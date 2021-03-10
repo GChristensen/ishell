@@ -88,7 +88,6 @@
             <pre>
 cmdAPI.createCommand({
   names: ["say-hello"],
-  uuid: "http://example.com/say-hello",
   execute: function hello_execute() {
     cmdAPI.notify("Hello, World!");
   }
@@ -108,24 +107,21 @@ cmdAPI.createCommand({
             <p>iShell allows to employ the full strength of <a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Classes">JavaScript classes</a>
                 in command creation. Let's rewrite the
                 previous command in the object-oriented way. To accomplish this you don't need to use <code>cmdAPI.createCommand</code>.
-            Just declare a class:</p>
+                Just declare a class with a <code>@command</code> annotation:</p>
 
             <pre>
-/**
-   @uuid http://example.com/say-hello
-*/
+/** @command */
 class SayHello {
   execute() {
     cmdAPI.notify("Hello, World!");
   }
 }
 </pre>
-            <p>The name will be generated automatically. iShell will interpret any class in the command editor as a command,
-                unless its name starts with an underscore,
-                or it contains <code>@noncommand</code> annotation at the documentation comment above. Regular JavaScript comments are ignored.
-                Non-command classes may be used to for subclassing, bringing common functionality to multiple commands.</p>
-            <p>Object-oriented syntax also allows to significantly declutter the command code, because all noisy attributes are moved to the documentation
-            comment and command class may only contain fields and functions related to its purpose. Explore templates in the command editor for more details.</p>
+            <p>The name will be generated automatically. iShell will interpret as a command any class in the command editor with the <code>@command</code>
+                annotation at the documentation comment. Regular JavaScript comments are ignored. A command class may extend any other classes.</p>
+            <p>Object-oriented syntax also allows to significantly declutter command code, because all the noisy attributes you pass to the
+                <code>cmdAPI.createCommand</code> are moved to the documentation
+            comment and the class may contain only fields and functions related to its purpose. Explore templates in the command editor for more details.</p>
 
             <h3 class="in-block"><span class="mw-headline" id="cmdAPI.createCommand">cmdAPI.createCommand</span>
             </h3>
@@ -136,14 +132,13 @@ class SayHello {
             <pre>
 {
   names: ["say-hello"],
-  uuid: "http://example.com/say-hello",
   execute: function () { //etc }
 }
 </pre>
-            <p>means "Make an object with three attributes, 'names', 'uuid' and 'execute'." This object is then passed as the
+            <p>means "Make an object with two attributes, 'names' and 'execute'." This object is then passed as the
                 argument to <code>cmdAPI.createCommand</code>.
-                'names', 'uuid' and 'execute' are the only mandatory attributes for your command object. 'names' specifies
-                what the command is called, 'uuid' - is a globally (presumably) unique identifier of the command, and 'execute'
+                'names' and 'execute' are the only mandatory attributes for your command object. 'names' specifies
+                what the command is called and 'execute'
                 specifies what it does. There are plenty of other attributes that you can specify, but they are all optional.<br>
             </p>
             <h3 class="in-block"><span class="mw-headline" id="names">names</span></h3>
@@ -157,13 +152,6 @@ class SayHello {
                 synonym or alias for the command.
             </p>
 
-            <h3 class="in-block"><span class="mw-headline" id="uuid">uuid</span></h3>
-            <p> 'uuid' may be an arbitrary unique string, for example, the homepage URL of a command.
-            An RFC 4122 v4 complaint UUID is generated
-            automatically for commands added through command editor templates. In the examples below we omit this
-            attribute for brevity.
-            </p>
-
             <h3 class="in-block"><span class="mw-headline" id="execute">execute</span></h3>
             <p>'execute' is always a function. When the user executes your command, this is the function that will be
                 run. It can do pretty much anything you want - or at least, anything you know how to write in
@@ -172,10 +160,21 @@ class SayHello {
             <p>In the example above, we simply call <code>cmdAPI.notify()</code>, which displays the given message in
                 whichever way the operating system can.
             </p>
-            <p><br>
+            <p>
                 There are a number of other useful functions in the <code>cmdAPI</code> namespace. For
                 more detailed information, take a look at the <a href="API.html">iShell API Reference</a>.
             </p>
+
+            <h3 class="in-block"><span class="mw-headline" id="uuid">Command UUID</span></h3>
+            <p>Although any command could be run without an 'uuid' attribute, it is recommended to add it to
+                every command you create. This will help to preserve the context menu entries, the command performance data
+                and the data commands stores through the Bin interface in the case if the command will be renamed.<br>
+                'uuid' may be an arbitrary unique string, for example, the homepage URL of a command.
+                An RFC 4122 v4 complaint UUID is generated
+                automatically for commands added through command editor templates. In the examples below we omit this
+                attribute for brevity.
+            </p>
+
 
             <!--h3 class="in-block"><span class="mw-headline" id="Making_sure_your_command_is_localizable">Making sure your command is localizable</span>
             </h3>
@@ -582,18 +581,18 @@ cmdAPI.createCommand({
 <pre>
 /**
   Displays a given message at popup or prints it to the browser log.
-
+  @command show-text
   @description An object-oriented command with arguments.
 */
-class ShowText {
+class ShowTextCommandClass {
   constructor(args) {
     args[OBJECT] = {nountype: noun_arb_text, label: "message"};
     args[IN]     = {nountype: ["popup", "log"], label: "destination"};
   }
 
   preview(args, display) {
-      let html = `Shows &lt;i&gt;${args[OBJECT]?.text}&lt;/i&gt; in &lt;b&gt;${args[IN]?.text || "popup"}&lt;/b&gt;`;
-      display.set(html);
+    let html = `Shows &lt;i&gt;${args[OBJECT]?.text}&lt;/i&gt; in &lt;b&gt;${args[IN]?.text || "popup"}&lt;/b&gt;`;
+    display.set(html);
   }
 
   execute(args) {
@@ -607,10 +606,12 @@ class ShowText {
   }
 }
 </pre>
-<p>The content of the documentation comment above the class (except annotations) is displayed at the help section of the iShell command listing.
-    The command defines a nameless object argument in its constructor, along with a prepositional argument <b>in</b> which can take two values: <i>popup</i> and <i>log</i>. These values will
-    be available to autocompletion. With the object-oriented syntax you do not need to remember obscure argument role names and just use the names
-    of arguments themselves when defining them in the constructor or accessing in methods (although you may access them in the old way if you prefer).
+<p>Let's see what happens here. The content of the documentation comment above the class (except annotations) is displayed at the help section of the iShell command listing.
+    The <code>@command</code> annotation allows to override the command name generated by default.
+    The <code>show-text</code> command defines a nameless arbitrary text <b>object</b> argument in its constructor, along with a prepositional argument <b>in</b>
+    which can take two values: <i>popup</i> and <i>log</i>. These values will
+    be available to the autocompletion. With the object-oriented syntax you do not need to remember obscure argument roles and just directly use the names
+    of arguments when defining them in the constructor or accessing them in methods (although you may access them in the old way if you prefer).
     Please do not use the command constructor for any purposes other than argument definition, since iShell may create the command object multiple times for various reasons.
     There are <a href="#Running_on_iShell_load_and_when_iShell_popup_is_shown_">several other functions</a> for command initialization.
 </p>
@@ -1029,6 +1030,23 @@ cmdAPI.makeSugg(text, html, data, score, selectionIndices);
                     eventually get passed in to the <code>execute()</code> and <code>preview()</code> methods of any
                     commands that use this noun type.
                 </p>
+
+                <h3 class="in-block">
+                    <span class="mw-headline" id="generating_nountypes_with_annotations">Generating Noun Types with Annotations</span></h3>
+
+                <p>If your noun type needs nothing more than <code>suggest</code> function, you may apply <code>@nountype</code> annotation to a regular function
+                    to generate the noun type with the same name:</p>
+<pre>
+/**
+    @nountype
+    @label title
+*/
+function noun_type_title(text, html, callback, selectedIndices) {
+    // ...
+}
+</pre>
+                <p>The annotated function accepts the same arguments as the <code>suggest</code> function of a full fledged noun type.</p>
+
                 <h3 class="in-block"><span class="mw-headline"
                                            id="Switching_Tabs:_The_Command">Switching Tabs: The Command</span></h3>
                 <p>Now that we are armed with the tab noun-type, it is easy to make the tab-switching command. Again, we
@@ -1055,6 +1073,7 @@ cmdAPI.createCommand({
 });
 </pre>
             </div>
+
             <h1 class="section-heading">
                 <div class="mw-ui-icon mw-ui-icon-element indicator"></div>
                 <span class="mw-headline" id="Development_Hints">Development Hints</span></h1>

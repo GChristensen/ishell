@@ -26,6 +26,8 @@ function insertExampleStub() {
         'insertsimpleobjectcommandstub':
 `/**
     Command help text
+    
+    @command
     @description A short description of your command.
     @uuid %%UUID%%
 */
@@ -112,6 +114,7 @@ class MySimpleCommand {
         <li><b>my-command</b> <i>show me</i> <b>as</b> <i>popup</i></li>
     </ul>
     
+    @command
     @license GPL
     @author Your Name
     @delay 1000 (preview delay, ms)

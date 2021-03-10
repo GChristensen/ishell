@@ -8,9 +8,9 @@ iShell is the further evolution of [UbiquityWE](https://github.com/GChristensen/
 Its aim is to create a clean, unified modern object-oriented command authoring API. Because major architectural and API 
 changes were necessary to accomplish this, it was spawned as a separate project.
 
-### Modern object-oriented command authoring syntax
+### Modern object-oriented command syntax
 
-Although iShell supports the command authoring API of the original Ubiquity (which is described in the extension tutorial at its setting pages),
+Although iShell supports the command authoring API of the original Ubiquity (which is described in the extension tutorial at the setting pages),
 it offers a new modern object-oriented way to create commands. Let's consider a command named `show-text` with the following syntax:
 
 **show-text** *message text* **in** *destination*
@@ -21,6 +21,7 @@ The snippet below shows the object-oriented command implementation in iShell:
 /**
  Displays a given message at popup or prints it to the browser log.
  
+ @command
  @icon http://example.com/favicon.ico
  @uuid 5BDEFC27-CA9F-4F41-85E4-8B358154E2FC
  @description An object-oriented command with arguments.
@@ -48,17 +49,16 @@ class ShowText {
 }
 ```
 
-iShell will interpret any class definition placed in the command editor as a command, unless its name starts with an underscore, or it contains `@noncommand`
-annotation at its documentation comment. Non-command classes are useful for subclassing of the common functionality.
+iShell will interpret as a command any class placed in the command editor with the `@command` annotation at its documentation comment. 
 
-Most of the arguments to the `CmdUtils.CreateCommand` are now specified as annotations at the command documentation comment. The command help
-is generated from the rest of the comment text (it may contain HTML). The body of the class may provide only fields and methods
+Most of the arguments to the `CmdUtils.CreateCommand` are also specified as annotations at the command documentation comment. The command help
+is generated from the rest of the comment text (it may contain HTML). Thus, the body of the class may provide only fields and methods
 related to the command purpose.
 
-The command above defines a nameless object argument in its constructor, along with a prepositional argument **in** which can take two values: *popup* and *log*. 
+The command above defines a nameless arbitrary text `object` argument in its constructor, along with a prepositional argument `in` which can take two values: *popup* and *log*. 
 These values will
-be available to autocompletion. With the object-oriented syntax you do not need to remember obscure argument role names and just use the names
-of arguments themselves when defining them or accessing in methods (although you may access them in the old way if you prefer).
+be available to autocompletion. With the object-oriented syntax you do not need to remember obscure argument roles and just directly use the names
+of arguments when defining them in the constructor or accessing them in methods (although you may access them in the old way if you prefer).
 Please do not use the command constructor for any purposes other than argument definition, since iShell may create the command object multiple times for 
 various reasons. There are several other functions for command initialization (please, see iShell API reference).
 
@@ -68,13 +68,13 @@ of iShell preview area (so you can pass it to `CmdUtils.previewAjax`, for exampl
 but has a new nice `set` method which sets element's innerHTML property for you.
 
 Because command editor uses a custom preprocessor to instantiate commands, CmdUtils API (or its modern `cmdAPI` variant) is the only way to create 
-built-in commands in the case if you want to hack and rebuild iShell.
+new built-in commands in the case if you want to hack and rebuild iShell.
 
 ### If you came from UbiquityWE
 
 There are several changes in the non-standard rarely used parts of the command authoring API and builtin command arguments:
 
-* Added new `on` prepositional argument with the role *dependency*.
+* iShell adds new `on` prepositional argument with the role *dependency*.
 * `init` method of a command is now called `load`.
 * `popup` method of a command is now called `init`.
 * `previewList2` API function is now called `objectPreviewList`.   

@@ -12,6 +12,8 @@ cmdAPI = {
     }
 
     cmdAPI.makeSugg = delegate(CmdUtils, CmdUtils.makeSugg);
+    cmdAPI.matchScore = delegate(CmdUtils, CmdUtils.matchScore);
+    cmdAPI.grepSuggs = delegate(CmdUtils, CmdUtils.grepSuggs);
     cmdAPI.createCommand = delegate(CmdUtils, CmdUtils.CreateCommand);
     cmdAPI.makeSearchCommand = delegate(CmdUtils, CmdUtils.makeSearchCommand);
     cmdAPI.previewAjax = delegate(CmdUtils, CmdUtils.previewAjax);
