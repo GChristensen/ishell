@@ -47,10 +47,10 @@ class ShowText {
 
 ```
 
-iShell will interpret any class definition placed in the command editor as a command, unless its name starts with an underscore, or it contains @noncommand
-annotation at the documentation comment above. Non-command classes are useful for subclassing of common functionality.
+iShell will interpret any class definition placed in the command editor as a command, unless its name starts with an underscore, or it contains `@noncommand`
+annotation at its documentation comment. Non-command classes are useful for subclassing of the common functionality.
 
-Most of the arguments to the CmdUtils.CreateCommand are now specified as annotations at the command documentation comment. The command help
+Most of the arguments to the `CmdUtils.CreateCommand` are now specified as annotations at the command documentation comment. The command help
 is generated from the rest of the comment text (it may contain HTML). The body of the class may define only fields and methods
 related to the command purpose.
 
@@ -63,7 +63,7 @@ various reasons. There are several other functions for command initialization (p
 
 You may also notice that object-oriented methods have the `args` argument always in the first position,
 and `pblock` argument is now called `display`. It still contains a reference to the same `div` element
-of iShell preview area (so you can pass it to CmdUtils.previewAjax, for example),
+of iShell preview area (so you can pass it to `CmdUtils.previewAjax`, for example),
 but has a new nice `set` method which sets element's innerHTML property for you.
 
 Because command editor uses a custom preprocessor to instantiate commands, CmdUtils API (or its modern `cmdAPI` variant) is the only way to create 
@@ -78,7 +78,7 @@ There are several small changes in the non-standard rarely used parts of the com
 * `popup` method of a command is now called `init`.
 * `previewList2` API function is now called `objectPreviewList`.   
 * Bin interface is now passed directly as the last argument of every standard command method and is no more wrapped in an object. 
-* Both **compose** and **email** command use **at** argument to specify account.
+* Both **compose** and **email** commands use **at** argument to specify account.
 
 ### Builtin command API keys
 
