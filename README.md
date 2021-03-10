@@ -19,12 +19,12 @@ The snippet below shows the object-oriented command implementation in iShell:
 
 ```js
 /**
- Displays a given message at popup or prints it to the browser log.
+    Displays the given message at a popup or prints it to the browser log.
  
- @command
- @icon http://example.com/favicon.ico
- @uuid 5BDEFC27-CA9F-4F41-85E4-8B358154E2FC
- @description An object-oriented command with arguments.
+     @command
+     @icon http://example.com/favicon.ico
+     @uuid 5BDEFC27-CA9F-4F41-85E4-8B358154E2FC
+     @description An object-oriented command with arguments.
  */
 class ShowText {
     constructor(args) {
@@ -49,25 +49,27 @@ class ShowText {
 }
 ```
 
-iShell will interpret as a command any class placed in the command editor with the `@command` annotation at its documentation comment. 
+iShell will interpret as a command any class placed in the command editor with the `@command` annotation. JavaDoc-style comments should be
+used to annotate classes (plain JavaScript comments are ignored).
 
-Most of the arguments to the `CmdUtils.CreateCommand` are also specified as annotations at the command documentation comment. The command help
+Most of the arguments to the `CmdUtils.CreateCommand` are also specified as annotations. The command help
 is generated from the rest of the comment text (it may contain HTML). Thus, the body of the class may provide only fields and methods
 related to the command purpose.
 
-The command above defines a nameless arbitrary text `object` argument in its constructor, along with a prepositional argument `in` which can take two values: *popup* and *log*. 
+In its constructor the command above defines a nameless `object` argument containing arbitrary text, along with a prepositional argument `in` 
+which can take two values: *popup* and *log*. 
 These values will
 be available to autocompletion. With the object-oriented syntax you do not need to remember obscure argument roles and just directly use the names
-of arguments when defining them in the constructor or accessing them in methods (although you may access them in the old way if you prefer).
+of arguments when defining them or accessing them in methods (although you may access arguments in the old way if you prefer).
 Please do not use the command constructor for any purposes other than argument definition, since iShell may create the command object multiple times for 
-various reasons. There are several other functions for command initialization (please, see iShell API reference).
+various reasons. There are several other functions for command initialization (please, see iShell API reference at the setting pages).
 
 You may also notice that object-oriented methods have the `args` argument always in the first position,
 and `pblock` argument is now called `display`. It still contains a reference to the same `div` element
 of iShell preview area (so you can pass it to `CmdUtils.previewAjax`, for example),
 but has a new nice `set` method which sets element's innerHTML property for you.
 
-Because command editor uses a custom preprocessor to instantiate commands, CmdUtils API (or its modern `cmdAPI` variant) is the only way to create 
+Because command editor uses a custom preprocessor to instantiate object-oriented commands, CmdUtils API (or its modern `cmdAPI` variant) is the only way to create 
 new built-in commands in the case if you want to hack and rebuild iShell.
 
 ### If you came from UbiquityWE
