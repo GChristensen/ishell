@@ -15,6 +15,8 @@ it offers a new modern object-oriented way to create commands. Let's consider a 
 
 **show-text** *message text* **in** *destination*
 
+The following snippet shows the object-oriented command implementation: 
+
 ```js
 /**
  Displays a given message at popup or prints it to the browser log.
@@ -44,7 +46,6 @@ class ShowText {
             cmdAPI.notify(message);
     }
 }
-
 ```
 
 iShell will interpret any class definition placed in the command editor as a command, unless its name starts with an underscore, or it contains `@noncommand`
