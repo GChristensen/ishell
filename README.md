@@ -72,14 +72,14 @@ built-in commands in the case if you want to hack and rebuild iShell.
 
 ### If you came from UbiquityWE
 
-There are several small changes in the non-standard rarely used parts of the command authoring API and builtin command arguments:
+There are several changes in the non-standard rarely used parts of the command authoring API and builtin command arguments:
 
 * Added new `on` prepositional argument with the role *dependency*.
 * `init` method of a command is now called `load`.
 * `popup` method of a command is now called `init`.
 * `previewList2` API function is now called `objectPreviewList`.   
 * Bin interface is now passed directly as the last argument of every standard command method and is no more wrapped in an object. 
-* Both **compose** and **email** commands use **at** argument to specify account.
+* Both **compose** and **email** commands use `at` argument to specify account.
 
 ### Builtin command API keys
 
