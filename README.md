@@ -74,7 +74,7 @@ built-in commands in the case if you want to hack and rebuild iShell.
 
 There are several small changes in the non-standard rarely used parts of the command authoring API and builtin command arguments:
 
-* Added new **on** prepositional argument with the role *dependency*.
+* Added new `on` prepositional argument with the role *dependency*.
 * `init` method of a command is now called `load`.
 * `popup` method of a command is now called `init`.
 * `previewList2` API function is now called `objectPreviewList`.   
