@@ -52,7 +52,7 @@ iShell will interpret any class definition placed in the command editor as a com
 annotation at its documentation comment. Non-command classes are useful for subclassing of the common functionality.
 
 Most of the arguments to the `CmdUtils.CreateCommand` are now specified as annotations at the command documentation comment. The command help
-is generated from the rest of the comment text (it may contain HTML). The body of the class may define only fields and methods
+is generated from the rest of the comment text (it may contain HTML). The body of the class may provide only fields and methods
 related to the command purpose.
 
 The command above defines a nameless object argument in its constructor, along with a prepositional argument **in** which can take two values: *popup* and *log*. 
