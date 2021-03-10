@@ -62,7 +62,8 @@ These values will
 be available to autocompletion. With the object-oriented syntax you do not need to remember obscure argument roles and just directly use the names
 of arguments when defining them or accessing them in methods (although you may access arguments in the old way if you prefer).
 Please do not use the command constructor for any purposes other than argument definition, since iShell may create the command object multiple times for 
-various reasons. There are several other functions for command initialization (please, see iShell API reference at the setting pages).
+various reasons. There are several other functions for command initialization 
+(please, see iShell API reference for `cmdAPI.createCommand` and explore command templates in the editor).
 
 You may also notice that object-oriented methods have the `args` argument always in the first position,
 and `pblock` argument is now called `display`. It still contains a reference to the same `div` element
@@ -81,7 +82,7 @@ There are several changes in the non-standard rarely used parts of the command a
 * `popup` method of a command is now called `init`.
 * `previewList2` API function is now called `objectPreviewList`.   
 * Bin interface is now passed directly as the last argument of every standard command method and is no more wrapped in an object. 
-* Both **compose** and **email** commands use `at` argument to specify account.
+* Both **compose** and **email** commands use `at` argument to specify an account.
 
 ### Builtin command API keys
 

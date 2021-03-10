@@ -340,16 +340,14 @@
 <h3><a id="user-content-utilsescapehtmlstring" class="anchor" aria-hidden="true" href="#utilsescapehtmlstring"></a>cmdAPI.escapeHtml(string)</h3>
 <p class="legacy-name">Legacy name: Utils.escapeHtml</p>
 <blockquote>
-    <p>Returns a version of the <strong>string</strong> safe for insertion into HTML.
-      Useful when you just want to concatenate a bunch of strings into
-      an HTML fragment and ensure that everything's escaped properly.</p>
+    <p>Returns a version of the <strong>string</strong> safe for insertion into HTML.</p>
   </blockquote>
 <h3><a id="user-content-utilsparamstostringparams-prefix-" class="anchor" aria-hidden="true" href="#makebin"></a>cmdAPI.makeBin(uuid, callback)</h3>
 <blockquote>
     <p>Creates an instance of the Bin interface and passes it to the supplied callback function or returns it as a promise. This allows to conveniently share persistent storage between commands.</p>
     <ul>
         <li><strong>uuid</strong> - unique identifier that defines storage space.</li>
-        <li><strong>callback</strong> - callback function that receives Bin object.</li>
+        <li><strong>callback</strong> - callback function that receives the Bin object. The result returned as a promise if not specified.</li>
     </ul>
 </blockquote>
 <h3><a id="user-content-active_tab" class="anchor" aria-hidden="true" href="#active_tab"></a>cmdAPI.getActiveTab()</h3>
@@ -376,12 +374,13 @@
 <blockquote>
     <p>A persistent data storage interface available through the last argument of any command handler function.
         Calling any method of this interface with an argument will persistently store the supplied value.
-        Calling the same method without arguments will return the stored value.
+        Calling the same method without arguments will return the value stored by the earlier call of this method.
     </p>
     <pre>
     preview: function(pblock, args, Bin) {
         pblock.innerHTML = Bin.myProperty() || "Nothing stored yet";
         Bin.myProperty("this value persists between browser restarts");
+        Bin.anotherProperty("this call persists another value");
     }
     </pre>
 </blockquote>
