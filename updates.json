@@ -1,0 +1,11 @@
+{
+  "addons": {
+    "ishell@gchristensen.github.io": {
+      "updates": [{
+          "version": "0.1",
+          "update_link": "https://github.com/GChristensen/ishell/releases/download/v0.1/ishell.xpi"
+        }
+      ]
+    }
+  }
+}

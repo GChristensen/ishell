@@ -1,0 +1,33 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <meta charset="UTF-8">
+	<link href="popup.css" rel="stylesheet"></head>
+
+    <script src="lib/jquery.js"></script>
+    <script src="lib/math_parser.js"></script>
+    <script src="settings.js"></script>
+    <script src="bridge.js"></script>
+    <script src="popup.js"></script>
+</head>
+
+<body>
+    <div id="shell-window">
+    <table border="0" cellpadding="0" cellspacing="0">
+        <tr><td colspan="2" id="shell-input-panel">
+            <input id="shell-input" autofocus autocomplete="off" spellcheck="false" type="text" size="60" maxlength="500"/>
+        </td></tr>
+        <tr id="shell-bottom-panel">
+            <td id="shell-suggestion-panel">
+            </td>
+            <td id="shell-command-panel">
+                <div id="shell-command-tip"></div>
+                <div id="shell-command-preview"></div>
+            </td>
+        </tr>
+    </table>
+    </div>
+    iShell 0.1
+</body>
+</html>

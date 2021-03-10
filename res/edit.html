@@ -1,0 +1,131 @@
+<html xmlns="http://www.w3.org/1999/xhtml" style="cursor: auto ! important;" hasBrowserHandlers="true">
+<head>
+    <title>iShell Command Editor</title>
+    <meta charset="utf-8">
+    <link href="/res/icons/logo.svg" rel="icon" />
+    <link rel="stylesheet" type="text/css" media="all" href="options.css"/>
+
+    <style>
+        body {
+            height: 100%;
+            display: flex;
+            flex-flow: column;
+            overflow: hidden;
+        }
+        #panel {
+            width: 870px;
+        }
+
+        .head, #nav-container {
+            flex: 0 1 auto;
+        }
+
+        #panel {
+            flex: 1 1 auto;
+        }
+
+        #code {
+            width: 100%;
+            height: 100%;
+
+            /*position: absolute; top: 40px; padding: 5px; left:0; bottom:0; right: 0;*/
+        }
+
+        #toolbar {
+            margin-top: 5px;
+            margin-bottom: 5px;
+            padding-right: 30px;
+        }
+
+        #file-picker {
+            display: none;
+        }
+
+        #script-namespaces, #create-namespace, #delete-namespace, #ns-label, #expand-editor {
+            float: right; display: inline-block;
+        }
+
+        #footer {
+            margin-top: 5px;
+            padding-right: 30px;
+            margin-bottom: 5px;
+            flex: 0 1 auto;
+        }
+
+        #buttons {
+            width: 60%;
+            float:right;
+            display: inline-block;
+            text-align: right;
+        }
+
+        #info {
+            width: 40%;
+            display: inline-block;
+        }
+
+    </style>
+
+    <script src="/lib/ace/ace.js"></script>
+
+    <script src="/lib/jquery.js"></script>
+    <script src="/lib/uuid.js"></script>
+    <script src="/bridge.js"></script>
+    <script type="module" src="/storage.js"></script>
+    <script src="/parser/nounutils.js"></script>
+    <script src="/parser/nountypes.js"></script>
+    <script src="/settings.js"></script>
+    <script src="edit.js"></script>
+
+</head>
+<body dir="ltr">
+<div id="header">
+<div class="head"><span class="large">iShell: </span>Command Editor</div>
+<div id="nav-container">
+    <ul id="nav">
+        <li><a href="options.html">Settings</a></li>
+        <li><a href="commands.html">Your Commands</a></li>
+        <li><a href="cmenu.html">Context Menu</a></li>
+        <li class="selected"><a href="edit.html">Command Editor</a></li>
+        <li><a href="API.html">API Reference</a></li>
+        <li><a href="tutorial.html">Tutorial</a></li>
+    </ul>
+</div>
+
+<br id="head-br" clear="all"/>
+<div id="toolbar">
+    <a href=# id="download"><img src="/res/icons/download.png" title="Download"
+    /></a><a href=# id="upload"><img src="/res/icons/upload.png" title="Upload"/></a>
+
+    <input type="file" id="file-picker"/>
+
+    <a href=# id="expand-editor">&nbsp;<img src="/res/icons/expand.png"/></a>
+    <a href=# id="delete-namespace"><img src="/res/icons/document_delete.png" title="Delete category"
+    /></a><a href=# id="create-namespace">&nbsp;<img src="/res/icons/document_create.png" title="Create category"/></a>
+    <select id="script-namespaces">
+        <option value="default">&lt;default&gt;</option>
+    </select>
+    <span id="ns-label">Category:&nbsp;</span>
+</div>
+</div>
+<div id="panel">
+    <div id="code" name="code"></div>
+</div>
+<div id="footer">
+    <div id="info">Saving is done automatically.</div>
+    <div id="buttons">
+        <span id="syntax-label">Syntax:&nbsp</span>
+        <select id="syntax-types">
+            <option value="class">class</option>
+            <option value="cmdAPI">cmdAPI</option>
+            <option value="CmdUtils">CmdUtils</option>
+        </select>
+        &nbsp;Insert templates:
+        <a href=# id="insertsimplecommandstub">SIMPLE</a> |
+        <a href=# id="insertcommandstub">ALL FEATURES</a> |
+        <a href=# id="insertsearchstub">SEARCH</a>
+        <span id="capture-stub" style="display: none;"> | <a href=# id="insertcapturestub">CAPTURE</a></span>
+    </div>
+</div>
+</body>
+</html>
