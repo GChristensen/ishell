@@ -15,7 +15,7 @@ it offers a new modern object-oriented way to create commands. Let's consider a 
 
 **show-text** *message text* **in** *destination*
 
-The following snippet shows the object-oriented command implementation: 
+The following snippet shows the object-oriented command implementation in iShell: 
 
 ```js
 /**
