@@ -256,7 +256,6 @@ NS_MORE_COMMANDS = "More Commands";
             names: ["nyaa"],
             uuid: "7834AFD7-1F08-443A-956D-17EFD542B34B",
             /*---------------------------------------------------------------------------*/
-            builtIn: true,
             _namespace: NS_MORE_COMMANDS,
             /*---------------------------------------------------------------------------*/
             _hidden: true,
@@ -291,7 +290,6 @@ NS_MORE_COMMANDS = "More Commands";
             names: ["sukebei"],
             uuid: "8C6B98D8-FDF6-40DB-891E-B6F44B00ADD1",
             /*---------------------------------------------------------------------------*/
-            builtIn: true,
             _namespace: NS_MORE_COMMANDS,
             /*---------------------------------------------------------------------------*/
             _hidden: true,

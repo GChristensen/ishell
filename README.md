@@ -73,17 +73,6 @@ but has a new nice `set` method which sets element's innerHTML property for you.
 Because command editor uses a custom preprocessor to instantiate object-oriented commands, CmdUtils API (or its modern `cmdAPI` variant) is the only way to create 
 new built-in commands in the case if you want to hack and rebuild iShell.
 
-### If you came from UbiquityWE
-
-There are several changes in the non-standard rarely used parts of the command authoring API and builtin command arguments:
-
-* iShell adds new `on` prepositional argument with the role *dependency*.
-* `init` method of a command is now called `load`.
-* `popup` method of a command is now called `init`.
-* `previewList2` API function is now called `objectPreviewList`.   
-* Bin interface is now passed directly as the last argument of every standard command method and is no more wrapped in an object. 
-* Both **compose** and **email** commands use `at` argument to specify an account.
-
 ### Builtin command API keys
 
 Some commands (for example, youtube, google, images) are ceased to work in UbiquityWE. In iShell they require API keys

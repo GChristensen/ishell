@@ -1,5 +1,3 @@
-import Dexie from "./lib/dexie.js"
-
 const dexie = new Dexie("ishell");
 
 dexie.version(1).stores({
@@ -89,4 +87,4 @@ class StorageIDB {
     }
 }
 
-window.DBStorage = new StorageIDB();
+DBStorage = new StorageIDB();

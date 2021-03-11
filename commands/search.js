@@ -8,7 +8,6 @@ shellSettings.load(settings => {
         url: `https://customsearch.googleapis.com/customsearch/v1?key=${cmdAPI.settings.google_cse_api_key}`
            + `&cx=${cmdAPI.settings.google_cse_api_id}&q=%s`,
         _namespace: "Search",
-        builtIn: true,
         icon: "/res/icons/google.png",
         description: "Searches Google for your words.",
         arguments: [{role: "object", nountype: noun_arb_text, label: "query"}],
@@ -31,7 +30,6 @@ shellSettings.load(settings => {
         url: "http://www.bing.com/search?q=%s",
         defaultUrl: "http://www.bing.com/",
         _namespace: "Search",
-        builtIn: true,
         arguments: [{role: "object", nountype: noun_arb_text, label: "query"}],
         previewDelay: 1000,
         icon: "/res/icons/bing.png",
@@ -49,7 +47,6 @@ shellSettings.load(settings => {
         url: "http://www.imdb.com/find?q=%s",
         defaultUrl: "http://www.imdb.com",
         _namespace: "Search",
-        builtIn: true,
         arguments: [{role: "object", nountype: noun_arb_text, label: "query"}],
         previewDelay: 1000,
         icon: "/res/icons/imdb.png",
@@ -69,7 +66,6 @@ shellSettings.load(settings => {
         icon: "/res/icons/youtube.png",
         description: ("Searches YouTube for videos matching your words. Previews the top results."),
         _namespace: "Search",
-        builtIn: true,
         arguments: [{role: "object", nountype: noun_arb_text, label: "query"}],
         previewDelay: 1000,
         preview: function(pblock, {object: {text, summary}}) {
@@ -122,7 +118,6 @@ shellSettings.load(settings => {
         uuid: "3A1A73F1-C651-4AD5-B4B4-2FBAAB85CDD0",
         arguments: [{role: "object", nountype: noun_arb_text, label: "query"}],
         _namespace: "Search",
-        builtIn: true,
         previewDelay: 1000,
         author: {name: "Federico Parodi", email: "getimages@jimmy2k.it"},
         contributor: "satyr",
@@ -275,7 +270,6 @@ shellSettings.load(settings => {
             {role: "object", nountype: noun_arb_text, label: "search term"},
             {role: "format", nountype: noun_type_lang_wikipedia}],
         _namespace: "Search",
-        builtIn: true,
         previewDelay: 1000,
         homepage: "http://theunfocused.net/moz/ubiquity/verbs/",
         author: {name: "Blair McBride", email: "blair@theunfocused.net"},
@@ -388,7 +382,6 @@ shellSettings.load(settings => {
     //     _namespace: "Search",
     //     description: "Shows a location on the map.",
     //     icon: "/res/icons/google.png",
-    //     builtIn: true,
     //     previewDelay: 1000,
     //     requirePopup: "https://maps.googleapis.com/maps/api/js?sensor=false",
     //     argument: [{role: "object", nountype: noun_arb_text, label: "query"}],
@@ -472,6 +465,38 @@ shellSettings.load(settings => {
     //     }
     // });
 
+    CmdUtils.CreateCommand({
+        name: "maps",
+        uuid: "161A4B18-F577-40B9-99DB-B689690E657A",
+        arguments: [{role: "object", nountype: noun_arb_text, label: "location"}],
+        _namespace: "Search",
+        description: "Shows a location on the map.",
+        icon: "/res/icons/google.png",
+        author: "rostok",
+        previewDelay: 1000,
+        preview: function(pblock, args) {
+            if (!args.object?.text) {
+                pblock.innerHTML = "Show objects or routes on google maps.<p>syntax: <pre>\tmaps [place]\n\tmaps [start] to [finish]</pre>";
+                return;
+            }
+            pblock.innerHTML = `
+                <div class="mapouter">
+                    <div class="gmap_canvas">
+                        <iframe width="540" height="505" id="gmap_canvas" src="https://maps.google.com/maps?q=`
+                        + encodeURIComponent(args.object.text) + `&t=&z=13&ie=UTF8&iwloc=&output=embed" 
+                        frameborder="0" scrolling="no" marginheight="0" marginwidth="0"></iframe>
+                    </div>
+                <style>
+                    .mapouter{text-align:right;height:505px;width:540px;}
+                    .gmap_canvas {overflow:hidden;background:none!important;height:504px;width:540px;}
+                </style>
+                </div>`;
+        },
+        execute: function(args) {
+            CmdUtils.addTab("https://maps.google.com/maps?q=" + encodeURIComponent(args.object.text));
+        }
+    });
+
     function dayToDate(day) {
         let date;
         switch (day) {
@@ -541,7 +566,6 @@ shellSettings.load(settings => {
             </ul>`,
         icon: "/res/icons/history.ico",
         previewDelay: 1000,
-        builtIn: true,
         _namespace: "Browser",
         preview: function(pblock, args, {Bin}) {
             let maxResults = args.cause && args.cause.data
@@ -750,7 +774,6 @@ shellSettings.load(settings => {
         author: "g/christensen",
         icon: "/res/icons/libgen.ico",
         previewDelay: 1000,
-        builtIn: true,
         _namespace: "Search",
         _genQuery: function(args) {
             let sort_mode;
@@ -820,7 +843,6 @@ shellSettings.load(settings => {
         icon: "/res/icons/scihub.ico",
         previewDelay: 1000,
         _article: null,
-        builtIn: true,
         _namespace: "Search",
         preview: function(pblock, args, {Bin}) {
             pblock.innerHTML = "Searching...";

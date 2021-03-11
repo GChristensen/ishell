@@ -6,7 +6,7 @@ CmdUtils.CreateCommand({
     help: `The command uses the URL opened in the current tab. 
             Direct feed links, Instagram, Tumblr, Twitter and Youtube are supported.`,
     icon: "/res/icons/feedly.png",
-    builtIn: true,
+
     preview: "Subscribe using Feedly",
     execute: function () {
       const feedlySubUrl = "https://feedly.com/i/subscription/feed/"; 

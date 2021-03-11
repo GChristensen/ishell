@@ -92,7 +92,7 @@ class CommandManager {
         try {
             f.apply(obj, new_args);
         } catch (e) {
-            console.error(e.toString());
+            console.error(e.toString() + "\n" + e.stack);
         }
     }
 
@@ -253,7 +253,7 @@ class CommandManager {
         if (namespace)
             this._commands = this._commands.filter(c => c._namespace !== namespace);
         else
-            this._commands = this._commands.filter(c => !!c.builtIn);
+            this._commands = this._commands.filter(c => !!c._builtin);
     }
 
     async loadCustomScripts(namespace) {
@@ -271,7 +271,7 @@ class CommandManager {
                     let script = CmdPreprocessor.run(record.script);
                     eval(script);
 
-                    for (let cmd of this._commands.filter(c => !c.builtIn && !c._namespace))
+                    for (let cmd of this._commands.filter(c => !c._builtin && !c._namespace))
                         cmd._namespace = record.namespace;
                 }
             } catch (e) {

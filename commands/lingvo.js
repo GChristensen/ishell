@@ -17,7 +17,7 @@ var __lingvoLiveAPIToken;
             names: ["lingvo"],
             uuid: "757A2516-9A45-4D02-8756-854B5DE5A074",
             /*---------------------------------------------------------------------------*/
-            builtIn: true, _namespace: "Translation",
+            _namespace: "Translation",
             /*---------------------------------------------------------------------------*/
             arguments: [{role: "object", nountype: noun_arb_text, label: "words"},
                 {role: "source", nountype: noun_type_lang_lingvo, label: "language"},

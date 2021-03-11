@@ -11,13 +11,6 @@ function __shell_get_sel() {
                 if (range.isCollapsed)
                     continue;
 
-                let parent = range.commonAncestorContainer.nodeType === 3
-                    ? range.commonAncestorContainer.parentNode
-                    : range.commonAncestorContainer;
-
-                parent = parent.cloneNode(false);
-
-                div.appendChild(parent);
                 div.appendChild(range.cloneContents());
             }
         }

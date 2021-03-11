@@ -242,7 +242,6 @@
         arguments: [{role: "object", nountype: noun_scrapyard_group, label: "name"}],
         description: "Switch to or create a shelf in Scrapyard.",
         icon: "/res/icons/scrapyard.svg",
-        builtIn: true,
         _namespace: NAMESPACE,
         preview: function(pblock, {object: {text}}) {
             pblock.innerHTML = "Switch to or create <span style='color: #FD7221;'>"
@@ -315,7 +314,6 @@
             </ul>`,
         icon: "/res/icons/scrapyard.svg",
         previewDelay: 1000,
-        builtIn: true,
         _namespace: NAMESPACE,
         load: updateCompletion,
         init: function(doc /* popup document */) {
@@ -613,7 +611,6 @@
             </ul>`,
         icon: "/res/icons/scrapyard.svg",
         //previewDelay: 1000,
-        builtIn: true,
         _namespace: NAMESPACE,
         //init: function({Bin}) {},
         //popup: function(doc /* popup document */, {Bin}) {},
@@ -660,7 +657,6 @@
             </ul>`,
         icon: "/res/icons/scrapyard.svg",
         //previewDelay: 1000,
-        builtIn: true,
         _namespace: NAMESPACE,
         //init: function({Bin}) {},
         //popup: function(doc /* popup document */, {Bin}) {},
@@ -766,7 +762,7 @@
                     settings.scrapyard_presents(false);
 
                 if (!settings.scrapyard_presents())
-                    CmdManager.commands = CmdManager.commands.filter(cmd => !(cmd.builtIn && cmd._namespace === "Scrapyard"));
+                    CmdManager.commands = CmdManager.commands.filter(cmd => !(cmd._builtin && cmd._namespace === "Scrapyard"));
             });
         }
 

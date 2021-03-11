@@ -76,7 +76,6 @@
             source: noun_type_lang_microsoft,
             goal: noun_type_lang_microsoft
         },
-        builtIn: true,
         previewDelay: 1000,
         help:
             `<span class="syntax">Syntax</span>
@@ -110,9 +109,9 @@
                 CmdUtils.deblog("Error performing translation: no text or text exceeded limits");
         },
         preview: function translate_preview(pblock, {object, goal, source}) {
-            let limitExceeded = CmdUtils.microsoftTranslatorAPIKey
-                ? object.text.length > MS_TRANSLATOR_LIMIT / 2
-                : object.text.length > MS_TRANSLATOR_LIMIT;
+            let limitExceeded = cmdAPI.settings.bing_translator_api_v3_key
+                ? object.text.length > MS_TRANSLATOR_LIMIT
+                : object.text.length > MS_TRANSLATOR_LIMIT / 2;
             let from = "", to = "";
 
             if (source && source.data)
@@ -149,7 +148,6 @@
                         <a href="http://translate.google.com">Google Translate</a>.`,
         icon: "/res/icons/translate_google.ico",
         author: "satyr",
-        builtIn: true,
         arguments: {
             object: noun_arb_text,
             goal: noun_type_lang_google,

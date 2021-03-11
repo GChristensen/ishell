@@ -60,6 +60,9 @@ CmdUtils.CreateCommand = function CreateCommand(options) {
     if (CmdManager.commands.some(c => c.id === options.id))
         return null;
 
+    if (options._namespace)
+        options._builtin = true;
+
     let args = options.arguments || options.argument;
     if (!args)
         args = options.arguments = [];
@@ -260,46 +263,26 @@ CmdUtils.loadCSS = function(doc, id, file) {
 };
 
 // updates selectedText variable
-CmdUtils.updateSelection = function (tab_id, callback) {
+CmdUtils.updateSelection = async function (tab_id) {
+    CmdUtils.selectedText = "";
+    CmdUtils.selectedHtml = "";
+
+    let results;
+
     try {
-        chrome.webNavigation.getAllFrames({tabId: tab_id}, async (frames) => {
-            CmdUtils.selectedText = "";
-            CmdUtils.selectedHtml = "";
-
-            function getFrameSelection(frames) {
-                let frame = frames.shift();
-                try {
-                    chrome.tabs.executeScript(tab_id, {file: "/selection.js", frameId: frame.frameId},
-                        function (selection) {
-                            if (selection && selection.length > 0 && selection[0]) {
-                                CmdUtils.selectedText = selection[0].text;
-                                CmdUtils.selectedHtml = selection[0].html;
-                            }
-
-                            if (!CmdUtils.selectedText && frames.length > 0)
-                                getFrameSelection(frames);
-                            else if (callback) {
-                                callback();
-                            }
-                        });
-                }
-                catch (e) {
-                    //console.error(e);
-                    if (!CmdUtils.selectedText && frames.length > 0)
-                        getFrameSelection(frames);
-                    else if (callback)
-                        callback();
-                }
-            }
-
-            getFrameSelection(frames)
-        });
+        results = await browser.tabs.executeScript(tab_id, {file: "/selection.js", allFrames: true});
     }
     catch (e) {
         console.log(e);
-        if (callback)
-            callback();
     }
+
+    if (results && results.length)
+        for (let selection of results)
+            if (selection) {
+                CmdUtils.selectedText = selection.text;
+                CmdUtils.selectedHtml = selection.html;
+                break;
+            }
 };
 
 CmdUtils._internalClearSelection = function() {
@@ -312,38 +295,32 @@ CmdUtils.getActiveTab = function () {
 };
 
 // called when tab is switched or changed, updates selectedText and activeTab
-CmdUtils.updateActiveTab = function (callback) {
+CmdUtils.updateActiveTab = async function () {
     CmdUtils.activeTab = null;
+    CmdUtils.selectedText = '';
     CmdUtils.selectedText = '';
 
     try {
-        chrome.tabs.query({active: true, currentWindow: true}, function (tabs) {
-            if (tabs.length > 0) {
-                var tab = tabs[0];
-                if (tab.url.match('^https?://') || tab.url.match('^file://')) {
-                    CmdUtils.activeTab = tab;
-                    if (!CmdUtils.selectedContextMenuCommand)
-                        CmdUtils.updateSelection(tab.id, callback);
-                    else
-                        if (callback)
-                            callback();
-                }
-                else if (callback)
-                    callback();
+        let tabs = await browser.tabs.query({active: true, currentWindow: true})
+        if (tabs.length) {
+            let tab = tabs[0];
+            if (tab.url.match('^https?://') || tab.url.match('^file://')) {
+                CmdUtils.activeTab = tab;
+                if (!CmdManager.selectedContextMenuCommand)
+                    await CmdUtils.updateSelection(tab.id);
             }
-            else if (callback)
-                callback();
-        });
+        }
     }
     catch (e) {
         console.log(e);
-        if (callback)
-            callback();
     }
 };
 
 ContextUtils.getSelection = CmdUtils.getSelection = () => CmdUtils.selectedText;
 ContextUtils.getHtmlSelection = CmdUtils.getHtmlSelection = () => CmdUtils.selectedHtml;
+
+// TODO: getting nodes of a range
+// https://stackoverflow.com/questions/667951/how-to-get-nodes-lying-inside-a-range-with-javascript/7931003#7931003
 
 // replaces current selection with string provided
 ContextUtils.setSelection = CmdUtils.setSelection = function setSelection(s) {
@@ -351,7 +328,6 @@ ContextUtils.setSelection = CmdUtils.setSelection = function setSelection(s) {
     s = s.replace(/(['"])/g, "\\$1");
     s = s.replace(/\\\\/g, "\\");
     // http://jsfiddle.net/b3Fk5/2/
-    //console.log("CmdUtils.setSelection"+s)
 
     var insertCode = `
     function replaceSelectedText(replacementText) {
@@ -366,7 +342,9 @@ ContextUtils.setSelection = CmdUtils.setSelection = function setSelection(s) {
         } else {
             if (sel.rangeCount) {
                 range = sel.getRangeAt(0);
-                range.deleteContents();
+                
+                for (let i = 0; i < sel.rangeCount; ++i)
+                    sel.getRangeAt(i).deleteContents();  
 
                 var el = document.createElement("div");
                 el.innerHTML = replacementText;

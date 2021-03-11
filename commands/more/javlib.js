@@ -128,7 +128,6 @@
         description: "Search for movie information at <a href='https://www.javlibrary.com/en'>javlibrary</a>.",
         help: `Try: <b>javlib</b> <i>star-699</i>`,
         icon: "/commands/more/jav.png",
-        builtIn: true,
         previewDelay: 1000,
         _hidden: true,
         _namespace: NS_MORE_COMMANDS,

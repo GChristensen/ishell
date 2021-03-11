@@ -21,7 +21,6 @@ CmdUtils.CreateCommand({
             <ul class="syntax">
                 <li><b>email</b> <b>this</b> <b>to</b> <i>user@example.com</i> <b>at</b> <i>secondary</i></li>
             </ul>`,
-    builtIn: true,
     _namespace: "Mail",
     author: "g/christensen",
     icon: "/res/icons/email.png",
@@ -95,7 +94,6 @@ CmdUtils.CreateCommand({
             <span class="arguments">Example</span>
             <ul class="syntax">
                 <li><b>compose</b> <i>shopping list</i> <b>to</b> <i>user@example.com</i> <b>at</b> <i>secondary</i>`,
-    builtIn: true,
     _namespace: "Mail",
     author: "g/christensen",
     icon: "/res/icons/email.png",
@@ -153,7 +151,6 @@ CmdUtils.CreateCommand({
     uuid: "C1B5C976-2BBE-4DD6-95E9-A65CC84E1B51",
     arguments: [{role: "object", nountype: noun_type_contact, label: "email"}],
     description: "Do not show the specified email in suggestions anymore.",
-    builtIn: true,
     _namespace: "Mail",
     author: "g/christensen",
     icon: "/res/icons/forget-email.png",
@@ -197,7 +194,6 @@ CmdUtils.CreateCommand({
             <li>- <b>all</b> - forget all emails</li>
             <li>- <i>pattern</i> - forget emails containing this string (may be a regular expression)</li>
         </ul>`,
-    builtIn: true,
     _namespace: "Mail",
     author: "g/christensen",
     icon: "/res/icons/forget-email.png",

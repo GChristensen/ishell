@@ -420,13 +420,13 @@ function shell_load_input() {
     }
 }
 
-function initPopup(settings) {
+async function initPopup(settings) {
     shell_parser = CmdManager.makeParser();
 
     for (let cmd of CmdManager.commands) {
         try {
             if (cmd.init) {
-                CmdManager.initCommand(cmd, cmd.init, document);
+                await CmdManager.initCommand(cmd, cmd.init, document);
             }
         }
         catch (e) {
@@ -434,11 +434,12 @@ function initPopup(settings) {
         }
     }
 
-    CmdUtils.updateActiveTab(() => {
-        shell_load_input()
-        shell_show_matching_commands();
-        CmdUtils.deblog("hello from iShell");
-    });
+    await CmdUtils.updateActiveTab();
+
+    shell_load_input()
+    shell_show_matching_commands();
+
+    CmdUtils.deblog("hello from iShell");
 
     // Add event handler to window
     document.addEventListener('keydown', shell_keydown_handler, false);

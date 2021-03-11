@@ -8,7 +8,6 @@ CmdUtils.makeSearchCommand({
     arguments: [{role: "object", nountype: noun_arb_text, label: "query"}],
     description: "Search for K-Pop releases.",
     icon: "/commands/more/kpop.png",
-    builtIn: true,
     _hidden: true,
     _namespace: NS_MORE_COMMANDS,
     previewDelay: 1000,

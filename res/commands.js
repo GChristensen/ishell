@@ -177,8 +177,8 @@ function insertNamespace(namespace, subtext, commands, table) {
 async function buildTable(settings) {
     let table = jQuery("#commands-and-feeds-table");
 
-    let builtinCommands = CmdManager.commands.filter((c) => c.builtIn).sort(compareByName);
-    let userCommands = CmdManager.commands.filter((c) => !c.builtIn).sort(compareByName);
+    let builtinCommands = CmdManager.commands.filter((c) => c._builtin).sort(compareByName);
+    let userCommands = CmdManager.commands.filter((c) => !c._builtin).sort(compareByName);
     let commandCount = builtinCommands.length + userCommands.length;
 
     jQuery("#num-commands").text(commandCount);
@@ -186,7 +186,7 @@ async function buildTable(settings) {
     const BUILTIN_AUTHOR = "by iShell Authors";
 
     function insertBuiltinNamespace(ns) {
-        let namespaced = CmdManager.commands.filter((c) => c.builtIn && c._namespace === ns).sort(compareByName);
+        let namespaced = CmdManager.commands.filter((c) => c._builtin && c._namespace === ns).sort(compareByName);
         if (namespaced.length)
             insertNamespace(ns, BUILTIN_AUTHOR, namespaced, table);
     }
@@ -203,7 +203,7 @@ async function buildTable(settings) {
     if (settings.enable_more_commands())
         insertBuiltinNamespace("More Commands");
 
-    builtinCommands = CmdManager.commands.filter((c) => c.builtIn && !c._namespace).sort(compareByName);
+    builtinCommands = CmdManager.commands.filter((c) => c._builtin && !c._namespace).sort(compareByName);
     if (builtinCommands.length > 0)
         insertNamespace("Builtin Commands", BUILTIN_AUTHOR, builtinCommands, table);
 
@@ -223,7 +223,7 @@ async function buildTable(settings) {
             + '" target="_blank">Open in editor</a>', userCommandsByCat[n], table);
 
     var defaultCommands = CmdManager.commands.filter((c) => c._namespace === "default").sort(compareByName);
-    insertNamespace("Other Commands", '<a href="edit.html" target="_blank">Open in editor</a>',
+    insertNamespace("Other Commands", '<a href="edit.html?default" target="_blank">Open in editor</a>',
         defaultCommands, table);
 
     jQuery("#num-cats").text(commandCategoryCount);
