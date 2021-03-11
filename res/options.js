@@ -153,8 +153,8 @@ function onDocumentLoad(settings) {
                 if (customScripts && typeof customScripts === "object") {
                     let multipleObjects = [];
                     try {
-                        multipleObjects = Object.values(customScripts).map(scripts =>
-                            DBStorage.saveCustomScripts(scripts.namespace, scripts.scripts));
+                        multipleObjects = Object.values(customScripts).map(record =>
+                            DBStorage.saveCustomScript(record.namespace, record.script));
                     }
                     catch (e) {
                         console.error(e);

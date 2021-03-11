@@ -174,7 +174,7 @@ function insertNamespace(namespace, subtext, commands, table) {
     commandCategoryCount += 1;
 }
 
-function buildTable(customscripts) {
+async function buildTable(settings) {
     let table = jQuery("#commands-and-feeds-table");
 
     let builtinCommands = CmdManager.commands.filter((c) => c.builtIn).sort(compareByName);
@@ -200,7 +200,7 @@ function buildTable(customscripts) {
     insertBuiltinNamespace("Translation");
     insertBuiltinNamespace("Scrapyard");
 
-    if (shellSettings.enable_more_commands())
+    if (settings.enable_more_commands())
         insertBuiltinNamespace("More Commands");
 
     builtinCommands = CmdManager.commands.filter((c) => c.builtIn && !c._namespace).sort(compareByName);
@@ -209,7 +209,9 @@ function buildTable(customscripts) {
 
     let userCommandsByCat = {};
 
-    for (let n in customscripts) {
+    let namespaces = await DBStorage.fetchCustomScriptNamespaces();
+
+    for (let n of namespaces) {
         if (n !== "default") {
             let commands = CmdManager.commands.filter((c) => c._namespace === n).sort(compareByName);
             userCommandsByCat[n] = commands;
@@ -229,9 +231,5 @@ function buildTable(customscripts) {
 
 jQuery(function onReady() {
     setupHelp("#show-hide-help", "#cmdlist-help-div");
-    shellSettings.load(() => {
-        CmdManager.loadCustomScripts(customscripts => {
-            buildTable(customscripts)
-        });
-    });
+    shellSettings.load(settings => buildTable(settings));
 });

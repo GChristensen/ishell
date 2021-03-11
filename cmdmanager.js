@@ -241,41 +241,43 @@ class CommandManager {
         command.__oo_preview = command.preview;
 
         command.preview = function(pblock, args, storage) {
-            pblock.set = function (html) {this.innerHTML = html};
+            if (!pblock.set)
+                pblock.set = function (html) {this.innerHTML = html};
             this.__oo_preview(args, pblock, storage);
         }
 
         CmdUtils.CreateCommand(command);
     }
 
-    unloadCustomScripts() {
-        this._commands = this._commands.filter(c => !!c.builtIn);
+    unloadCustomScripts(namespace) {
+        if (namespace)
+            this._commands = this._commands.filter(c => c._namespace !== namespace);
+        else
+            this._commands = this._commands.filter(c => !!c.builtIn);
     }
 
-    loadCustomScripts(callback) {
-        this.unloadCustomScripts();
-        // mark built-int commands
-        this._commands.forEach(c => {c.builtIn = true;});
+    async loadCustomScripts(namespace) {
+        this.unloadCustomScripts(namespace);
 
         // load custom scripts
-        DBStorage.fetchCustomScripts(customscripts => {
-            for (let n in customscripts) {
-                try {
-                    if (customscripts[n].scripts) {
-                        let script = runPreprocessor(customscripts[n].scripts);
-                        eval(script);
+        let customscripts = await DBStorage.fetchCustomScripts(namespace);
 
-                        for (let cmd of this._commands.filter(c => !c.builtIn && !c._namespace))
-                            cmd._namespace = n;
-                    }
-                } catch (e) {
-                    console.error("custom scripts evaluation failed", e);
+        if (namespace)
+            customscripts = [customscripts];
+
+        for (let record of customscripts) {
+            try {
+                if (record.script) {
+                    let script = CmdPreprocessor.run(record.script);
+                    eval(script);
+
+                    for (let cmd of this._commands.filter(c => !c.builtIn && !c._namespace))
+                        cmd._namespace = record.namespace;
                 }
+            } catch (e) {
+                console.error("custom scripts evaluation failed", e);
             }
-
-            if (callback)
-                callback(customscripts);
-        });
+        }
     }
 }
 

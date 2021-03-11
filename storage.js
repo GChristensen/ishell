@@ -13,8 +13,6 @@ dexie.on('populate', () => {
 });
 
 class StorageIDB {
-    constructor() {
-    }
 
     async getSuggestionMemory(input) {
         return dexie.suggestion_memory.where("input").equals(input).first();
@@ -57,51 +55,37 @@ class StorageIDB {
         return dexie.command_storage.toArray();
     }
 
-    async fetchCustomScripts(callback) {
-        let args = arguments;
-        let namespace = args.length && (typeof callback === "function")? undefined: callback;
-        let customScripts = {};
+    async fetchCustomScriptNamespaces() {
+        return dexie.custom_scripts.orderBy("namespace").keys();
+    }
+
+    async fetchCustomScripts(namespace) {
+        let customScripts;
 
         if (namespace)
-            customScripts[args[0]] = await dexie.custom_scripts.where("namespace").equals(args[0]).first();
+            customScripts = await dexie.custom_scripts.where("namespace").equals(namespace).first();
         else {
-            let rows = await dexie.custom_scripts.toArray();
-            for (let row of rows)
-                customScripts[row.namespace] = row;
-        }
-        if (namespace) {
-            if (args[1])
-                args[1](customScripts);
-        }
-        else {
-            if (callback)
-                callback(customScripts);
+            customScripts = await dexie.custom_scripts.toArray();
         }
 
         return customScripts;
     }
 
-    async saveCustomScripts(namespace, scripts, callback) {
+    async saveCustomScript(namespace, script) {
         const exists = await dexie.custom_scripts.where("namespace").equals(namespace).count();
 
         if (exists) {
             await dexie.custom_scripts.where("namespace").equals(namespace).modify({
-                scripts
+                script
             });
         }
         else {
-            await dexie.custom_scripts.add({namespace, scripts});
+            await dexie.custom_scripts.add({namespace, script});
         }
-
-        if (callback)
-            callback();
     }
 
-    async deleteCustomScripts(namespace, callback) {
+    async deleteCustomScript(namespace) {
         await dexie.custom_scripts.where("namespace").equals(namespace).delete();
-
-        if (callback)
-            callback();
     }
 }
 

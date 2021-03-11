@@ -235,13 +235,13 @@ class MyCommand {
 }
 
 // evaluates and saves scripts from editor
-function saveScripts(callback) {
-    var customscripts = editor.getSession().getValue();
+async function saveScript() {
+    var customscode = editor.getSession().getValue();
 
     if (scriptNamespace === SHELL_SETTINGS) {
         let settings;
         try {
-            settings = JSON.parse(customscripts)
+            settings = JSON.parse(customscode)
         }
         catch (e) {
             console.log(e);
@@ -249,35 +249,26 @@ function saveScripts(callback) {
         }
 
         if (settings)
-            chrome.storage.local.set(settings);
+            await browser.storage.local.set(settings);
         else
-            chrome.storage.local.clear();
+            await browser.storage.local.clear();
     }
     else {
         // save
-        DBStorage.saveCustomScripts(scriptNamespace, customscripts, () => {
-            // eval
-            try {
-                $("#info").html("Evaluated!");
-                eval(customscripts);
-                CmdManager.loadCustomScripts();
-            } catch (e) {
-                $("#info").html("<span style='background-color: red; color: white;'>&nbsp;" + e.message + "&nbsp;</span>");
-            }
+        await DBStorage.saveCustomScript(scriptNamespace, customscode);
 
-            if (callback && typeof callback === "function")
-                callback();
-        });
+        // eval
+        try {
+            eval(customscode);
+            $("#info").html("Evaluated!");
+            await CmdManager.loadCustomScripts(scriptNamespace);
+        } catch (e) {
+            $("#info").html("<span style='background-color: red; color: white;'>&nbsp;" + e.message + "&nbsp;</span>");
+        }
     }
-
-    // download link
-    var a = document.getElementById("download");
-    var file = new Blob([customscripts], {type: "application/javascript"});
-    a.href = URL.createObjectURL(file);
-    a.download = scriptNamespace + (scriptNamespace === SHELL_SETTINGS? ".json": ".js");
 }
 
-function initEditor(settings) {
+async function initEditor(settings) {
     let lastNamespace = settings.last_editor_namespace();
 
     scriptNamespace =  window.location.search
@@ -296,13 +287,8 @@ function initEditor(settings) {
     });
     $(window).resize();
 
-    function editNamespaceScripts(all_scripts, namespace) {
-        let namespace_scripts = all_scripts[namespace];
-        if (namespace_scripts)
-            editor.setValue(namespace_scripts.scripts || "", -1);
-        else
-            editor.setValue("");
-
+    function editScript(script) {
+        editor.setValue(script || "", -1);
         editor.getSession().setUndoManager(new ace.UndoManager())
     }
 
@@ -320,50 +306,69 @@ function initEditor(settings) {
         }
     });
 
-    $("#create-namespace").click(() => {
+    $("#download").click(async (e) => {
+        // download link
+        let file = new Blob([editor.getSession().getValue()], {type: "application/javascript"});
+        let url = URL.createObjectURL(file);
+        let filename = scriptNamespace + (scriptNamespace === SHELL_SETTINGS ? ".json" : ".js");
+
+        let download = await browser.downloads.download({url: url, filename: filename, saveAs: true});
+
+        let download_listener = delta => {
+            if (delta.id === download && delta.state && delta.state.current === "complete") {
+                browser.downloads.onChanged.removeListener(download_listener);
+                URL.revokeObjectURL(url);
+            }
+        };
+        browser.downloads.onChanged.addListener(download_listener);
+    });
+
+    $("#create-namespace").click(async () => {
         if (scriptNamespace === SHELL_SETTINGS)
             return;
 
         let name = prompt("Create category: ");
         if (name) {
-            DBStorage.fetchCustomScripts(all_scripts => {
-                ADD_NAME: {
-                    saveScripts();
+            ADD_NAME: {
+                await saveScript();
 
-                    for (let n in all_scripts) {
-                        if (n.toLowerCase() == name.toLowerCase()) {
-                            scriptNamespace = n;
-                            $("#script-namespaces").val(n);
-                            editNamespaceScripts(all_scripts, scriptNamespace)
-                            break ADD_NAME;
-                        }
+                let namespaces = await DBStorage.fetchCustomScriptNamespaces();
+
+                for (let n of namespaces) {
+                    if (n.toLowerCase() == name.toLowerCase()) {
+                        scriptNamespace = n;
+                        $("#script-namespaces").val(n);
+
+                        let record = await DBStorage.fetchCustomScripts(scriptNamespace);
+                        editScript(record?.script);
+
+                        break ADD_NAME;
                     }
-
-                    scriptNamespace = name;
-                    editor.getSession().setValue("");
-                    editor.getSession().setUndoManager(new ace.UndoManager())
-                    $("#script-namespaces").append($("<option></option>")
-                        .attr("value", name)
-                        .text(name))
-                        .val(name);
-                    settings.last_editor_namespace(scriptNamespace);
                 }
-            });
+
+                scriptNamespace = name;
+                editor.getSession().setValue("");
+                editor.getSession().setUndoManager(new ace.UndoManager())
+                $("#script-namespaces").append($("<option></option>")
+                    .attr("value", name)
+                    .text(name))
+                    .val(name);
+                settings.last_editor_namespace(scriptNamespace);
+            }
         }
     });
 
-    $("#delete-namespace").click(() => {
+    $("#delete-namespace").click(async () => {
         if (scriptNamespace !== "default" && scriptNamespace !== SHELL_SETTINGS)
             if (confirm("Do you really want to delete \"" + scriptNamespace + "\"?")) {
-                DBStorage.deleteCustomScripts(scriptNamespace, () => {
-                    $('option:selected', $("#script-namespaces")).remove();
+                await DBStorage.deleteCustomScript(scriptNamespace);
+                $('option:selected', $("#script-namespaces")).remove();
 
-                    scriptNamespace = $("#script-namespaces").val();
-                    settings.last_editor_namespace(scriptNamespace);
-                    DBStorage.fetchCustomScripts(scriptNamespace, scripts => {
-                        editNamespaceScripts(scripts, scriptNamespace);
-                    });
-                });
+                scriptNamespace = $("#script-namespaces").val();
+                settings.last_editor_namespace(scriptNamespace);
+
+                let record = await DBStorage.fetchCustomScripts(scriptNamespace);
+                editScript(record?.script);
             }
     });
 
@@ -412,40 +417,40 @@ function initEditor(settings) {
                 editor.getSession().setValue(JSON.stringify(result, null, 2), -1);
             }
         });
-    else
-        DBStorage.fetchCustomScripts(all_scripts => {
-            var sorted = Object.keys(all_scripts).sort(function (a, b) {
-                if (a.toLocaleLowerCase() < b.toLocaleLowerCase())
-                    return -1;
-                if (a.toLocaleLowerCase() > b.toLocaleLowerCase())
-                    return 1;
-                return 0;
-            });
-            for (let n of sorted)
-                if (n !== "default")
-                    $("#script-namespaces").append($("<option></option>")
-                        .attr("value", n)
-                        .text(n));
+    else {
+        let namespaces = await DBStorage.fetchCustomScriptNamespaces();
 
-            $("#script-namespaces").val(window.scriptNamespace);
-
-            $("#script-namespaces").change(() => {
-                saveScripts(() => {
-                    scriptNamespace = $("#script-namespaces").val();
-
-                    settings.last_editor_namespace(scriptNamespace);
-                    DBStorage.fetchCustomScripts(scriptNamespace, scripts => {
-                        editNamespaceScripts(scripts, scriptNamespace);
-                    });
-                });
-            });
-
-            editNamespaceScripts(all_scripts, scriptNamespace);
-            //saveScripts();
+        namespaces = namespaces.sort(function (a, b) {
+            if (a.toLocaleLowerCase() < b.toLocaleLowerCase())
+                return -1;
+            if (a.toLocaleLowerCase() > b.toLocaleLowerCase())
+                return 1;
+            return 0;
         });
 
-    editor.on("blur", saveScripts);
-    editor.on("change", saveScripts);
+        for (let n of namespaces)
+            if (n !== "default")
+                $("#script-namespaces").append($("<option></option>")
+                    .attr("value", n)
+                    .text(n));
+
+        $("#script-namespaces").val(scriptNamespace);
+
+        $("#script-namespaces").change(async () => {
+            await saveScript()
+            scriptNamespace = $("#script-namespaces").val();
+            settings.last_editor_namespace(scriptNamespace);
+
+            let record = await DBStorage.fetchCustomScripts(scriptNamespace);
+            editScript(record?.script);
+        });
+
+        let record = await DBStorage.fetchCustomScripts(scriptNamespace);
+        editScript(record?.script);
+    }
+
+    editor.on("blur", saveScript);
+    editor.on("change", saveScript);
 
     editor.focus();
 }

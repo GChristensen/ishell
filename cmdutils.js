@@ -52,14 +52,17 @@ CmdUtils.CreateCommand = function CreateCommand(options) {
         options.names = options.names || [options.name];
     }
 
-    let args = options.arguments || options.argument;
-    if (!args)
-        args = options.arguments = [];
-
     options.id = options.uuid || options.name; // Utils.hash(options.name + JSON.stringify(args));
 
     if (!options.uuid)
         options.uuid = options.id;
+
+    if (CmdManager.commands.some(c => c.id === options.id))
+        return null;
+
+    let args = options.arguments || options.argument;
+    if (!args)
+        args = options.arguments = [];
 
     let nounId = 0;
     function toNounType(obj, key) {
@@ -776,20 +779,20 @@ CmdUtils.previewList.CSS = `\
   #preview-list > li:hover {outline: 1px solid;}
 `;
 
-CmdUtils.previewList2 = function(block, items, f, css) {
+CmdUtils.previewList2 = function(block, items, fs, css) {
     
     let lines = [];
     for (let i of items) {
         let html = "";
-        let thumb = f.thumb? f.thumb(i): undefined;
+        let thumb = fs.thumb? fs.thumb(i): undefined;
 
         if (thumb)
             html += `<img class='image' src='${thumb}'>`
         else
             html += "<div></div>";
 
-        let text = f.text(i);
-        let subtext = f.subtext(i);
+        let text = fs.text(i);
+        let subtext = fs.subtext(i);
 
         html += `<div class='cnt'><div class='text'>${text}</div>`;
 
@@ -801,7 +804,7 @@ CmdUtils.previewList2 = function(block, items, f, css) {
         lines.push(html);
     }
 
-    return CmdUtils.previewList(block, lines, (i, e) => f.action(items[i], e),
+    return CmdUtils.previewList(block, lines, (i, e) => fs.action(items[i], e),
         `
          .preview-list-item {
             white-space: nowrap;
@@ -817,7 +820,7 @@ CmdUtils.previewList2 = function(block, items, f, css) {
          }
          .preview-item-key {
             display: block;
-            ${f.thumb? 'width: 18px;': 'width: 16px;'}
+            ${fs.thumb? 'width: 18px;': 'width: 16px;'}
             align-self: center;
             flex 0 1 auto;
          }
