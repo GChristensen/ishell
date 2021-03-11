@@ -83,4 +83,4 @@ at StackOverflow.
 
 #### Change Log
 
-[Full changelog](changelog.md)
+See [version history at AMO](https://addons.mozilla.org/en-US/firefox/addon/ishell/versions/).
