@@ -546,7 +546,7 @@ shellSettings.load(settings => {
         preview: function(pblock, args, {Bin}) {
             let maxResults = args.cause && args.cause.data
                 ? args.cause.data
-                : (+maxSearchResults);
+                : shellSettings.max_history_items() || 20;
 
             let forDomain;
 

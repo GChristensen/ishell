@@ -89,24 +89,36 @@ function onDocumentLoad(settings) {
     //     settings.parser_language(lang);
     // });
 
+    $("#export-settings").click(async (e) => {
+        e.preventDefault();
 
-    $("#export-settings").mouseover((e) => {
-        chrome.storage.local.get(undefined, async settings => {
-            let exported = {};
-            exported.addon = "iShell";
-            exported.version = CmdUtils.VERSION;
+        let exported = {};
+        exported.addon = "iShell";
+        exported.version = CmdUtils.VERSION;
 
-            Object.assign(exported, settings);
+        let settings = await browser.storage.local.get();
 
-            delete exported.command_history;
+        Object.assign(exported, settings);
 
-            exported.commandStorage = await DBStorage.fetchCommandStorage();
-            exported.customScripts = await DBStorage.fetchCustomScripts();
+        delete exported.command_history;
 
-            var file = new Blob([JSON.stringify(exported, null, 2)], {type: "application/json"});
-            e.target.href = URL.createObjectURL(file);
-            e.target.download = "ishell.json";
-        });
+        exported.command_storage = await DBStorage.fetchCommandStorage();
+        exported.custom_scripts = await DBStorage.fetchCustomScripts();
+
+        // download link
+        let file = new Blob([JSON.stringify(exported, null, 2)], {type: "application/json"});
+        let url = URL.createObjectURL(file);
+        let filename = "ishell-settings.json"
+
+        let download = await browser.downloads.download({url: url, filename: filename, saveAs: true});
+
+        let download_listener = delta => {
+            if (delta.id === download && delta.state && delta.state.current === "complete") {
+                browser.downloads.onChanged.removeListener(download_listener);
+                URL.revokeObjectURL(url);
+            }
+        };
+        browser.downloads.onChanged.addListener(download_listener);
     });
 
     $("#import-settings").click((e) => {
@@ -117,11 +129,11 @@ function onDocumentLoad(settings) {
     $("#file-picker").change((e) => {
         if (e.target.files.length > 0) {
             let reader = new FileReader();
-            reader.onload = function(re) {
+            reader.onload = async function(re) {
                 let imported = JSON.parse(re.target.result);
 
                 if (imported.addon !== "iShell") {
-                    CmdUtils.notify("Export format is not supported", "Error");
+                    CmdUtils.notify("Export format is not supported.", "Error");
                     return;
                 }
 
@@ -133,27 +145,27 @@ function onDocumentLoad(settings) {
                 if (imported.version)
                     delete imported.version;
 
-                let customScripts = imported.customScripts;
+                let customScripts = imported.custom_scripts;
 
                 if (customScripts !== undefined)
-                    delete imported.customScripts;
+                    delete imported.custom_scripts;
 
-                let commandStorage = imported.commandStorage;
+                let commandStorage = imported.command_storage;
 
                 if (commandStorage !== undefined)
-                    delete imported.commandStorage;
+                    delete imported.command_storage;
 
                 chrome.storage.local.set(imported);
 
                 if (commandStorage && Array.isArray(commandStorage)) {
                     for (let item of commandStorage)
-                        DBStorage.setCommandStorage(item.uuid, item.bin)
+                        await DBStorage.setCommandStorage(item.uuid, item.bin)
                 }
 
-                if (customScripts && typeof customScripts === "object") {
+                if (customScripts && Array.isArray(customScripts)) {
                     let multipleObjects = [];
                     try {
-                        multipleObjects = Object.values(customScripts).map(record =>
+                        multipleObjects = customScripts.map(record =>
                             DBStorage.saveCustomScript(record.namespace, record.script));
                     }
                     catch (e) {
