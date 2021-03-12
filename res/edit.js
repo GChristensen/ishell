@@ -36,12 +36,12 @@ class MySimpleCommand {
         args[OBJECT] = {nountype: noun_arb_text, label: "text"};
     }
 
-    preview({object: {text}}, display) {
-        display.set("Your input is " + text + ".");
+    preview({OBJECT}, display) {
+        display.set("Your input is " + OBJECT?.text + ".");
     }
     
-    execute({object: {text}}) {
-        cmdAPI.notify("Your input is: " + text);
+    execute({OBJECT}) {
+        cmdAPI.notify("Your input is: " + OBJECT?.text);
     }
 }`,
 

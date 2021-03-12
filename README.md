@@ -32,8 +32,8 @@ class ShowText {
         args[IN] = {nountype: ["popup", "log"], label: "destination"};
     }
 
-    preview(args, display) {
-        let html = `Shows <i>${args[OBJECT]?.text}</i> in <b>${args[IN]?.text || "popup"}</b>`;
+    preview({OBJECT, IN}, display) {
+        let html = `Shows <i>${OBJECT?.text}</i> in <b>${IN?.text || "popup"}</b>`;
         display.set(html);
     }
 

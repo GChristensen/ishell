@@ -472,8 +472,8 @@ $(window).on('unload', function() {
 });
 
 
-CmdUtils.getCommandLine = () => popup.getInput();
-CmdUtils.setCommandLine = function (text) {
+cmdAPI.getCommandLine = CmdUtils.getCommandLine = () => popup.getInput();
+cmdAPI.setCommandLine = CmdUtils.setCommandLine = function (text) {
     popup.setInput(text);
     popup.saveInput();
     suggestions.displaySuggestions(text);
