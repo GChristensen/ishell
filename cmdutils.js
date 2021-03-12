@@ -173,7 +173,12 @@ CmdUtils.getLocation = function getLocation() {
 
 // opens new tab with provided url
 Utils.openUrlInBrowser = CmdUtils.addTab = function addTab(url, callback) {
-    chrome.tabs.create({ "url": url }, tab => {if (callback) callback(tab)});
+    let result = browser.tabs.create({ "url": url });
+
+    if (callback)
+        result.then(callback)
+
+    return result;
 };
 
 // gets json with xhr

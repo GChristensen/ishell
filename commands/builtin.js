@@ -297,8 +297,10 @@ CmdUtils.CreateCommand({
         CmdUtils.setSelection(this._decode(args.object.text, n));
     },
     preview: function preview(pblock, args) {
-        let n = args.cause && args.cause.text? parseInt(args.cause.text): 1;
-        pblock.innerHTML = this._decode(args.object.text, n);
+        if (args.object?.text) {
+            let n = args.cause?.text ? parseInt(args.cause.text) : 1;
+            pblock.innerHTML = this._decode(args.object?.text, n);
+        }
     },
 });
 
@@ -313,7 +315,8 @@ CmdUtils.CreateCommand({
         CmdUtils.setSelection(encodeURIComponent(text));
     },
     preview: function preview(pblock, {object: {text}}) {
-        pblock.innerHTML = encodeURIComponent(text);
+        if (text)
+            pblock.innerHTML = encodeURIComponent(text);
     },
 });
 

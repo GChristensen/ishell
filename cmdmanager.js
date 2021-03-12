@@ -1,3 +1,18 @@
+let PREPOSITION_MAP = new Map([
+    [OBJECT, "OBJECT"],
+    [FOR, "FOR"],
+    [TO, "TO"],
+    [FROM, "FROM"],
+    [NEAR, "NEAR"],
+    [AT, "AT"],
+    [WITH, "WITH"],
+    [IN, "IN"],
+    [OF, "OF"],
+    [AS, "AS"],
+    [BY, "BY"],
+    [ON, "ON"]
+]);
+
 class CommandManager {
     constructor() {
         this._commands = [];
@@ -8,7 +23,7 @@ class CommandManager {
            if (commands)
                this._context_menu_commands = commands;
            this.createContextMenu();
-       });
+        });
     }
 
     addCommand(command) {
@@ -241,8 +256,10 @@ class CommandManager {
         command.__oo_preview = command.preview;
 
         command.preview = function(pblock, args, storage) {
-            if (!pblock.set)
-                pblock.set = function (html) {this.innerHTML = html};
+            for (let role of PREPOSITION_MAP.keys())
+                if (args[role])
+                    args[PREPOSITION_MAP.get(role)] = args[role]
+
             this.__oo_preview(args, pblock, storage);
         }
 

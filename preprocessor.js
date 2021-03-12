@@ -115,8 +115,17 @@ class CommandPreprocessor {
         let uuid = comment.match(/@uuid (.*?)(?:\n|$)/i);
         let help = comment.replaceAll(/@\w+.*?(?:\n|$)/g, "").trim();
 
+        let command_name = command ? command?.[1]?.trim() || true: false;
+
+        if (typeof command_name === "string")
+            if (command_name.indexOf(" ") > 0 || command_name.indexOf(",") > 0) {
+                command_name = command_name.replaceAll(",", " ");
+                command_name = command_name.replaceAll("\s+", " ");
+                command_name = command_name.split(" ");
+            }
+
         return {
-            command: command ? command?.[1]?.trim()?.replaceAll(" ", "-") || true : false,
+            command: command_name,
             delay: delay && delay[1] ? parseInt(delay[1]) : undefined,
             preview: preview?.[1]?.trim(),
             license: license?.[1]?.trim(),
@@ -147,11 +156,17 @@ class CommandPreprocessor {
         let block = `\n{
     let args = {};
     let command = new ${object.name}(args);\n\n`
+        let command_name;
+
+        if (Array.isArray(properties.command))
+            command_name = JSON.stringify(properties.command)
+        else
+            command_name = typeof properties.command === "string"
+                ? ("[" + this.generateProperty(properties.command) + "]")
+                : ("[" + this.generateProperty(properties.name) + "]")
 
         if (properties.name)
-            block += `    command.name = ${this.generateProperty(typeof properties.command === "string"
-                ? properties.command
-                : properties.name)};\n`;
+            block += `    command.names = ${command_name};\n`;
         if (properties.delay)
             block += `    command.previewDelay = ${properties.delay || "undefined"};\n`;
         if (properties.preview)

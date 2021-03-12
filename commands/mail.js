@@ -36,9 +36,9 @@ CmdUtils.CreateCommand({
             desc += "to &lt;" + args.goal.text + "&gt; ";
 
         if (args.time && args.time.text)
-            desc += "at the " + args.source.text + " account.";
+            desc += "from the " + args.source.text + " account.";
         else
-            desc += "at the default account.";
+            desc += "from the default account.";
 
         pblock.innerHTML = desc;
     },

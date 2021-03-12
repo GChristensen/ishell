@@ -11,7 +11,7 @@ Utils.trim = function(s) {
         return s.trim();
 };
 
-Utils.setTimeout = setTimeout;
+Utils.setTimeout = function() {setTimeout.apply(window, arguments)};
 Utils.isArray = Array.isArray;
 
 Utils.reportWarning = function(aMessage, stackFrameNumber) {

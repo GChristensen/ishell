@@ -582,7 +582,7 @@ cmdAPI.createCommand({
 /**
   Displays a given message at popup or prints it to the browser log.
 
-  @command show-text
+  @command show-text, display-text
   @description An object-oriented command with arguments.
 */
 class ShowTextCommandClass {
@@ -591,12 +591,12 @@ class ShowTextCommandClass {
     args[IN]     = {nountype: ["popup", "log"], label: "destination"};
   }
 
-  preview(args, display) {
+  preview(args, display, storage) {
     let html = `Shows &lt;i&gt;${args[OBJECT]?.text}&lt;/i&gt; in &lt;b&gt;${args[IN]?.text || "popup"}&lt;/b&gt;`;
     display.set(html);
   }
 
-  execute(args) {
+  execute(args, storage) {
     let destination = args[IN]?.text;
     let message = args[OBJECT]?.text;
 
@@ -618,7 +618,8 @@ class ShowTextCommandClass {
 </p>
                 <p>You may also notice that object-oriented methods have the <code>args</code> argument always in the first position,
                     and <code>pblock</code> argument is now called <code>display</code>. It still contains a reference to the same <code>div</code> element
-                of iShell preview area, but has a new nice <code>set</code> method which sets element's innerHTML property for you.</p>
+                of iShell preview area, but has a new nice <code>set</code> method which sets element's innerHTML property for you.
+                    <code>storage</code> argument is a reference to the <a href="/res/API.html#user-content-bin">Bin interface</a> of the command.</p>
 
                 <h2 class="in-block"><span class="mw-headline"
                                            id="Introduction_to_Noun_Types">Introduction to Noun Types</span></h2>
