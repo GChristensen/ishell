@@ -75,7 +75,7 @@ new built-in commands in the case if you want to hack and rebuild iShell.
 
 ### Builtin command API keys
 
-Some commands (for example, youtube, google, images) are ceased to work in UbiquityWE. In iShell they require API keys
+Some builtin commands (for example, youtube, google, images) are ceased to work in UbiquityWE. In iShell they require API keys
 of the corresponding web services. Moreover, to use Google commands you need to create a custom search engine with the options
 "Search the entire web" and "Image search" enabled. If the help links in iShell interface provide not enough guidance how
 to set it up, you may find some inspiration in [this post](https://stackoverflow.com/questions/45899493/configuring-google-custom-search-to-work-like-google-search)
