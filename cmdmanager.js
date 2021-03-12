@@ -105,7 +105,7 @@ class CommandManager {
         new_args.push(bin);
 
         try {
-            f.apply(obj, new_args);
+            await f.apply(obj, new_args);
         } catch (e) {
             console.error(e.toString() + "\n" + e.stack);
         }

@@ -676,21 +676,21 @@ var noun_type_history_date = {
         }
 
         suggs = matchingPredefs.map(p =>
-            NounUtils.makeSugg(p.label, p.label, null, CmdUtils.matchScore(p.match), selectionIndices));
+            CmdUtils.makeSugg(p.label, p.label, null, CmdUtils.matchScore(p.match), selectionIndices));
 
         if (/\d{4}-d{1,2}-d{1,2}/.test(text)) {
-            suggs.push(NounUtils.makeSugg(text, text, null, CmdUtils.matchScore(p.match), selectionIndices));
+            suggs.push(CmdUtils.makeSugg(text, text, null, CmdUtils.matchScore(p.match), selectionIndices));
         }
         else if (/\d{1,2}-\d{1,2}/.test(text)) {
             let now = new Date();
             let [month, day] = text.split("-");
             let date = now.getFullYear() + "-" + addZero(month) + "-" + addZero(day);
-            suggs.push(NounUtils.makeSugg(date, date, null, 1, selectionIndices));
+            suggs.push(CmdUtils.makeSugg(date, date, null, 1, selectionIndices));
         }
         else if (/\d{1,2}/.test(text)) {
             let now = new Date();
             let date = now.getFullYear() + "-" + addZero(now.getMonth() + 1) + "-" + addZero(text);
-            suggs.push(NounUtils.makeSugg(date, date, null, 1, selectionIndices));
+            suggs.push(CmdUtils.makeSugg(date, date, null, 1, selectionIndices));
         }
 
         return suggs;

@@ -32,6 +32,8 @@ const DEFAULT_SETTINGS = {
     max_history_items: 20,
     max_suggestions: 5,
     remember_context_menu_commands: false,
+    template_syntax: "class",
+    last_editor_namespace: "default",
     dynamic_settings: {
         lingvo_api_key: "NGNmNTVlNzUtNzg2MS00ZWE1LWIzNWItNjNlMTAyZTM5YmRlOmM3NTg3MDY2Y2MyMDQxY2E4NTQ0MDZhOTQyYTcxMTk2",
         bing_translator_api_v3_key: "",

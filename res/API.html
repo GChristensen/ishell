@@ -344,13 +344,13 @@
 </blockquote>
 
 <h3><a id="user-content-matchscore" class="anchor" aria-hidden="true" href="#matchscore"></a>cmdAPI.matchScore(match)</h3>
-<p class="legacy-name">Legacy names: NounUtils.matchScore</p>
+<p class="legacy-name">Legacy name: NounUtils.matchScore</p>
 <blockquote>
     <p>Calculates the score for use in suggestions from a result array (<b>match</b>) of <b>RegExp#exec</b> run against user input.</p>
 </blockquote>
 
 <h3><a id="user-content-makesugg" class="anchor" aria-hidden="true" href="#makesugg"></a>cmdAPI.makeSugg(text, html, data, score, selectionIndices)</h3>
-<p class="legacy-name">Legacy names: NounUtils.makeSugg</p>
+<p class="legacy-name">Legacy name: NounUtils.makeSugg</p>
 <blockquote>
     <p>
         Creates a suggestion object used by parser to make suggestions displayed at the popup window.
@@ -365,7 +365,7 @@
           <li><b>score</b> is an optional float number representing
           the score of the suggestion. Defaults to 1.0.</li>
           <li><b>selectionIndices</b> is an optional array containing the start and end
-          indices of selection within <b>text</b> displayed at the interface.</li>
+          indices of selection (displayed at the interface) within <b>text</b>.</li>
         </ul>
     </p>
 </blockquote>
@@ -411,6 +411,8 @@
         Bin.anotherProperty("this call persists another value");
     }
     </pre>
+
+    <p>The interface offers a separate storage space for each command.</p>
 </blockquote>
 
 <h3><a id="user-content-jquery" class="anchor" aria-hidden="true" href="#bin"></a>jQuery, $</h3>
@@ -432,9 +434,9 @@
   <li><strong>noun_type_email</strong> - email address.</li>
     <li><strong>noun_type_contact</strong> - will suggest email addresses used with the <b>email</b> and <b>compose</b> commands.</li>
   <li><strong>noun_type_tab</strong> - will suggest active tabs matched by title or url.</li>
-  <li><strong>noun_type_lang_google</strong> - language name/code pairs, supported by Google Translator.</li>
-  <li><strong>noun_type_lang_wikipedia</strong> - language name/code pairs, supported by Wikipedia.</li>
-  <li><strong>noun_type_lang_microsoft</strong> - language name/code pairs, supported by Bing Translator.</li>
+  <li><strong>noun_type_lang_google</strong> - language name/code pairs supported by Google Translator.</li>
+  <li><strong>noun_type_lang_wikipedia</strong> - language name/code pairs supported by Wikipedia.</li>
+  <li><strong>noun_type_lang_microsoft</strong> - language name/code pairs supported by Bing Translator.</li>
 </ul>
 </body>
 </html>

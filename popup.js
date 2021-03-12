@@ -1,13 +1,15 @@
-let shell_last_input_text = "";
+let popup;
 let suggestions;
 
+
 class SuggestionManager {
-    constructor(parser, max_suggestions) {
+    constructor(popup, parser, max_suggestions) {
         this._max_suggestions = max_suggestions;
         this._selected_suggestion = 0;
         this._selected_sentence = null;
         this._suggestions = null;
         this._parser = parser;
+        this._popup = popup;
     }
 
     reset() {
@@ -35,6 +37,15 @@ class SuggestionManager {
             return this._selected_sentence.completionText.trim();
 
         return "";
+    }
+
+    autocompleteInput() {
+        if (this.hasSelection()) {
+            let completion = this.autocompleteSelection();
+            let input = this._popup.getInput();
+            if (input && completion && completion.length < 100 && input.trim() !== completion)
+                this._popup.setInput(completion);
+        }
     }
 
     _ensureSelectionInRange() {
@@ -79,9 +90,9 @@ class SuggestionManager {
             $("#suggestion-item-" + previous_command_index).parent().removeClass("selected");
             $(`#suggestion-item-${index}`).parent().addClass('selected');
 
-            shell_autocomplete();
-            shell_set_preview(this.activeCommand?.description);
-            this._showPreview(this._selected_sentence);
+            this.autocompleteInput();
+            this._popup.setPreview(this.activeCommand?.description, true);
+            this._showCommandPreview(this._selected_sentence);
         }
     }
 
@@ -89,58 +100,21 @@ class SuggestionManager {
         this._selectCommand(this._getNextCommandIndex(asc))
     }
 
-    show(text) {
-        const query = this._parser.newQuery(text, null, this._max_suggestions, true);
-
-        query.onResults = () => {
-            this._suggestions = query.suggestionList;
-            this._ensureSelectionInRange();
-
-            // We have matches, show a list
-            if (this._suggestions.length > 0) {
-                let suggestions_div = document.createElement('div');
-                let suggestions_list = document.createElement('ul');
-                let old_selection = this._selected_sentence;
-
-                for (let i in this._suggestions) {
-                    var s = this._suggestions[i];
-                    var li = document.createElement('LI');
-                    li.innerHTML = `<div id="suggestion-item-${i}">
-                                        <table cellspacing="1" cellpadding="1">
-                                            <tr>
-                                                <td>${shell_decorate_icon(s.icon)}</td>
-                                                <td>${s.displayHtml}</td>
-                                            </tr>
-                                        </table>
-                                    </div>`;
-                    if (i == this._selected_suggestion) {
-                        li.setAttribute('class', 'selected');
-                        this._selected_sentence = s;
-                    }
-                    suggestions_list.appendChild(li);
-                }
-
-                suggestions_div.appendChild(suggestions_list);
-                shell_suggestion_elt().innerHTML = suggestions_div.innerHTML; // shouldn't clear the preview
-
-                for (let i in this._suggestions)
-                    jQuery(`#suggestion-item-${i}`).click((e) => {
-                        this._selectCommand(i);
-                    });
-
-                if (old_selection && !this._selected_sentence.equalCommands(old_selection) || !old_selection)
-                    shell_set_preview(this._selected_sentence.getCommand().description);
-
-                this._showPreview(this._selected_sentence);
-            } else {
-                shell_default_state()
-            }
-        };
-
-        query.run(); // WARNING: callback suggestions may make several calls of onResults
+    _resetWindow() {
+        this.reset();
+        this._popup.reset();
+        this._popup.displayHelp();
     }
 
-    _showPreview(sentence) {
+    _decorateIcon(icon) {
+        if (!icon || icon === "http://example.com/favicon.ico") {
+            icon = '/res/icons/logo.svg';
+        }
+        icon = '<img src="' + icon + '" border="0" alt="" align="absmiddle"> ';
+        return icon;
+    }
+
+    _showCommandPreview(sentence) {
         if (sentence == null)
             return;
 
@@ -151,34 +125,87 @@ class SuggestionManager {
         switch(typeof command.preview)
         {
             case 'undefined':
-                shell_set_preview(command.description, true);
+                this._popup.setPreview(command.description, true);
                 break;
             case 'string':
-                shell_set_preview(command.preview, true);
+                this._popup.setPreview(command.preview, true);
                 break;
             default:
-                let commandPreview = ()=> {
-                    // zoom overflow dirty fix
-                    $("#shell-command-preview").css("overflow-y", "auto");
-                    try {
-                        shell_preview_elt().dispatchEvent(new Event("preview-change"));
-                        CmdManager.callPreview(sentence, shell_preview_elt())
-                    } catch (e) {
-                        console.error(e)
-                    }
-                };
+                // zoom overflow dirty fix
+                $("#shell-command-preview").css("overflow-y", "auto");
 
-                if (typeof command.require !== 'undefined')
-                    CmdUtils.loadScripts(command.require, () => commandPreview());
-                else if (typeof command.requirePopup !== 'undefined')
-                    CmdUtils.loadScripts(command.requirePopup, () => commandPreview(), window);
-                else
-                    commandPreview();
+                this._popup.invalidatePreview();
+                CmdManager.callPreview(sentence, this._popup.pblock);
         }
     }
 
+    _generateSuggestionHtml(suggestions) {
+        let suggestions_div = document.createElement('div');
+        let suggestions_list = document.createElement('ul');
+
+        for (let i in suggestions) {
+            var s = suggestions[i];
+            var li = document.createElement('LI');
+            li.innerHTML = `<div id="suggestion-item-${i}">
+                                        <table cellspacing="1" cellpadding="1">
+                                            <tr>
+                                                <td>${this._decorateIcon(s.icon)}</td>
+                                                <td>${s.displayHtml}</td>
+                                            </tr>
+                                        </table>
+                                    </div>`;
+            if (i == this._selected_suggestion) {
+                li.setAttribute('class', 'selected');
+            }
+            suggestions_list.appendChild(li);
+        }
+
+        suggestions_div.appendChild(suggestions_list);
+
+        return suggestions_div.innerHTML;
+    }
+
+    _populateSuggestionList(user_input) {
+        const query = this._parser.newQuery(user_input, null, this._max_suggestions, true);
+
+        query.onResults = () => {
+            this._suggestions = query.suggestionList;
+            this._ensureSelectionInRange();
+
+            // We have matches, show a list
+            if (this._suggestions.length > 0) {
+                let suggestion_html = this._generateSuggestionHtml(this._suggestions);
+                this._popup.populateSuggestions(suggestion_html);
+
+                for (let i in this._suggestions)
+                    jQuery(`#suggestion-item-${i}`).click((e) => {
+                        this._selectCommand(i);
+                    });
+
+                let old_selection = this._selected_sentence;
+                this._selected_sentence = this._suggestions[this._selected_suggestion];
+
+                if (old_selection && !this._selected_sentence.equalCommands(old_selection) || !old_selection)
+                    this._popup.setPreview(this._selected_sentence.getCommand().description, true);
+
+                this._showCommandPreview(this._selected_sentence);
+            } else {
+                this._resetWindow();
+            }
+        };
+
+        query.run(); // WARNING: callback suggestions may make several calls of onResults
+    }
+
+    displaySuggestions(input) {
+        if (input)
+            this._populateSuggestionList(input); // will also show command preview
+        else
+            this._resetWindow();
+    }
+
     executeSelection() {
-        if (this._selected_sentence) {
+        if (this.selection) {
             CmdManager.callExecute(this.selection)
                 .then(() => {
                     CmdUtils._internalClearSelection();
@@ -187,152 +214,115 @@ class SuggestionManager {
     }
 
     strengthenMemory() {
-        if (this._selected_sentence)
-            this._parser.strengthenMemory(this._selected_sentence);
+        if (this.selection)
+            this._parser.strengthenMemory(this.selection);
     }
 }
 
 
-// closes ishell popup, it's needed to be defined here to work in Firefox
-CmdUtils.closePopup = function closePopup() {
-    window.close();
-};
+class PopupWindow {
+    constructor() {
+        this._last_input_text = "";
+        this._input_element = document.getElementById('shell-input');
+        this._preview_element = document.getElementById('shell-command-preview');
+        this._suggestions_element = document.getElementById('shell-suggestion-panel');
 
-CmdUtils.getCommandLine = shell_get_input;
-CmdUtils.setCommandLine = function (text) {
-    shell_set_input(text);
-    shell_save_input();
-    shell_show_suggestions();
-    shell_last_input_text = shell_get_input();
-};
-
-function shell_preview_elt() {
-    return document.getElementById('shell-command-preview');
-}
-
-function shell_suggestion_elt() {
-    return document.getElementById('shell-suggestion-panel');
-}
-
-function shell_set_preview(html, wrap) {
-    html = html || "";
-    wrap = wrap || (html.indexOf("<") === -1 && html.indexOf(">") === -1);
-    html = wrap? '<div id="shell-help-wrapper">' + html + '</div>': html;
-
-    let elt = shell_preview_elt();
-    elt.dispatchEvent(new Event("preview-change"));
-    elt.innerHTML = html;
-}
-
-function shell_clear_suggestions() {
-    let elt = shell_suggestion_elt();
-    elt.innerHTML = "<ul/>";
-}
-
-// clears tip, result and preview panels
-function shell_clear() {
-    shell_clear_suggestions();
-    shell_set_preview("");
-}
-
-function shell_get_input() {
-    var input = document.getElementById('shell-input');
-    if (!input) {
-        suggestions.reset();
-        return '';
+        // add a handy set method to populate innerHTML of the preview area
+        if (!this._preview_element.set)
+            this._preview_element.set = function (html) {this.innerHTML = html};
     }
-    return input.value;
-}
 
-function shell_set_input(text) {
-    let input = document.getElementById('shell-input');
-    input.value = text;
-}
-
-function shell_autocomplete() {
-    if (suggestions.hasSelection()) {
-        let completion = suggestions.autocompleteSelection();
-        let input = shell_get_input();
-        if (input && completion && completion.length < 100 && input.trim() !== completion)
-            shell_set_input(completion);
+    populateSuggestions(html) {
+        this._suggestions_element.innerHTML = html;
     }
-}
 
-function shell_help() {
-    var html = "<div id='shell-help-wrapper'>Type the name of a command and press Enter to execute it. "
-             + "Use <b>help</b> command for assistance.";
-    html += "<p>";
-    html += "<div class='shell-help-heading'>Keyboard Shortcuts</div>";
-    html += "<span class='keys'>Ctrl+C</span> - copy preview to clipboard<br>";
-    html += "<span class='keys'>Ctrl+Alt+Enter</span> - add selected command to context menu<br>";
-    html += "<span class='keys'>Ctrl+Alt+\\</span> - open command history<br>";
-    html += "<span class='keys'>Ctrl+Alt+&ltkey&gt;</span> - select list item prefixed with &ltkey&gt;<br>";
-    html += "<span class='keys'>&#8593;/&#8595;</span> - cycle through command suggestions<br>";
-    html += "<span class='keys'>F5</span> - reload the extension</div>";
+    invalidatePreview() {
+        this._preview_element.dispatchEvent(new Event("preview-change"));
+    }
 
-    shell_set_preview(html);
-}
+    setPreview(html, wrap) {
+        if (typeof html !== "undefined") {
+            wrap = wrap || (html.indexOf("<") === -1 && html.indexOf(">") === -1);
+            html = wrap ? '<div id="shell-help-wrapper">' + html + '</div>' : html;
+        }
 
-async function shell_show_command_history() {
-    const history = await CmdManager.commandHistory();
+        this.invalidatePreview();
+        this._preview_element.innerHTML = html || "";
+    }
 
-    shell_preview_elt().dispatchEvent(new Event("preview-change"));
-    CmdUtils.previewList(shell_preview_elt(), history, (i, e) => {
-        shell_set_input(history[i]);
-        shell_show_suggestions();
-    });
-}
+    get pblock() {
+        return this._preview_element;
+    }
 
-function shell_make_context_menu_cmd() {
-    let input = shell_get_input();
-    if (suggestions.hasSelection() && input) {
-        let command = suggestions.autocompleteSelection();
+    reset() {
+        this._suggestions_element.innerHTML = "<ul/>";
+        this.setPreview();
+    }
 
-        if (!CmdManager.getContextMenuCommand(command)) {
-            CmdManager.addContextMenuCommand(suggestions.activeCommand, input.trim(), command);
+    getInput() {
+        return this._input_element.value;
+    }
+
+    rememberInput() {
+        this._last_input_text = this._input_element.value;
+    }
+
+    recallInput() {
+        return this._last_input_text;
+    }
+
+    get lastInput() {
+        return this._last_input_text;
+    }
+
+    set lastInput(text) {
+        this._last_input_text = text;
+    }
+
+    setInput(text) {
+        this._input_element.value = text;
+    }
+
+    saveInput() {
+        shellSettings.shell_last_command(this._input_element.value);
+        popup.rememberInput();
+    }
+
+    loadInput() {
+        if (CmdManager.selectedContextMenuCommand) {
+            this.setInput(CmdManager.selectedContextMenuCommand);
+            CmdManager.selectedContextMenuCommand = null;
+            if (shellSettings.remember_context_menu_commands())
+                this.saveInput();
+            return this._input_element.value;
+        }
+        else {
+            let input = shellSettings.shell_last_command() || "";
+            this._input_element.value = input;
+            this._input_element.select();
+            return input;
         }
     }
-}
 
-function shell_focus() {
-    el = document.getElementById('shell-input');
-    if (el.createTextRange) {
-        var oRange = el.createTextRange();
-        oRange.moveStart("character", 0);
-        oRange.moveEnd("character", el.value.length);
-        oRange.select();
-    } else if (el.setSelectionRange) {
-        el.setSelectionRange(0, el.value.length);
+    displayHelp() {
+        let html = "<div id='shell-help-wrapper'>Type the name of a command and press Enter to execute it. "
+            + "Use <b>help</b> command for assistance.";
+        html += "<p>";
+        html += "<div class='shell-help-heading'>Keyboard Shortcuts</div>";
+        html += "<span class='keys'>Ctrl+C</span> - copy preview to clipboard<br>";
+        html += "<span class='keys'>Ctrl+Alt+Enter</span> - add selected command to context menu<br>";
+        html += "<span class='keys'>Ctrl+Alt+\\</span> - open command history<br>";
+        html += "<span class='keys'>Ctrl+Alt+&ltkey&gt;</span> - select list item prefixed with &ltkey&gt;<br>";
+        html += "<span class='keys'>&#8593;/&#8595;</span> - cycle through command suggestions<br>";
+        html += "<span class='keys'>F5</span> - reload the extension</div>";
+
+        this.setPreview(html);
     }
-    el.focus();
 }
 
-function shell_decorate_icon(icon) {
-    if (!icon || icon === "http://example.com/favicon.ico") {
-        icon = '/res/icons/logo.svg';
-    }
-    icon = '<img src="' + icon + '" border="0" alt="" align="absmiddle"> ';
-    return icon;
-}
-
-function shell_default_state() {
-    suggestions.reset();
-    shell_clear();
-    shell_help();
-}
-
-function shell_show_suggestions(text) {
-    if (!text) text = shell_get_input();
-
-    if (text)
-        suggestions.show(text); // will also call preview
-    else
-        shell_default_state();
-}
-
-function shell_keydown_handler(evt) {
+async function keydown_handler(evt) {
 	// measure the input 
-	CmdUtils.inputUpdateTime = performance.now();
+	//CmdUtils.inputUpdateTime = performance.now();
 
     if (!evt) return;
     let kc = evt.keyCode;
@@ -340,30 +330,43 @@ function shell_keydown_handler(evt) {
     // On TAB, autocomplete
     if (kc === 9) {
         evt.preventDefault();
-        shell_autocomplete();
+        suggestions.autocompleteInput();
         return;
     }
 
     // On ENTER, execute the given command
     if (kc === 13) {
-        let input = shell_get_input()
+        let input = popup.getInput();
+
         if (Utils.easterListener(input))
             return;
 
         if (evt.ctrlKey && evt.altKey) {
-            shell_make_context_menu_cmd();
+            // make context menu item
+            if (suggestions.hasSelection() && input) {
+                let command_text = suggestions.autocompleteSelection();
+
+                if (!CmdManager.getContextMenuCommand(command_text))
+                    CmdManager.addContextMenuCommand(suggestions.activeCommand, input.trim(), command_text);
+            }
             return;
         }
 
         CmdManager.commandHistoryPush(input);
-        CmdUtils.closePopup();
         suggestions.executeSelection();
+        window.close();
         return;
     }
 
     if (kc === 220) {
         if (evt.ctrlKey && evt.altKey) {
-            shell_show_command_history();
+            const history = await CmdManager.commandHistory();
+
+            popup.invalidatePreview();
+            CmdUtils.previewList(popup.pblock, history, (i, e) => {
+                popup.setInput(history[i]);
+                suggestions.displaySuggestions(history[i]);
+            });
             return;
         }
     }
@@ -377,14 +380,14 @@ function shell_keydown_handler(evt) {
     // Cursor up
     if (kc === 38) {
         evt.preventDefault();
-        shell_last_input_text = "";
+        popup.lastInput = "";
         suggestions.advanceSelection(false);
         return;
     }
     // Cursor Down
     else if (kc === 40) {
         evt.preventDefault();
-        shell_last_input_text = "";
+        popup.lastInput = "";
         suggestions.advanceSelection(true);
         return;
     }
@@ -402,25 +405,22 @@ function shell_keydown_handler(evt) {
 
     // Ctrl+C copies preview to clipboard
     if (kc === 67 && evt.ctrlKey) {
-        //ackgroundPage.console.log("copy to clip");
-        var el = shell_preview_elt();
-        if (!el) return;
-        CmdUtils.setClipboard( el.innerText );
+        CmdUtils.setClipboard(popup.pblock.innerText);
         return;
     }
 
     if (kc === 33 || kc === 34) {
-        let pblock = shell_preview_elt();
-        pblock.scrollBy(0, (kc === 33? -1: 1) * pblock.clientHeight - 20);
+        popup.pblock.scrollBy(0, (kc === 33? -1: 1) * popup.pblock.clientHeight - 20);
     }
 
-    shell_last_input_text = shell_get_input();
+    popup.rememberInput();
 }
 
-function shell_keyup_handler(evt) {
+function keyup_handler(evt) {
     if (!evt) return;
-    var kc = evt.keyCode;
-    if (shell_last_input_text === shell_get_input()) return;
+    let kc = evt.keyCode;
+    let input = popup.getInput();
+    if (input === popup.recallInput()) return;
 
     if (evt.ctrlKey || evt.altKey)
         return;
@@ -434,39 +434,11 @@ function shell_keyup_handler(evt) {
         return;
     }
 
-    shell_save_input();
-    shell_show_suggestions();
-    shell_last_input_text = shell_get_input();
-}
-
-function shell_save_input() {
-	const input = document.getElementById('shell-input');
-    shellSettings.shell_last_command(input.value);
-}
-
-function shell_load_input() {
-    if (CmdManager.selectedContextMenuCommand) {
-        shell_set_input(CmdManager.selectedContextMenuCommand);
-        CmdManager.selectedContextMenuCommand = null;
-        if (shellSettings.remember_context_menu_commands())
-            shell_save_input();
-    }
-    else {
-        const input = document.getElementById('shell-input');
-        input.value = shellSettings.shell_last_command() || "";
-        input.select();
-    }
+    popup.saveInput()
+    suggestions.displaySuggestions(input);
 }
 
 async function initPopup(settings) {
-
-    // add a handy set method to set innerHTML
-    let display = shell_preview_elt();
-    if (!display.set)
-        display.set = function (html) {this.innerHTML = html};
-
-    suggestions = new SuggestionManager(CmdManager.makeParser(), settings.max_suggestions());
-
     for (let cmd of CmdManager.commands) {
         try {
             if (cmd.init) {
@@ -480,19 +452,29 @@ async function initPopup(settings) {
 
     await CmdUtils.updateActiveTab();
 
-    shell_load_input()
-    shell_show_suggestions();
+    popup = new PopupWindow();
+    suggestions = new SuggestionManager(popup, CmdManager.makeParser(), settings.max_suggestions());
+
+    let input = popup.loadInput()
+    suggestions.displaySuggestions(input);
 
     CmdUtils.deblog("hello from iShell");
 
-    // Add event handler to window
-    document.addEventListener('keydown', shell_keydown_handler, false);
-    document.addEventListener('keyup', shell_keyup_handler, false);
+    document.addEventListener('keydown', keydown_handler, false);
+    document.addEventListener('keyup', keyup_handler, false);
 }
 
 $(window).on('load', () => shellSettings.load(settings => initPopup(settings)));
 
 $(window).on('unload', function() {
-    CmdManager.commandHistoryPush(shell_get_input());
+    CmdManager.commandHistoryPush(popup.getInput());
     suggestions.strengthenMemory();
 });
+
+
+CmdUtils.getCommandLine = () => popup.getInput();
+CmdUtils.setCommandLine = function (text) {
+    popup.setInput(text);
+    popup.saveInput();
+    suggestions.displaySuggestions(text);
+};

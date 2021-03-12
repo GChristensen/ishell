@@ -223,37 +223,6 @@ CmdUtils.post = function post(url, data) {
 	});
 };
 
-CmdUtils.loadScripts = function loadScripts(url, callback, wnd=window) {
-    wnd.loadedScripts = wnd.loadedScripts || [];
-	url = url || [];
-	if (url.constructor === String) url = [url];
-
-    if (typeof wnd.jQuery === "undefined") {
-        console.error("there's no jQuery at "+wnd+".");
-        return false;
-    }
-	if (url.length == 0) 
-		return callback();
-
-	var thisurl = url.shift();
-	tempfunc = function(data, textStatus, jqXHR) {
-		return loadScripts(url, callback, wnd);
-	};
-	if (wnd.loadedScripts.indexOf(thisurl)==-1) {
-		console.log("loading :::: ", thisurl);
-		wnd.loadedScripts.push(thisurl);
-    	wnd.jQuery.ajax({
-            url: thisurl,
-            dataType: 'script',
-            success: tempfunc,
-            async: true
-        });
-    }
-    else {
-    	tempfunc();
-    }
-};
-
 CmdUtils.loadCSS = function(doc, id, file) {
     if (!doc.getElementById(id)) {
         let head = doc.getElementsByTagName('head')[0];
@@ -373,7 +342,7 @@ ContextUtils.setSelection = CmdUtils.setSelection = function setSelection(s) {
 // for measuring time the input is changed
 CmdUtils.inputUpdateTime = performance.now();
 CmdUtils.timeSinceInputUpdate = function timeSinceInputUpdate() {
-	return (performance.now() - CmdUtils.inputUpdateTime)*0.001;
+	return (performance.now() - CmdUtils.inputUpdateTime) * 0.001;
 };
 
 // returns command with this name
