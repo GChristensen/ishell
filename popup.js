@@ -80,6 +80,31 @@ class SuggestionManager {
         return index;
     }
 
+    _showCommandPreview(sentence) {
+        if (sentence == null)
+            return;
+
+        let command = sentence.getCommand();
+        if (!command || !command.preview)
+            return;
+
+        switch(typeof command.preview)
+        {
+            case 'undefined':
+                this._popup.setPreview(command.description, true);
+                break;
+            case 'string':
+                this._popup.setPreview(command.preview, true);
+                break;
+            default:
+                // zoom overflow dirty fix
+                $("#shell-command-preview").css("overflow-y", "auto");
+
+                this._popup.invalidatePreview();
+                CmdManager.callPreview(sentence, this._popup.pblock);
+        }
+    }
+
     _selectCommand(index) {
         this._ensureSelectionInRange();
         if (this._selected_suggestion != index) {
@@ -112,31 +137,6 @@ class SuggestionManager {
         }
         icon = '<img src="' + icon + '" border="0" alt="" align="absmiddle"> ';
         return icon;
-    }
-
-    _showCommandPreview(sentence) {
-        if (sentence == null)
-            return;
-
-        let command = sentence.getCommand();
-        if (!command || !command.preview)
-            return;
-
-        switch(typeof command.preview)
-        {
-            case 'undefined':
-                this._popup.setPreview(command.description, true);
-                break;
-            case 'string':
-                this._popup.setPreview(command.preview, true);
-                break;
-            default:
-                // zoom overflow dirty fix
-                $("#shell-command-preview").css("overflow-y", "auto");
-
-                this._popup.invalidatePreview();
-                CmdManager.callPreview(sentence, this._popup.pblock);
-        }
     }
 
     _generateSuggestionHtml(suggestions) {
@@ -172,7 +172,6 @@ class SuggestionManager {
             this._suggestions = query.suggestionList;
             this._ensureSelectionInRange();
 
-            // We have matches, show a list
             if (this._suggestions.length > 0) {
                 let suggestion_html = this._generateSuggestionHtml(this._suggestions);
                 this._popup.populateSuggestions(suggestion_html);
@@ -265,10 +264,6 @@ class PopupWindow {
 
     rememberInput() {
         this._last_input_text = this._input_element.value;
-    }
-
-    recallInput() {
-        return this._last_input_text;
     }
 
     get lastInput() {
@@ -392,6 +387,7 @@ async function keydown_handler(evt) {
         return;
     }
 
+    // execute events from preview lists
     if (evt.ctrlKey && evt.altKey && kc >= 40 && kc <= 90) {
         let items = jQuery("[accessKey='" + String.fromCharCode(kc).toLowerCase() + "']");
         if (items.length > 0) {
@@ -420,7 +416,7 @@ function keyup_handler(evt) {
     if (!evt) return;
     let kc = evt.keyCode;
     let input = popup.getInput();
-    if (input === popup.recallInput()) return;
+    if (input === popup.lastInput) return;
 
     if (evt.ctrlKey || evt.altKey)
         return;
