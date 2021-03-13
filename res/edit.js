@@ -142,25 +142,30 @@ class MyCommand {
     //load(storage) {}
     //init(doc /* popup document */, storage) {}
     
-    preview(args, display, storage) {
+    async preview(args, display, storage) {
         
         // display the initial html markup of the requested page
-        if (/^https?:\\/\\/.*/.test(args[OBJECT]?.text))  
-            cmdAPI.previewAjax(display, {
-                url: args[OBJECT]?.text,
-                dataType: "html",
-                success: function(data) {
-                    if (data) {
-                        let html = data.substring(0, 500); 
-                        display.set("Request response: <br>" + cmdAPI.escapeHtml(html) + "...");
+        if (/^https?:\\/\\/.+/.test(args[OBJECT]?.text))
+            try {
+                let response = await cmdAPI.previewFetch(display, args[OBJECT]?.text);
+                
+                if (response.ok) {
+                    let html = await response.text();
+                    
+                    if (html) {
+                        html = html.substring(0, 500); 
+                        display.set(\`Request response: <br>\${cmdAPI.escapeHtml(html)}...\`);
                     }
                     else
                         display.set("Response is empty.");
-                },
-                error: function() {
-                    display.set("HTTP request error.");
                 }
-            });  
+                else 
+                    display.set("HTTP request error.");
+            }
+            catch (e) {
+                if (e.name !== "AbortError") // do not change preview on AbortError
+                    display.set("Network error.");
+            }
         else
             display.set("Invalid URL.");
     }
@@ -280,6 +285,12 @@ async function initEditor(settings) {
     editor.setTheme("ace/theme/monokai");
     editor.getSession().setMode("ace/mode/javascript");
     editor.setPrintMarginColumn(120);
+
+    editor.commands.addCommand({
+        name: "Save",
+        exec: saveScript,
+        bindKey: {mac: "cmd-s", win: "ctrl-s"}
+    });
 
     $(window).on('resize', e => {
         editor.container.style.height = $(window).innerHeight() - $("#header").height() - $("#footer").height() - 16;

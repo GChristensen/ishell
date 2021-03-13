@@ -163,12 +163,24 @@
       </li>
     </ul>
   </blockquote>
+
+<h3><a id="preview-fetch" class="anchor" aria-hidden="true" href="#preview-fetch"></a>cmdAPI.previewFetch(pblock, resource, init)</h3>
+<blockquote>
+    <p>Does an asynchronous request to a remote web service. It is a wrapper around
+        standard
+        <a href="https://developer.mozilla.org/en-US/docs/Web/API/WindowOrWorkerGlobalScope/fetch" target="_blank">fetch()</a> function.
+        The difference is that <strong>cmdAPI.previewFetch()</strong> is designed to handle
+        command previews, which can be canceled by the user between the
+        time that it's requested and the time it displays. If the preview
+        is canceled, an exception with the <code>name</code> property that equals to "AbortError" is thrown.</p>
+</blockquote>
+
 <h3><a id="user-content-cmdutilspreviewajaxpblock-options" class="anchor" aria-hidden="true" href="#cmdutilspreviewajaxpblock-options"></a>cmdAPI.previewAjax(pblock, options)</h3>
 <p class="legacy-name">Legacy name: CmdUtils.previewAjax</p>
 <blockquote>
     <p>Does an asynchronous request to a remote web service.  It is used
       just like <strong>jQuery.ajax()</strong>, which is documented at
-      <a href="https://api.jquery.com/jQuery.Ajax/#jQuery-ajax-url-settings" rel="nofollow">here</a>.<br>
+      <a href="https://api.jquery.com/jQuery.Ajax" target="_blank">here</a>.<br>
       The difference is that <strong>cmdAPI.previewAjax()</strong> is designed to handle
       command previews, which can be canceled by the user between the
       time that it's requested and the time it displays. If the preview
@@ -181,7 +193,7 @@
 <blockquote>
     <p>Does an asynchronous request to a remote web service.
     It is used just like <b>jQuery.get()/jQuery.post()</b>,
-        which is documented <a href="https://api.jquery.com/jQuery.get">here</a>.<br>
+        which is documented <a href="https://api.jquery.com/jQuery.get" target="_blank">here</a>.<br>
     The difference is that <b>previewGet()/previewPost()</b> is designed to
     handle command previews, which can be cancelled by the user between the
     time that it's requested and the time it displays.  If the preview
@@ -190,7 +202,7 @@
 <h3><a id="user-content-cmdutilspreviewlistblock-htmls-callback-css" class="anchor" aria-hidden="true" href="#cmdutilspreviewlistblock-htmls-callback-css"></a>cmdAPI.previewList(block, htmls, [callback], [css])</h3>
 <p class="legacy-name">Legacy name: CmdUtils.previewList</p>
 <blockquote>
-    <p>Also <strong>cmdAPI.htmlPreviewList</strong>. Creates a simple clickable list in the preview block and
+    <p>Also called <strong>cmdAPI.htmlPreviewList</strong>. Creates a simple clickable list in the preview block and
       returns the list element.</p>
     <ul>
       <li><strong>block</strong> is the DOM element the list will be placed into.</li>
@@ -311,7 +323,7 @@
       Opens the given URL in the user's browser, using
       their current preferences for how new URLs should be opened (e.g.,
       in a new window vs. a new tab, etc).
-      Passes the newly opened tab object to the callback function or returns it as a promise.</p>
+      Passes the newly opened tab object to the callback function or returns it as a promise if the callback is omitted.</p>
     <ul>
       <li><strong>urlString</strong> a URL to be opened.</li>
     </ul>
@@ -380,7 +392,7 @@
 </blockquote>
 <h3><a id="user-content-active_tab" class="anchor" aria-hidden="true" href="#active_tab"></a>cmdAPI.getActiveTab()</h3>
 <blockquote>
-    <p>Returns <a href="https://developer.mozilla.org/en-US/docs/Mozilla/Add-ons/WebExtensions/API/tabs/Tab">Tab</a> object of the currently active tab.
+    <p>Also available as a read-only property <b>cmdAPI.activeTab</b>. Returns the <a href="https://developer.mozilla.org/en-US/docs/Mozilla/Add-ons/WebExtensions/API/tabs/Tab">Tab</a> object of the currently active tab.
         May return <b>null</b> for the special tabs.</p>
 </blockquote>
 <h3><a id="user-content-getcommandline" class="anchor" aria-hidden="true" href="#getcommandline"></a>cmdAPI.getCommandLine()</h3>
@@ -389,7 +401,7 @@
 </blockquote>
 <h3><a id="user-content-setcommandline" class="anchor" aria-hidden="true" href="#setcommandline"></a>cmdAPI.setCommandLine(text)</h3>
 <blockquote>
-    <p>Sets content of the command line.</p>
+    <p>Sets the content of the command line.</p>
     <ul>
         <li><strong>text</strong> - command text.</li>
     </ul>

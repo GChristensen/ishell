@@ -97,11 +97,22 @@ class SuggestionManager {
                 this._popup.setPreview(command.preview, true);
                 break;
             default:
-                // zoom overflow dirty fix
-                $("#shell-command-preview").css("overflow-y", "auto");
+                let previewCallback = () => {
+                    // zoom overflow dirty fix
+                    $("#shell-command-preview").css("overflow-y", "auto");
+                    this._popup.invalidatePreview();
+                    CmdManager.callPreview(sentence, this._popup.pblock);
+                };
 
-                this._popup.invalidatePreview();
-                CmdManager.callPreview(sentence, this._popup.pblock);
+                // Command require and requirePopup properties are currently undocumented
+                // The properties should specify arrays of URLs to be loaded in the background or popup pages
+                // respectively. This may require modification of CSP manifest settings and addon rebuild
+                if (typeof command.require !== 'undefined')
+                    CmdUtils.loadScripts(command.require, previewCallback);
+                else if (typeof command.requirePopup !== 'undefined')
+                    CmdUtils.loadScripts(command.requirePopup, previewCallback, window);
+                else
+                    previewCallback();
         }
     }
 

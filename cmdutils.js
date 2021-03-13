@@ -52,10 +52,14 @@ CmdUtils.CreateCommand = function CreateCommand(options) {
         options.names = options.names || [options.name];
     }
 
-    options.id = options.uuid || options.name; // Utils.hash(options.name + JSON.stringify(args));
+    if (!options.uuid) {
+        if (options.homepage)
+            options.uuid = options.homepage;
+        else
+            options.uuid = options.name;  // Utils.hash(options.name + JSON.stringify(args));
+    }
 
-    if (!options.uuid)
-        options.uuid = options.id;
+    options.id = options.uuid;
 
     if (CmdManager.commands.some(c => c.id === options.id))
         return null;
@@ -221,6 +225,39 @@ CmdUtils.post = function post(url, data) {
     	data: data,
         async: true
 	});
+};
+
+// loads remote scripts into specified window (or background if not specified)
+CmdUtils.loadScripts = function loadScripts(url, callback, wnd=window) {
+    // this array will hold all loaded scripts into this window
+    wnd.loadedScripts = wnd.loadedScripts || [];
+    url = url || [];
+    if (url.constructor === String) url = [url];
+
+    if (typeof wnd.jQuery === "undefined") {
+        console.error("there's no jQuery at " + wnd + ".");
+        return false;
+    }
+    if (url.length == 0)
+        return callback();
+
+    let thisurl = url.shift();
+    let tempfunc = function(data, textStatus, jqXHR) {
+        return loadScripts(url, callback, wnd);
+    };
+    if (wnd.loadedScripts.indexOf(thisurl) == -1) {
+        console.log("loading :::: ", thisurl);
+        wnd.loadedScripts.push(thisurl);
+        wnd.jQuery.ajax({
+            url: thisurl,
+            dataType: 'script',
+            success: tempfunc,
+            async: true
+        });
+    }
+    else {
+        tempfunc();
+    }
 };
 
 CmdUtils.loadCSS = function(doc, id, file) {

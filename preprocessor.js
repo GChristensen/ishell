@@ -114,13 +114,22 @@ class CommandPreprocessor {
         let description = comment.match(/@description (.*?)(?:\n|$)/i);
         let uuid = comment.match(/@uuid (.*?)(?:\n|$)/i);
         let help = comment.replaceAll(/@\w+.*?(?:\n|$)/g, "").trim();
+        let require;
+
+        let require_matches = [...comment.matchAll(/@require (.+?)(?:\n|$)/ig)];
+        if (require_matches.length) {
+            require = [];
+            for (let m of require_matches) {
+                require.push(m[1].trim());
+            }
+        }
 
         let command_name = command ? command?.[1]?.trim() || true: false;
 
         if (typeof command_name === "string")
             if (command_name.indexOf(" ") > 0 || command_name.indexOf(",") > 0) {
                 command_name = command_name.replaceAll(",", " ");
-                command_name = command_name.replaceAll("\s+", " ");
+                command_name = command_name.replaceAll(/\s+/g, " ");
                 command_name = command_name.split(" ");
             }
 
@@ -135,6 +144,7 @@ class CommandPreprocessor {
             description: description?.[1]?.trim(),
             uuid: uuid?.[1]?.trim(),
             help: help || undefined,
+            require: require
         }
     }
 
@@ -185,6 +195,8 @@ class CommandPreprocessor {
             block += `    command.help = ${this.generateProperty(properties.help)};\n`;
         if (properties.uuid)
             block += `    command.uuid = ${this.generateProperty(properties.uuid)};\n`;
+        if (properties.require)
+            block += `    command.requirePopup = ${JSON.stringify(properties.require)};\n`;
 
         block += `\n    CmdManager.addObjectCommand(command, args);\n}\n`;
 
