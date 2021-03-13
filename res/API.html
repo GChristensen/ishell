@@ -170,9 +170,17 @@
         standard
         <a href="https://developer.mozilla.org/en-US/docs/Web/API/WindowOrWorkerGlobalScope/fetch" target="_blank">fetch()</a> function.
         The difference is that <strong>cmdAPI.previewFetch()</strong> is designed to handle
-        command previews, which can be canceled by the user between the
-        time that it's requested and the time it displays. If the preview
+        command previews, which can be canceled by a user action between the
+        time that it is requested and the time it displays. If the preview
         is canceled, an exception with the <code>name</code> property that equals to "AbortError" is thrown.</p>
+</blockquote>
+
+<h3><a id="fetch-aborted" class="anchor" aria-hidden="true" href="#preview-fetch"></a>cmdAPI.fetchAborted(error)</h3>
+<blockquote>
+    <p>Determines, if the call to <b>cmdAPI.previewFetch</b> was aborted by user action.</p>
+    <ul>
+        <li><strong>error</strong> - exception thrown by <b>cmdAPI.previewFetch</b> or one of the methods of the
+            <a href="https://developer.mozilla.org/en-US/docs/Web/API/Response" target="_blank">Response</a> object returned by it.</li>
 </blockquote>
 
 <h3><a id="user-content-cmdutilspreviewajaxpblock-options" class="anchor" aria-hidden="true" href="#cmdutilspreviewajaxpblock-options"></a>cmdAPI.previewAjax(pblock, options)</h3>
@@ -182,8 +190,8 @@
       just like <strong>jQuery.ajax()</strong>, which is documented at
       <a href="https://api.jquery.com/jQuery.Ajax" target="_blank">here</a>.<br>
       The difference is that <strong>cmdAPI.previewAjax()</strong> is designed to handle
-      command previews, which can be canceled by the user between the
-      time that it's requested and the time it displays. If the preview
+      command previews, which can be canceled by a user action between the
+      time that it is requested and the time it displays. If the preview
       is canceled, no callbacks in the options object will be called.</p>
   </blockquote>
 <h3><a id="user-content-cmdutilspreviewgetpost" class="anchor" aria-hidden="true" href="#cmdutilspreviewgetpost"></a>cmdAPI.previewGet(pblock, url, data, callback, type)<br>
@@ -195,8 +203,8 @@
     It is used just like <b>jQuery.get()/jQuery.post()</b>,
         which is documented <a href="https://api.jquery.com/jQuery.get" target="_blank">here</a>.<br>
     The difference is that <b>previewGet()/previewPost()</b> is designed to
-    handle command previews, which can be cancelled by the user between the
-    time that it's requested and the time it displays.  If the preview
+    handle command previews, which can be cancelled by a user action between the
+    time that it is requested and the time it displays.  If the preview
     is cancelled, the given callback will not be called.</p>
 </blockquote>
 <h3><a id="user-content-cmdutilspreviewlistblock-htmls-callback-css" class="anchor" aria-hidden="true" href="#cmdutilspreviewlistblock-htmls-callback-css"></a>cmdAPI.previewList(block, htmls, [callback], [css])</h3>

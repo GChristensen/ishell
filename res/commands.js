@@ -49,11 +49,11 @@ function formatMetaData(md) {
     }
 
     var result = ('<div class="meta">'
-        + (license? license + ' ': '')
-        + (license && authors.length > 0? ' | ': '')
         + (authors.length > 0? 'Authors: ': '')
         + span(authors, formatAuthors, "author", "createdby")
         + (homepage? ' <a href="' + homepage + '"><img src="/res/icons/homepage.png"></a>': '')
+        + (license && (authors.length > 0 || homepage)? ' | ': '')
+        + (license? license + ' ': '')
         + '</div>');
     return result;
 

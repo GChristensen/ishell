@@ -163,7 +163,7 @@ class MyCommand {
                     display.set("HTTP request error.");
             }
             catch (e) {
-                if (e.name !== "AbortError") // do not change preview on AbortError
+                if (!cmdAPI.fetchAborted(e)) // do not change preview if previewFetch was aborted
                     display.set("Network error.");
             }
         else

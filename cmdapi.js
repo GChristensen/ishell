@@ -72,7 +72,10 @@ cmdAPI = {
                 return target[key];
             }
         })
-    }
+    };
 
+    cmdAPI.fetchAborted = function(error) {
+        return error?.name === "AbortError";
+    };
 }
 

@@ -70,8 +70,8 @@ and `pblock` argument is now called `display`. It still contains a reference to 
 of iShell preview area (so you can pass it to `CmdUtils.previewAjax`, for example),
 but has a new nice `set` method which sets element's innerHTML property for you.
 
-Because command editor uses a custom preprocessor to instantiate object-oriented commands, CmdUtils API (or its modern `cmdAPI` variant) is the only way to create 
-new built-in commands in the case if you want to hack and rebuild iShell.
+Because command editor uses a custom preprocessor to instantiate object-oriented commands, CmdUtils API (or its modern `cmdAPI` variant) is currently
+the only way to create new built-in commands in the case if you want to hack and rebuild iShell.
 
 ### Builtin command API keys
 
