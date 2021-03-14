@@ -614,8 +614,8 @@ class ShowTextCommandClass {
     which can take two values: <i>popup</i> and <i>log</i>. These values will
     be available to the autocompletion. With the object-oriented syntax you do not need to remember obscure argument roles and just directly use the names
     of arguments when defining them in the constructor or accessing them in methods (although you may access arguments in the old way if you prefer).
-    Please do not use the command constructor for any purposes other than argument definition, since iShell may create the command object multiple times for various reasons.
-    There are <a href="#Running_on_iShell_load_and_when_iShell_popup_is_shown_">several other functions</a> for command initialization.
+    Please do not use the command constructor for any purposes other than argument definition and simple field initialization, since iShell may create the command object multiple times for various reasons.
+    There are <a href="#Running_on_iShell_load_and_when_iShell_popup_is_shown_">several other functions</a> that are used to initialize commands.
 </p>
                 <p>You may also notice that object-oriented methods have the <code>args</code> argument always in the first position,
                     and <code>pblock</code> argument is now called <code>display</code>. It still contains a reference to the same <code>div</code> element
@@ -1111,6 +1111,7 @@ cmdAPI.createCommand({
     description: "Lets you jot a memo for the page.",
     author: "satyr",
     argument: noun_arb_text,
+    previewDelay: 1000,
     execute: function({object: {html}}, Bin) {
         let href = cmdAPI.getLocation();
         let list = Bin.href() || [];
@@ -1136,7 +1137,6 @@ cmdAPI.createCommand({
         ol.setAttribute("data-id", gId);
     },
 });
-
 </pre>
 <hr>
                 <div id="content" class="mw-body"><p>Authors: Aza Raskin, Blair McBride, Abimanyu Raja, Jono DiCarlo, Atul

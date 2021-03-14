@@ -8,8 +8,6 @@ function onDocumentLoad(settings) {
     if (CmdUtils.DEBUG)
         $("#shell-debug-mode").show();
 
-    let dynamicSettingList = $("#dynamic-settings");
-
     const helpHints = {
         lingvo_api_key: "API key used by lingvo command",
         bing_translator_api_v3_key: "API key used by translate command",
@@ -28,23 +26,40 @@ function onDocumentLoad(settings) {
 
     const builtinKeys = Object.keys(helpLinks);
 
-    for (let item of Object.entries(settings.dynamic_settings())) {
-        dynamicSettingList.append(`<tr id="${item[0]}">
-            ${(builtinKeys.some(k => k === item[0])) 
-            ? '<td class="help-hint" title="' + helpHints[item[0]] + '">&#8505;</td>'
-            : '<td class="remove-item" title="Remove item">&#xD7;</td>'}
-            <td class="item-key"><input type="text" name="key" title="Key" value="${Utils.escapeHtml(item[0])}" disabled/></td>
-            <td class="item-value"><input type="text" name="value" title="Value" value="${Utils.escapeHtml(item[1])}"
-                                     ${builtinKeys.some(k => k === item[0])? 'style="margin-right: -20px"': ""}/>
-            ${builtinKeys.some(k => k === item[0])
-                ? ('<span className="key-help" title="Get a personal API key">&nbsp;<a href="' + helpLinks[item[0]] 
-                    + '" target="_blank">?</a></span>')
-                : ""}
-            </td>
-        </tr>`);
+    function populateDynamicSettings(settings) {
+        let html = "";
+
+        for (let item of Object.entries(settings.dynamic_settings())) {
+            html += `<tr id="${item[0]}">
+                        ${(builtinKeys.some(k => k === item[0]))
+                            ? '<td class="help-hint" title="' + helpHints[item[0]] + '">&#8505;</td>'
+                            : '<td class="remove-item" title="Remove item">&#xD7;</td>'}
+                        <td class="item-key"><input type="text" name="key" title="Key" value="${Utils.escapeHtml(item[0])}" disabled/></td>
+                        <td class="item-value"><input type="text" name="value" title="Value" value="${Utils.escapeHtml(item[1])}"
+                                                 ${builtinKeys.some(k => k === item[0]) ? 'style="margin-right: -20px"' : ""}/>
+                        ${builtinKeys.some(k => k === item[0])
+                            ? ('<span className="key-help" title="Get a personal API key">&nbsp;<a href="' + helpLinks[item[0]]
+                                + '" target="_blank">?</a></span>')
+                            : ""}
+                        </td>
+                    </tr>`
+
+        }
+        $("#dynamic-settings").append(html);
     }
 
-    $("#dynamic-settings .remove-item").click((e) => {
+    populateDynamicSettings(settings);
+
+    browser.runtime.onMessage.addListener((request, sender, sendResponse) => {
+        switch(request.type) {
+            case "ADDED_DYNAMIC_SETTING":
+                $("#dynamic-settings").empty();
+                shellSettings.load(settings => populateDynamicSettings(settings));
+                break;
+        }
+    })
+
+    $(document).on("click", "#dynamic-settings .remove-item", e => {
         let tr = e.target.parentNode;
         let key = $(tr).find("input[name='key']").val();
         if (confirm("Do you really want to delete \"" + key + "\"?")) {
@@ -57,7 +72,7 @@ function onDocumentLoad(settings) {
         }
     });
 
-    $("#dynamic-settings input[name='value']").blur((e) => {
+    $(document).on("blur", "#dynamic-settings input[name='value']", e => {
         let tr = e.target.parentNode.parentNode;
         let key = $(tr).find("input[name='key']").val();
         let value = $(tr).find("input[name='value']").val();

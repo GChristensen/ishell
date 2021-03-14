@@ -105,7 +105,7 @@ class CommandManager {
         new_args.push(bin);
 
         try {
-            await f.apply(obj, new_args);
+            f.apply(obj, new_args);
         } catch (e) {
             console.error(e.toString() + "\n" + e.stack);
         }
@@ -273,10 +273,52 @@ class CommandManager {
             this._commands = this._commands.filter(c => !!c._builtin);
     }
 
+    async _loadDynamicManifest() {
+        let response = await fetch("/commands/dynamic.json");
+        if (response.ok) {
+            let json = await response.text();
+            json = json.replaceAll(/\/\/.*?$/gm, "")
+            return JSON.parse(json);
+        }
+    }
+
+    async _loadDynamicFile(file) {
+        if (file) {
+            if (file.startsWith("/"))
+                file = file.substr(1);
+
+            let response = await fetch(`/commands/${file}`);
+            if (response.ok)
+                return await response.text();
+        }
+    }
+
+    async loadBuiltinScripts() {
+        try {
+            let manifest = await this._loadDynamicManifest();
+
+            for (let file of manifest.files) {
+                if (file.path === "example.js")
+                    continue;
+
+                try {
+                    let script = await this._loadDynamicFile(file.path);
+                    if (script) {
+                        script = CmdPreprocessor.run(script, file.syntax);
+                        eval(script);
+                    }
+                } catch (e) {
+                    console.error("builtin script evaluation failed", e);
+                }
+            }
+        } catch (e) {
+            console.error("builtin scripts load failed", e);
+        }
+    }
+
     async loadCustomScripts(namespace) {
         this.unloadCustomScripts(namespace);
 
-        // load custom scripts
         let customscripts = await DBStorage.fetchCustomScripts(namespace);
 
         if (namespace)
@@ -292,7 +334,7 @@ class CommandManager {
                         cmd._namespace = record.namespace;
                 }
             } catch (e) {
-                console.error("custom scripts evaluation failed", e);
+                console.error("custom script evaluation failed", e);
             }
         }
     }

@@ -113,11 +113,12 @@ cmdAPI.createCommand({
                                 with the value: "${args.object.text}".`;
     },
     execute: function(args, storage) {
-        if (args.alias && args.alias.text)
+        if (args.alias?.text)
             shellSettings.load(settings => {
                 let dynamic_settings = settings.dynamic_settings();
                 dynamic_settings[args.alias.text] = args.object.text;
                 settings.dynamic_settings(dynamic_settings);
+                browser.runtime.sendMessage({type: "ADDED_DYNAMIC_SETTING"})
             })
     }
 });

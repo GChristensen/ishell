@@ -90,7 +90,7 @@ class CommandPreprocessor {
     }
 
     extractAnnotatedClasses(script) {
-        const rxClassCommand = /\/\*\*(.*?)\*\/\s*^\s*class\s*(\w+).*?{/gsm
+        const rxClassCommand = /\/\*\*(.*?)\*\/\s*^\s*class\s+(\w+).*?{/gsm
         const matches = [...script.matchAll(rxClassCommand)];
 
         return matches.map(m => ({name: m[2], comment: m[1], all: m[0], index: m.index}));
@@ -104,23 +104,34 @@ class CommandPreprocessor {
     }
 
     extractCommandProperties(comment) {
-        let command = comment.match(/@command(.*?)(?:\n|$)/i);
+        let command = comment.match(/@command(.*?)(?:\r?\n|$)/i);
         let delay = comment.match(/@delay (\d+)/i);
-        let preview = comment.match(/@preview (.*?)(?:\n|$)/i);
-        let license = comment.match(/@license (.*?)(?:\n|$)/i);
-        let author = comment.match(/@author (.*?)(?:\n|$)/i);
-        let icon = comment.match(/@icon (.*?)(?:\n|$)/i);
-        let homepage = comment.match(/@homepage (.*?)(?:\n|$)/i);
-        let description = comment.match(/@description (.*?)(?:\n|$)/i);
-        let uuid = comment.match(/@uuid (.*?)(?:\n|$)/i);
-        let help = comment.replaceAll(/@\w+.*?(?:\n|$)/g, "").trim();
-        let require;
+        let preview = comment.match(/@preview (.*?)(?:\r?\n|$)/i);
+        let license = comment.match(/@license (.*?)(?:\r?\n|$)/i);
+        let author = comment.match(/@author (.*?)(?:\r?\n|$)/i);
+        let icon = comment.match(/@icon (.*?)(?:\r?\n|$)/i);
+        let homepage = comment.match(/@homepage (.*?)(?:\r?\n|$)/i);
+        let description = comment.match(/@description (.*?)(?:\r?\n|$)/i);
+        let uuid = comment.match(/@uuid (.*?)(?:\r?\n|$)/i);
+        let namespace = comment.match(/@namespace (.*?)(?:\r?\n|$)/i);
+        let hidden = comment.match(/@hidden/i);
 
-        let require_matches = [...comment.matchAll(/@require (.+?)(?:\n|$)/ig)];
+        let require;
+        let requirePopup;
+
+        let require_matches = [...comment.matchAll(/@require (.+?)(?:\r?\n|$)/ig)];
         if (require_matches.length) {
             require = [];
             for (let m of require_matches) {
                 require.push(m[1].trim());
+            }
+        }
+
+        require_matches = [...comment.matchAll(/@requirePopup (.+?)(?:\r?\n|$)/ig)];
+        if (require_matches.length) {
+            requirePopup = [];
+            for (let m of require_matches) {
+                requirePopup.push(m[1].trim());
             }
         }
 
@@ -143,14 +154,17 @@ class CommandPreprocessor {
             homepage: homepage?.[1]?.trim(),
             description: description?.[1]?.trim(),
             uuid: uuid?.[1]?.trim(),
-            help: help || undefined,
-            require: require
+            namespace: namespace?.[1]?.trim(),
+            hidden: !!hidden,
+            help: comment.replaceAll(/@\w+.*?(?:\r?\n|$)/g, "").trim() || undefined,
+            require: require,
+            requirePopup: requirePopup,
         }
     }
 
     extractNounTypeProperties(comment) {
         let nountype = comment.match(/@nountype/i);
-        let label = comment.match(/@label (.*?)(?:\n|$)/i);
+        let label = comment.match(/@label (.*?)(?:\r?\n|$)/i);
 
         return {
             nountype: !!nountype,
@@ -195,8 +209,14 @@ class CommandPreprocessor {
             block += `    command.help = ${this.generateProperty(properties.help)};\n`;
         if (properties.uuid)
             block += `    command.uuid = ${this.generateProperty(properties.uuid)};\n`;
+        if (properties.namespace)
+            block += `    command._namespace = ${this.generateProperty(properties.namespace)};\n`;
+        if (properties.hidden)
+            block += `    command._hidden = true;\n`;
         if (properties.require)
-            block += `    command.requirePopup = ${JSON.stringify(properties.require)};\n`;
+            block += `    command.require = ${JSON.stringify(properties.require)};\n`;
+        if (properties.requirePopup)
+            block += `    command.requirePopup = ${JSON.stringify(properties.requirePopup)};\n`;
 
         block += `\n    CmdManager.addObjectCommand(command, args);\n}\n`;
 
@@ -264,7 +284,7 @@ class CommandPreprocessor {
         return script;
     }
 
-    run(script) {
+    run(script, syntax) {
         script = this.preprocessNounTypes(script);
         script = this.preprocessCommands(script);
 

@@ -61,8 +61,9 @@ which can take two values: *popup* and *log*.
 These values will
 be available to autocompletion. With the object-oriented syntax you do not need to remember obscure argument roles and just directly use the names
 of arguments when defining them or accessing them in methods (although you may access arguments in the old way if you prefer).
-Please do not use the command constructor for any purposes other than argument definition, since iShell may create the command object multiple times for 
-various reasons. There are several other functions for command initialization 
+Please do not use the command constructor for any purposes other than argument definition and simple field initialization,
+since iShell may create the command object multiple times for 
+various reasons. There are several other functions that are used to initialize commands 
 (please, see iShell API reference for `cmdAPI.createCommand` and explore command templates in the editor).
 
 You may also notice that object-oriented methods have the `args` argument always in the first position,
@@ -70,8 +71,9 @@ and `pblock` argument is now called `display`. It still contains a reference to 
 of iShell preview area (so you can pass it to `CmdUtils.previewAjax`, for example),
 but has a new nice `set` method which sets element's innerHTML property for you.
 
-Because command editor uses a custom preprocessor to instantiate object-oriented commands, CmdUtils API (or its modern `cmdAPI` variant) is currently
-the only way to create new built-in commands in the case if you want to hack and rebuild iShell.
+In the case if you want to hack and rebuild iShell, you need to declare files
+with builtin object-oriented commands at the commands/dynamic.json manifest, 
+because the new syntax uses a custom preprocessor for command instantiation.
 
 ### Builtin command API keys
 

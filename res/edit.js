@@ -117,7 +117,7 @@ class MySimpleCommand {
     @command
     @license GPL
     @author Your Name
-    @delay 1000 (preview delay, ms)
+    @delay 1000
     @icon http://example.com/favicon.ico
     @homepage http://example.com/my-command
     @description A short description of your command.

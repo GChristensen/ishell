@@ -312,13 +312,13 @@ class PopupWindow {
 
     displayHelp() {
         let html = "<div id='shell-help-wrapper'>Type the name of a command and press Enter to execute it. "
-            + "Use <b>help</b> command for assistance.";
+            + "Use the <b>help</b> command for assistance.";
         html += "<p>";
         html += "<div class='shell-help-heading'>Keyboard Shortcuts</div>";
-        html += "<span class='keys'>Ctrl+C</span> - copy preview to clipboard<br>";
-        html += "<span class='keys'>Ctrl+Alt+Enter</span> - add selected command to context menu<br>";
-        html += "<span class='keys'>Ctrl+Alt+\\</span> - open command history<br>";
-        html += "<span class='keys'>Ctrl+Alt+&ltkey&gt;</span> - select list item prefixed with &ltkey&gt;<br>";
+        html += "<span class='keys'>Ctrl+C</span> - copy the preview content to clipboard<br>";
+        html += "<span class='keys'>Ctrl+Alt+Enter</span> - add the selected command to context menu<br>";
+        html += "<span class='keys'>Ctrl+Alt+\\</span> - show command history<br>";
+        html += "<span class='keys'>Ctrl+Alt+&ltkey&gt;</span> - select the list item prefixed with the &ltkey&gt;<br>";
         html += "<span class='keys'>&#8593;/&#8595;</span> - cycle through command suggestions<br>";
         html += "<span class='keys'>F5</span> - reload the extension</div>";
 

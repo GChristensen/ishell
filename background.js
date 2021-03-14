@@ -1,10 +1,12 @@
 CmdUtils.deblog("iShell v" + CmdUtils.VERSION + " background script says hello");
 
 shellSettings.load(async settings => {
-    CmdUtils.DEBUG = !!settings.debug_mode();
-    CmdManager.commands = CmdManager.commands.filter(cmd => CmdUtils.DEBUG || !cmd._hidden);
+    CmdUtils.DEBUG = settings.debug_mode();
 
+    await CmdManager.loadBuiltinScripts();
     await CmdManager.loadCustomScripts();
+
+    CmdManager.commands = CmdManager.commands.filter(cmd => CmdUtils.DEBUG || !cmd._hidden);
 
     let disabledCommands = settings.disabled_commands();
 
@@ -16,12 +18,11 @@ shellSettings.load(async settings => {
 
     for (let cmd of CmdManager.commands) {
         try {
-            if (cmd.load) {
+            if (cmd.load)
                 await CmdManager.initCommand(cmd, cmd.load);
-            }
         }
         catch (e) {
-            console.log(e.message);
+            console.log(e, e.stack);
         }
     }
 });

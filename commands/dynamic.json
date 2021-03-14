@@ -1,0 +1,12 @@
+// A manifest for dynamically loaded command scripts that require preprocessing
+// These files should not be loaded through background.html
+// The only supported property is "files"
+// The file named "example.js" is always ignored for performance reasons
+{
+  "files": [
+    {
+      "path": "example.js", // the path should be relative to the "commands" folder
+      "syntax": "class"     // the only supported sytax is "class"
+    }
+  ]
+}

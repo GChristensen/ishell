@@ -23,36 +23,26 @@
 
 <h2><a id="user-content-shell-api-reference" class="anchor" aria-hidden="true" href="#shell-api-reference"></a>iShell API Reference</h2>
 <p>Currently iShell supports both the modern <code>cmdAPI</code> namespace and legacy <code>CmdUtils</code> and <code>Utils</code> namespaces from Ubiquity API.</p>
-<!--h3><a id="user-content-_string-data" class="anchor" aria-hidden="true" href="#_string-data"></a>_(string, data)</h3>
-<blockquote>
-    <p>A shortcut for cmdAPI.renderTemplate.  <br>Note: in the original Ubiquity this shortcut provided internationalization support.
-        There is currently no internationalization in iShell.</p>
-</blockquote-->
 <h3><a id="user-content-cmdutilscreatecommandoptions" class="anchor" aria-hidden="true" href="#cmdutilscreatecommandoptions"></a>cmdAPI.createCommand(options)</h3>
 <p class="legacy-name">Legacy name: CmdUtils.CreateCommand</p>
 <blockquote>
-    <p>Creates and registers a iShell command.</p>
+    <p>Creates and registers an iShell command. Equivalent annotations for the object-oriented syntax are specified in parentheses.</p>
     <p><strong>options</strong> is a dictionary object which
       <strong>must have the following properties:</strong></p>
     <ul>
-      <li><strong>uuid</strong> - an unique string, such as URI with the page address of the command.</li>
-      <li><strong>name</strong>/<strong>names</strong> - the string or array of strings which will be the name or
+      <li><strong>name</strong>/<strong>names</strong> (<code>@command</code>) - the string/array of strings which will be the name or
         names of your command the user will type into the command line,
         or choose from the context menu, to activate it.</li>
-      <li><strong>execute</strong> - the function which gets run when the user executes your command,
-        or the string which is notified or opened (if URL).
+      <li><strong>execute</strong> - the function which gets run when the user executes your command.
         If your command takes arguments (see below),
         your execute method will be passed an dictionary object containing
         the arguments assigned by the parser.</li>
-      <li><strong>arguments</strong>/<strong>argument</strong> - these properties are used if you want your command to
-        accept arguments.
-        See the <a href="tutorial.html#commands-with-arguments" target="_blank">commands with arguments</a> tutorial section.</li>
     </ul>
 
-    <p>The following properties are optional but strongly recommended to
-        make your command easier for users to learn:</p>
+    <p>The following properties are optional but strongly recommended:</p>
     <ul>
-      <li><strong>description</strong> - an XHTML string containing a short description of your command, to be displayed
+       <li><strong>uuid</strong> (<code>@uuid</code>) - an unique string, such as an URL of the command homepage.</li>
+      <li><strong>description</strong> (<code>@description</code>) - an XHTML string containing a short description of your command, to be displayed
         on the command-list page.</li>
       <li><strong>help</strong> - an XHTML string containing a longer description of
         your command, also displayed on the command-list page, which can go
@@ -60,15 +50,18 @@
     </ul>
     <p>The following properties are optional:</p>
     <ul>
-      <li><strong>icon</strong> - a URL string pointing to a small image (favicon-sized) to
+      <li><strong>arguments</strong>/<strong>argument</strong> - these properties are used if you want your command to
+            accept arguments.
+            See the <a href="tutorial.html#commands-with-arguments" target="_blank">commands with arguments</a> tutorial section.</li>
+      <li><strong>icon</strong> (<code>@icon</code>) - a URL string pointing to a small image (favicon-sized) to
         be displayed alongside the name of your command in the interface.</li>
-      <li><strong>author</strong>/<strong>authors</strong>, <strong>contributor</strong>/<strong>contributors</strong> - a plain text
+      <li><strong>author</strong>/<strong>authors</strong>, <strong>contributor</strong>/<strong>contributors</strong> (<code>@author</code>) - a plain text
         or dictionary object (which can have <strong>name</strong>, <strong>email</strong>,
         and <strong>homepage</strong> properties, all plain text)
         describing the command's author/contributor.
         Can be an array of them if multiple.</li>
-      <li><strong>homepage</strong> - a URL string of the command's homepage, if any.</li>
-      <li><strong>license</strong> - a string naming the license under which your
+      <li><strong>homepage</strong> (<code>@homepage</code>) - a URL string of the command's homepage, if any.</li>
+      <li><strong>license</strong> (<code>@license</code>) - a string naming the license under which your
         command is distributed, for example <strong>"MPL"</strong>.</li>
       <li><strong>load</strong> - function, called exactly once after iShell is loaded.</li>
       <li><strong>init</strong> - function, called each time after iShell popup window is shown.
@@ -83,7 +76,7 @@
         Use <strong>this.previewDefault(pblock)</strong> to set the default preview.
         If your command takes arguments (see above), your preview method will
         be passed the dictionary as the second argument.</li>
-      <li><strong>previewDelay</strong> - specifies the amount of time, in
+      <li><strong>previewDelay</strong> (<code>@delay</code>) - specifies the amount of time, in
         milliseconds, to wait before calling the preview function defined
         in <strong>options.preview</strong>. If the user presses a key before this
         amount of time has passed, then the preview function isn't
@@ -171,16 +164,16 @@
         <a href="https://developer.mozilla.org/en-US/docs/Web/API/WindowOrWorkerGlobalScope/fetch" target="_blank">fetch()</a> function.
         The difference is that <strong>cmdAPI.previewFetch()</strong> is designed to handle
         command previews, which can be canceled by a user action between the
-        time that it is requested and the time it displays. If the preview
-        is canceled, an exception with the <code>name</code> property that equals to "AbortError" is thrown.</p>
+        time it is requested and the time it displays. If the preview
+        is canceled, an "AbortError" exception is thrown.</p>
 </blockquote>
 
 <h3><a id="fetch-aborted" class="anchor" aria-hidden="true" href="#preview-fetch"></a>cmdAPI.fetchAborted(error)</h3>
 <blockquote>
-    <p>Determines, if the call to <b>cmdAPI.previewFetch</b> was aborted by user action.</p>
+    <p>Determines if the call to <b>cmdAPI.previewFetch</b> was aborted by a user action.</p>
     <ul>
-        <li><strong>error</strong> - exception thrown by <b>cmdAPI.previewFetch</b> or one of the methods of the
-            <a href="https://developer.mozilla.org/en-US/docs/Web/API/Response" target="_blank">Response</a> object returned by it.</li>
+        <li><strong>error</strong> - exception thrown by <b>cmdAPI.previewFetch</b> or one of the
+            <a href="https://developer.mozilla.org/en-US/docs/Web/API/Response" target="_blank">Response</a> object methods returned by it.</li>
 </blockquote>
 
 <h3><a id="user-content-cmdutilspreviewajaxpblock-options" class="anchor" aria-hidden="true" href="#cmdutilspreviewajaxpblock-options"></a>cmdAPI.previewAjax(pblock, options)</h3>
@@ -191,7 +184,7 @@
       <a href="https://api.jquery.com/jQuery.Ajax" target="_blank">here</a>.<br>
       The difference is that <strong>cmdAPI.previewAjax()</strong> is designed to handle
       command previews, which can be canceled by a user action between the
-      time that it is requested and the time it displays. If the preview
+      time it is requested and the time it displays. If the preview
       is canceled, no callbacks in the options object will be called.</p>
   </blockquote>
 <h3><a id="user-content-cmdutilspreviewgetpost" class="anchor" aria-hidden="true" href="#cmdutilspreviewgetpost"></a>cmdAPI.previewGet(pblock, url, data, callback, type)<br>
@@ -204,7 +197,7 @@
         which is documented <a href="https://api.jquery.com/jQuery.get" target="_blank">here</a>.<br>
     The difference is that <b>previewGet()/previewPost()</b> is designed to
     handle command previews, which can be cancelled by a user action between the
-    time that it is requested and the time it displays.  If the preview
+    time it is requested and the time it displays. If the preview
     is cancelled, the given callback will not be called.</p>
 </blockquote>
 <h3><a id="user-content-cmdutilspreviewlistblock-htmls-callback-css" class="anchor" aria-hidden="true" href="#cmdutilspreviewlistblock-htmls-callback-css"></a>cmdAPI.previewList(block, htmls, [callback], [css])</h3>
@@ -283,8 +276,7 @@
           an HTML string or a jQuery/DOM object.
       </li>
       <li>
-        <strong>baseUrl</strong> is the URL used for base
-          (that is to say; the URL that the relative paths are relative to).
+        <strong>baseUrl</strong> is the URL used for base.
       </li>
     </ul>
   </blockquote>
