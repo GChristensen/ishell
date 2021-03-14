@@ -58,20 +58,25 @@ cmdAPI = {
             pblock.removeEventListener("preview-change", onPreviewChange, false);
         }
 
-        let response = await fetch(resource, init);
+        try {
+            let response = await fetch(resource, init);
 
-        return new Proxy(response, {
-            get (target, key, receiver) {
-                if (["arrayBuffer", "blob", "formData", "json", "text"].some(k => k === key)) {
-                    return () => target[key]().finally(removePreviewListener);
+            return new Proxy(response, {
+                get(target, key, receiver) {
+                    if (["arrayBuffer", "blob", "formData", "json", "text"].some(k => k === key)) {
+                        return () => target[key]().finally(removePreviewListener);
+                    }
+
+                    if (key === "body")
+                        return undefined;
+
+                    return target[key];
                 }
-
-                if (key === "body")
-                    return undefined;
-
-                return target[key];
-            }
-        })
+            })
+        } catch (e) {
+            removePreviewListener();
+            throw e;
+        }
     };
 
     cmdAPI.fetchAborted = function(error) {
