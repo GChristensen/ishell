@@ -1,5 +1,5 @@
 {
-    "version": "0.1.14",
+    "version": "0.1.15",
     "name": "iShell Extension",
     "short_name": "iShell",
     "homepage_url": "https://gchristensen.github.io/#ishell",
@@ -8,7 +8,7 @@
     "content_security_policy": "script-src 'self' 'unsafe-eval'; object-src 'self';",
     "applications": {
        "gecko": {
-         "id": "ishell@gchristensen.github.io",
+         "id": "ishell-we@gchristensen.github.io",
          "strict_min_version": "78.0"
        }
      },

@@ -297,6 +297,11 @@ class CommandPreprocessor {
             this.names = name;
         else if (name)
             this.name = name;
+        else {
+            if (!this.name && this.names && this.names.length)
+                this.name = this.names[0];
+            this.names = undefined; 
+        }
     }\n\n`
 
         metaGenerator += this.generateCommandPropertyBlock(object.properties);
