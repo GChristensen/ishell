@@ -4,13 +4,147 @@
     (global.Rainbow = factory());
 }(this, function () { 'use strict';
 
-    function isNode$1() {
-        /* globals module */
-        return typeof module !== 'undefined' && typeof module.exports === 'object';
-    }
+    function PseudoWorker(handler) {
+        var messageListeners = [];
+        var errorListeners = [];
+        var workerMessageListeners = [];
+        var workerErrorListeners = [];
+        var postMessageListeners = [];
+        var terminated = false;
+        var script = true;
+        var workerSelf;
 
-    function isWorker$1() {
-        return typeof document === 'undefined' && typeof self !== 'undefined';
+        var api = this;
+
+        // custom each loop is for IE8 support
+        function executeEach(arr, fun) {
+            var i = -1;
+            while (++i < arr.length) {
+                if (arr[i]) {
+                    fun(arr[i]);
+                }
+            }
+        }
+
+        function callErrorListener(err) {
+            return function (listener) {
+                listener({
+                    type: 'error',
+                    error: err,
+                    message: err.message
+                });
+            };
+        }
+
+        function addEventListener(type, fun) {
+            if (type === 'message') {
+                messageListeners.push(fun);
+            } else if (type === 'error') {
+                errorListeners.push(fun);
+            }
+        }
+
+        function removeEventListener(type, fun) {
+            var listeners;
+            if (type === 'message') {
+                listeners = messageListeners;
+            } else if (type === 'error') {
+                listeners = errorListeners;
+            } else {
+                return;
+            }
+            var i = -1;
+            while (++i < listeners.length) {
+                var listener = listeners[i];
+                if (listener === fun) {
+                    delete listeners[i];
+                    break;
+                }
+            }
+        }
+
+        function postError(err) {
+            var callFun = callErrorListener(err);
+            if (typeof api.onerror === 'function') {
+                callFun(api.onerror);
+            }
+            if (workerSelf && typeof workerSelf.onerror === 'function') {
+                callFun(workerSelf.onerror);
+            }
+            executeEach(errorListeners, callFun);
+            executeEach(workerErrorListeners, callFun);
+        }
+
+        function runPostMessage(msg, transfer) {
+            function callFun(listener) {
+                try {
+                    listener({data: msg, ports: transfer});
+                } catch (err) {
+                    postError(err);
+                }
+            }
+            if (workerSelf && typeof workerSelf.onmessage === 'function') {
+                callFun(workerSelf.onmessage);
+            }
+            executeEach(workerMessageListeners, callFun);
+        }
+
+        function postMessage(msg, transfer) {
+            if (typeof msg === 'undefined') {
+                throw new Error('postMessage() requires an argument');
+            }
+            if (terminated) {
+                return;
+            }
+            if (!script) {
+                postMessageListeners.push({msg: msg, transfer: (transfer ? transfer : undefined)});
+                return;
+            }
+            runPostMessage(msg, transfer);
+        }
+
+        function terminate() {
+            terminated = true;
+        }
+
+        function workerPostMessage(msg) {
+            if (terminated) {
+                return;
+            }
+            function callFun(listener) {
+                listener({
+                    data: msg
+                });
+            }
+            if (typeof api.onmessage === 'function') {
+                callFun(api.onmessage);
+            }
+            executeEach(messageListeners, callFun);
+        }
+
+        function workerAddEventListener(type, fun) {
+            /* istanbul ignore else */
+            if (type === 'message') {
+                workerMessageListeners.push(fun);
+            } else if (type === 'error') {
+                workerErrorListeners.push(fun);
+            }
+        }
+
+        workerSelf = {
+            postMessage: workerPostMessage,
+            addEventListener: workerAddEventListener,
+            close: terminate
+        };
+
+        workerSelf.onmessage = handler.bind(workerSelf);
+
+        api.postMessage = postMessage;
+        api.addEventListener = addEventListener;
+        api.removeEventListener = removeEventListener;
+        api.terminate = terminate;
+
+        return api;
     }
 
     /**
@@ -159,33 +293,12 @@
     /**
      * Creates a usable web worker from an anonymous function
      *
-     * mostly borrowed from https://github.com/zevero/worker-create
-     *
      * @param {Function} fn
      * @param {Prism} Prism
      * @return {Worker}
      */
     function createWorker(fn, Prism) {
-        if (isNode$1()) {
-            /* globals global, require, __filename */
-            global.Worker = require('web-worker');
-            return new Worker(__filename);
-        }
-
-        var prismFunction = Prism.toString();
-
-        var code = keys.toString();
-        code += htmlEntities.toString();
-        code += hasCompleteOverlap.toString();
-        code += intersects.toString();
-        code += replaceAtPosition.toString();
-        code += indexOfGroup.toString();
-        code += prismFunction;
-
-        var fullString = code + "\tthis.onmessage=" + (fn.toString());
-
-        var blob = new Blob([fullString], { type: 'text/javascript' });
-        return new Worker((window.URL || window.webkitURL).createObjectURL(blob));
+        return new PseudoWorker(rainbowWorker);
     }
 
     /**
@@ -563,27 +676,18 @@
     };
 
     function rainbowWorker(e) {
+        var self = this;
+        console.log(this);
         var message = e.data;
 
         var prism = new Prism(message.options);
         var result = prism.refract(message.code, message.lang);
 
-        function _reply() {
-            self.postMessage({
-                id: message.id,
-                lang: message.lang,
-                result: result
-            });
-        }
-
-        if (message.isNode) {
-            _reply();
-            return;
-        }
-
-        setTimeout(function () {
-            _reply();
-        }, message.options.delay * 1000);
+        self.postMessage({
+            id: message.id,
+            lang: message.lang,
+            result: result
+        });
     }
 
     /**
@@ -627,12 +731,9 @@
      */
     var id = 0;
 
-    var isNode = isNode$1();
-    var isWorker = isWorker$1();
-
     var cachedWorker = null;
     function _getWorker() {
-        if (isNode || cachedWorker === null) {
+        if (cachedWorker === null) {
             cachedWorker = createWorker(rainbowWorker, Prism);
         }
 
@@ -654,21 +755,6 @@
             if (e.data.id === message.id) {
                 callback(e.data);
                 worker.removeEventListener('message', _listen);
-
-                // I realized down the road I might look at this and wonder what is going on
-                // so probably it is not a bad idea to leave a comment.
-                //
-                // This is needed because right now the node library for simulating web
-                // workers “web-worker” will keep the worker open and it causes
-                // scripts running from the command line to hang unless the worker is
-                // explicitly closed.
-                //
-                // This means for node we will spawn a new thread for every asynchronous
-                // block we are highlighting, but in the browser we will keep a single
-                // worker open for all requests.
-                if (isNode) {
-                    worker.terminate();
-                }
             }
         }
 
@@ -750,8 +836,7 @@
             id: id++,
             code: code,
             lang: lang,
-            options: _getPrismOptions(options),
-            isNode: isNode
+            options: _getPrismOptions(options)
         };
 
         return workerData;
@@ -1010,30 +1095,13 @@
         color: color
     };
 
-    if (isNode) {
-        Rainbow.colorSync = function(code, lang) {
-            var workerData = _getWorkerData(code, lang);
-            var prism = new Prism(workerData.options);
-            return prism.refract(workerData.code, workerData.lang);
-        };
-    }
-
-    // In the browser hook it up to color on page load
-    if (!isNode && !isWorker) {
-        document.addEventListener('DOMContentLoaded', function (event) {
-            if (!Rainbow.defer) {
-                Rainbow.color(event);
-            }
-        }, false);
-    }
-
-    // From a node worker, handle the postMessage requests to it
-    if (isWorker) {
-        self.onmessage = rainbowWorker;
-    }
+    document.addEventListener('DOMContentLoaded', function (event) {
+        if (!Rainbow.defer) {
+            Rainbow.color(event);
+        }
+    }, false);
 
     var Rainbow$1 = Rainbow;
 
     return Rainbow$1;
-
 }));

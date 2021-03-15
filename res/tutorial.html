@@ -303,10 +303,10 @@ cmdAPI.createCommand({
                 on the post-localization string. So the above preview method could be rewritten more simply as:
             </p>
 
-<pre><code data-language="javascript">  preview: function date_preview(pblock) {
-    var msg = 'Inserts today's date: "&lt;i&gt;${date}&lt;/i&gt;"';
-    pblock.innerHTML = _(msg, {date: this._date()});
-  },</code></pre>
+<pre><code data-language="javascript">preview: function date_preview(pblock) {
+  var msg = 'Inserts today's date: "&lt;i&gt;${date}&lt;/i&gt;"';
+   pblock.innerHTML = _(msg, {date: this._date()});
+},</code></pre>
             <h3 class="in-block"><span class="mw-headline" id="Networking_calls_and_placeholder_previews">Networking calls and placeholder previews</span>
             </h3>
             <p>Previews display something meaningful to the user immediately. If you have a preview that requires an
@@ -315,12 +315,12 @@ cmdAPI.createCommand({
                 your command should display a placeholder preview giving the user feedback.
             </p>
 
-<pre><code data-language="javascript">  preview: function(pblock) {
-    pblock.innerHTML = "This will show until the AJAX request returns";
-    cmdAPI.previewAjax(pblock, "http://example.com", function (htm) {
-      pblock.innerHTML = htm;
-    });
-  },</code></pre>
+<pre><code data-language="javascript">preview: function(pblock) {
+  pblock.innerHTML = "This will show until the AJAX request returns";
+  cmdAPI.previewAjax(pblock, "http://example.com", function (htm) {
+    pblock.innerHTML = htm;
+  });
+},</code></pre>
             <h2 class="in-block"><span class="mw-headline"
                                        id="Documentation_and_Metadata">Documentation and Metadata</span></h2>
             <p>Before you share your command with the world, you should consider adding some attributions to the code:

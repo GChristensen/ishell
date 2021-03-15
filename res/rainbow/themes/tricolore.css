@@ -157,7 +157,7 @@ pre .inherited-class {
 }
 
 pre .entity {
-    color: #1e851f
+    color: #0d8a0e
 }
 
 pre .support {
@@ -165,5 +165,5 @@ pre .support {
 }
 
 pre .variable.global, pre .variable.class, pre .variable.instance {
-    color: #3E853F
+    color: #0d8a0e
 }
