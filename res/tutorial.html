@@ -23,7 +23,12 @@
 
     <script src="/lib/jquery.js"></script>
     <script src="/lib/jquery.toc.js"></script>
+    <script src="rainbow/rainbow.js"></script>
+    <script src="rainbow/languages/generic.js"></script>
+    <script src="rainbow/languages/javascript.js"></script>
     <script src="external.js"></script>
+
+    <link rel="stylesheet" type="text/css" media="all" href="rainbow/themes/tricolore.css"/>
 </head>
 <body dir="ltr">
 <div class="head"><span class="large">iShell: </span>Tutorial</div>
@@ -86,14 +91,12 @@
             </p>
             <p>In the command editor type the following:
             </p>
-            <pre>
-cmdAPI.createCommand({
+<pre><code data-language="javascript">cmdAPI.createCommand({
   names: ["say-hello"],
   execute: function hello_execute() {
     cmdAPI.notify("Hello, World!");
   }
-});
-</pre>
+});</code></pre>
             <p>Now try executing "say hello". You'll see that "Hello, World!" is immediately displayed on the screen. If
                 you are on Mac OSX with <a rel="nofollow" class="external text"
                                            href="http://en.wikipedia.org/wiki/Growl_(software)">Growl</a> installed the
@@ -110,14 +113,12 @@ cmdAPI.createCommand({
                 previous command in the object-oriented way. I this case you don't need to use <code>cmdAPI.createCommand</code>.
                 Just declare a class with the <code>@command</code> annotation:</p>
 
-            <pre>
-/** @command */
+<pre><code data-language="javascript">/** @command */
 class SayHello {
   execute() {
     cmdAPI.notify("Hello, World!");
   }
-}
-</pre>
+}</code></pre>
             <p>The command name will be generated automatically. Only JavaDoc-style comments should be used to annotate classes, the regular JavaScript comments are ignored.
                 A command class may extend any other classes.</p>
             <p>Object-oriented syntax also allows to significantly declutter command code, because all the noisy attributes you pass to the
@@ -130,12 +131,11 @@ class SayHello {
                 Commands are created by making an object and passing it to <code>cmdAPI.createCommand</code>. In
                 Javascript, inline curly braces stands for object literal, so this code:
             </p>
-            <pre>
-{
+
+<pre><code data-language="javascript">{
   names: ["say-hello"],
   execute: function () { //etc }
-}
-</pre>
+}</code></pre>
             <p>means "Make an object with two attributes, 'names' and 'execute'." This object is then passed as the
                 argument to <code>cmdAPI.createCommand</code>.
                 'names' and 'execute' are the only mandatory attributes for your command object. 'names' specifies
@@ -147,8 +147,7 @@ class SayHello {
                 name, "hello world". But we could have provided as many names as we wanted. For instance, if we had
                 said:
             </p>
-            <pre> names: ["say-hello", "greet"]
-</pre>
+            <pre><code data-language="javascript">names: ["say-hello", "greet"]</code></pre>
             <p>then "say-hello" would be the normal name of the command, but iShell would also recognize "greet" as a
                 synonym or alias for the command.
             </p>
@@ -218,15 +217,14 @@ cmdAPI.createCommand({
             <p>For the "say-hello" command, we don't need anything fancy: just some help text that is more descriptive
                 than the default "Executes the say hello command."
             </p>
-            <pre>
-cmdAPI.createCommand({
+
+<pre><code data-language="javascript">cmdAPI.createCommand({
   names: ["say-hello", "greet"],
   preview: "Displays a &lt;i&gt;salutary&lt;/i&gt; greeting to the planet.",
   execute: function hello_execute() {
     cmdAPI.notify("Hello, World!");
   }
-})
-</pre>
+})</code></pre>
             <p>Here the preview is an HTML-formatted string. The preview can also be a function. We'll get to that in
                 the next section.
             </p>
@@ -237,14 +235,13 @@ cmdAPI.createCommand({
                 programmer, I generally solve my problem's symptoms with technology rather then addressing the root
                 cause. My solution is to create a command that inserts the date at the location of the cursor.
             </p>
-            <pre>
-cmdAPI.createCommand({
+
+<pre><code data-language="javascript">cmdAPI.createCommand({
   names: ["insert-date"],
   execute: function date_execute() {
     cmdAPI.setSelection(new Date().toLocaleDateString());
   }
-})
-</pre>
+})</code></pre>
             <p>The new function here is <code>setSelection()</code>. This inserts the passed-in text onto the page at
                 the location of the cursor. If the cursor is in an editable text or rich-text fields, the text gets
                 dumped there. If the cursor isn't in an editable area, <code>setSelection()</code> will still be able to
@@ -263,8 +260,8 @@ cmdAPI.createCommand({
                 user will know what to expect when they execute the command. (As a side benefit the user doesn't even
                 need to execute the command to do a quick check of the day.)
             </p>
-            <pre>
-cmdAPI.createCommand({
+
+<pre><code data-language="javascript">cmdAPI.createCommand({
   names: ["insert-date"],
 
   _date: function date__date() {
@@ -279,8 +276,7 @@ cmdAPI.createCommand({
   execute: function date_execute() {
     cmdAPI.setSelection(this._date());
   }
-})
-</pre>
+})</code></pre>
             <p>We've done three things here. The first was to factor out the code for getting the date into the <code>_date()</code>
                 function. This way we don't break <a rel="nofollow" class="external text"
                                                      href="http://en.wikipedia.org/wiki/Don%27t_repeat_yourself">DRY</a>
@@ -306,12 +302,11 @@ cmdAPI.createCommand({
                 shortcut for it. Calling _() with a JSON object as the second argument will automatically trigger <code>cmdAPI.renderTemplate()</code>
                 on the post-localization string. So the above preview method could be rewritten more simply as:
             </p>
-            <pre>
-  preview: function date_preview(pblock) {
+
+<pre><code data-language="javascript">  preview: function date_preview(pblock) {
     var msg = 'Inserts today's date: "&lt;i&gt;${date}&lt;/i&gt;"';
     pblock.innerHTML = _(msg, {date: this._date()});
-  },
-</pre>
+  },</code></pre>
             <h3 class="in-block"><span class="mw-headline" id="Networking_calls_and_placeholder_previews">Networking calls and placeholder previews</span>
             </h3>
             <p>Previews display something meaningful to the user immediately. If you have a preview that requires an
@@ -319,20 +314,19 @@ cmdAPI.createCommand({
                 meantime,
                 your command should display a placeholder preview giving the user feedback.
             </p>
-            <pre>
-  preview: function(pblock) {
+
+<pre><code data-language="javascript">  preview: function(pblock) {
     pblock.innerHTML = "This will show until the AJAX request returns";
     cmdAPI.previewAjax(pblock, "http://example.com", function (htm) {
       pblock.innerHTML = htm;
     });
-  },
-</pre>
+  },</code></pre>
             <h2 class="in-block"><span class="mw-headline"
                                        id="Documentation_and_Metadata">Documentation and Metadata</span></h2>
             <p>Before you share your command with the world, you should consider adding some attributions to the code:
             </p>
-            <pre>
-cmdAPI.createCommand({
+
+<pre><code data-language="javascript">cmdAPI.createCommand({
   names: ["insert-date"],
   homepage: "http://azarask.in/",
   author: { name: "Aza Raskin", email: "aza@mozilla.com"},
@@ -340,12 +334,11 @@ cmdAPI.createCommand({
   license: "MPL",
 
   /* THE REST OF THE CODE HERE */
-})
-</pre>
+})</code></pre>
             <p>And you should <em>definitely</em> add some documentation:
             </p>
-            <pre>
-cmdAPI.createCommand({
+
+<pre><code data-language="javascript">cmdAPI.createCommand({
   names: ["insert-date"],
   homepage: "http://azarask.in/",
   author: { name: "Aza Raskin", email: "aza@mozilla.com"},
@@ -355,8 +348,7 @@ cmdAPI.createCommand({
   help: "If you're in an editable text area, inserts today's date, formatted for the current locale.",
 
   /* THE REST OF THE CODE HERE */
-})
-</pre>
+})</code></pre>
             <p>The <code>.description</code> and <code>.help</code> attributes are both automatically displayed
                 alongside your command's name on the command-list page. (The user can get to this page at any time by
                 issuing the "list-shell-commands" command.) HTML tags can be used in both of these strings.
@@ -447,8 +439,8 @@ cmdAPI.createCommand({
                 <h2 class="in-block"><span class="mw-headline" id="Echo">Echo</span></h2>
                 <p>Let's start by making a simple command to echo back whatever you type.
                 </p>
-                <pre>
-cmdAPI.createCommand({
+
+<pre><code data-language="javascript">cmdAPI.createCommand({
   names: ["echo"],
   arguments: [{role: "object",
                nountype: noun_arb_text,
@@ -460,8 +452,8 @@ cmdAPI.createCommand({
     var msg = args.object.text + "... " + args.object.text + "......";
     cmdAPI.notify(msg);
   },
-});
-</pre>
+});</code></pre>
+
                 <p>This says that the command "echo" takes one argument which is arbitrary text. Whatever text the user
                     enters will get wrapped in an input object and passed into both the preview and execute function.
                 </p>
@@ -479,9 +471,7 @@ cmdAPI.createCommand({
                     interface as a prompt for the user. E.g, if you run "echo", you will see the label for the
                     argument:
                 </p>
-                <pre>
-  echo (your shout)
-</pre>
+<pre><code data-language="javascript">  echo (your shout)</code></pre>
                 <p>The roles and the nountypes require some more explanation. We'll cover each of them in detail next.
                 </p>
                 <h3 class="in-block"><span class="mw-headline" id="Argument_Roles">Argument Roles</span></h3>
@@ -504,14 +494,13 @@ cmdAPI.createCommand({
                     argument is an indirect object. We call it the "goal" of the verb. So if we were writing the email
                     command, we'd define the arguments like this:
                 </p>
-                <pre>
-  arguments: [{role: "object",
+
+<pre><code data-language="javascript">  arguments: [{role: "object",
                nountype: noun_arb_text,
                label: "message"},
               {role: "goal",
                nountype: noun_type_contact,
-               label: "recipient"}]
-</pre>
+               label: "recipient"}]</code></pre>
                 <p>Because we give the recipient argument the "goal" role, the iShell parser knows to expect the user
                     to
                     type the word "to". When the user enters "email hello to Aza", the parser knows that the word
@@ -558,12 +547,11 @@ cmdAPI.createCommand({
                 </p>
                 <p><code>args.object</code> (or <code>args.goal</code>) has several attributes of its own:
                 </p>
-                <pre>
-  args.object.text    // a string of the input in plain text, without formatting
+<pre><code data-language="javascript">  args.object.text    // a string of the input in plain text, without formatting
   args.object.html    // a string of the input in formatted HTML, including tags
   args.object.data    // for non-text input types, an arbitrary data object
-  args.object.summary // the HTML string displayed in the suggestion list, abbreviated if long
-</pre>
+  args.object.summary // the HTML string displayed in the suggestion list, abbreviated if long</code></pre>
+
                 <p>Our example command only cares about the <code>.text</code> attribute of the input, because it simply
                     wants plain text. Often, when the user invokes your command by typing a few short words into the
                     input
@@ -580,8 +568,8 @@ cmdAPI.createCommand({
 
                 <p>Now you know more about commands and arguments, so we can create a more complex object-oriented command with arguments.
                     Let's call it <code>show-text</code>. It will have the following syntax: <b>show-text</b> <i>message text</i> <b>in</b> <i>destination</i>.</p>
-<pre>
-/**
+
+<pre><code data-language="javascript">/**
   Displays a given message at popup or prints it to the browser log.
 
   @command show-text, display-text
@@ -607,8 +595,8 @@ class ShowTextCommandClass {
     else
       cmdAPI.notify(message);
   }
-}
-</pre>
+}</code></pre>
+
 <p>Let's see what happens here. The content of the documentation comment above the class (except annotations) is displayed at the help section of iShell command listing.
     The <code>@command</code> annotation allows to override the command name generated by default.
     <code>show-text</code> defines a nameless arbitrary text <b>object</b> argument in its constructor, along with a prepositional argument <b>in</b>
@@ -668,16 +656,14 @@ class ShowTextCommandClass {
                     to accept only arguments that begin with the letter N. The following regexp matches words that start
                     with N:
                 </p>
-                <pre>
-  /^[nN]/
-</pre>
+<pre><code data-language="javascript">  /^[nN]/</code></pre>
                 <p>You could use it as a noun type, like so:
                 </p>
-                <pre>
-  arguments: [{role: "object",
+
+<pre><code data-language="javascript">  arguments: [{role: "object",
                nountype: /^[nN]/,
-               label: "word that starts with n"}]
-</pre>
+               label: "word that starts with n"}]</code></pre>
+
                 <p>(Note that you do <i>not</i> put quotes around the regexp.)
                 </p>
                 <p>A regexp nountype will reject input that doesn't match, but it doesn't know how to help the user by
@@ -690,16 +676,16 @@ class ShowTextCommandClass {
                     array
                     of strings:
                 </p>
-                <pre>
-  names: ["convert-color"],
+
+<pre><code data-language="javascript">  names: ["convert-color"],
   arguments: [{role: "object",
                nountype: ["red", "orange", "yellow", "green",
                           "blue", "violet", "black", "white",
                           "grey", "brown", "beige", "magenta",
                           "cerulean", "puce"],
-               label: "color to convert"}]
-</pre>
-                <p><br>
+               label: "color to convert"}]</code></pre>
+
+                <p>
                     One benefit of using a list is that the parser can use it offer the user suggestions. If the user
                     enters
                     "get-color bl", for instance, iShell will be able to suggest "black" and "blue" as the two valid
@@ -730,16 +716,15 @@ class ShowTextCommandClass {
                     to paste into a text field because I don't know it off-hand. This command solves that by letting you
                     insert someone's email address using autocomplete.
                 </p>
-                <pre>
-cmdAPI.createCommand({
+
+<pre><code data-language="javascript">cmdAPI.createCommand({
   name: "insert-email",
   arguments: {modifier: noun_type_contact},
   preview: "Inserts someone's email address by name.",
   execute: function(args) {
     cmdAPI.setSelection(args.modifier.html);
   },
-});
-</pre>
+});</code></pre>
                 <p>To try this out, execute "insert-email of " and then the first few letters of someone you mailed through
                     the commands mentioned above.
                 </p>
@@ -748,34 +733,25 @@ cmdAPI.createCommand({
                 <p>Notice that we used a shortcut for declaring the arguments. In the long form, we would have had to
                     say:
                 </p>
-                <pre>
-  arguments: [{role: "modifier",
+
+<pre><code data-language="javascript">  arguments: [{role: "modifier",
                nountype: noun_type_contact,
-               label: "contact"}]
-</pre>
+               label: "contact"}]</code></pre>
                 <p>but if we don't care about specifying extra parameters for the argument, we can get away with using a
                     single object for "arguments", with the roles as the property names, and the nountypes as the
                     property
                     values:
                 </p>
-                <pre>
-  arguments: {modifier: noun_type_contact}
-</pre>
+<pre><code data-language="javascript">  arguments: {modifier: noun_type_contact}</code></pre>
                 <p>or with label using <code>"_"</code> (or <code>" "</code>) as separator:
                 </p>
-                <pre>
-  arguments: {modifier_contact: noun_type_contact}
-</pre>
+<pre><code data-language="javascript">  arguments: {modifier_contact: noun_type_contact}</code></pre>
                 <p>If we had several arguments, we could say:
                 </p>
-                <pre>
-  arguments: {object: noun_arb_text, modifier: noun_type_contact}
-</pre>
+<pre><code data-language="javascript">  arguments: {object: noun_arb_text, modifier: noun_type_contact}</code></pre>
                 <p>Finally, if you only have "object" and don't need to specify a label...:
                 </p>
-                <pre>
-  argument: noun_arb_text
-</pre>
+<pre><code data-language="javascript">  argument: noun_arb_text</code></pre>
 
                     <p>iShell increases the surface area of innovation for the browser many-fold, by making anyone who
                         can
@@ -800,7 +776,8 @@ cmdAPI.createCommand({
                     in
                     this command.
                 </p>
-                <pre>
+
+<pre><code data-language="javascript">
 cmdAPI.createCommand({
   names: ["tinyurl"],
   description: "Replaces the selected URL with a TinyUrl.",
@@ -814,8 +791,7 @@ cmdAPI.createCommand({
       cmdAPI.setSelection(tinyUrl);
     });
   },
-})
-</pre>
+})</code></pre>
                 <p>jQuery is a powerful tool. With it, you can fairly effortlessly cherry-pick the data you need from
                     RSS
                     feeds, XML, and all sorts of other data formats. It also makes doing in-preview animations a breeze.
@@ -963,8 +939,7 @@ cmdAPI.createCommand({
                     objects,
                     each one containing the name of a matching tab.
                 </p>
-                <pre>
-var noun_type_browser_tab = {
+<pre><code data-language="javascript">var noun_type_browser_tab = {
     label: "tab title or URL",
     _searchTabs(text, maxResults, callback) {
         let matcher = new RegExp(text, "i");
@@ -991,8 +966,7 @@ var noun_type_browser_tab = {
 
         return []; // normally, we should return suggestions here, but our noun type is asynchronous
     }
-};
-</pre>
+};</code></pre>
                 <p>The suggest method of a noun type always gets passed both text and html. If the input is coming from
                     a
                     part of a web page that the user has selected, these
@@ -1010,9 +984,9 @@ var noun_type_browser_tab = {
                 <p>We use the convenience function <code>cmdAPI.makeSugg()</code> to generate an
                     input object of the type that the iShell parser expects. The full signature of this function is:
                 </p>
-                <pre>
-cmdAPI.makeSugg(text, html, data, score, selectionIndices);
-</pre>
+
+<pre><code data-language="javascript">cmdAPI.makeSugg(text, html, data, score, selectionIndices);</code></pre>
+
                 <p>It requires at least one of <code>text</code>, <code>html</code>, <code>data</code>. Use
                     <code>null</code> if you want to skip <code>text</code> and/or <code>html</code>.
                 </p>
@@ -1024,12 +998,12 @@ cmdAPI.makeSugg(text, html, data, score, selectionIndices);
                     a
                     list of anonymous objects like these:
                 </p>
-                <pre>
-{ text: tabName,
+
+<pre><code data-language="javascript">{ text: tabName,
   html: Utils.escapeHtml(tabName),
   data: tab,
-  summary: Utils.escapeHtml(tabName) };
-</pre>
+  summary: Utils.escapeHtml(tabName) };</code></pre>
+
                 <p>The input objects that our <code>suggest()</code> method generates are the same objects that will
                     eventually get passed in to the <code>execute()</code> and <code>preview()</code> methods of any
                     commands that use this noun type.
@@ -1040,15 +1014,13 @@ cmdAPI.makeSugg(text, html, data, score, selectionIndices);
 
                 <p>If your noun type needs nothing more than <code>suggest</code> function, you may apply <code>@nountype</code> annotation to a regular function
                     to generate the noun type with the same name:</p>
-<pre>
-/**
+<pre><code data-language="javascript">/**
     @nountype
     @label title
 */
 function noun_type_title(text, html, callback, selectedIndices) {
     // ...
-}
-</pre>
+}</code></pre>
                 <p>The annotated function accepts the same arguments as the <code>suggest</code> function of a full fledged noun type.</p>
 
                 <h3 class="in-block"><span class="mw-headline"
@@ -1057,7 +1029,7 @@ function noun_type_title(text, html, callback, selectedIndices) {
                     use
                     FUEL to focus the selected tab.
                 </p>
-                <pre>
+<pre><code data-language="javascript">
 cmdAPI.createCommand({
   names: ["switch-tab"],
   arguments: {object: noun_type_browser_tab},
@@ -1074,8 +1046,7 @@ cmdAPI.createCommand({
     else
       pblock.innerHTML = "Switch to a tab by name.";
   }
-});
-</pre>
+});</code></pre>
             </div>
 
             <h1 class="section-heading">
@@ -1103,9 +1074,7 @@ cmdAPI.createCommand({
                 <p>Some commands may want to store data that persist even after closing Firefox.
                     Meet the <code>Bin</code> interface:
                 </p>
-                <pre>
-
-let gId = 42; // used to avoid needless preview updates when typing
+<pre><code data-language="javascript">let gId = 42; // used to avoid needless preview updates when typing
 cmdAPI.createCommand({
     name: "memo",
     uuid: "FA6A3460-E825-4CFA-A24F-5908131D29FD",
@@ -1137,10 +1106,9 @@ cmdAPI.createCommand({
         });
         ol.setAttribute("data-id", gId);
     },
-});
-</pre>
+});</code></pre>
 <hr>
                 <div id="content" class="mw-body"><p>Authors: Aza Raskin, Blair McBride, Abimanyu Raja, Jono DiCarlo, Atul
-                    Varma, Gerrard Christensen</p>
+                    Varma, Gerrard Christensen</p></div>
 </body>
 </html>
