@@ -13,7 +13,26 @@ AS = "alias";
 BY = "cause";
 ON = "dependency"
 
+let PREPROCESSOR_PREPOSITION_MAP = new Map([
+    [OBJECT, "OBJECT"],
+    [FOR, "FOR"],
+    [TO, "TO"],
+    [FROM, "FROM"],
+    [NEAR, "NEAR"],
+    [AT, "AT"],
+    [WITH, "WITH"],
+    [IN, "IN"],
+    [OF, "OF"],
+    [AS, "AS"],
+    [BY, "BY"],
+    [ON, "ON"]
+]);
+
+
 class CommandPreprocessor {
+    constructor(context) {
+        this._context = context;
+    }
 
     camelToKebab(name) {
         let result = name.replace(/([a-z0-9]|(?=[A-Z]))([A-Z])/g, '$1-$2').toLowerCase();
@@ -115,6 +134,7 @@ class CommandPreprocessor {
         let uuid = comment.match(/@uuid (.*?)(?:\r?\n|$)/i);
         let namespace = comment.match(/@namespace (.*?)(?:\r?\n|$)/i);
         let hidden = comment.match(/@hidden/i);
+        let metaclass = comment.match(/@metaclass/i);
 
         let require;
         let requirePopup;
@@ -154,8 +174,9 @@ class CommandPreprocessor {
             homepage: homepage?.[1]?.trim(),
             description: description?.[1]?.trim(),
             uuid: uuid?.[1]?.trim(),
-            namespace: namespace?.[1]?.trim(),
+            namespace: this._context === CommandPreprocessor.CONTEXT_BUILTIN? namespace?.[1]?.trim(): undefined,
             hidden: !!hidden,
+            metaclass: !!metaclass,
             help: comment.replaceAll(/@\w+.*?(?:\r?\n|$)/g, "").trim() || undefined,
             require: require,
             requirePopup: requirePopup,
@@ -172,14 +193,33 @@ class CommandPreprocessor {
         };
     }
 
+    static assignCommandArguments(args) {
+        let _arguments = [];
+
+        for (let a in args) {
+            args[a].role = a;
+            _arguments.push(args[a]);
+        }
+        
+        return _arguments;
+    }
+
+    static assignCommandPreview() {
+        return function (pblock, args, storage) {
+            for (let role of PREPROCESSOR_PREPOSITION_MAP.keys())
+                if (args[role])
+                    args[PREPROCESSOR_PREPOSITION_MAP.get(role)] = args[role]
+
+            this.__oo_preview(args, pblock, storage);
+        }
+    }
+
     generateProperty(property) {
         return property ? ("\`" + property.replaceAll(/`/g, "\\`") + "\`") : "undefined";
     }
 
-    generateCommandSetupBlock(object, properties) {
-        let block = `\n{
-    let args = {};
-    let command = new ${object.name}(args);\n\n`
+    generateCommandPropertyBlock(properties, prefix = "") {
+        let block = "";
         let command_name;
 
         if (Array.isArray(properties.command))
@@ -189,38 +229,89 @@ class CommandPreprocessor {
                 ? ("[" + this.generateProperty(properties.command) + "]")
                 : ("[" + this.generateProperty(properties.name) + "]")
 
-        if (properties.name)
-            block += `    command.names = ${command_name};\n`;
+        if (properties.name && !properties.metaclass)
+            block += `    ${prefix}names = ${command_name};\n`;
         if (properties.delay)
-            block += `    command.previewDelay = ${properties.delay || "undefined"};\n`;
+            block += `    ${prefix}previewDelay = ${properties.delay || "undefined"};\n`;
         if (properties.preview)
-            block += `    command.preview = ${this.generateProperty(properties.preview)};\n`;
+            block += `    ${prefix}preview = ${this.generateProperty(properties.preview)};\n`;
         if (properties.license)
-            block += `    command.license = ${this.generateProperty(properties.license)};\n`;
+            block += `    ${prefix}license = ${this.generateProperty(properties.license)};\n`;
         if (properties.author)
-            block += `    command.author = ${this.generateProperty(properties.author)};\n`;
+            block += `    ${prefix}author = ${this.generateProperty(properties.author)};\n`;
         if (properties.icon)
-            block += `    command.icon = ${this.generateProperty(properties.icon)};\n`;
+            block += `    ${prefix}icon = ${this.generateProperty(properties.icon)};\n`;
         if (properties.homepage)
-            block += `    command.homepage = ${this.generateProperty(properties.homepage)};\n`;
+            block += `    ${prefix}homepage = ${this.generateProperty(properties.homepage)};\n`;
         if (properties.description)
-            block += `    command.description = ${this.generateProperty(properties.description)};\n`;
+            block += `    ${prefix}description = ${this.generateProperty(properties.description)};\n`;
         if (properties.help)
-            block += `    command.help = ${this.generateProperty(properties.help)};\n`;
+            block += `    ${prefix}help = ${this.generateProperty(properties.help)};\n`;
         if (properties.uuid)
-            block += `    command.uuid = ${this.generateProperty(properties.uuid)};\n`;
+            block += `    ${prefix}uuid = ${this.generateProperty(properties.uuid)};\n`;
         if (properties.namespace)
-            block += `    command._namespace = ${this.generateProperty(properties.namespace)};\n`;
+            block += `    ${prefix}_namespace = ${this.generateProperty(properties.namespace)};\n`;
         if (properties.hidden)
-            block += `    command._hidden = true;\n`;
+            block += `    ${prefix}_hidden = true;\n`;
         if (properties.require)
-            block += `    command.require = ${JSON.stringify(properties.require)};\n`;
+            block += `    ${prefix}require = ${JSON.stringify(properties.require)};\n`;
         if (properties.requirePopup)
-            block += `    command.requirePopup = ${JSON.stringify(properties.requirePopup)};\n`;
+            block += `    ${prefix}requirePopup = ${JSON.stringify(properties.requirePopup)};\n`;
+        
+        return block;
+    }
+    
+    generateCommandSetupBlock(object) {
+        let block = `\n{
+    let args = {};
+    let command = new ${object.name}(args);
+    command.arguments = CommandPreprocessor.assignCommandArguments(args);
+    
+    command.__oo_preview = command.preview;
+    command.preview = CommandPreprocessor.assignCommandPreview();\n\n`
 
-        block += `\n    CmdManager.addObjectCommand(command, args);\n}\n`;
+        block += this.generateCommandPropertyBlock(object.properties, "command.");
+        block += `\n    cmdAPI.createCommand(command);\n}\n`;
 
         return block;
+    }
+
+    generateCommand(script, object) {
+        return script.replace(object.fullDefinition, object.fullDefinition + this.generateCommandSetupBlock(object));
+    }
+
+    generateMetaClass(script, object) {
+        let metaName = `__metaclass_${object.name}`;
+        let nameRx = new RegExp(`/\\*\\*.*?\\*/\\s*(^\\s*class\\s+)${object.name}(.*?{)`, "sm");
+        let metaDefinition = object.fullDefinition.replace(nameRx, `\$1${metaName}\$2`);
+        let metaGenerator = `\n\nclass ${object.name} extends ${metaName} {
+    
+    constructor(name) {
+        let args = {};
+        super(args);
+        this.arguments = CommandPreprocessor.assignCommandArguments(args);
+        this.__oo_preview = this.preview;
+        this.preview = CommandPreprocessor.assignCommandPreview(); 
+        
+        if (name && Array.isArray(name))
+            this.names = name;
+        else if (name)
+            this.name = name;
+    }\n\n`
+
+        metaGenerator += this.generateCommandPropertyBlock(object.properties);
+        metaGenerator += `\n}`
+
+        metaDefinition += metaGenerator;
+
+        return script.replace(object.fullDefinition, metaDefinition);
+    }
+
+    preprocessCommand(script, object) {
+        if (object.properties.metaclass)
+            return this.generateMetaClass(script, object);
+        else
+            return this.generateCommand(script, object);
     }
 
     generateNounType(object, properties) {
@@ -274,12 +365,14 @@ class CommandPreprocessor {
             }
 
             object.fullDefinition = this.extractFullDefinition(script, object);
-            object.setupBlock = this.generateCommandSetupBlock(object, properties);
+            object.properties = properties;
         }
 
         for (let object of classMatches)
-            if (!object.skip)
-                script = script.replace(object.fullDefinition, object.fullDefinition + object.setupBlock);
+            if (!object.skip) {
+                script = this.preprocessCommand(script, object);
+                //console.log(script);
+            }
 
         return script;
     }
@@ -288,10 +381,9 @@ class CommandPreprocessor {
         script = this.preprocessNounTypes(script);
         script = this.preprocessCommands(script);
 
-        //console.log(script);
-
         return script;
     }
 }
 
-CmdPreprocessor = new CommandPreprocessor();
+CommandPreprocessor.CONTEXT_BUILTIN = 0;
+CommandPreprocessor.CONTEXT_CUSTOM = 1;

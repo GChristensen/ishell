@@ -181,7 +181,7 @@ body {
     border-left: 6pt solid #d3d3d3;
 }
 
-#shell-help-wrapper {
+#shell-help-wrapper, .description, .help {
     padding-left: 5px;
     padding-right: 5px;
 }

@@ -3,7 +3,6 @@
     Files containing all such commands should be declared in dynamic.json manifest.
     Every builtin command should contain a "namespace" annotation, which defines its category
     at the iShell command listing.
-    Under any circumstances never use this annotation for the commands entered in editor.
     "require" annotations load the specified scripts (for example, proprietary external API libraries)
     into popup or background page.
     This may require change of CSE settings for allowed script domains in the addon manifest.

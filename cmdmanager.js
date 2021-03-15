@@ -1,18 +1,3 @@
-let PREPOSITION_MAP = new Map([
-    [OBJECT, "OBJECT"],
-    [FOR, "FOR"],
-    [TO, "TO"],
-    [FROM, "FROM"],
-    [NEAR, "NEAR"],
-    [AT, "AT"],
-    [WITH, "WITH"],
-    [IN, "IN"],
-    [OF, "OF"],
-    [AS, "AS"],
-    [BY, "BY"],
-    [ON, "ON"]
-]);
-
 class CommandManager {
     constructor() {
         this._commands = [];
@@ -26,9 +11,101 @@ class CommandManager {
         });
     }
 
-    addCommand(command) {
-        this._commands.push(command)
+    createCommand(options) {
+        if (Array.isArray(options.name)) {
+            options.names = options.name;
+            options.name = options.name[0];
+        } else {
+            options.name = options.name || options.names[0];
+            options.names = options.names || [options.name];
+        }
+
+        if (!options.uuid) {
+            if (options.homepage)
+                options.uuid = options.homepage;
+            else
+                options.uuid = options.name;  // Utils.hash(options.name + JSON.stringify(args));
+        }
+
+        options.id = options.uuid;
+
+        if (this._commands.some(c => c.id === options.id))
+            return null;
+
+        if (options._namespace)
+            options._builtin = true;
+
+        let args = options.arguments || options.argument;
+        if (!args)
+            args = options.arguments = [];
+
+        let nounId = 0;
+        function toNounType(obj, key) {
+            let val = obj[key];
+            if (!val) return;
+            let noun = obj[key] = NounUtils.NounType(val);
+            if (!noun.id) noun.id = options.id + "#n" + nounId++;
+        }
+
+        ASSIGN_ARGUMENTS:
+        {
+            // handle simplified syntax
+            if (typeof args.suggest === "function")
+                // argument: noun
+                args = [{role: "object", nountype: args}];
+            else if (!Array.isArray(args)) {
+                // arguments: {role: noun, ...}
+                // arguments: {"role label": noun, ...}
+                let a = [], re = /^[a-z]+(?=(?:[$_:\s]([^]+))?)/;
+                for (let key in args) {
+                    let [role, label] = re.exec(key) || [];
+                    if (role) a.push({role: role, label: label, nountype: args[key]});
+                }
+                args = a;
+            }
+            for (let arg of args) toNounType(arg, "nountype");
+            options.arguments = args;
+        }
+
+        options._preview = options.preview;
+
+        let to = parseInt(options.timeout || options.previewDelay);
+        if (to > 0) {
+            if (typeof options._preview === 'function') {
+                options.preview = function(pblock) {
+                    let args = arguments;
+                    let callback = CmdUtils.previewCallback(pblock, options._preview);
+                    if (options.preview_timeout !== null)
+                        clearTimeout(options.preview_timeout);
+                    options.preview_timeout = setTimeout(function () {
+                        callback.apply(options, args);
+                    }, to);
+                };
+            }
+        }
+
+        options.previewDefault = CommandManager.previewDefault;
+
+        this._commands.push(options);
+
+        return options;
     }
+
+    static previewDefault(pb) {
+        var html = "";
+        if ("previewHtml" in this) html = this.previewHtml;
+        else {
+            if ("description" in this)
+                html += '<div class="description">' + this.description + '</div>';
+            else if ("help" in this)
+                html += '<p class="help">' + this.help + '</p>';
+            if (!html) html = L(
+                "Execute the %S command.",
+                '<strong class="name">' + Utils.escapeHtml(this.name) + "</strong>");
+            html = '<div class="default">' + html + '</div>';
+        }
+        return (pb || 0).innerHTML = html;
+    };
 
     get commands() {
         return this._commands;
@@ -243,29 +320,6 @@ class CommandManager {
         return false;
     }
 
-    addObjectCommand(command, args) {
-        if (args) {
-            command.arguments = [];
-
-            for (let a in args) {
-                args[a].role = a;
-                command.arguments.push(args[a]);
-            }
-        }
-
-        command.__oo_preview = command.preview;
-
-        command.preview = function(pblock, args, storage) {
-            for (let role of PREPOSITION_MAP.keys())
-                if (args[role])
-                    args[PREPOSITION_MAP.get(role)] = args[role]
-
-            this.__oo_preview(args, pblock, storage);
-        }
-
-        CmdUtils.CreateCommand(command);
-    }
-
     unloadCustomScripts(namespace) {
         if (namespace)
             this._commands = this._commands.filter(c => c._namespace !== namespace);
@@ -296,6 +350,7 @@ class CommandManager {
     async loadBuiltinScripts() {
         try {
             let manifest = await this._loadDynamicManifest();
+            let preprocessor = new CommandPreprocessor(CommandPreprocessor.CONTEXT_BUILTIN);
 
             for (let file of manifest.files) {
                 if (file.path === "example.js")
@@ -304,7 +359,7 @@ class CommandManager {
                 try {
                     let script = await this._loadDynamicFile(file.path);
                     if (script) {
-                        script = CmdPreprocessor.run(script, file.syntax);
+                        script = preprocessor.run(script, file.syntax);
                         eval(script);
                     }
                 } catch (e) {
@@ -319,6 +374,7 @@ class CommandManager {
     async loadCustomScripts(namespace) {
         this.unloadCustomScripts(namespace);
 
+        let preprocessor = new CommandPreprocessor(CommandPreprocessor.CONTEXT_CUSTOM);
         let customscripts = await DBStorage.fetchCustomScripts(namespace);
 
         if (namespace)
@@ -327,7 +383,7 @@ class CommandManager {
         for (let record of customscripts) {
             try {
                 if (record.script) {
-                    let script = CmdPreprocessor.run(record.script);
+                    let script = preprocessor.run(record.script);
                     eval(script);
 
                     for (let cmd of this._commands.filter(c => !c._builtin && !c._namespace))

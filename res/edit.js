@@ -239,6 +239,8 @@ class MyCommand {
     return false;
 }
 
+let preprocessor = new CommandPreprocessor(CommandPreprocessor.CONTEXT_CUSTOM);
+
 // evaluates and saves scripts from editor
 async function saveScript() {
     var customscode = editor.getSession().getValue();
@@ -264,7 +266,7 @@ async function saveScript() {
 
         // eval
         try {
-            eval(customscode);
+            eval(preprocessor.run(customscode));
             $("#info").html("Evaluated!");
             await CmdManager.loadCustomScripts(scriptNamespace);
         } catch (e) {
@@ -461,7 +463,15 @@ async function initEditor(settings) {
     }
 
     editor.on("blur", saveScript);
-    editor.on("change", saveScript);
+
+    let timeout;
+    editor.on("change", e => {
+        clearTimeout(timeout);
+
+        timeout = setTimeout(() => {
+            saveScript();
+        }, 2000);
+    });
 
     editor.focus();
 }

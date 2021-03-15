@@ -611,6 +611,54 @@ class ShowTextCommandClass {
                 of iShell preview area, but has a new nice <code>set</code> method which sets element's innerHTML property for you.
                     <code>storage</code> argument is a reference to the <a href="/res/API.html#user-content-bin">Bin interface</a> of the command.</p>
 
+
+                <h2 class="in-block"><span class="mw-headline" id="metaclass">The @metaclass annotation</span></h2>
+
+                <p>Classes annotated with the <code>@metaclass</code> annotation do not automatically create commands.
+                    Instead, they could be instantiated and passed to <code>cmdAPI.createCommand</code>, or inherited from.
+                    This is convenient, when it is necessary to create a command-generating function like <code>cmdAPI.createSearchCommand</code>,
+                    when the generated commands bear the same functionality but differ slightly by some aspects. In the example below,
+                    <code>createSuffixCommand</code> function uses this feature.
+                </p>
+
+                <pre><code data-language="javascript">/**
+  This class does not create any commands automatically.
+
+  @command
+  @metaclass
+  @description Supplies input with the "%s" suffix.
+*/
+class SuffixCommand {
+  _suffix = "";
+
+  constructor(args) {
+    args[OBJECT] = {nountype: noun_arb_text, label: "input"};
+  }
+
+  preview({OBJECT}, display) {
+    if (OBJECT?.text) {
+      let html = `Processed input: ${OBJECT?.text}${this._suffix}`;
+      display.set(html);
+    }
+    else
+      this.previewDefault(display);
+  }
+
+  execute() {}
+}
+
+function createSuffixCommand(options) {
+  let command = new SuffixCommand();
+  command.name = options.name;
+  command._suffix = options.suffix;
+  command.uuid = options.uuid;
+  command.description = command.description.replace("%s", options.suffix);
+  cmdAPI.createCommand(command);
+}
+
+createSuffixCommand({name: "um-suffix", suffix: "um", uuid: "uuid1"});
+createSuffixCommand({name: "issa-suffix", suffix: "issa", uuid: "uuid2"});</code></pre>
+
                 <h2 class="in-block"><span class="mw-headline"
                                            id="Introduction_to_Noun_Types">Introduction to Noun Types</span></h2>
                 <p>Noun types specify what <i>kind</i> of input your command can accept for each one of its arguments.
