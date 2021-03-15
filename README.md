@@ -10,7 +10,7 @@ changes were necessary to accomplish this, it was spawned as a separate project.
 
 ### Modern object-oriented command syntax
 
-Although iShell supports the command authoring API of the original Ubiquity (which is described in the extension tutorial at the setting pages),
+Although iShell supports the command authoring API of the original Ubiquity (which is described in the extension [tutorial](https://gchristensen.github.io/ishell/res/tutorial.html)),
 it offers a new modern object-oriented way to create commands. Let's consider a command named `show-text` with the following syntax:
 
 **show-text** *message text* **in** *destination*
@@ -64,7 +64,7 @@ of arguments when defining them or accessing them in methods (although you may a
 Please do not use the command constructor for any purposes other than argument definition and simple field initialization,
 since iShell may create the command object multiple times for 
 various reasons. There are several other functions that are used to initialize commands 
-(please, see iShell API reference for `cmdAPI.createCommand` and explore command templates in the editor).
+(please, see iShell API reference for [cmdAPI.createCommand](https://gchristensen.github.io/ishell/res/API.html) and explore command templates in the editor).
 
 You may also notice that object-oriented methods have the `args` argument always in the first position,
 and `pblock` argument is now called `display`. It still contains a reference to the same `div` element
