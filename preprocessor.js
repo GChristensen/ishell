@@ -293,10 +293,12 @@ class CommandPreprocessor {
         this.__oo_preview = this.preview;
         this.preview = CommandPreprocessor.assignCommandPreview(); 
         
-        if (name && Array.isArray(name))
+        if (name && Array.isArray(name) && name.length)
             this.names = name;
-        else if (name)
+        else if (name) {
             this.name = name;
+            this.names = undefined;
+        }
         else {
             if (!this.name && this.names && this.names.length)
                 this.name = this.names[0];
