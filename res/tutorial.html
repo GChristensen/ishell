@@ -612,12 +612,12 @@ class ShowTextCommandClass {
                     <code>storage</code> argument is a reference to the <a href="/res/API.html#user-content-bin">Bin interface</a> of the command.</p>
 
 
-                <h2 class="in-block"><span class="mw-headline" id="metaclass">The @metaclass annotation</span></h2>
+                <h2 class="in-block"><span class="mw-headline" id="metaclass">The @metaclass Annotation</span></h2>
 
                 <p>Classes annotated with the <code>@metaclass</code> annotation do not automatically create commands.
                     Instead, they could be instantiated and passed to <code>cmdAPI.createCommand</code>, or inherited from.
                     This is convenient, when it is necessary to create a command-generating function like <code>cmdAPI.createSearchCommand</code>,
-                    when the generated commands bear the same functionality but differ slightly by some aspects. In the example below,
+                    which produces commands that bear the same functionality but differ slightly by some aspects. In the example below,
                     <code>createSuffixCommand</code> function uses this feature.
                 </p>
 

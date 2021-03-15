@@ -229,7 +229,7 @@ class CommandPreprocessor {
                 ? ("[" + this.generateProperty(properties.command) + "]")
                 : ("[" + this.generateProperty(properties.name) + "]")
 
-        if (properties.name && !properties.metaclass)
+        if (properties.name)
             block += `    ${prefix}names = ${command_name};\n`;
         if (properties.delay)
             block += `    ${prefix}previewDelay = ${properties.delay || "undefined"};\n`;
