@@ -8,12 +8,12 @@ if (location.href.includes("github")) {
         head.appendChild(script);
     }
 
-
     document.addEventListener("DOMContentLoaded", function() {
         let nav = document.getElementById("nav-container");
         nav.parentNode.removeChild(nav);
-        loadScript("lib/jquery.js", () => loadScript("lib/jquery.toc.js"));
-    });
 
+        if (location.href.includes("tutorial"))
+            loadScript("lib/jquery.js", () => loadScript("lib/jquery.toc.js"));
+    });
 
 }
