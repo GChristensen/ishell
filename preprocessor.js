@@ -214,6 +214,15 @@ class CommandPreprocessor {
         }
     }
 
+    static configureMetaCommand(command) {
+        if (command.name)
+            command.names = undefined;
+        else if (command.names) {
+            command.name = command.names[0];
+            command.names = undefined;
+        }
+    }
+
     generateProperty(property) {
         return property ? ("\`" + property.replaceAll(/`/g, "\\`") + "\`") : "undefined";
     }
@@ -286,24 +295,17 @@ class CommandPreprocessor {
         let metaDefinition = object.fullDefinition.replace(nameRx, `\$1${metaName}\$2`);
         let metaGenerator = `\n\nclass ${object.name} extends ${metaName} {
     
-    constructor(name) {
+    constructor(options) {
         let args = {};
         super(args);
         this.arguments = CommandPreprocessor.assignCommandArguments(args);
         this.__oo_preview = this.preview;
         this.preview = CommandPreprocessor.assignCommandPreview(); 
         
-        if (name && Array.isArray(name) && name.length)
-            this.names = name;
-        else if (name) {
-            this.name = name;
-            this.names = undefined;
-        }
-        else {
-            if (!this.name && this.names && this.names.length)
-                this.name = this.names[0];
-            this.names = undefined; 
-        }
+        if (options)
+            Object.assign(this, options);
+        
+        CommandPreprocessor.configureMetaCommand(this);
     }\n\n`
 
         metaGenerator += this.generateCommandPropertyBlock(object.properties);

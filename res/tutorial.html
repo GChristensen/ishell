@@ -317,9 +317,9 @@ cmdAPI.createCommand({
 
 <pre><code data-language="javascript">preview: function(pblock) {
   pblock.innerHTML = "This will show until the AJAX request returns";
-  cmdAPI.previewAjax(pblock, "http://example.com", function (htm) {
+  cmdAPI.previewAjax(pblock, {url: "http://example.com", success: function (htm) {
     pblock.innerHTML = htm;
-  });
+  }});
 },</code></pre>
             <h2 class="in-block"><span class="mw-headline"
                                        id="Documentation_and_Metadata">Documentation and Metadata</span></h2>
@@ -609,7 +609,7 @@ class ShowTextCommandClass {
                 <p>You may also notice that object-oriented methods have the <code>args</code> argument always in the first position,
                     and <code>pblock</code> argument is now called <code>display</code>. It still contains a reference to the same <code>div</code> element
                 of iShell preview area, but has a new nice <code>set</code> method which sets element's innerHTML property for you.
-                    <code>storage</code> argument is a reference to the <a href="/res/API.html#user-content-bin">Bin interface</a> of the command.</p>
+                    <code>storage</code> argument is a reference to the <a href="API.html#user-content-bin">Bin interface</a> of the command.</p>
 
 
                 <h2 class="in-block"><span class="mw-headline" id="metaclass">The @metaclass Annotation</span></h2>
@@ -1069,7 +1069,7 @@ cmdAPI.createCommand({
 function noun_type_title(text, html, callback, selectedIndices) {
     // ...
 }</code></pre>
-                <p>The annotated function accepts the same arguments as the <code>suggest</code> function of a full fledged noun type.</p>
+                <p>The annotated function accepts the same arguments as the <code>suggest</code> function of a full-fledged noun type.</p>
 
                 <h3 class="in-block"><span class="mw-headline"
                                            id="Switching_Tabs:_The_Command">Switching Tabs: The Command</span></h3>
