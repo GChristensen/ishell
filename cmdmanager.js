@@ -67,14 +67,13 @@ class CommandManager {
             options.arguments = args;
         }
 
-        options._preview = options.preview;
-
         let to = parseInt(options.timeout || options.previewDelay);
         if (to > 0) {
-            if (typeof options._preview === 'function') {
+            if (typeof options.preview === 'function') {
+                options.__preview = options.preview;
                 options.preview = function(pblock) {
                     let args = arguments;
-                    let callback = CmdUtils.previewCallback(pblock, options._preview);
+                    let callback = CmdUtils.previewCallback(pblock, options.__preview);
                     if (options.preview_timeout !== null)
                         clearTimeout(options.preview_timeout);
                     options.preview_timeout = setTimeout(function () {

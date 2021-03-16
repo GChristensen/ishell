@@ -181,6 +181,10 @@ class SuggestionManager {
 
         query.onResults = () => {
             this._suggestions = query.suggestionList;
+
+            if (this._suggestions.length && this._suggestions.length > this._max_suggestions)
+                this._suggestions.splice(this._max_suggestions);
+
             this._ensureSelectionInRange();
 
             if (this._suggestions.length > 0) {

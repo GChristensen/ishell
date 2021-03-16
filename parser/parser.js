@@ -810,8 +810,7 @@ var NLParser = {};
                         if (!suggestions.length) return;
 
                         for (let sugg of suggestions) {
-                            //sugg.score = (sugg.score || 1) / 4;
-                            sugg.score = (sugg.score || 1) / 1;
+                            sugg.score = sugg.score || 1;
                             for (let [pps, arg] of callback.otherSentences)
                                 pps.addArgumentSuggestion(arg, sugg);
                         }
