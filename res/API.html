@@ -95,7 +95,13 @@
             preview display element. Your function can generate and display arbitrary HTML by
             setting the value of <strong>pblock.innerHTML</strong>. Use <strong>this.previewDefault(pblock)</strong>
             to set the default preview. If your command takes arguments (see above), your preview
-            method will be passed the dictionary as the second argument.
+            method will be passed the dictionary as the second argument.<br>
+            In iShell <strong>pblock</strong> object has two additional methods:
+            <ul>
+                <li><b>set</b> - sets <strong>pblock.innerHTML</strong> verbatim.</li>
+                <li><b>wrap</b> - sets <strong>pblock.innerHTML</strong> by adding
+                    the same margins as the displayed description of the command.</li>
+            </ul>
         </li>
         <li><strong>previewDelay</strong> (<code>@delay</code>) - specifies the amount of time, in
             milliseconds, to wait before calling the preview function defined in <strong>options.preview</strong>.

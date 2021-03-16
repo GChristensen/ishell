@@ -244,6 +244,10 @@ class PopupWindow {
         // add a handy set method to populate innerHTML of the preview area
         if (!this._preview_element.set)
             this._preview_element.set = function (html) {this.innerHTML = html};
+
+        // wraps html text into a div with some margins
+        if (!this._preview_element.wrap)
+            this._preview_element.wrap = function (html) {this.innerHTML = `<div class="description">${html}</div>`};
     }
 
     populateSuggestions(html) {
