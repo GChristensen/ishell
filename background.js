@@ -28,3 +28,7 @@ shellSettings.load(async settings => {
 });
 
 chrome.i18n.getAcceptLanguages(ll => CmdUtils.acceptLanguages = ll);
+
+chrome.tabs.onActivated.addListener(function (actInfo) {
+    CmdUtils.updateActiveTab();
+});

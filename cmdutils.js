@@ -217,7 +217,7 @@ CmdUtils.getActiveTab = function () {
 CmdUtils.updateActiveTab = async function () {
     CmdUtils.activeTab = null;
     CmdUtils.selectedText = '';
-    CmdUtils.selectedText = '';
+    CmdUtils.selectedHtml = '';
 
     try {
         let tabs = await browser.tabs.query({active: true, currentWindow: true})
@@ -225,8 +225,7 @@ CmdUtils.updateActiveTab = async function () {
             let tab = tabs[0];
             if (tab.url.match('^https?://') || tab.url.match('^file://')) {
                 CmdUtils.activeTab = tab;
-                if (!CmdManager.selectedContextMenuCommand)
-                    await CmdUtils.updateSelection(tab.id);
+                await CmdUtils.updateSelection(tab.id);
             }
         }
     }

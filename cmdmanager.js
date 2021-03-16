@@ -168,11 +168,10 @@ class CommandManager {
     };
 
     makeParser() {
-        return NLParser.makeParserForLanguage("en", this._commands, ContextUtils,
-                new SuggestionMemory("main_parser"));
+        return NLParser.makeParserForLanguage("en", this._commands, ContextUtils, new SuggestionMemory());
     };
 
-    // adds storage bin obtained from the command uuid as the last argument of the called function
+    // adds a storage bin obtained from the command uuid as the last argument of the called function
     async callPersistent(cmd, obj, f) {
         let args = arguments;
         let new_args = Array.prototype.slice.call(args, 3);
@@ -220,6 +219,30 @@ class CommandManager {
         this.createContextMenu();
     };
 
+    static async contextMenuListener(info) {
+        switch(info.menuItemId) {
+            case "shell-settings":
+                chrome.tabs.create({"url": "res/options.html"});
+                break;
+            default:
+                // if (info.selectionText) {
+                //     // NOP, selection is maintained by updateActiveTab
+                // }
+                if (info.linkUrl) {
+                    CmdUtils.selectedText = info.linkUrl;
+                    CmdUtils.selectedHtml = "<a class='__ishellLinkSelection' src='"
+                        + info.linkUrl + "'>" + info.linkText + "</a>";
+                }
+
+                let contextMenuCmdData = CmdManager.getContextMenuCommand(info.menuItemId);
+                // open popup, if command "execute" flag is unchecked
+                if (contextMenuCmdData && !CmdManager.executeContextMenuItem(info.menuItemId, contextMenuCmdData)) {
+                    CmdManager.selectedContextMenuCommand = info.menuItemId;
+                    chrome.browserAction.openPopup();
+                }
+        }
+    }
+
     createContextMenu() {
         chrome.contextMenus.removeAll();
 
@@ -256,33 +279,8 @@ class CommandManager {
 
         chrome.contextMenus.create(menuInfo);
 
-        if (!this.contextMenuListener) {
-            this.contextMenuListener = function(info, tab) {
-                switch(info.menuItemId) {
-                    case "shell-settings":
-                        chrome.tabs.create({"url": "res/options.html"});
-                        break;
-                    default:
-                        if (info.selectionText) { // TODO: add html selection
-                            CmdUtils.selectedText = info.selectionText;
-                            CmdUtils.selectedHtml = info.selectionText;
-                        }
-                        if (info.linkUrl) {
-                            CmdUtils.selectedText = info.linkUrl;
-                            CmdUtils.selectedHtml = "<a class='__ishellLinkSelection' src='"
-                                + info.linkUrl + "'>" + info.linkText + "</a>";
-                        }
-
-                        let contextMenuCmdData = CmdManager.getContextMenuCommand(info.menuItemId);
-                        if (contextMenuCmdData
-                            && !CmdManager.executeContextMenuItem(info.menuItemId, contextMenuCmdData)) {
-                            CmdManager.selectedContextMenuCommand = info.menuItemId;
-                            chrome.browserAction.openPopup();
-                        }
-                }
-            }
-            chrome.contextMenus.onClicked.addListener(this.contextMenuListener);
-        }
+        if (!chrome.contextMenus.onClicked.hasListener(CommandManager.contextMenuListener))
+            chrome.contextMenus.onClicked.addListener(CommandManager.contextMenuListener);
     }
 
     executeContextMenuItem(command, contextMenuCmdData) {
@@ -295,7 +293,8 @@ class CommandManager {
 
             query.onResults = () => {
                 let sent = query.suggestionList
-                && query.suggestionList.length > 0? query.suggestionList[0]: null;
+                        && query.suggestionList.length > 0? query.suggestionList[0]: null;
+
                 if (sent && sent.getCommand().uuid.toLowerCase() === commandDef.uuid.toLowerCase()) {
 
                     this.callExecute(sent).then(() => {
@@ -305,7 +304,6 @@ class CommandManager {
                     if (shellSettings.remember_context_menu_commands())
                         this.commandHistoryPush(contextMenuCmdData.command);
 
-                    //if (CmdUtils.DEBUG)
                     parser.strengthenMemory(sent);
                 }
                 else

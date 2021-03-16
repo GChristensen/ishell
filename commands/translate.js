@@ -15,16 +15,17 @@
     }
 
     function translate(target, from, to, back) {
+        let translator = cmdAPI.settings.bing_translator_api_v3_key? msTranslator_v3: msTranslator;
+
         if (!to) return void
-            msTranslator("Detect", {text: target.text}, function detected(code) {
+            translator("Detect", {text: target.text}, function detected(code) {
                 translate(target, from, defaultLanguage(noun_type_lang_microsoft.MS_LANGS_REV, code).code, back)
             });
         let {html} = target
         // bitbucket#29: The API doesn't like apostrophes HTML-escaped.
         ~html.indexOf('<') || (html = html.replace(/&#39;/g, "'"));
 
-        (cmdAPI.settings.bing_translator_api_v3_key? msTranslator_v3: msTranslator)
-            ("Translate", {
+        translator("Translate", {
                 contentType: "text/html", text: html, from: from, to: to,
             }, back);
     }
