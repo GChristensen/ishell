@@ -71,7 +71,7 @@ shellSettings.load(settings => {
         preview: function(pblock, {object: {text, summary}}) {
             if (!text) return void this.previewDefault(pblock);
 
-            pblock.innerHTML = _("Searches YouTube for " + text + ".", {it: summary.bold()});
+            pblock.wrap("Searches YouTube for " + text + ".", {it: summary.bold()});
             CmdUtils.previewAjax(pblock, {
                 url: "https://www.googleapis.com/youtube/v3/search",
                 data: {
@@ -137,8 +137,7 @@ shellSettings.load(settings => {
                 data,
                 url: "https://customsearch.googleapis.com/customsearch/v1",
                 error: xhr => {
-                    pblock.innerHTML =
-                        `<em class=error>${xhr.status} ${xhr.statusText}</em>`
+                    pblock.wrap(`<em class=error>${xhr.status} ${xhr.statusText}</em>`);
                 },
                 success: (json, status, xhr) => {
 
@@ -281,11 +280,11 @@ shellSettings.load(settings => {
             var searchText = Utils.trim(args.object.text);
             var lang = args.format.html || "English";
             if (!searchText) {
-                previewBlock.innerHTML = `Searches Wikipedia in ${lang}.`;
+                previewBlock.wrap(`Searches Wikipedia in ${lang}.`);
                 return;
             }
             var previewData = {query: args.object.html};
-            previewBlock.innerHTML = _("Searching Wikipedia for <b>" + args.object.text + "</b> ...");
+            previewBlock.wrap("Searching Wikipedia for <b>" + args.object.text + "</b> ...");
             var apiParams = {
                 format: "json",
                 action: "query",
@@ -476,7 +475,7 @@ shellSettings.load(settings => {
         previewDelay: 1000,
         preview: function(pblock, args) {
             if (!args.object?.text) {
-                pblock.innerHTML = "Show objects or routes on google maps.<p>syntax: <pre>\tmaps [place]\n\tmaps [start] to [finish]</pre>";
+                pblock.wrap("Show objects or routes on google maps.<p>syntax: <pre>\tmaps [place]\n\tmaps [start] to [finish]</pre>");
                 return;
             }
             pblock.innerHTML = `
@@ -604,7 +603,7 @@ shellSettings.load(settings => {
                 (historyItems) => {
 
                     if (!historyItems || historyItems.length === 0) {
-                        pblock.innerHTML = "History is empty."
+                        pblock.wrap("History is empty.");
                     }
                     else {
                         if (forDomain) {
@@ -640,7 +639,7 @@ shellSettings.load(settings => {
             this.getBooks_ = getBooks;
             CmdUtils.previewAjax(pblock, {
                 url: q,
-                error: () => {pblock.innerHTML = "Search error."},
+                error: () => {pblock.wrap("Search error.")},
                 success: this.logResults_.bind(this),
                 dataType: "html"
             });
@@ -812,12 +811,12 @@ shellSettings.load(settings => {
             return query;
         },
         preview: function(pblock, args, {Bin}) {
-            pblock.innerHTML = "Searching...";
+            pblock.wrap("Searching...");
             let a = this._genQuery(args);
 
             libgenSearch.getJSONResults(pblock, a, books => {
                 if (!books || !books.length) {
-                    pblock.innerHTML = "Not found."
+                    pblock.wrap("Not found.");
                 }
                 else {
                     CmdUtils.previewList2(pblock, books, {
@@ -845,14 +844,14 @@ shellSettings.load(settings => {
         _article: null,
         _namespace: "Search",
         preview: function(pblock, args, {Bin}) {
-            pblock.innerHTML = "Searching...";
+            pblock.wrap("Searching...");
 
             if (args.object && args.object.text)
                 CmdUtils.previewAjax(pblock, {
                     method: "POST",
                     url: "https://sci-hub.se",
                     data: {"sci-hub-plugin-check": "", "request": args.object.text},
-                    error: () => {pblock.innerHTML = "Search error."},
+                    error: () => {pblock.wrap("Search error.")},
                     success: data => {
                         if (data) {
                             Utils.parseHtml(data, doc => {
@@ -863,18 +862,18 @@ shellSettings.load(settings => {
                                     let citation = doc.querySelector("#citation");
 
                                     if (citation.textContent === ".") {
-                                        citation.innerHTML = "&lt;press &apos;Enter&apos; to open the document&gt;";
+                                        citation.wrap("&lt;press &apos;Enter&apos; to open the document&gt;");
                                     }
 
-                                    pblock.innerHTML = `<a style="color: #45BCFF" 
-                                                       href="${article.src}">${citation.innerHTML}</a>`;
+                                    pblock.wrap(`<a style="color: #45BCFF" 
+                                                       href="${article.src}">${citation.innerHTML}</a>`);
                                 }
                                 else
-                                    pblock.innerHTML = "Not found.";
+                                    pblock.wrap("Not found.");
                             });
                         }
                         else
-                            pblock.innerHTML = "Error.";
+                            pblock.wrap("Error.");
                     },
                     dataType: "html"
                 });

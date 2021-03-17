@@ -109,8 +109,8 @@ cmdAPI.createCommand({
     previewDelay: 1000,
     preview: function(pblock, args, storage) {
         if (args.alias && args.alias.text && args.object && args.object.text)
-            pblock.innerHtml = `Inserts a new dynamic setting <code>${args.alias.text}</code> 
-                                with the value: "${args.object.text}".`;
+            pblock.wrap(`Inserts a new dynamic setting <code>${args.alias.text}</code> 
+                                with the value: "${args.object.text}".`);
     },
     execute: function(args, storage) {
         if (args.alias?.text)
@@ -354,7 +354,7 @@ CmdUtils.CreateCommand({
     license: "Public domain",
     arguments: [{role: "object", nountype: noun_calc, label: "expression"}],
     preview: function (pb, {object: {data, score}}) {
-        pb.innerHTML = data? (score < .3 ? "<em style='color: red'>" : "<strong>") + data: "";
+        pb.wrap(data? (score < .3 ? "<em style='color: red'>" : "<strong>") + data: "");
     },
 });
 
@@ -397,9 +397,9 @@ CmdUtils.CreateCommand({
             }
 
             this._short_url = ajax.results[query].shortUrl;
-            pblock.innerHTML = `Shortened <b>${query}</b> to: 
+            pblock.wrap(`Shortened <b>${query}</b> to: 
                                 <span style="color: #45BCFF">${this._short_url}</span>. <br><br>
-                                Press 'Enter' to copy the result to clipboard.<br>`
+                                Press 'Enter' to copy the result to clipboard.<br>`);
         }, "json");
     },
     execute: async function ({object: {text}}) {
@@ -422,16 +422,16 @@ CmdUtils.CreateCommand({
         if (!text)
             return;
 
-        pblock.innerHTML = "Checking <b>" + text + "</b>";
+        pblock.wrap("Checking <b>" + text + "</b>");
         var urlString = "https://isitdown.site/api/v3/" + encodeURIComponent(text);
 
         CmdUtils.previewGet(pblock, urlString, (resp) => {
 
             if (!resp) return;
             if (resp.isitdown) {
-                pblock.innerHTML = 'It\'s <b>not</b> just you. The site is <b>down!</b>';
+                pblock.wrap('It\'s <b>not</b> just you. The site is <b>down!</b>');
             } else {
-                pblock.innerHTML = 'It\'s just you. The site is <b>up!</b>';
+                pblock.wrap('It\'s just you. The site is <b>up!</b>');
             }
         }, "json");
     },

@@ -124,7 +124,7 @@
 
                 var service = resurrect_archiveServices[instrument][0];
 
-                pblock.innerHTML = _("Opens the most recent archived version of <b>"
+                pblock.wrap("Opens the most recent archived version of <b>"
                     + target.name + "</b> using the <a href=\"http://"
                     + service + "\">" + service + "</a>");
             },
