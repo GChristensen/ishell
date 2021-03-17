@@ -15,12 +15,14 @@
     }
 
     function translate(target, from, to, back) {
-        let translator = cmdAPI.settings.bing_translator_api_v3_key? msTranslator_v3: msTranslator;
+        let api_v3 = !!cmdAPI.settings.bing_translator_api_v3_key;
+        let translator = api_v3? msTranslator_v3: msTranslator;
 
-        if (!to) return void
-            translator("Detect", {text: target.text}, function detected(code) {
+        if (!api_v3 && !to) return void
+            msTranslator("Detect", {text: target.text}, function detected(code) {
                 translate(target, from, defaultLanguage(noun_type_lang_microsoft.MS_LANGS_REV, code).code, back)
             });
+
         let {html} = target
         // bitbucket#29: The API doesn't like apostrophes HTML-escaped.
         ~html.indexOf('<') || (html = html.replace(/&#39;/g, "'"));
@@ -35,7 +37,10 @@
         let url = "https://api.cognitive.microsofttranslator.com/translate?api-version=3.0";
         if (params.from)
             url += "&from=" + params.from;
-        url += "&to=" + params.to;
+        if (params.to)
+            url += "&to=" + params.to;
+        else
+            url += "&to=" + defaultLanguage(noun_type_lang_microsoft.MS_LANGS_REV, params.from).code;
         url += "&textType=html";
         $.ajax({
             url: url,

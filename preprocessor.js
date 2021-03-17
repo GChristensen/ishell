@@ -214,15 +214,6 @@ class CommandPreprocessor {
         }
     }
 
-    static configureMetaCommand(command) {
-        if (command.name)
-            command.names = undefined;
-        else if (command.names) {
-            command.name = command.names[0];
-            command.names = undefined;
-        }
-    }
-
     generateProperty(property) {
         return property ? ("\`" + property.replaceAll(/`/g, "\\`") + "\`") : "undefined";
     }
@@ -235,11 +226,13 @@ class CommandPreprocessor {
             command_name = JSON.stringify(properties.command)
         else
             command_name = typeof properties.command === "string"
-                ? ("[" + this.generateProperty(properties.command) + "]")
-                : ("[" + this.generateProperty(properties.name) + "]")
+                ? this.generateProperty(properties.command)
+                : this.generateProperty(properties.name);
 
-        if (properties.name)
+        if (command_name.startsWith("["))
             block += `    ${prefix}names = ${command_name};\n`;
+        else
+            block += `    ${prefix}name = ${command_name};\n`;
         if (properties.delay)
             block += `    ${prefix}previewDelay = ${properties.delay || "undefined"};\n`;
         if (properties.preview)
@@ -294,26 +287,21 @@ class CommandPreprocessor {
         let nameRx = new RegExp(`/\\*\\*.*?\\*/\\s*(^\\s*class\\s+)${object.name}(.*?{)`, "sm");
         let metaDefinition = object.fullDefinition.replace(nameRx, `\$1${metaName}\$2`);
         let metaGenerator = `\n\nclass ${object.name} extends ${metaName} {
-    
-    constructor(options) {
+    constructor() {
         let args = {};
         super(args);
         this.arguments = CommandPreprocessor.assignCommandArguments(args);
         this.__oo_preview = this.preview;
         this.preview = CommandPreprocessor.assignCommandPreview(); 
         
-        if (options)
-            Object.assign(this, options);
+        ${this.generateCommandPropertyBlock(object.properties, "this.")}        
         
-        CommandPreprocessor.configureMetaCommand(this);
-    }\n\n`
+        if (this.metaconstructor)
+            return this.metaconstructor.apply(this, arguments);
+    }
+}`
 
-        metaGenerator += this.generateCommandPropertyBlock(object.properties);
-        metaGenerator += `\n}`
-
-        metaDefinition += metaGenerator;
-
-        return script.replace(object.fullDefinition, metaDefinition);
+        return script.replace(object.fullDefinition, metaDefinition + metaGenerator);
     }
 
     preprocessCommand(script, object) {

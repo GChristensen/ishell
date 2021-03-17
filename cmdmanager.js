@@ -225,18 +225,21 @@ class CommandManager {
                 chrome.tabs.create({"url": "res/options.html"});
                 break;
             default:
-                // if (info.selectionText) {
-                //     // NOP, selection is maintained by updateActiveTab
-                // }
-                if (info.linkUrl) {
-                    CmdUtils.selectedText = info.linkUrl;
-                    CmdUtils.selectedHtml = "<a class='__ishellLinkSelection' src='"
-                        + info.linkUrl + "'>" + info.linkText + "</a>";
-                }
+                let contextMenuCmd = CmdManager.getContextMenuCommand(info.menuItemId);
 
-                let contextMenuCmdData = CmdManager.getContextMenuCommand(info.menuItemId);
                 // open popup, if command "execute" flag is unchecked
-                if (contextMenuCmdData && !CmdManager.executeContextMenuItem(info.menuItemId, contextMenuCmdData)) {
+                if (contextMenuCmd && contextMenuCmd.execute) {
+                    await CmdUtils.updateActiveTab();
+
+                    if (info.linkUrl) {
+                        CmdUtils.selectedText = info.linkUrl;
+                        CmdUtils.selectedHtml = "<a class='__ishellLinkSelection' src='"
+                            + info.linkUrl + "'>" + info.linkText + "</a>";
+                    }
+
+                    CmdManager.executeContextMenuItem(info.menuItemId, contextMenuCmd);
+                }
+                else if (contextMenuCmd) {
                     CmdManager.selectedContextMenuCommand = info.menuItemId;
                     chrome.browserAction.openPopup();
                 }
@@ -283,38 +286,39 @@ class CommandManager {
             chrome.contextMenus.onClicked.addListener(CommandManager.contextMenuListener);
     }
 
-    executeContextMenuItem(command, contextMenuCmdData) {
-        let commandDef = this.getCommandByUUID(contextMenuCmdData.uuid);
+    executeContextMenuItem(command, contextMenuCmd) {
+        let commandDef = this.getCommandByUUID(contextMenuCmd.uuid);
 
-        if (!commandDef.preview || typeof commandDef.preview !== "function"
-            || contextMenuCmdData.execute) {
-            let parser = this.makeParser();
-            let query = parser.newQuery(command, null, shellSettings.max_suggestions(), true);
+        let parser = this.makeParser();
+        let query = parser.newQuery(command, null, shellSettings.max_suggestions(), true);
 
-            query.onResults = () => {
-                let sent = query.suggestionList
-                        && query.suggestionList.length > 0? query.suggestionList[0]: null;
+        let executed = false;
 
-                if (sent && sent.getCommand().uuid.toLowerCase() === commandDef.uuid.toLowerCase()) {
+        query.onResults = () => { // onResults can run several times, depending on suggestions with callbacks
+            if (executed)
+                return;
 
-                    this.callExecute(sent).then(() => {
-                        CmdUtils._internalClearSelection();
-                    });
+            executed = true;
 
-                    if (shellSettings.remember_context_menu_commands())
-                        this.commandHistoryPush(contextMenuCmdData.command);
+            let sent = query.suggestionList
+                    && query.suggestionList.length > 0? query.suggestionList[0]: null;
 
-                    parser.strengthenMemory(sent);
-                }
-                else
-                    CmdUtils.deblog("Context menu command/parser result mismatch")
-            };
+            if (sent && sent.getCommand().uuid.toLowerCase() === commandDef.uuid.toLowerCase()) {
 
-            query.run();
-            return true;
-        }
+                this.callExecute(sent).then(() => {
+                    CmdUtils._internalClearSelection();
+                });
 
-        return false;
+                if (shellSettings.remember_context_menu_commands())
+                    this.commandHistoryPush(contextMenuCmd.command);
+
+                parser.strengthenMemory(sent);
+            }
+            else
+                CmdUtils.deblog("Context menu command/parser result mismatch")
+        };
+
+        query.run();
     }
 
     unloadCustomScripts(namespace) {

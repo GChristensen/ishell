@@ -677,7 +677,6 @@
 
     function rainbowWorker(e) {
         var self = this;
-        console.log(this);
         var message = e.data;
 
         var prism = new Prism(message.options);
