@@ -37,7 +37,7 @@ class MySimpleCommand {
     }
 
     preview({OBJECT}, display) {
-        display.set("Your input is " + OBJECT?.text + ".");
+        display.text("Your input is " + OBJECT?.text + ".");
     }
     
     execute({OBJECT}) {
@@ -70,6 +70,10 @@ class MySimpleCommand {
     //load: function(storage) {},
     //init: function(doc /* popup document */, storage) {},
     preview: function(pblock, args, storage) {
+        if (!args.object?.text) {
+            this.previewDefault(pblock);
+            return;
+        }
     
         // display the initial html markup of the requested page
         if (/^https?:\\/\\/.*/.test(args.object.text))  
@@ -142,12 +146,16 @@ class MyCommand {
     //load(storage) {}
     //init(doc /* popup document */, storage) {}
     
-    async preview(args, display, storage) {
+    async preview({OBJECT}, display, storage) {
+        if (!OBJECT?.text) {
+            this.previewDefault(display);
+            return;
+        }
         
         // display the initial html markup of the requested page
-        if (/^https?:\\/\\/.+/.test(args[OBJECT]?.text))
+        if (/^https?:\\/\\/.+/.test(OBJECT?.text))
             try {
-                let response = await cmdAPI.previewFetch(display, args[OBJECT]?.text);
+                let response = await cmdAPI.previewFetch(display, OBJECT?.text);
                 
                 if (response.ok) {
                     let html = await response.text();
@@ -157,21 +165,21 @@ class MyCommand {
                         display.set(\`Request response: <br>\${cmdAPI.escapeHtml(html)}...\`);
                     }
                     else
-                        display.set("Response is empty.");
+                        display.text("<i>Response is empty.</i>");
                 }
                 else 
-                    display.set("HTTP request error.");
+                    display.error("HTTP request error.");
             }
             catch (e) {
-                if (!cmdAPI.fetchAborted(e)) // do not change preview if previewFetch was aborted
-                    display.set("Network error.");
+                if (!cmdAPI.fetchAborted(e)) // skip preview change if previewFetch was aborted
+                    display.error("Network error.");
             }
         else
-            display.set("Invalid URL.");
+            display.text("Invalid URL.");
     }
     
     execute(args, storage) {
-        cmdAPI.notify("You loaded: " + args[OBJECT]?.text);
+        cmdAPI.notify("You loaded: " + OBJECT?.text);
     }
 }`,
 

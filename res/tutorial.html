@@ -606,8 +606,8 @@ class ShowTextCommandClass {
 
   preview(args, display, storage) {
     if (args[OBJECT]?.text) {
-      let html = `Shows &lt;i&gt;${args[OBJECT]?.text}&lt;/i&gt; in &lt;b&gt;${args[IN]?.text || "popup"}&lt;/b&gt;`;
-      display.set(html);
+      let msg = `Shows &lt;i&gt;${args[OBJECT]?.text}&lt;/i&gt; in &lt;b&gt;${args[IN]?.text || "popup"}&lt;/b&gt;`;
+      display.set(msg);
     }
     else
       this.previewDefault(display);
@@ -680,10 +680,8 @@ class SuffixCommand {
   }
 
   preview({OBJECT}, display) {
-    if (OBJECT?.text) {
-      let html = `Processed input: ${OBJECT?.text}${this.suffix}`;
-      display.wrap(html);
-    }
+    if (OBJECT?.text)
+      display.text(`Processed input: ${OBJECT?.text}${this.suffix}`);
     else
       this.previewDefault(display);
   }
@@ -700,7 +698,7 @@ function createSuffixCommand(options) {
 createSuffixCommand({name: "um-suffix", suffix: "um", uuid: "uuid1"});
 createSuffixCommand({name: "issa-suffix", suffix: "issa", uuid: "uuid2"});</code></pre>
 
-<p>The <code>wrap</code> method of the <code>display</code> object adds the same margins to the output,
+<p>The <code>text</code> method of the <code>display</code> object adds the same margins to the output,
 as the ones used to display command description, so the text does not wiggle as in the previous command.</p>
 
 <h2><span id="Introduction_to_Noun_Types">Introduction to Noun Types</span></h2>

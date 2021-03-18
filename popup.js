@@ -244,10 +244,20 @@ class PopupWindow {
         // add a handy set method to populate innerHTML of the preview area
         if (!this._preview_element.set)
             this._preview_element.set = function (html) {this.innerHTML = html};
+        else
+            console.error("Preview element has set property:", this._preview_element.set);
 
         // wraps html text into a div with some margins
-        if (!this._preview_element.wrap)
-            this._preview_element.wrap = function (html) {this.innerHTML = `<div class="description">${html}</div>`};
+        if (!this._preview_element.text)
+            this._preview_element.text = function (html) {this.innerHTML = `<div class="description">${html}</div>`};
+        else
+            console.error("Preview element has text property:", this._preview_element.text);
+
+        // wraps html text into a div with some margins
+        if (!this._preview_element.error)
+            this._preview_element.error = function (html) {this.innerHTML = `<div class="description error">${html}</div>`};
+        else
+            console.error("Preview element has error property:", this._preview_element.error);
     }
 
     populateSuggestions(html) {

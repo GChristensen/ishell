@@ -96,11 +96,15 @@
             setting the value of <strong>pblock.innerHTML</strong>. Use <strong>this.previewDefault(pblock)</strong>
             to set the default preview. If your command takes arguments (see above), your preview
             method will be passed the dictionary as the second argument.<br>
-            In iShell <strong>pblock</strong> object has two additional methods:
+            In iShell <strong>pblock</strong> object has three additional methods:
             <ul>
                 <li><b>set</b> - sets <strong>pblock.innerHTML</strong> verbatim.</li>
-                <li><b>wrap</b> - sets <strong>pblock.innerHTML</strong> by adding
-                    the same margins as the displayed description of the command has.</li>
+                <li><b>text</b> - sets <strong>pblock.innerHTML</strong> by adding the same margins
+                    as the displayed description of the command has.
+                </li>
+                <li><b>error</b> - displays error message in the same way as the <b>text</b> method
+                    but in red color.
+                </li>
             </ul>
         </li>
         <li><strong>previewDelay</strong> (<code>@delay</code>) - specifies the amount of time, in

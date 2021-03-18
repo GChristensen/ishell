@@ -181,9 +181,13 @@ body {
     border-left: 6pt solid #d3d3d3;
 }
 
-#shell-help-wrapper, .description, .help {
+#shell-help-wrapper, .description, .help, .error {
     padding-left: 5px;
     padding-right: 5px;
+}
+
+.error {
+    color: #f94c52;
 }
 
 .shell-help-heading {

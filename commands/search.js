@@ -22,6 +22,10 @@ shellSettings.load(settings => {
             body       : "htmlSnippet",
             maxResults : maxSearchResults,
         },
+        execute: function({object: {text}}) {
+            if (text)
+                CmdUtils.addTab(`http://www.google.com/search?q=${encodeURIComponent(text)}`);
+        }
     });
 
     CmdUtils.makeSearchCommand({
