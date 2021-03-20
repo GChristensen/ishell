@@ -109,7 +109,7 @@ cmdAPI.createCommand({
     previewDelay: 1000,
     preview: function(pblock, args, storage) {
         if (args.alias && args.alias.text && args.object && args.object.text)
-            pblock.wrap(`Inserts a new dynamic setting <code>${args.alias.text}</code> 
+            pblock.text(`Inserts a new dynamic setting <code>${args.alias.text}</code> 
                                 with the value: "${args.object.text}".`);
     },
     execute: function(args, storage) {
@@ -354,7 +354,7 @@ CmdUtils.CreateCommand({
     license: "Public domain",
     arguments: [{role: "object", nountype: noun_calc, label: "expression"}],
     preview: function (pb, {object: {data, score}}) {
-        pb.wrap(data? (score < .3 ? "<em style='color: red'>" : "<strong>") + data: "");
+        pb.text(data? (score < .3 ? "<em style='color: red'>" : "<strong>") + data: "");
     },
 });
 
@@ -397,7 +397,7 @@ CmdUtils.CreateCommand({
             }
 
             this._short_url = ajax.results[query].shortUrl;
-            pblock.wrap(`Shortened <b>${query}</b> to: 
+            pblock.text(`Shortened <b>${query}</b> to: 
                                 <span style="color: #45BCFF">${this._short_url}</span>. <br><br>
                                 Press 'Enter' to copy the result to clipboard.<br>`);
         }, "json");
@@ -422,16 +422,16 @@ CmdUtils.CreateCommand({
         if (!text)
             return;
 
-        pblock.wrap("Checking <b>" + text + "</b>");
+        pblock.text("Checking <b>" + text + "</b>");
         var urlString = "https://isitdown.site/api/v3/" + encodeURIComponent(text);
 
         CmdUtils.previewGet(pblock, urlString, (resp) => {
 
             if (!resp) return;
             if (resp.isitdown) {
-                pblock.wrap('It\'s <b>not</b> just you. The site is <b>down!</b>');
+                pblock.text('It\'s <b>not</b> just you. The site is <b>down!</b>');
             } else {
-                pblock.wrap('It\'s just you. The site is <b>up!</b>');
+                pblock.text('It\'s just you. The site is <b>up!</b>');
             }
         }, "json");
     },

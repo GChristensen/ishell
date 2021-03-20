@@ -94,7 +94,7 @@ var __lingvoLiveAPIToken;
                 words = words ? words.trim().toLowerCase() : null;
 
                 this._failureMessage = "Could not translate \"<b>" + words + "</b>\"";
-                this.previewBlock.wrap("Translating <b>" + words + "</b> ...");
+                this.previewBlock.text("Translating <b>" + words + "</b> ...");
 
                 if (this.oldRequest != undefined)
                     this.oldRequest.abort();
@@ -140,7 +140,7 @@ var __lingvoLiveAPIToken;
                             self._onTranslated(words, data, requestUrl);
                         }
                         catch (e) {
-                            self.previewBlock.wrap(self._failureMessage);
+                            self.previewBlock.text(self._failureMessage);
                         }
                     },
                     statusCode: {
@@ -152,11 +152,11 @@ var __lingvoLiveAPIToken;
                                 errorCtr += 1;
                             }
                             else
-                                self.previewBlock.wrap(self._failureMessage);
+                                self.previewBlock.text(self._failureMessage);
                         }
                     },
                     error: function (data) {
-                        self.previewBlock.wrap(self._failureMessage);
+                        self.previewBlock.text(self._failureMessage);
                     }
                 };
 
@@ -167,7 +167,7 @@ var __lingvoLiveAPIToken;
                 var response = this._formatJSON(jsonResponse, words);
 
                 if (response == null) {
-                    this.previewBlock.wrap(this._failureMessage);
+                    this.previewBlock.text(this._failureMessage);
                     executionUrl = null;
                 }
                 else {

@@ -47,7 +47,7 @@
 
     function scrapyardSend(message, payload) {
         let msg = Object.assign({type: message}, payload? payload: {})
-        return browser.runtime.sendMessage(CmdUtils.SCRAPYARD_ID, msg);
+        return browser.runtime.sendMessage(scrapyard_id, msg);
     }
 
     function openListSuggestion(text, html, cb, selectionIndices) {
@@ -731,32 +731,30 @@
         CmdUtils.CreateCommand(options);
     };
 
-    CmdUtils.scrapyardCommands = [shelfCmd, scrapyardCmd, bookmarkCmd, archiveCmd];
-
+    let scrapyard_commands = [shelfCmd, scrapyardCmd, bookmarkCmd, archiveCmd];
+    let ishell_id = browser.runtime.getManifest().applications?.gecko?.id;
+    let scrapyard_id = ishell_id?.includes("-we")
+        ? "scrapyard-we@firefox"
+        : "scrapyard@firefox";
 
     shellSettings.load(settings => {
-        if (settings.scrapyard_id())
-            CmdUtils.SCRAPYARD_ID = settings.scrapyard_id();
-        else
-            CmdUtils.SCRAPYARD_ID = "scrapyard-we@firefox";
-
         chrome.management.onInstalled.addListener((info) => {
-            if (info.id === CmdUtils.SCRAPYARD_ID)
+            if (info.id === scrapyard_id)
                 settings.scrapyard_presents(true, () => chrome.runtime.reload())
         });
 
         chrome.management.onUninstalled.addListener((info) => {
-            if (info.id === CmdUtils.SCRAPYARD_ID)
+            if (info.id === scrapyard_id)
                 settings.scrapyard_presents(false, () => chrome.runtime.reload())
         });
 
         function checkForScrapyard() {
-            chrome.runtime.sendMessage(CmdUtils.SCRAPYARD_ID, {type: "SCRAPYARD_GET_VERSION"}, version => {
+            chrome.runtime.sendMessage(scrapyard_id, {type: "SCRAPYARD_GET_VERSION"}, version => {
                 if (version) {
                     settings.scrapyard_presents(true)
 
-                    if (CmdUtils.scrapyardCommands && CmdManager.commands.indexOf(CmdUtils.scrapyardCommands[0]) < 0)
-                        CmdManager.commands = [...CmdManager.commands, ...CmdUtils.scrapyardCommands];
+                    if (CmdManager.commands.indexOf(scrapyard_commands[0]) < 0)
+                        CmdManager.commands = [...CmdManager.commands, ...scrapyard_commands];
                 }
                 else
                     settings.scrapyard_presents(false);

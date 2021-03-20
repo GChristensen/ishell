@@ -40,7 +40,7 @@ CmdUtils.CreateCommand({
         else
             desc += "from the default account.";
 
-        pblock.wrap(desc);
+        pblock.text(desc);
     },
     execute: async function(args) {
         let gmail = "https://mail.google.com/mail/u/"
@@ -113,7 +113,7 @@ CmdUtils.CreateCommand({
         else
             desc += "at the default account.";
 
-        pblock.wrap(desc);
+        pblock.text(desc);
     },
     execute: async function(args) {
         let gmail = "https://mail.google.com/mail/u/"
@@ -156,10 +156,10 @@ CmdUtils.CreateCommand({
     icon: "/res/icons/forget-email.png",
     preview: function(pblock, args) {
         if (args.object.text) {
-            pblock.wrap("Forget " + args.object.text + ".");
+            pblock.text("Forget " + args.object.text + ".");
         }
         else
-            pblock.wrap(this.description);
+            pblock.text(this.description);
     },
     execute: async function(args) {
         if (args.object.text) {
@@ -200,12 +200,12 @@ CmdUtils.CreateCommand({
     preview: function(pblock, args) {
         if (args.object.text) {
             if (args.object.text.toLowerCase() === "all")
-                pblock.wrap("Forget all emails.");
+                pblock.text("Forget all emails.");
             else
-                pblock.wrap("Forget all emails containing \"" + args.object.text + "\".");
+                pblock.text("Forget all emails containing \"" + args.object.text + "\".");
         }
         else
-            pblock.wrap(this.description);
+            pblock.text(this.description);
     },
     execute: async function(args) {
         if (args.object.text) {

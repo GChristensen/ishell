@@ -132,15 +132,15 @@
                     ph += '<p><em class="error">' +
                         _("The text you selected exceeds the API limit.") +
                         '</em>';
-                pblock.wrap(ph);
+                pblock.text(ph);
                 return;
             }
 
-            pblock.wrap("Translating the selected text...");
+            pblock.text("Translating the selected text...");
             translate(
                 object, from, to,
                 CmdUtils.previewCallback(pblock, function show(html) {
-                    pblock.wrap(html);
+                    pblock.text(html);
                 }))
         }
     });
@@ -176,7 +176,7 @@
             let url = (object && object.text)? Utils.escapeHtml(object.text): "";
             let lang = (goal && goal.text && goal.text !== object.text)? goal.text: "English";
 
-            pb.wrap(`Translates <i>${url}</i> to <strong>${lang}</strong>.`);
+            pb.text(`Translates <i>${url}</i> to <strong>${lang}</strong>.`);
         },
     })
 }
