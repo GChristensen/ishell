@@ -36,11 +36,12 @@
         "DONE": TODO_STATE_DONE
     };
 
+    let completionUpdateRequired = true;
 
     browser.runtime.onMessageExternal.addListener((message, sender, sendResponse) => {
         switch (message.type) {
             case "SCRAPYARD_INVALIDATE_COMPLETION":
-                updateCompletion();
+                completionUpdateRequired = true;
                 break;
         }
     });
@@ -142,38 +143,35 @@
 
     function updateShelfSuggestions() {
         scrapyardSend("SCRAPYARD_LIST_SHELVES").then(shelves => {
-            if (shelves) {
-                noun_scrapyard_shelf._items.length = 0;
-                shelves.forEach(s => noun_scrapyard_shelf._items.push(s));
-            }
+            if (shelves)
+                noun_scrapyard_shelf._items = shelves;
         })
     }
 
 
     function updateGroupSuggestions() {
         scrapyardSend("SCRAPYARD_LIST_GROUPS").then(groups => {
-            if (groups) {
-                noun_scrapyard_group._items.length = 0;
-                groups.forEach(g => noun_scrapyard_group._items.push(g));
-            }
+            if (groups)
+                noun_scrapyard_group._items = groups;
         })
     }
 
 
     function updateTagSuggestions() {
         scrapyardSend("SCRAPYARD_LIST_TAGS").then(tags => {
-            if (tags) {
-                noun_scrapyard_tag._items.length = 0;
-                tags.forEach(t => noun_scrapyard_tag._items.push(t));
-            }
+            if (tags)
+                noun_scrapyard_tag._items = tags;
         })
     }
 
 
     function updateCompletion() {
-        updateShelfSuggestions();
-        updateGroupSuggestions();
-        updateTagSuggestions();
+        if (completionUpdateRequired) {
+            updateShelfSuggestions();
+            updateGroupSuggestions();
+            updateTagSuggestions();
+            completionUpdateRequired = false;
+        }
     }
 
     let getArgumentText = arg =>
@@ -317,8 +315,7 @@
         _namespace: NAMESPACE,
         load: updateCompletion,
         init: function(doc /* popup document */) {
-            if (!noun_scrapyard_group._items.length)
-                updateCompletion();
+            updateCompletion();
         },
         preview: function(pblock, args) {
             let payload = unpackArgs(this, args);
