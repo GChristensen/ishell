@@ -335,16 +335,16 @@
                         let text = "";
 
                         if (n.type === NODE_TYPE_GROUP) {
-                            text = "<img class='n-image' src='/res/icons/folder.svg'>"
+                            text = "<img class='n-icon' src='/res/icons/folder.svg'>"
                                 + "<div class='n-group'>" + Utils.escapeHtml(n.path) + "</div>";
                         }
                         else {
                             if (n.icon) {
                                 n.icon = n.icon.replace(/'/g, "\\'");
-                                text = "<img class='n-image' src='" + n.icon + "'>"
+                                text = "<img class='n-icon' src='" + n.icon + "'>"
                             }
                             else
-                                text = "<img class='n-image' src='/res/icons/globe.svg'>";
+                                text = "<img class='n-icon' src='/res/icons/globe.svg'>";
 
 
                             if (n.uri && !n.name)
@@ -357,7 +357,7 @@
                         items.push(text);
                     }
 
-                    CmdUtils.previewList(pblock, items, (i, _) => {
+                    let list = CmdUtils.previewList(pblock, items, (i, _) => {
                             if (nodes[i].type === NODE_TYPE_GROUP) {
                                 let path = payload.path? payload.path + "/": "";
 
@@ -390,7 +390,7 @@
                         flex-flow: row nowrap;
                         align-content: center;
                      }
-                     .n-image {
+                     .n-icon {
                         width: 16px;
                         height: 16px;
                         float: left;
@@ -427,10 +427,11 @@
                         text-overflow: ellipsis;
                      }`
                     );
+                    
+                    $(list).find("img.n-icon").on("error", 
+                        e => e.target.src = "/res/icons/globe.svg");
                 }
-
             });
-
         },
         execute: function(args, {Bin}) {
 
@@ -602,8 +603,6 @@
         icon: "/res/icons/scrapyard.svg",
         //previewDelay: 1000,
         _namespace: NAMESPACE,
-        //init: function({Bin}) {},
-        //popup: function(doc /* popup document */, {Bin}) {},
         preview: bookmarkingCommandPreview(NODE_TYPE_BOOKMARK),
         execute: bookmarkingCommand(NODE_TYPE_BOOKMARK)
 
@@ -648,8 +647,6 @@
         icon: "/res/icons/scrapyard.svg",
         //previewDelay: 1000,
         _namespace: NAMESPACE,
-        //init: function({Bin}) {},
-        //popup: function(doc /* popup document */, {Bin}) {},
         preview: bookmarkingCommandPreview(NODE_TYPE_ARCHIVE),
         execute: bookmarkingCommand(NODE_TYPE_ARCHIVE)
 

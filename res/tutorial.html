@@ -1147,16 +1147,18 @@ cmdAPI.createCommand({
 
 
 <h2><span id="Anaphora">Anaphora</span></h2>
-<p>If there is active selection, iShell parser will substitute one of the predefined
-    <a href="https://en.wikipedia.org/wiki/Anaphora_(linguistics)" target="_blank">anaphoric</a>
-    pronouns to the selected content. For example, in the following
-    command pronoun <b>this</b> will be substituted for the content of active selection on the current page:<br><br>
-    &nbsp;&nbsp;<b>send</b> <b>this</b> <b>to</b> <i>user@example.com</i> <b>with</b> <i>subject text</i><br><br>
-    This may be useful, if your command contains more than one arbitrary text argument, so it is possible
-    to specify the value of the second such argument in the command line (the <b>with</b> argument in the example above).
-    Without anaphoric pronouns,
-    any text after the first space in the argument value will be assigned to the value of the first arbitrary text argument,
-    which is usually <code>object</code>.
+<p>If there is active selection, and the value of an arbitrary text argument is equal to one of the
+    predefined <a href="https://en.wikipedia.org/wiki/Anaphora_(linguistics)" target="_blank">anaphoric</a>
+    pronouns, the command handler methods will receive content of the selection through this
+    argument. In the following example, pronoun <b>this</b> will be substituted for the content of
+    the active selection at the current page:<br><br>
+    &nbsp;&nbsp;<b>send</b> <b>this</b> <b>to</b> <i>user@example.com</i> <b>with</b> <i>subject
+        text</i><br><br> This may be useful, if the command contains more than one arbitrary text
+    argument, so it is possible to specify any value of the second such argument in the command line
+    (the <b>with</b> argument in the example above). Without anaphoric pronouns all text after the
+    first space in the value of the second arbitrary text argument will be assigned to the
+    the first arbitrary text argument, which is usually <code>object</code>. If there is no active selection,
+    anaphoric pronouns are treated as literal text values of the corresponding arguments.
 </p>
 <p>iShell parser recognizes the following anaphoric pronouns:</p>
 <ul>
