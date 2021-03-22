@@ -652,9 +652,9 @@ class ShowTextCommandClass {
 <p>Classes annotated with the <code>@metaclass</code> annotation do not automatically create
     commands. Instead, they could be instantiated and passed to <code>cmdAPI.createCommand</code>,
     or inherited from. This is convenient, when it is necessary to create a command-generating
-    function like <code>cmdAPI.createSearchCommand</code>, which produces commands that bear the
-    same functionality but differ slightly in some aspects. At the example below, <code>createSuffixCommand</code>
-    function uses this feature.
+    function like <code>cmdAPI.createSearchCommand</code>, which produces commands that contain the
+    same logic but differ slightly in some aspects. At the example below, <code>createSuffixCommand</code>
+    function uses a metaclass to generate a set of such commands.
 </p>
 
 <pre><code data-language="javascript">/**
@@ -699,7 +699,7 @@ createSuffixCommand({name: "um-suffix", suffix: "um", uuid: "uuid1"});
 createSuffixCommand({name: "issa-suffix", suffix: "issa", uuid: "uuid2"});</code></pre>
 
 <p>The <code>text</code> method of the <code>display</code> object adds the same margins to the output,
-as the ones used to display command description, so the text does not wiggle as in the previous command.</p>
+as the ones used to display command description, so the output does not wiggle as in the previous command.</p>
 
 <h2><span id="Introduction_to_Noun_Types">Introduction to Noun Types</span></h2>
 <p>Noun types specify what <i>kind</i> of input your command can accept for each one of its
@@ -1145,6 +1145,29 @@ cmdAPI.createCommand({
     development easier for you.
 </p>
 
+
+<h2><span id="anaphora">Anaphora</span></h2>
+<p>If there is active selection, iShell parser will substitute one of the predefined
+    <a href="https://en.wikipedia.org/wiki/Anaphora_(linguistics)" target="_blank">anaphoric</a>
+    pronouns to the selected content. For example, in the following
+    command pronoun <b>this</b> will be substituted for the content of active selection on the current page:<br><br>
+    &nbsp;&nbsp;<b>send</b> <b>this</b> <b>to</b> <i>user@example.com</i> <b>with</b> <i>subject text</i><br><br>
+    This may be useful, if your command contains more than one arbitrary text argument, so it is possible
+    to specify the value of the second such argument in the command line (the <b>with</b> argument in the example above).
+    Without anaphoric pronouns,
+    any text after the first space in the argument value will be assigned to the value of the first arbitrary text argument,
+    which is usually <code>object</code>.
+</p>
+<p>iShell parser recognizes the following anaphoric pronouns:</p>
+<ul>
+    <li>this</li>
+    <li>that</li>
+    <li>it</li>
+    <li>selection</li>
+    <li>him</li>
+    <li>her</li>
+    <li>them</li>
+</ul>
 
 <h2><span id="Running_on_page_load.2C_iShell_load_and_startup">Running on iShell load and when iShell popup is shown</span></h2>
 <p>There are two additional command properties may be set in cmdAPI.createCommand for that purposes:</p>

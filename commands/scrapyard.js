@@ -307,7 +307,6 @@
         icon: "/res/icons/scrapyard.svg",
         previewDelay: 1000,
         _namespace: NAMESPACE,
-        load: updateCompletion,
         init: function(doc /* popup document */) {
             updateCompletion();
         },
