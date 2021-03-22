@@ -75,16 +75,12 @@
 
     var noun_scrapyard_shelf = {
         label: "shelf",
-        noExternalCalls: true,
-        cacheTime: -1,
         _items: [],
         suggest: openListSuggestion
     };
 
     var noun_scrapyard_group = {
         label: "path",
-        noExternalCalls: true,
-        cacheTime: -1,
         _items: [],
         suggest: openListSuggestion
     };
@@ -92,8 +88,6 @@
 
     var noun_scrapyard_tag = {
         label: "tags",
-        noExternalCalls: true,
-        cacheTime: -1,
         _items: [],
         suggest: openListSuggestion
     };
@@ -166,7 +160,7 @@
 
 
     function updateCompletion() {
-        if (completionUpdateRequired) {
+        if (completionUpdateRequired || !noun_scrapyard_group._items.length) {
             updateShelfSuggestions();
             updateGroupSuggestions();
             updateTagSuggestions();
@@ -736,33 +730,48 @@
 
     shellSettings.load(settings => {
         chrome.management.onInstalled.addListener((info) => {
-            if (info.id === scrapyard_id)
+            if (info.id === scrapyard_id) {
                 settings.scrapyard_presents(true, () => chrome.runtime.reload())
+            }
         });
 
         chrome.management.onUninstalled.addListener((info) => {
-            if (info.id === scrapyard_id)
-                settings.scrapyard_presents(false, () => chrome.runtime.reload())
+            if (info.id === scrapyard_id) {
+                settings.scrapyard_presents(false, () => chrome.runtime.reload());
+            }
         });
 
-        function checkForScrapyard() {
-            chrome.runtime.sendMessage(scrapyard_id, {type: "SCRAPYARD_GET_VERSION"}, version => {
-                if (version) {
-                    settings.scrapyard_presents(true)
-
-                    if (CmdManager.commands.indexOf(scrapyard_commands[0]) < 0)
-                        CmdManager.commands = [...CmdManager.commands, ...scrapyard_commands];
-                }
-                else
-                    settings.scrapyard_presents(false);
-
-                if (!settings.scrapyard_presents())
-                    CmdManager.commands = CmdManager.commands.filter(cmd => !(cmd._builtin && cmd._namespace === "Scrapyard"));
-            });
+        async function scrapyardPresents() {
+            try {
+                return !!(await browser.runtime.sendMessage(scrapyard_id, {type: "SCRAPYARD_GET_VERSION"}));
+            }
+            catch (e) {
+                return false;
+            }
         }
 
-        chrome.runtime.onInstalled.addListener(checkForScrapyard);
-        setTimeout(checkForScrapyard, 2000);
+        async function checkForScrapyard(retry = 1) {
+            //console.log(`Checking for Scrapyard, retry ${retry}`);
+
+            let scrapyard_presents = await scrapyardPresents();
+
+            if (scrapyard_presents) {
+                settings.scrapyard_presents(true)
+
+                if (CmdManager.commands.indexOf(scrapyard_commands[0]) < 0)
+                    CmdManager.commands = [...CmdManager.commands, ...scrapyard_commands];
+            }
+            else {
+                if (retry < 10) {
+                    setTimeout(() => checkForScrapyard(retry + 1), 1000);
+                }
+                else {
+                    settings.scrapyard_presents(false);
+                }
+            }
+        }
+
+        checkForScrapyard();
     });
 }
 
