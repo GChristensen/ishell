@@ -104,19 +104,19 @@ class MySimpleCommand {
         'insertobjectcommandstub':
 `/**
     <!-- example command help -->
-    <span class="syntax">Syntax</span>
-    <p class="syntax">
-       <b>my-command</b> <i>input</i> <b>as</b> <i>display</i>
-    </p>
-    <span class="syntax">Arguments</span>
-    <ul class="syntax">
+    <div class="syntax">
+      <h1>Syntax</h1>
+      <p><b>my-command</b> <i>input</i> <b>as</b> <i>display</i></p>
+      <h1>Arguments</h1>
+      <ul>
         <li>- <i>input</i> - description of the input</li>
         <li>- <i>display</i> - description of the display argument</li>
-    </ul>
-    <span class="syntax">Examples</span>
-    <ul class="syntax">
+      </ul>
+      <h1>Examples</h1>
+      <ul>
         <li><b>my-command</b> <i>show me</i> <b>as</b> <i>popup</i></li>
-    </ul>
+      </ul>
+    </div>
     
     @command
     @license GPL

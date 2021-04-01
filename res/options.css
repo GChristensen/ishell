@@ -407,24 +407,27 @@ div.shell-tutorial h2 {
     font-size: 13px;
 }
 
-ul.syntax {
+ul.syntax, .syntax ul {
     margin-top: 0;
     margin-bottom: 0;
     padding-left: 20px;
     list-style: none;
 }
 
-ul.syntax li {
+ul.syntax li, .syntax ul > li {
     padding: 0;
 }
 
-span.syntax, span.arguments {
+span.syntax, span.arguments, .syntax h1, .syntax h2, .syntax h3  {
+  font-size: 12pt;
   font-weight: 600;
+  font-variant: normal;
   display: inline-block;
-  margin-top: 10px;
+  margin: 10px 0 0 0;
+  color: #777;
 }
 
-p.syntax {
+p.syntax, .syntax p {
   padding-left: 20px;
   margin: 0;
 }
