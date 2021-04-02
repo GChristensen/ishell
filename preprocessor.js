@@ -122,6 +122,39 @@ class CommandPreprocessor {
         return matches.map(m => ({name: m[2], comment: m[1], args: m[3], all: m[0], index: m.index}));
     }
 
+    processMarkdown(text) {
+        let spaces;
+        let unindentRx = /^[ ]{0}/m;
+        let syntax = false;
+        let lines = text.split(/\r?\n/);
+
+        for (let i = 0; i < lines.length; ++i) {
+            let trimmed = lines[i].trim();
+
+            if (trimmed && spaces === undefined) {
+                spaces = lines[i].indexOf(trimmed);
+                if (spaces > 0)
+                    unindentRx = new RegExp(`^[ ]{0,${spaces}}`);
+            }
+
+            lines[i] = lines[i].replace(unindentRx, "");
+
+            // markdown comment: [//]: # (comment text)
+            if (/\[\/\/]: # \(.*?\)$/.exec(lines[i]))
+                lines[i] = "";
+
+            // wrap into div with the "syntax" class if markdown headings are used
+            if (lines[i].match(/^\s*#/))
+                syntax = true;
+        }
+
+        text = lines.join("\n");
+        if (syntax)
+            return`<div class="syntax">${marked(text)}</div>`;
+        else
+            return marked(text);
+    }
+
     extractCommandProperties(comment) {
         let command = comment.match(/@command(.*?)(?:\r?\n|$)/i);
         let delay = comment.match(/@delay (\d+)/i);
@@ -135,6 +168,7 @@ class CommandPreprocessor {
         let namespace = comment.match(/@namespace (.*?)(?:\r?\n|$)/i);
         let hidden = comment.match(/@hidden/i);
         let metaclass = comment.match(/@metaclass/i);
+        let markdown = comment.match(/@markdown/i);
 
         let require;
         let requirePopup;
@@ -164,6 +198,13 @@ class CommandPreprocessor {
                 command_name = command_name.split(" ");
             }
 
+        let help_content = comment.replaceAll(/@\w+.*?(?:\r?\n|$)/g, "");
+
+        if (markdown)
+            help_content = this.processMarkdown(help_content);
+        else
+            help_content = help_content.trim();
+
         return {
             command: command_name,
             delay: delay && delay[1] ? parseInt(delay[1]) : undefined,
@@ -177,7 +218,7 @@ class CommandPreprocessor {
             namespace: this._context === CommandPreprocessor.CONTEXT_BUILTIN? namespace?.[1]?.trim(): undefined,
             hidden: !!hidden,
             metaclass: !!metaclass,
-            help: comment.replaceAll(/@\w+.*?(?:\r?\n|$)/g, "").trim() || undefined,
+            help: help_content,
             require: require,
             requirePopup: requirePopup,
         }

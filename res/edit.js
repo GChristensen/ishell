@@ -103,22 +103,21 @@ class MySimpleCommand {
 
         'insertobjectcommandstub':
 `/**
-    <!-- example command help -->
-    <div class="syntax">
-      <h1>Syntax</h1>
-      <p><b>my-command</b> <i>input</i> <b>as</b> <i>display</i></p>
-      <h1>Arguments</h1>
-      <ul>
-        <li>- <i>input</i> - description of the input</li>
-        <li>- <i>display</i> - description of the display argument</li>
-      </ul>
-      <h1>Examples</h1>
-      <ul>
-        <li><b>my-command</b> <i>show me</i> <b>as</b> <i>popup</i></li>
-      </ul>
-    </div>
+    <!-- Example command help in Markdown -->
+    
+    # Syntax
+    **my-command** _input_ **as** _display_
+
+    # Arguments
+    - _input_ - description of the _input_ argument
+    - _display_ - description of the _display_ argument
+        - this is a nested list
+        
+    # Examples
+    **my-command** _show me_ **as** _popup_
     
     @command
+    @markdown
     @license GPL
     @author Your Name
     @delay 1000
@@ -294,6 +293,8 @@ async function initEditor(settings) {
     editor.getSession().setUseWorker(false);
     editor.setTheme("ace/theme/monokai");
     editor.getSession().setMode("ace/mode/javascript");
+    editor.getSession().setUseSoftTabs(true);
+    editor.getSession().setTabSize(4);
     editor.setPrintMarginColumn(120);
 
     editor.commands.addCommand({

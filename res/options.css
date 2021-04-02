@@ -418,6 +418,12 @@ ul.syntax li, .syntax ul > li {
     padding: 0;
 }
 
+.syntax ul > li:before {
+  content: "-";
+  padding-right: 5px;
+}
+
+
 span.syntax, span.arguments, .syntax h1, .syntax h2, .syntax h3  {
   font-size: 12pt;
   font-weight: 600;
