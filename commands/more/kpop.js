@@ -3,8 +3,8 @@
 CmdUtils.makeSearchCommand({
     name: "kpop",
     uuid: "479E0CB6-981C-4485-AA7B-8296AB383EA7",
-    url: "http://henejeh.hulnews.top/?s=%s",
-    defaultUrl: "http://henejeh.hulnews.top",
+    url: "http://hulnews.top/?s=%s",
+    defaultUrl: "http://hulnews.top",
     arguments: [{role: "object", nountype: noun_arb_text, label: "query"}],
     description: "Search for K-Pop releases.",
     icon: "/commands/more/kpop.png",
