@@ -238,7 +238,7 @@
         preview: function(pblock, {object: {text}}) {
             pblock.innerHTML = "Switch to or create <span style='color: #FD7221;'>"
                 + Utils.escapeHtml(text)
-                + "</span> Scrapyard shelf.";
+                + "</span> Scrapyard shelf or folder.";
         },
         execute: function({object: {text}}) {
             scrapyardSend("SCRAPYARD_SWITCH_SHELF", {name: text});
@@ -522,7 +522,7 @@
 
 
     function bookmarkingCommand(node_type) {
-        return function(args) {
+        return async function(args) {
             let url = CmdUtils.getLocation();
 
             if (!url) {
@@ -542,51 +542,42 @@
             payload.name = payload.search = title;
             payload.uri = url;
 
-            let send = () =>
-                scrapyardSend(node_type == NODE_TYPE_BOOKMARK
-                    ? "SCRAPYARD_ADD_BOOKMARK"
-                    : "SCRAPYARD_ADD_ARCHIVE", payload);
+            let testFavicon = async url => {
+                try {
+                    // get a nice favicon for wikipedia
+                    if (url.origin.endsWith("wikipedia.org"))
+                        return "https://wikipedia.org/favicon.ico";
 
-            let test_default_favicon = () => {
-                let favicon = new URL(CmdUtils.activeTab.url).origin + "/favicon.ico";
-                fetch(favicon, {method: "GET"})
-                    .then(response => {
+                    let response = await fetch(url, {method: "GET"})
+                    if (response.ok) {
                         let type = response.headers.get("content-type") || "image";
-                        if (response.ok && type.startsWith("image"))
-                            response.arrayBuffer().then(bytes => {
-                                        payload.icon = bytes.byteLength? favicon.toString(): undefined;
-                                        send();
-                                    });
-                        else
-                            send();
-                    }).catch(() => send());
-            };
+                        //let length = response.headers.get("content-length") || "0";
+                        if (type.startsWith("image") /*&& parseInt(length) > 0*/)
+                            return url.toString();
+                    }
+                }
+                catch (e) {
+                    console.error(e);
+                }
+            }
 
-            chrome.tabs.executeScript(CmdUtils.activeTab.id, {
-                    code: `function extractIcon() {
-                                let iconElt = document.querySelector("head link[rel*='icon'], head link[rel*='shortcut']");
-                                if (iconElt)
-                                    return iconElt.href;
-                            }
-                            extractIcon();
-                            `
-                },
-                icon => {
-                    if (chrome.runtime.lastError) {
-                        send();
-                    }
-                    else if (icon && icon.length && icon[0]) {
-                        let icon_url = new URL(icon[0], new URL(CmdUtils.activeTab.url).origin);
-                        payload.icon = icon_url.toString();
-                        send();
-                    } else {
-                        test_default_favicon();
-                    }
+            try {
+                let icon = await browser.tabs.executeScript(CmdUtils.activeTab.id, {
+                    code: `document.querySelector("head link[rel*='icon'], head link[rel*='shortcut']")?.href`
                 });
 
-            if (payload.path && noun_scrapyard_group._items && !noun_scrapyard_group._items.includes(payload.path)) {
-                noun_scrapyard_group._items.push(payload.path);
+                if (icon && icon.length && icon[0])
+                    payload.icon = await testFavicon(new URL(icon[0], new URL(CmdUtils.activeTab.url).origin));
+            } catch (e) {
+                console.error(e);
             }
+
+            if (!payload.icon)
+                payload.icon = await testFavicon(new URL("/favicon.ico", new URL(CmdUtils.activeTab.url).origin));
+
+            scrapyardSend(node_type == NODE_TYPE_BOOKMARK
+                ? "SCRAPYARD_ADD_BOOKMARK"
+                : "SCRAPYARD_ADD_ARCHIVE", payload);
         };
     }
 
