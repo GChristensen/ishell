@@ -989,7 +989,7 @@
     function extend(language, languagePatterns, inherits) {
 
         // If we extend a language again we shouldn't need to specify the
-        // inheritence for it. For example, if you are adding special highlighting
+        // inheritance for it. For example, if you are adding special highlighting
         // for a javascript function that is not in the base javascript rules, you
         // should be able to do
         //

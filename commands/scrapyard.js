@@ -542,39 +542,6 @@
             payload.name = payload.search = title;
             payload.uri = url;
 
-            let testFavicon = async url => {
-                try {
-                    // get a nice favicon for wikipedia
-                    if (url.origin.endsWith("wikipedia.org"))
-                        return "https://wikipedia.org/favicon.ico";
-
-                    let response = await fetch(url, {method: "GET"})
-                    if (response.ok) {
-                        let type = response.headers.get("content-type") || "image";
-                        //let length = response.headers.get("content-length") || "0";
-                        if (type.startsWith("image") /*&& parseInt(length) > 0*/)
-                            return url.toString();
-                    }
-                }
-                catch (e) {
-                    console.error(e);
-                }
-            }
-
-            try {
-                let icon = await browser.tabs.executeScript(CmdUtils.activeTab.id, {
-                    code: `document.querySelector("head link[rel*='icon'], head link[rel*='shortcut']")?.href`
-                });
-
-                if (icon && icon.length && icon[0])
-                    payload.icon = await testFavicon(new URL(icon[0], new URL(CmdUtils.activeTab.url).origin));
-            } catch (e) {
-                console.error(e);
-            }
-
-            if (!payload.icon)
-                payload.icon = await testFavicon(new URL("/favicon.ico", new URL(CmdUtils.activeTab.url).origin));
-
             scrapyardSend(node_type == NODE_TYPE_BOOKMARK
                 ? "SCRAPYARD_ADD_BOOKMARK"
                 : "SCRAPYARD_ADD_ARCHIVE", payload);

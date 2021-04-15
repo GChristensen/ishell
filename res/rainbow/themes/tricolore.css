@@ -147,7 +147,7 @@ pre .string {
     color: #8E0022
 }
 
-pre .keyword, pre .selector {
+pre .keyword, pre .selector, pre .this {
     color: #0000A1;
     font-weight: bold
 }
