@@ -245,13 +245,17 @@ class CommandPreprocessor {
         return _arguments;
     }
 
-    static assignCommandPreview() {
-        return function (pblock, args, storage) {
-            for (let role of PREPROCESSOR_PREPOSITION_MAP.keys())
-                if (args[role])
-                    args[PREPROCESSOR_PREPOSITION_MAP.get(role)] = args[role]
+    static assignCommandPreview(command) {
+        if (command.preview && typeof command.preview === "function") {
+            command.__oo_preview = command.preview;
 
-            this.__oo_preview(args, pblock, storage);
+            command.preview = function (pblock, args, storage) {
+                for (let role of PREPROCESSOR_PREPOSITION_MAP.keys())
+                    if (args[role])
+                        args[PREPROCESSOR_PREPOSITION_MAP.get(role)] = args[role];
+
+                this.__oo_preview(args, pblock, storage);
+            }
         }
     }
 
@@ -310,8 +314,7 @@ class CommandPreprocessor {
     let command = new ${object.name}(args);
     command.arguments = CommandPreprocessor.assignCommandArguments(args);
     
-    command.__oo_preview = command.preview;
-    command.preview = CommandPreprocessor.assignCommandPreview();\n\n`
+    CommandPreprocessor.assignCommandPreview(command);\n\n`
 
         block += this.generateCommandPropertyBlock(object.properties, "command.");
         block += `\n    cmdAPI.createCommand(command);\n}\n`;
@@ -332,8 +335,7 @@ class CommandPreprocessor {
         let args = {};
         super(args);
         this.arguments = CommandPreprocessor.assignCommandArguments(args);
-        this.__oo_preview = this.preview;
-        this.preview = CommandPreprocessor.assignCommandPreview(); 
+        CommandPreprocessor.assignCommandPreview(this); 
         
         ${this.generateCommandPropertyBlock(object.properties, "this.")}        
         
