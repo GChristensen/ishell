@@ -1,6 +1,6 @@
 # iShell Extension
 
-A natural language interface for web browsers.
+A text command interface for web browsers.
 
 This is a development page. Please visit the main site at: https://gchristensen.github.io/ishell/
 
