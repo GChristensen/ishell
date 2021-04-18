@@ -1,4 +1,4 @@
 theme: jekyll-theme-minimal
 title: iShell
 logo: media/ishell-logo.svg
-description: A natural language interface for web browsers
+description: A text command interface for web browsers
