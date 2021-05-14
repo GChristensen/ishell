@@ -220,7 +220,7 @@ class SuggestionManager {
 
     executeSelection() {
         if (this.selection) {
-            CmdManager.callExecute(this.selection)
+            return CmdManager.callExecute(this.selection)
                 .then(() => {
                     CmdUtils._internalClearSelection();
                 });
@@ -377,7 +377,7 @@ async function keydown_handler(evt) {
         }
 
         CmdManager.commandHistoryPush(input);
-        suggestions.executeSelection();
+        await suggestions.executeSelection();
         window.close();
         return;
     }

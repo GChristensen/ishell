@@ -72,6 +72,7 @@
         return {};
     }
 
+    cmdAPI.scrapyard = {};
 
     var noun_scrapyard_shelf = {
         label: "shelf",
@@ -84,7 +85,6 @@
         _items: [],
         suggest: openListSuggestion
     };
-
 
     var noun_scrapyard_tag = {
         label: "tags",
@@ -161,7 +161,7 @@
 
     function updateCompletion() {
         if (completionUpdateRequired || !noun_scrapyard_group._items.length) {
-            updateShelfSuggestions();
+            //updateShelfSuggestions();
             updateGroupSuggestions();
             updateTagSuggestions();
             completionUpdateRequired = false;
@@ -682,6 +682,20 @@
         ? "scrapyard-we@firefox"
         : "scrapyard@firefox";
 
+    let scrapyardProxy = new Proxy({}, {
+        get(target, key, receiver) {
+
+            if (key === "noun_type_directory")
+                return noun_scrapyard_group;
+
+            return (val) => {
+                const payload = val || {};
+                payload.type = "SCRAPYARD_" + key.replace(/([a-z0-9]|(?=[A-Z]))([A-Z])/g, '$1_$2').toUpperCase();
+                return browser.runtime.sendMessage(scrapyard_id, payload);
+            };
+        }
+    });
+
     shellSettings.load(settings => {
         chrome.management.onInstalled.addListener((info) => {
             if (info.id === scrapyard_id) {
@@ -714,6 +728,8 @@
 
                 if (CmdManager.commands.indexOf(scrapyard_commands[0]) < 0)
                     CmdManager.commands = [...CmdManager.commands, ...scrapyard_commands];
+
+                cmdAPI.scrapyard = scrapyardProxy;
             }
             else {
                 if (retry < 10) {
