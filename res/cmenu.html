@@ -50,6 +50,12 @@
             width: 100%;
         }
 
+        #option-context-history-row {
+            display: flex;
+            align-items: center;
+            align-content: center;
+        }
+
     </style>
 </head>
 <body dir="ltr">
@@ -73,7 +79,7 @@
 <div id="context-menu-container">
     <h2 class="top">Context menu commands</h2>
     <div id="context-menu-commands-wrapper"><table id="context-menu-commands"></table></div>
-    <div><input type="checkbox" id="cm-history-switch"/><label for="cm-history-switch">Do not add context menu commands to history</label></div>
+    <div id="option-context-history-row"><input type="checkbox" id="cm-history-switch"/><label for="cm-history-switch">Do not add context menu commands to history</label></div>
 </div>
 
 <!--br clear="all"/>

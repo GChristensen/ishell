@@ -35,6 +35,13 @@
             margin-top: 5px;
             margin-bottom: 5px;
             padding-right: 30px;
+            display: flex;
+            align-content: center;
+            align-items: center;
+        }
+
+        #toolbar-spacer {
+            flex: 1 0;
         }
 
         #file-picker {
@@ -42,7 +49,19 @@
         }
 
         #script-namespaces, #create-namespace, #delete-namespace, #ns-label, #expand-editor {
-            float: right; display: inline-block;
+            display: inline-block;
+        }
+
+        #script-namespaces {
+            margin-right: 2px;
+        }
+
+        #create-namespace, #expand-editor {
+            margin-left: 4px;
+        }
+
+        #delete-namespace {
+            margin-left: 1px;
         }
 
         #footer {
@@ -100,13 +119,15 @@
 
     <input type="file" id="file-picker"/>
 
-    <a href=# id="expand-editor">&nbsp;<img src="/res/icons/expand.png"/></a>
-    <a href=# id="delete-namespace"><img src="/res/icons/document_delete.png" title="Delete category"
-    /></a><a href=# id="create-namespace">&nbsp;<img src="/res/icons/document_create.png" title="Create category"/></a>
+    <div id="toolbar-spacer"></div>
+
+    <span id="ns-label">Category:&nbsp;</span>
     <select id="script-namespaces">
         <option value="default">&lt;default&gt;</option>
     </select>
-    <span id="ns-label">Category:&nbsp;</span>
+    <a href=# id="create-namespace"><img src="/res/icons/document_create.png" title="Create category"/></a>
+    <a href=# id="delete-namespace"><img src="/res/icons/document_delete.png" title="Delete category"/></a>
+    <a href=# id="expand-editor"><img src="/res/icons/expand.png"/></a>
 </div>
 </div>
 <div id="panel">

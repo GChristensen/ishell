@@ -12,6 +12,36 @@ body {
   color: #000;
 }
 
+input[type="checkbox"] {
+  padding: 0;
+  margin-right: 4px;
+  border: 0;
+  height: 14px;
+  width: 14px;
+  appearance: none;
+  display: inline-block;
+  background-repeat: no-repeat;
+  background-position: 0 0;
+  cursor: pointer;
+  background-image: url("images/checkbox.png");
+}
+
+input[type="checkbox"]:checked {
+  background-position: 0 -14px;
+}
+
+input[type="text"] {
+  border: 1px solid #777;
+  appearance: none;
+  padding: 2px;
+}
+
+input[type="text"]:focus {
+  outline: none;
+  border: 1px solid #007799;
+  padding: 2px;
+}
+
 #nav-container {
   margin-left: -40px;
   float: left;
@@ -170,6 +200,10 @@ h2.top {
   color: black;
 }
 
+.command input[type=checkbox] {
+  margin-top: 5px;
+}
+
 #skin-list {
   padding: 0;
 }
@@ -187,8 +221,6 @@ h2.top {
   margin-top: 5px;
   color: #777;
 }
-
-
 
 #preview-image {
   border: 3px solid #000;

@@ -368,6 +368,12 @@ async function initEditor(settings) {
                     }
                 }
 
+                const builtin = CmdManager.commands.some(c => c._namespace === name && c._builtin);
+                if (builtin) {
+                    CmdUtils.notify("A builtin category with the same name already exists.");
+                    break ADD_NAME;
+                }
+
                 scriptNamespace = name;
                 editor.getSession().setValue("");
                 editor.getSession().setUndoManager(new ace.UndoManager())

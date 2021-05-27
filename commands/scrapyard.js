@@ -1,5 +1,5 @@
 {
-    const NAMESPACE = "Scrapyard";
+    const SCRAPYARD_NAMESPACE = "Scrapyard";
 
     const DEFAULT_OUTPUT_LIMIT = 50;
 
@@ -173,6 +173,7 @@
             ? arg.text
             : null;
 
+
     function unpackArgs(cmd, args) {
 
         if (cmd.__scr_ignore_args) {
@@ -234,16 +235,19 @@
         arguments: [{role: "object", nountype: noun_scrapyard_group, label: "name"}],
         description: "Switch to or create a shelf in Scrapyard.",
         icon: "/res/icons/scrapyard.svg",
-        _namespace: NAMESPACE,
+        _namespace: SCRAPYARD_NAMESPACE,
         preview: function(pblock, {object: {text}}) {
-            pblock.innerHTML = "Switch to or create <span style='color: #FD7221;'>"
+            let html = "Switch to or create <span style='color: #FD7221;'>"
                 + Utils.escapeHtml(text)
                 + "</span> Scrapyard shelf or folder.";
+
+            pblock.text(html);
         },
         execute: function({object: {text}}) {
             scrapyardSend("SCRAPYARD_SWITCH_SHELF", {name: text});
         }
     });
+
 
     let scrapyardCmd = CmdUtils.CreateCommand({
         name: "scrapyard",
@@ -306,7 +310,7 @@
             </ul>`,
         icon: "/res/icons/scrapyard.svg",
         previewDelay: 1000,
-        _namespace: NAMESPACE,
+        _namespace: SCRAPYARD_NAMESPACE,
         init: function(doc /* popup document */) {
             updateCompletion();
         },
@@ -480,8 +484,6 @@
     ];
 
 
-    let bookmarkingCommandHelp = "help";
-
     function bookmarkingCommandPreview(node_type) {
         return function(pblock, args) {
             let {search, path, tags, todo_state, todo_date, details} = unpackArgs(this, args);
@@ -516,7 +518,7 @@
             }
 
             if (html)
-                pblock.innerHTML = html;
+                pblock.text(html);
         }
     }
 
@@ -560,7 +562,7 @@
             </ul>`,
         icon: "/res/icons/scrapyard.svg",
         //previewDelay: 1000,
-        _namespace: NAMESPACE,
+        _namespace: SCRAPYARD_NAMESPACE,
         preview: bookmarkingCommandPreview(NODE_TYPE_BOOKMARK),
         execute: bookmarkingCommand(NODE_TYPE_BOOKMARK)
 
@@ -604,10 +606,101 @@
             </ul>`,
         icon: "/res/icons/scrapyard.svg",
         //previewDelay: 1000,
-        _namespace: NAMESPACE,
+        _namespace: SCRAPYARD_NAMESPACE,
         preview: bookmarkingCommandPreview(NODE_TYPE_ARCHIVE),
         execute: bookmarkingCommand(NODE_TYPE_ARCHIVE)
 
+    });
+
+
+    let copyingArgs = [
+        {role: "object", nountype: noun_scrapyard_group, label: "path"},
+        {role: "cause",  nountype: ["switching"], label: "action"}, // by
+    ];
+
+    function copyingCommandPreview() {
+        return function(pblock, {object, cause}) {
+            let html = "";
+
+            if (object)
+                html += "Path: <span style='color: #FD7221;'>" + Utils.escapeHtml(object.text) + "</span><br>";
+
+            if (cause?.text) {
+                let action;
+
+                switch (cause.text) {
+                    case "switching":
+                        action = "switch to the destination folder";
+                        break;
+                }
+
+                html += "Action: <span style='color: #45BCFF;'>" + action + "</span><br>";
+            }
+
+            if (html)
+                pblock.text(html);
+        }
+    }
+
+    function copyingCommand(message) {
+        return function({object, cause}) {
+            if (!object?.text)
+                return;
+
+            const payload = {
+                path: object.text,
+                action: cause?.text
+            };
+
+            scrapyardSend(message, payload);
+        }
+    }
+
+    let copyAtCmd = CmdUtils.CreateCommand({
+        name: "copy-at",
+        uuid: "F21CD346-D5B0-41F1-BAC0-1E325DB9DD21",
+        arguments: copyingArgs,
+        description: "Copy selected bookmarks at the destination folder.",
+        help:  `<span class="syntax">Syntax</span>
+            <ul class="syntax">
+                <li><b>copy-at</b> <i>path</i> [<b>by</b> <i>action</i>]</li>
+            </ul>
+            <span class="arguments">Arguments</span><br>
+            <ul class="syntax">
+                <li>- <i>path</i> - path of the destination folder.</li>
+            </ul>
+            <ul class="syntax">
+                <li>- <i>action</i> - action to take after copying:</li>
+                <ul class="syntax">
+                    <li><b>switching</b> - switch to the destination folder.</li>
+                </ul>
+            </ul>
+            <span class="arguments">Examples</span>
+            <ul class="syntax">
+                <li><b>copy-at</b> <i>~/wiki</i> <b>by</b> <i>switching</i></li>
+            </ul>`,
+        icon: "/res/icons/scrapyard.svg",
+        //previewDelay: 1000,
+        _namespace: SCRAPYARD_NAMESPACE,
+        preview: copyingCommandPreview(),
+        execute: copyingCommand("SCRAPYARD_COPY_AT")
+    });
+
+
+    let moveAtCmd = CmdUtils.CreateCommand({
+        name: "move-at",
+        uuid: "425CC0C9-8794-486E-AF8C-3D64F92F9AD7",
+        arguments: copyingArgs,
+        description: "Move selected bookmarks at the destination folder.",
+        help:  `<span class="syntax">Syntax</span>
+            <ul class="syntax">
+                <li>Same as <b>copy-at</b>.</li>
+            </ul>`,
+        icon: "/res/icons/scrapyard.svg",
+        //previewDelay: 1000,
+        _namespace: SCRAPYARD_NAMESPACE,
+        preview: copyingCommandPreview(),
+        execute: copyingCommand("SCRAPYARD_MOVE_AT")
     });
 
 
@@ -676,13 +769,13 @@
         CmdUtils.CreateCommand(options);
     };
 
-    let scrapyard_commands = [shelfCmd, scrapyardCmd, bookmarkCmd, archiveCmd];
+    let scrapyard_commands = [shelfCmd, scrapyardCmd, bookmarkCmd, archiveCmd, copyAtCmd, moveAtCmd];
     let ishell_id = browser.runtime.getManifest().applications?.gecko?.id;
     let scrapyard_id = ishell_id?.includes("-we")
         ? "scrapyard-we@firefox"
         : "scrapyard@firefox";
 
-    let scrapyardProxy = new Proxy({}, {
+    cmdAPI.scrapyard = new Proxy({}, {
         get(target, key, receiver) {
 
             if (key === "noun_type_directory")
@@ -728,8 +821,6 @@
 
                 if (CmdManager.commands.indexOf(scrapyard_commands[0]) < 0)
                     CmdManager.commands = [...CmdManager.commands, ...scrapyard_commands];
-
-                cmdAPI.scrapyard = scrapyardProxy;
             }
             else {
                 if (retry < 10) {

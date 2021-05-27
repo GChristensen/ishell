@@ -4,7 +4,7 @@ body {
     margin: 0;
     background-color: black;
     font-size: 12pt;
-    font-family: Calibri, Helvetica, Arial;
+    font-family: Calibri, Helvetica, Arial, sans-serif;
     font-weight: normal;
 }
 
@@ -43,7 +43,7 @@ body {
     -webkit-appearance: none;
     outline: none;
 
-    font-family: Geneva, Tahoma, Verdana;
+    font-family: Geneva, Tahoma, Verdana, sans-serif;
     text-shadow: #888 0px 1px .2px;
 }
 
