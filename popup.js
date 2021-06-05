@@ -98,8 +98,6 @@ class SuggestionManager {
                 break;
             default:
                 let previewCallback = () => {
-                    // zoom overflow dirty fix
-                    $("#shell-command-preview").css("overflow-y", "auto");
                     this._popup.invalidatePreview();
                     CmdManager.callPreview(sentence, this._popup.pblock);
                 };
@@ -146,7 +144,7 @@ class SuggestionManager {
         if (!icon || icon === "http://example.com/favicon.ico") {
             icon = '/res/icons/logo.svg';
         }
-        icon = '<img src="' + icon + '" border="0" alt="" align="absmiddle"> ';
+        icon = '<img class="suggestion-icon" src="' + icon + '" alt=""> ';
         return icon;
     }
 
@@ -157,14 +155,10 @@ class SuggestionManager {
         for (let i in suggestions) {
             var s = suggestions[i];
             var li = document.createElement('LI');
-            li.innerHTML = `<div id="suggestion-item-${i}">
-                                        <table cellspacing="1" cellpadding="1">
-                                            <tr>
-                                                <td>${this._decorateIcon(s.icon)}</td>
-                                                <td>${s.displayHtml}</td>
-                                            </tr>
-                                        </table>
-                                    </div>`;
+            li.innerHTML = `<div id="suggestion-item-${i}" class="suggestion-item">        
+                                <div class="suggestion-icon">${this._decorateIcon(s.icon)}</div>
+                                <div class="suggestion-text">${s.displayHtml}</div>
+                            </div>`;
             if (i == this._selected_suggestion) {
                 li.setAttribute('class', 'selected');
             }
@@ -239,7 +233,7 @@ class PopupWindow {
         this._last_input_text = "";
         this._input_element = document.getElementById('shell-input');
         this._preview_element = document.getElementById('shell-command-preview');
-        this._suggestions_element = document.getElementById('shell-suggestion-panel');
+        this._suggestions_element = document.getElementById('shell-command-suggestions');
 
         // add a handy set method to populate innerHTML of the preview area
         if (!this._preview_element.set)

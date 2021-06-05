@@ -485,13 +485,13 @@ shellSettings.load(settings => {
             pblock.innerHTML = `
                 <div class="mapouter">
                     <div class="gmap_canvas">
-                        <iframe width="540" height="505" id="gmap_canvas" src="https://maps.google.com/maps?q=`
+                        <iframe width="546" height="507" id="gmap_canvas" src="https://maps.google.com/maps?q=`
                         + encodeURIComponent(args.object.text) + `&t=&z=13&ie=UTF8&iwloc=&output=embed" 
                         frameborder="0" scrolling="no" marginheight="0" marginwidth="0"></iframe>
                     </div>
                 <style>
-                    .mapouter{text-align:right;height:505px;width:540px;}
-                    .gmap_canvas {overflow:hidden;background:none!important;height:504px;width:540px;}
+                    .mapouter{overflow:hidden;text-align:right;height:507px;width:546px; margin-top: -3px; margin-left: -7px;}
+                    .gmap_canvas {overflow:hidden;background:none!important;height:507px;width:546px;}
                 </style>
                 </div>`;
         },

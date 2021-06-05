@@ -1,184 +1,170 @@
+:root {
+    --shell-width: 800px;
+    --shell-height: 565px;
+    --shell-input-height: 55px;
+    --shell-suggestion-width: 260px;
+}
+
+/** {*/
+/*    outline: 1px solid #f00 !important;*/
+/*}*/
+
 body {
-    width: 780px;
-    height: 560px;
-    margin: 0;
+    width: var(--shell-width);
+    height: var(--shell-height);
+    min-width: var(--shell-width);
+    min-height: var(--shell-height);
     background-color: black;
-    font-size: 12pt;
     font-family: Calibri, Helvetica, Arial, sans-serif;
     font-weight: normal;
+    font-size: 12pt;
+    margin: 0;
+    padding: 0;
+    border: 0;
+    overflow: hidden;
 }
 
 #shell-window {
     position: fixed;
-    left: 0px;
-    top: 0px;
-    visibility: visible;
-    width: 780px;
-    height: 560px;
-    border: 0px;
-    padding: 0px;
+    left: 0;
+    top: 0;
+    bottom: 0;
+    right: 0;
+    width: var(--shell-width);
+    height: var(--shell-height);
+    border: 0;
+    padding: 0;
+    margin: 0;
     z-index: 99999;
     background: #2d2d2d;
     overflow: hidden;
-}
-
-#shell-input-panel {
-    border: 0;
-    margin: 0;
-    width: 780px;
-    height: 55px;
+    display: grid;
+    grid-template-columns: var(--shell-suggestion-width) auto;
+    grid-template-rows: var(--shell-input-height) auto;
 }
 
 #shell-input {
-    border: 0px; 
-    /*border-bottom: 1px outset gray;*/
+    border: 0;
+    margin: 0;
+    grid-column: 1 / 3;
+    grid-row: 1 / 2;
+    border: 0;
     width: 100%;
     height: 100%;
-    margin: 0px;
-    padding-left: 4pt;
-    padding-right: 4pt;
+    box-sizing: border-box;
+    margin: 0;
+    padding: 0 4pt;
     background: #d3d3d3;
     color: #333;
     font-size: 18pt;
     -webkit-appearance: none;
     outline: none;
-
     font-family: Geneva, Tahoma, Verdana, sans-serif;
-    text-shadow: #888 0px 1px .2px;
+    text-shadow: #888 0 1px 0.2px;
 }
 
 #shell-input:focus {
-	color:black;
-}        
-
-#shell-command-tip, #shell-command-preview, #shell-results-panel {
-    border: 0;
-    display: block;
+	color: black;
 }
 
-#shell-bottom-panel {
-    height: 100%;
-}
-#shell-command-panel {
-    width: 540px; 
-    height: 100%;
-    vertical-align: top;
-}
-
-#shell-command-tip {
-    color: #ddd;
-    font-style: italic;
-    width: 540px; 
-    height: 0px;
-}
-
-#shell-command-preview {
-    color: #ddd;
-    /* width: 540px;  */
-    width: 100%; 
-    height: 505px;
-    position: relative;
-    /* overflow-y: auto; */
-    /* zoom overflow dirty fix */
-    overflow-y: hidden;
-    padding-top: 5px;
-}
-
-#shell-command-preview a {
-    color:white;
-    text-decoration: bold;
-    font-size: 11.5pt;
-}
-
-#shell-command-preview #shell-preview-div {
-    --zoom: 1.0;
-    transform: scale(var(--zoom)); transform-origin: 0px 0px;
-    -moz-transform: scale(var(--zoom)); -moz-transform-origin: 0 0;
-    -webkit-transform: scale(var(--zoom)); -webkit-transform-origin: 0 0;
-    width: calc(100% / var(--zoom)) !important;
-    height: calc(100% / var(--zoom)) !important;
-    height: 100%;
-    overflow: hidden; 
-    position: relative; border:0px;
-}
-#shell-preview-div #shell-preview-frm {
-    --scrollX: 0px;
-    --scrollY: 0px;
-    width: calc(100%  + var(--scrollX)) !important; 
-    height: calc(100% + var(--scrollY)) !important;
-    background-color: transparent;
-    border: 0px;
-}
-
-#shell-suggestion-panel {
-    vertical-align: top;
-    width: 100%;
-    height: 505px;
+#shell-command-suggestions {
+    grid-column: 1 / 2;
+    grid-row: 2 / 3;
+    width: var(--shell-suggestion-width);
     margin: 0;
-    clear: both;
     text-align: left;
     color: white;
 }
-/* 
-#shell-suggestion-panel.result {
-    padding-left: 4pt;
-    padding-right: 4pt;
-}
- */
-#shell-suggestion-panel ul {
-	padding:0; 
-	margin:0;
-    width: 240px; 
+
+#shell-command-suggestions ul {
+    padding: 0;
+    margin: 0;
+    width: var(--shell-suggestion-width);
     height: 100%;
     background: linear-gradient(90deg, #3b3b3b 90%, transparent 10%, rgba(0,0,0,0) 0), #2d2d2d;
-    background-size: 257px auto;
+    background-size: calc(var(--shell-suggestion-width) + 17px) auto;
 }
 
-#shell-suggestion-panel li {
-	color: black; 
-	list-style: none; 
-	margin: 0; 
-    padding-top: 2pt;
-	vertical-align: middle;
-	padding-left: 6px;
-	font-size: 12pt;
-	/*height: 22pt;*/
-    width: 225px;
-	background-color: #a9a9a9;
-	background-repeat: repeat;
+#shell-command-suggestions li {
+    color: black;
+    list-style: none;
+    margin: 0;
+    padding-top: 2px;
+    padding-bottom: 2px;
+    min-height: 28px;
+    padding-left: 4px;
+    font-size: 12pt;
+    width: calc(var(--shell-suggestion-width) - 15px);
+    background-color: #a9a9a9;
+    background-repeat: repeat;
     cursor: pointer;
 }
 
-#shell-suggestion-panel li img {
+#shell-command-suggestions li img {
     height: 16px;
     width: 16px;
     margin: 4px;
 }
 
-#shell-suggestion-panel li.selected {
-	background-color: #d3d3d3; 
-    /* background: linear-gradient(#efefef, #b0b0b0); */
+#shell-command-suggestions li.selected {
+    background-color: #d3d3d3;
     position:relative;
-    width: 225px;
+    width: calc(var(--shell-suggestion-width) - 15px);
 }
 
-#shell-suggestion-panel .more-commands {
-    width: 225px;
-    line-height: 10px;
-    text-align: center;
-}
-
-#shell-suggestion-panel li.selected::after {
-    position:absolute;
-    top:0%;
-    left:100%;
-    content:"";
-    margin-left:0px;
-    width: 0; 
-    height: 0; 
+#shell-command-suggestions li.selected::after {
+    position: absolute;
+    top: 0;
+    left: 100%;
+    content: "";
+    margin-left: 0;
+    width: 0;
+    height: 0;
     border-top: 12pt solid transparent;
     border-bottom: 12pt solid transparent;
     border-left: 6pt solid #d3d3d3;
+}
+
+.suggestion-item {
+    display: flex;
+    align-content: center;
+    align-items: stretch;
+    flex-wrap: nowrap;
+}
+
+div.suggestion-icon {
+    display: flex;
+    align-items: center;
+    align-content: center;
+    padding-right: 2px !important;
+}
+
+div.suggestion-text {
+    flex-grow: 1;
+    overflow: hidden;
+    vertical-align: middle;
+    display: inline-block;
+    margin-right: 2px;
+    padding-top: 2px;
+}
+
+#shell-command-preview {
+    border: 0;
+    display: block;
+}
+
+#shell-command-preview {
+    grid-column: 2 / 3;
+    grid-row: 2 / 3;
+    color: #ddd;
+    position: relative;
+    padding-top: 5px;
+    overflow-y: auto;
+}
+
+#shell-command-preview a {
+    color: white;
+    font-size: 11.5pt;
 }
 
 #shell-help-wrapper, .description, .help, .error {

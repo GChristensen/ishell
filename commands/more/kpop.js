@@ -13,11 +13,11 @@ CmdUtils.makeSearchCommand({
     previewDelay: 1000,
     parser: {
         type: "html",
-        container  : "article[id^='post']",
-        title      : ".post-title a",
-        href       : ".post-title a",
-        thumbnail  : ".post-thumbnail img",
-        body       : ".post-meta li:nth-of-type(2)",
+        container  : "article[class*='post']",
+        title      : ".title a",
+        href       : ".title a",
+        thumbnail  : ".featured-thumbnail img",
+        body       : ".thetime",
         maxResults : 20,
         display: "previewList2"
     }
