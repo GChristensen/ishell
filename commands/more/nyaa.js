@@ -185,7 +185,7 @@ NS_MORE_COMMANDS = "More Commands";
             }
 
             resultCell.addClass("nyaa-error");
-            console.log(e);
+            console.error(e)
         }
 
         return result;

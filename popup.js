@@ -1,7 +1,6 @@
 let popup;
 let suggestions;
 
-
 class SuggestionManager {
     constructor(popup, parser, max_suggestions) {
         this._max_suggestions = max_suggestions;
@@ -485,7 +484,7 @@ async function initPopup(settings) {
 
 $(window).on('load', () => shellSettings.load(settings => initPopup(settings)));
 
-$(window).on('unload', function() {
+$(window).on('beforeunload', function() {
     CmdManager.commandHistoryPush(popup.getInput());
     suggestions.strengthenMemory();
 });

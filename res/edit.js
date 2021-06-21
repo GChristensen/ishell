@@ -258,7 +258,7 @@ async function saveScript() {
             settings = JSON.parse(customscode)
         }
         catch (e) {
-            console.log(e);
+            console.error(e)
             return;
         }
 

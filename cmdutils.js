@@ -192,7 +192,7 @@ CmdUtils.updateSelection = async function (tab_id) {
         results = await browser.tabs.executeScript(tab_id, {file: "/selection.js", allFrames: true});
     }
     catch (e) {
-        console.log(e);
+        console.error(e)
     }
 
     if (results && results.length)
@@ -230,7 +230,7 @@ CmdUtils.updateActiveTab = async function () {
         }
     }
     catch (e) {
-        console.log(e);
+        console.error(e);
     }
 };
 
