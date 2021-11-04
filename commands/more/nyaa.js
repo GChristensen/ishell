@@ -9,9 +9,9 @@ NS_MORE_COMMANDS = "More Commands";
             <tr>
               <td class="nyaa-results result-si">nyaa.si: Loading...</td>
             </tr>
-            <tr>
+            <!--tr>
               <td class="nyaa-results result-net">nyaa.net: Loading...</td>
-            </tr>
+            </tr-->
           </tbody>
         </table>`;
 
@@ -201,12 +201,12 @@ NS_MORE_COMMANDS = "More Commands";
         }
 
         const fetchNyaaSi = () => fetchTorrents.call(this, pblock, query, category, domain, "nyaa.si", progress);
-        const fetchNyaaNet = () => fetchTorrents.call(this, pblock, query, category, domain, "nyaa.net", progress);
+        //const fetchNyaaNet = () => fetchTorrents.call(this, pblock, query, category, domain, "nyaa.net", progress);
 
         const nyaaSi = fetchNyaaSi();
-        const nyaaNet = fetchNyaaNet();
+        //const nyaaNet = fetchNyaaNet();
 
-        await Promise.all([nyaaSi, nyaaNet])
+        await Promise.all([nyaaSi/*, nyaaNet*/])
 
         if ((await nyaaSi) === "http-error") {
             await new Promise(resolve => setTimeout(resolve,  1500));

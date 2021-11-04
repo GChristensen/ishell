@@ -632,11 +632,11 @@ shellSettings.load(settings => {
 
 
 
-    const LIBGEN_HOST = "http://libgen.li/";
+    const LIBGEN_HOST = "http://libgen.is/";
     const LIBGEN_HOST2 = "http://libgen.io/";
 
     var libgenSearch = {
-// derived from https://github.com/toddpress/Looky_Booky
+        // derived from https://github.com/toddpress/Looky_Booky
         getBooks_: () => {},
 
         getJSONResults: function(pblock, q, getBooks) {
@@ -747,7 +747,7 @@ shellSettings.load(settings => {
                     {role: "instrument", nountype: ["asc", "desc"], label: "sort mode"}, // with
                     {role: "modifier",   nountype: ["year", "title", "author"], label: "order"}, // of
                     {role: "cause",      nountype: ["25", "50", "100"], label: "amount"}, // by
-                    {role: "time",       nountype: ["libgen.io", "libgen.li"], label: "server"}, // at
+                    {role: "time",       nountype: ["libgen.is", "libgen.io"], label: "server"}, // at
         ],
         description: "Search Library Genesis",
         help:  `<span class="syntax">Syntax</span>
@@ -791,7 +791,7 @@ shellSettings.load(settings => {
             if (args.cause && args.cause.text)
                 amount = args.cause.text;
 
-            let libgen_host = (args.time && args.time.text && args.time.text === "libgen.is")
+            let libgen_host = (args.time && args.time.text && args.time.text === "libgen.io")
                 ? LIBGEN_HOST2
                 : LIBGEN_HOST;
 
@@ -855,11 +855,11 @@ shellSettings.load(settings => {
                     method: "POST",
                     url: "https://sci-hub.se",
                     data: {"sci-hub-plugin-check": "", "request": args.object.text},
-                    error: () => {pblock.text("Search error.")},
+                    error: e => { pblock.text("Search error.") },
                     success: data => {
                         if (data) {
                             Utils.parseHtml(data, doc => {
-                                let article = doc.querySelector("#article iframe");
+                                let article = doc.querySelector("#article #pdf");
 
                                 if (article) {
                                     this._article = article.src;
