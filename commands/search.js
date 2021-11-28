@@ -765,7 +765,7 @@ shellSettings.load(settings => {
                 <li>- <i>sort mode</i> - {<b>asc</b> | <b>desc</b>}, specifies sort mode.</li>
             </ul>
             <ul class="syntax">
-                <li>- <i>server</i> - {<b>libgen.li</b> | <b>libgen.io</b>}.</li>
+                <li>- <i>server</i> - {<b>libgen.is</b> | <b>libgen.io</b>}.</li>
             </ul>
             <ul class="syntax">
                 <li>- <i>amount</i> - {<b>25</b> | <b>50</b> | <b>100</b> }, specifies the maximum amount of listed items.</li>
@@ -863,14 +863,22 @@ shellSettings.load(settings => {
 
                                 if (article) {
                                     this._article = article.src;
+
+                                    if (!this._article.startsWith("http")) {
+                                        if (this._article.startsWith("//"))
+                                            this._article = "https:" + this._article;
+                                        else if (this._article.startsWith("/"))
+                                            this._article = "https://sci-hub.se" + this._article;
+                                    }
+
                                     let citation = doc.querySelector("#citation");
 
-                                    if (citation.textContent === ".") {
+                                    if (citation.textContent?.trim() === ".") {
                                         citation.innerHTML = "&lt;press &apos;Enter&apos; to open the document&gt;";
                                     }
 
                                     pblock.text(`<a style="color: #45BCFF" 
-                                                       href="${article.src}">${citation.innerHTML}</a>`);
+                                                       href="${this._article}">${citation.innerHTML}</a>`);
                                 }
                                 else
                                     pblock.text("Not found.");
