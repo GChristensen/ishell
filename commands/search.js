@@ -6,14 +6,14 @@ shellSettings.load(settings => {
         name: "google",
         uuid: "61A61D85-07B4-4375-AB42-D635190241EA",
         url: `https://customsearch.googleapis.com/customsearch/v1?key=${cmdAPI.settings.google_cse_api_key}`
-           + `&cx=${cmdAPI.settings.google_cse_api_id}&q=%s`,
+            + `&cx=${cmdAPI.settings.google_cse_api_id}&q=%s`,
         _namespace: "Search",
         icon: "/res/icons/google.png",
         description: "Searches Google for your words.",
         arguments: [{role: "object", nountype: noun_arb_text, label: "query"}],
         previewDelay: 1000,
         help: "You can use the keyboard shortcut ctrl + alt + number to open one " +
-        "of the Google results shown in the preview.",
+            "of the Google results shown in the preview.",
         parser: {
             type       : "json",
             container  : "items",
@@ -135,7 +135,7 @@ shellSettings.load(settings => {
 
             pblock.innerHTML = "..."
             var data    = {q, start: 0, key: cmdAPI.settings.google_cse_api_key,
-                           cx: cmdAPI.settings.google_cse_api_id, searchType: "image"}
+                cx: cmdAPI.settings.google_cse_api_id, searchType: "image"}
                 , starts  = []
                 , options = {
                 data,
@@ -148,12 +148,12 @@ shellSettings.load(settings => {
                     var images = [], info;
 
                     json.items.forEach(item => {
-                       let a = document.createElement("a");
-                       a.setAttribute("href", item.link);
-                       let img = document.createElement("img");
-                       img.src = item.link;
-                       a.appendChild(img);
-                       images.push(a);
+                        let a = document.createElement("a");
+                        a.setAttribute("href", item.link);
+                        let img = document.createElement("img");
+                        img.src = item.link;
+                        a.appendChild(img);
+                        images.push(a);
                     });
 
                     var i = 0
@@ -486,7 +486,7 @@ shellSettings.load(settings => {
                 <div class="mapouter">
                     <div class="gmap_canvas">
                         <iframe width="546" height="507" id="gmap_canvas" src="https://maps.google.com/maps?q=`
-                        + encodeURIComponent(args.object.text) + `&t=&z=13&ie=UTF8&iwloc=&output=embed" 
+                + encodeURIComponent(args.object.text) + `&t=&z=13&ie=UTF8&iwloc=&output=embed" 
                         frameborder="0" scrolling="no" marginheight="0" marginwidth="0"></iframe>
                     </div>
                 <style>
@@ -539,11 +539,11 @@ shellSettings.load(settings => {
         name: "history",
         uuid: "128DEB45-F187-4A1F-A74D-566EDAE8DD0F",
         arguments: [{role: "object",   nountype: noun_arb_text, label: "title or url"},
-                    {role: "subject",  nountype: /[^\s]+/, label: "url"},
-                    {role: "modifier", nountype: noun_type_history_date, label: "day"},
-                    {role: "goal",     nountype: noun_type_history_date, label: "day"},
-                    {role: "source",   nountype: noun_type_history_date, label: "day"},
-                    {role: "cause",    nountype: noun_type_number, label: "amount"}],
+            {role: "subject",  nountype: /[^\s]+/, label: "url"},
+            {role: "modifier", nountype: noun_type_history_date, label: "day"},
+            {role: "goal",     nountype: noun_type_history_date, label: "day"},
+            {role: "source",   nountype: noun_type_history_date, label: "day"},
+            {role: "cause",    nountype: noun_type_number, label: "amount"}],
         description: "Browsing history search.",
         help:  `<span class="syntax">Syntax</span>
             <ul class="syntax">
@@ -623,7 +623,7 @@ shellSettings.load(settings => {
                             action: (h) =>  chrome.tabs.create({"url": h.url, active: false})
                         });
                     }
-               });
+                });
 
         },
         execute: function(args, {Bin}) {
@@ -744,10 +744,10 @@ shellSettings.load(settings => {
         name: "libgen",
         uuid: "25DB48B1-0FB6-49FC-8F38-728A1BAF7265",
         arguments: [{role: "object",     nountype: noun_arb_text, label: "text"},
-                    {role: "instrument", nountype: ["asc", "desc"], label: "sort mode"}, // with
-                    {role: "modifier",   nountype: ["year", "title", "author"], label: "order"}, // of
-                    {role: "cause",      nountype: ["25", "50", "100"], label: "amount"}, // by
-                    {role: "time",       nountype: ["libgen.is", "libgen.io"], label: "server"}, // at
+            {role: "instrument", nountype: ["asc", "desc"], label: "sort mode"}, // with
+            {role: "modifier",   nountype: ["year", "title", "author"], label: "order"}, // of
+            {role: "cause",      nountype: ["25", "50", "100"], label: "amount"}, // by
+            {role: "time",       nountype: ["libgen.is", "libgen.io"], label: "server"}, // at
         ],
         description: "Search Library Genesis",
         help:  `<span class="syntax">Syntax</span>
