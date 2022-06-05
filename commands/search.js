@@ -34,6 +34,7 @@ shellSettings.load(settings => {
         url: "http://www.bing.com/search?q=%s",
         defaultUrl: "http://www.bing.com/",
         _namespace: "Search",
+        _hidden: true,
         arguments: [{role: "object", nountype: noun_arb_text, label: "query"}],
         previewDelay: 1000,
         icon: "/res/icons/bing.png",

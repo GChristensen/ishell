@@ -411,6 +411,7 @@ CmdUtils.CreateCommand({
     name: "isdown",
     uuid: "48449987-B873-49F5-99B4-7F99662BCA99",
     _namespace: "Utility",
+    _hidden: true,
     arguments: [{role: "object", nountype: noun_arb_text, label: "URL"}],
     previewDelay: 1000,
     icon: "/res/icons/isdown.ico",
