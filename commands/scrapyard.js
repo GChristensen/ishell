@@ -136,7 +136,7 @@
 
 
     function updateShelfSuggestions() {
-        scrapyardSend("SCRAPYARD_LIST_SHELVES").then(shelves => {
+        scrapyardSend("SCRAPYARD_LIST_SHELVES_ISHELL").then(shelves => {
             if (shelves)
                 noun_scrapyard_shelf._items = shelves;
         })
@@ -144,7 +144,7 @@
 
 
     function updateGroupSuggestions() {
-        scrapyardSend("SCRAPYARD_LIST_GROUPS").then(groups => {
+        scrapyardSend("SCRAPYARD_LIST_GROUPS_ISHELL").then(groups => {
             if (groups)
                 noun_scrapyard_group._items = groups;
         })
@@ -152,7 +152,7 @@
 
 
     function updateTagSuggestions() {
-        scrapyardSend("SCRAPYARD_LIST_TAGS").then(tags => {
+        scrapyardSend("SCRAPYARD_LIST_TAGS_ISHELL").then(tags => {
             if (tags)
                 noun_scrapyard_tag._items = tags;
         })
@@ -180,22 +180,6 @@
             for (let arg of cmd.__scr_ignore_args)
                 args[arg] = undefined;
         }
-
-        // let result = {
-        //     search: args.object && args.object.text && args.object.text !== "this"? args.object.text: null,
-        //     depth: args.source && args.source.text? args.source.text: null,
-        //     path:  (args.time && args.time.text? args.time.text: null) || cmd.__scr_path,
-        //     tags:  (args.alias && args.alias.text? args.alias.text: null) || cmd.__scr_tags,
-        //     limit: args.cause && args.cause.text? args.cause.text: null,
-        //     types: args.format && args.format.text? args.format.data: null,
-        //     todo_state: (args.instrument && args.instrument.text? args.instrument.data: null)
-        //         || (cmd.__scr_todo? todo_states[cmd.__scr_todo.toUpperCase()]: undefined),
-        //     todo_date:  (args.goal && args.goal.text? args.goal.text: null) || cmd.__scr_due,
-        //     details:  (args.subject && args.subject.text? args.subject.text: null) || cmd.__scr_details,
-        //     _selector: cmd.__scr_selector,
-        //     _filter: cmd.__scr_filter,
-        //     _style: cmd.__scr_style
-        // };
 
         let result = {
             search: getArgumentText(args.object),
@@ -244,7 +228,7 @@
             pblock.text(html);
         },
         execute: function({object: {text}}) {
-            scrapyardSend("SCRAPYARD_SWITCH_SHELF", {name: text});
+            scrapyardSend("SCRAPYARD_SWITCH_SHELF_ISHELL", {name: text});
         }
     });
 
@@ -271,7 +255,8 @@
         description: "List and filter Scrapyard or Firefox bookmarks.",
         help:  `<span class="syntax">Syntax</span>
             <ul class="syntax">
-                <li><b>scrapyard</b> [<i>filter</i>] [<b>at</b> <i>path</i>] [<b>from</b> <i>depth</i>] [<b>in</b> <i>type</i>] [<b>as</b> <i>tags</i>] [<b>by</b> <i>amount</i>]</li>
+                <li><b>scrapyard</b> [<i>filter</i>] [<b>at</b> <i>path</i>] [<b>from</b> <i>depth</i>] [<b>in</b> <i>type</i>] 
+                [<b>as</b> <i>tags</i>] [<b>by</b> <i>amount</i>]</li>
             </ul>
             <span class="arguments">Arguments</span><br>
             <ul class="syntax">
@@ -328,51 +313,57 @@
                 }
             }
 
-            scrapyardSend("SCRAPYARD_LIST_NODES", payload).then(nodes => {
-                if (!nodes || nodes.length === 0) {
+            scrapyardSend("SCRAPYARD_LIST_NODES_ISHELL", payload).then(nodes => {
+                if (!nodes || nodes.length === 0)
                     pblock.innerHTML = "Bookmarks are empty."
+                else
+                    createBookmarkList(nodes, pblock, payload.path);
+            });
+        },
+        execute: function(args, {Bin}) {
+        }
+    });
+
+    function createBookmarkList(nodes, pblock, path) {
+        let items = [];
+
+        for (let n of nodes) {
+            let text = "";
+
+            if (n.type === NODE_TYPE_GROUP) {
+                text = "<img class='n-icon' src='/res/icons/folder.svg'>"
+                    + "<div class='n-group'>" + Utils.escapeHtml(n.path) + "</div>";
+            }
+            else {
+                if (n.icon) {
+                    n.icon = n.icon.replace(/'/g, "\\'");
+                    text = "<img class='n-icon' src='" + n.icon + "'>"
+                }
+                else
+                    text = "<img class='n-icon' src='/res/icons/globe.svg'>";
+
+
+                if (n.uri && !n.name)
+                    text += "<div class='cnt'>" + Utils.escapeHtml(n.uri) + "</div>";
+                else
+                    text += "<div class='cnt'><div class='n-title'>" + n.name + "</div>"
+                        + "<div class='n-url'>" + Utils.escapeHtml(n.uri) + "</div></div>";
+            }
+
+            items.push(text);
+        }
+
+        let list = CmdUtils.previewList(pblock, items, (i, _) => {
+                if (nodes[i].type === NODE_TYPE_GROUP) {
+                    let itemPath = path? path + "/": "";
+                    CmdUtils.setCommandLine("scrapyard from group at " + itemPath + nodes[i].path);
                 }
                 else {
-                    let html = "";
-                    let items = [];
-                    for (let n of nodes) {
-                        let text = "";
-
-                        if (n.type === NODE_TYPE_GROUP) {
-                            text = "<img class='n-icon' src='/res/icons/folder.svg'>"
-                                + "<div class='n-group'>" + Utils.escapeHtml(n.path) + "</div>";
-                        }
-                        else {
-                            if (n.icon) {
-                                n.icon = n.icon.replace(/'/g, "\\'");
-                                text = "<img class='n-icon' src='" + n.icon + "'>"
-                            }
-                            else
-                                text = "<img class='n-icon' src='/res/icons/globe.svg'>";
-
-
-                            if (n.uri && !n.name)
-                                text += "<div class='cnt'>" + Utils.escapeHtml(n.uri) + "</div>";
-                            else
-                                text += "<div class='cnt'><div class='n-title'>" + n.name + "</div>"
-                                    +  "<div class='n-url'>" + Utils.escapeHtml(n.uri) + "</div></div>";
-                        }
-
-                        items.push(text);
-                    }
-
-                    let list = CmdUtils.previewList(pblock, items, (i, _) => {
-                            if (nodes[i].type === NODE_TYPE_GROUP) {
-                                let path = payload.path? payload.path + "/": "";
-
-                                CmdUtils.setCommandLine("scrapyard from group at " + path + nodes[i].path);
-                            }
-                            else {
-                                ///if (typeof nodes[i].id === "string" && nodes[i].id.startsWith("firefox_"))
-                                scrapyardSend("SCRAPYARD_BROWSE_NODE", {node: nodes[i]});
-                            }
-                        },
-                        `.preview-list-item {
+                    ///if (typeof nodes[i].id === "string" && nodes[i].id.startsWith("firefox_"))
+                    scrapyardSend("SCRAPYARD_BROWSE_NODE_ISHELL", {node: nodes[i]});
+                }
+            },
+            `.preview-list-item {
                         white-space: nowrap;
                         display: flex;
                         flex-flow: row nowrap;
@@ -430,17 +421,11 @@
                         white-space: nowrap;
                         text-overflow: ellipsis;
                      }`
-                    );
-                    
-                    $(list).find("img.n-icon").on("error", 
-                        e => e.target.src = "/res/icons/globe.svg");
-                }
-            });
-        },
-        execute: function(args, {Bin}) {
+        );
 
-        }
-    });
+        $(list).find("img.n-icon").on("error",
+            e => e.target.src = "/res/icons/globe.svg");
+    }
 
     function _todoColor(todo_state) {
         switch (todo_state) {
@@ -473,10 +458,10 @@
         //{role: "location",   nountype: noun_arb_text, label: "text"}, // near
         {role: "time",       nountype: noun_scrapyard_group, label: "path"}, // at
         {role: "instrument", nountype: {"TODO": TODO_STATE_TODO,
-                "WAITING": TODO_STATE_WAITING,
-                "POSTPONED": TODO_STATE_POSTPONED,
-                "CANCELLED": TODO_STATE_CANCELLED,
-                "DONE": TODO_STATE_DONE}, label: "todo"}, // with
+                                        "WAITING": TODO_STATE_WAITING,
+                                        "POSTPONED": TODO_STATE_POSTPONED,
+                                        "CANCELLED": TODO_STATE_CANCELLED,
+                                        "DONE": TODO_STATE_DONE}, label: "todo"}, // with
         //{role: "format",     nountype: noun_arb_text, label: "text"}, // in
         //{role: "modifier",   nountype: noun_arb_text, label: "text"}, // of
         {role: "alias",      nountype: noun_scrapyard_tag, label: "tags"}, // as
@@ -484,7 +469,7 @@
     ];
 
 
-    function bookmarkingCommandPreview(node_type) {
+    function bookmarkingCommandPreview() {
         return function(pblock, args) {
             let {search, path, tags, todo_state, todo_date, details} = unpackArgs(this, args);
 
@@ -523,30 +508,15 @@
     }
 
 
-    function bookmarkingCommand(node_type) {
+    function bookmarkingCommand(nodeType) {
         return async function(args) {
-            let url = CmdUtils.getLocation();
-
-            if (!url) {
-                CmdUtils.notify("Scrapyard: cannot obtain page URL");
-                return;
-            }
-
             let payload = this.__scr__args;
             delete this.__scr__args;
 
-            let title = payload.search
-                ? payload.search
-                : (CmdUtils.activeTab
-                    ? CmdUtils.activeTab.title
-                    : "Bookmark");
+            payload.name = payload.search;
+            payload.uri = CmdUtils.getLocation();
 
-            payload.name = payload.search = title;
-            payload.uri = url;
-
-            scrapyardSend(node_type == NODE_TYPE_BOOKMARK
-                ? "SCRAPYARD_ADD_BOOKMARK"
-                : "SCRAPYARD_ADD_ARCHIVE", payload);
+            scrapyardSend(`SCRAPYARD_ADD_${nodeType}_ISHELL`, payload);
         };
     }
 
@@ -563,9 +533,8 @@
         icon: "/res/icons/scrapyard.svg",
         //previewDelay: 1000,
         _namespace: SCRAPYARD_NAMESPACE,
-        preview: bookmarkingCommandPreview(NODE_TYPE_BOOKMARK),
-        execute: bookmarkingCommand(NODE_TYPE_BOOKMARK)
-
+        preview: bookmarkingCommandPreview(),
+        execute: bookmarkingCommand("BOOKMARK")
     });
 
 
@@ -576,7 +545,8 @@
         description: "Archive a web-page or selection to Scrapyard.",
         help: `<span class="syntax">Syntax</span>
             <ul class="syntax">
-                <li><b>archive</b> [<b>this</b> | <i>title</i>] [<b>at</b> <i>path</i>] [<b>as</b> <i>tags</i>] [<b>for</b> <i>details</i>] [<b>with</b> <i>todo</i>] [<b>to</b> <i>due</i>]</li>
+                <li><b>archive</b> [<b>this</b> | <i>title</i>] [<b>at</b> <i>path</i>] [<b>as</b> <i>tags</i>] [<b>for</b> <i>details</i>] 
+                [<b>with</b> <i>todo</i>] [<b>to</b> <i>due</i>]</li>
             </ul>
             <span class="arguments">Arguments</span><br>
             <ul class="syntax">
@@ -586,7 +556,7 @@
                 <li>- <i>title</i> - bookmark title. The current tab name used if not specified.</li>
             </ul>
             <ul class="syntax">
-                <li>- <i>path</i> - limits the scope of search to the specified path. The default shelf is designated by '~' character.</li>
+                <li>- <i>path</i> - the folder to save archive into. The default shelf is designated by '~' character.</li>
             </ul>
             <ul class="syntax">
                 <li>- <i>tags</i> - assigns a comma-separated list of tags to the created archive.</li>
@@ -607,9 +577,25 @@
         icon: "/res/icons/scrapyard.svg",
         //previewDelay: 1000,
         _namespace: SCRAPYARD_NAMESPACE,
-        preview: bookmarkingCommandPreview(NODE_TYPE_ARCHIVE),
-        execute: bookmarkingCommand(NODE_TYPE_ARCHIVE)
+        preview: bookmarkingCommandPreview(),
+        execute: bookmarkingCommand("ARCHIVE")
+    });
 
+
+    let archiveSiteCmd = CmdUtils.CreateCommand({
+        names: ["archive-site", "arcsite"],
+        uuid: "AE2C458E-DA04-46D7-8D6A-3FE62069285A",
+        arguments: bookmarkingArgs,
+        description: "Archive site to Scrapyard.",
+        help:  `<span class="syntax">Syntax</span>
+            <ul class="syntax">
+                <li>Same as <b>archive</b>.</li>
+            </ul>`,
+        icon: "/res/icons/scrapyard.svg",
+        //previewDelay: 1000,
+        _namespace: SCRAPYARD_NAMESPACE,
+        preview: bookmarkingCommandPreview(),
+        execute: bookmarkingCommand("SITE")
     });
 
 
@@ -683,7 +669,7 @@
         //previewDelay: 1000,
         _namespace: SCRAPYARD_NAMESPACE,
         preview: copyingCommandPreview(),
-        execute: copyingCommand("SCRAPYARD_COPY_AT")
+        execute: copyingCommand("SCRAPYARD_COPY_AT_ISHELL")
     });
 
 
@@ -700,7 +686,7 @@
         //previewDelay: 1000,
         _namespace: SCRAPYARD_NAMESPACE,
         preview: copyingCommandPreview(),
-        execute: copyingCommand("SCRAPYARD_MOVE_AT")
+        execute: copyingCommand("SCRAPYARD_MOVE_AT_ISHELL")
     });
 
 
@@ -783,7 +769,7 @@
 
             return (val) => {
                 const payload = val || {};
-                payload.type = "SCRAPYARD_" + key.replace(/([a-z0-9]|(?=[A-Z]))([A-Z])/g, '$1_$2').toUpperCase();
+                payload.type = "SCRAPYARD_" + key.replace(/([a-z0-9]|(?=[A-Z]))([A-Z])/g, '$1_$2').toUpperCase() + "_ISHELL";
                 return browser.runtime.sendMessage(scrapyard_id, payload);
             };
         }
