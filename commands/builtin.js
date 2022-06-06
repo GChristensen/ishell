@@ -407,42 +407,41 @@ CmdUtils.CreateCommand({
     }
 });
 
-CmdUtils.CreateCommand({
-    name: "isdown",
-    uuid: "48449987-B873-49F5-99B4-7F99662BCA99",
-    _namespace: "Utility",
-    _hidden: true,
-    arguments: [{role: "object", nountype: noun_arb_text, label: "URL"}],
-    previewDelay: 1000,
-    icon: "/res/icons/isdown.ico",
-    description: "Check if selected/typed URL is down.",
-    preview: function (pblock, {object: {text}}) {
-        if (!text)
-            text = CmdUtils.getLocation();
-
-        if (!text)
-            return;
-
-        pblock.text("Checking <b>" + text + "</b>");
-        var urlString = "https://isitdown.site/api/v3/" + encodeURIComponent(text);
-
-        CmdUtils.previewGet(pblock, urlString, (resp) => {
-
-            if (!resp) return;
-            if (resp.isitdown) {
-                pblock.text('It\'s <b>not</b> just you. The site is <b>down!</b>');
-            } else {
-                pblock.text('It\'s just you. The site is <b>up!</b>');
-            }
-        }, "json");
-    },
-    execute: async function ({object: {text}}) {
-        if (!text)
-            text = CmdUtils.getLocation();
-
-        if (!text)
-            return;
-
-        CmdUtils.addTab("http://downforeveryoneorjustme.com/" + encodeURIComponent(text));
-    }
-});
+// CmdUtils.CreateCommand({
+//     name: "isdown",
+//     uuid: "48449987-B873-49F5-99B4-7F99662BCA99",
+//     _namespace: "Utility",
+//     arguments: [{role: "object", nountype: noun_arb_text, label: "URL"}],
+//     previewDelay: 1000,
+//     icon: "/res/icons/isdown.ico",
+//     description: "Check if selected/typed URL is down.",
+//     preview: function (pblock, {object: {text}}) {
+//         if (!text)
+//             text = CmdUtils.getLocation();
+//
+//         if (!text)
+//             return;
+//
+//         pblock.text("Checking <b>" + text + "</b>");
+//         var urlString = "https://isitdown.site/api/v3/" + encodeURIComponent(text);
+//
+//         CmdUtils.previewGet(pblock, urlString, (resp) => {
+//
+//             if (!resp) return;
+//             if (resp.isitdown) {
+//                 pblock.text('It\'s <b>not</b> just you. The site is <b>down!</b>');
+//             } else {
+//                 pblock.text('It\'s just you. The site is <b>up!</b>');
+//             }
+//         }, "json");
+//     },
+//     execute: async function ({object: {text}}) {
+//         if (!text)
+//             text = CmdUtils.getLocation();
+//
+//         if (!text)
+//             return;
+//
+//         CmdUtils.addTab("http://downforeveryoneorjustme.com/" + encodeURIComponent(text));
+//     }
+// });

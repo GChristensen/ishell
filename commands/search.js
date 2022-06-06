@@ -28,23 +28,23 @@ shellSettings.load(settings => {
         }
     });
 
-    CmdUtils.makeSearchCommand({
-        name: "bing",
-        uuid: "44FF357D-C3C2-4CB3-91EB-B4E415DC9905",
-        url: "http://www.bing.com/search?q=%s",
-        defaultUrl: "http://www.bing.com/",
-        _namespace: "Search",
-        _hidden: true,
-        arguments: [{role: "object", nountype: noun_arb_text, label: "query"}],
-        previewDelay: 1000,
-        icon: "/res/icons/bing.png",
-        parser: {
-            container: ".b_algo",
-            title: "h2 > a",
-            body: ".b_caption",
-            maxResults: maxSearchResults,
-        },
-    });
+    // CmdUtils.makeSearchCommand({
+    //     name: "bing",
+    //     uuid: "44FF357D-C3C2-4CB3-91EB-B4E415DC9905",
+    //     url: "http://www.bing.com/search?q=%s",
+    //     defaultUrl: "http://www.bing.com/",
+    //     _namespace: "Search",
+    //     _hidden: true,
+    //     arguments: [{role: "object", nountype: noun_arb_text, label: "query"}],
+    //     previewDelay: 1000,
+    //     icon: "/res/icons/bing.png",
+    //     parser: {
+    //         container: ".b_algo",
+    //         title: "h2 > a",
+    //         body: ".b_caption",
+    //         maxResults: maxSearchResults,
+    //     },
+    // });
 
     CmdUtils.makeSearchCommand({
         name: "IMDb",
