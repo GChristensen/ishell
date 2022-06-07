@@ -769,7 +769,7 @@
 
             return (val) => {
                 const payload = val || {};
-                payload.type = "SCRAPYARD_" + key.replace(/([a-z0-9]|(?=[A-Z]))([A-Z])/g, '$1_$2').toUpperCase() + "_ISHELL";
+                payload.type = "SCRAPYARD_" + key.replace(/([a-z0-9]|(?=[A-Z]))([A-Z])/g, '$1_$2').toUpperCase();
                 return browser.runtime.sendMessage(scrapyard_id, payload);
             };
         }
