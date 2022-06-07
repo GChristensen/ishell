@@ -283,6 +283,8 @@ async function saveScript() {
 }
 
 async function initEditor(settings) {
+    await initializeIShellAPI();
+
     let lastNamespace = settings.last_editor_namespace();
 
     scriptNamespace =  window.location.search

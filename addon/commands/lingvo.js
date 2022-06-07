@@ -6,9 +6,6 @@ var __lingvoLiveAPIToken;
 
 {
     var abbyyServiceAPI = "https://developers.lingvolive.com";
-    var urlTemplateAPI = "${service}/api/v1/Translation?text=${words}&srcLang=${from}&dstLang=${to}";
-    var urlTemplateTranslate = "https://www.lingvolive.com/en-us/translate/${from}-${to}/${words}";
-
     var latinREAPI = new RegExp("[a-z]");
     var executionUrl;
 
@@ -109,21 +106,14 @@ var __lingvoLiveAPIToken;
 
                 const EN = {data: [1033, "en"]};
                 const RU = {data: [1049, "ru"]};
+                const fromID = abbrev2id(from, isLatin ? EN: RU, true);
+                const toID = abbrev2id(to, isLatin ? RU: EN, true);
+                const fromIDabc = abbrev2id(from, isLatin ? EN: RU);
+                const toIDabc = abbrev2id(to, isLatin ? RU: EN);
 
-                var requestUrl = CmdUtils.renderTemplate(urlTemplateAPI,
-                    {
-                        service: abbyyServiceAPI,
-                        words: words, //words.replace(/ /, "+"),
-                        from: abbrev2id(from, isLatin ? EN: RU, true),
-                        to: abbrev2id(to, isLatin ? RU: EN, true)
-                    });
+                var requestUrl = `${abbyyServiceAPI}/api/v1/Translation?text=${words}&srcLang=${fromID}&dstLang=${toID}`;
 
-                executionUrl = CmdUtils.renderTemplate(urlTemplateTranslate,
-                    {
-                        words: words, //words.replace(/ /, "+"),
-                        from: abbrev2id(from, isLatin ? EN: RU),
-                        to: abbrev2id(to, isLatin ? RU: EN)
-                    });
+                executionUrl = `https://www.lingvolive.com/en-us/translate/${fromIDabc}-${toIDabc}/${words}`;
 
                 var self = this;
 

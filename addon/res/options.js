@@ -1,7 +1,8 @@
 
 $(() => shellSettings.load(settings => onDocumentLoad(settings)));
 
-function onDocumentLoad(settings) {
+async function onDocumentLoad(settings) {
+    await initializeIShellAPI();
 
     $("#shell-version").text(CmdUtils.VERSION);
 

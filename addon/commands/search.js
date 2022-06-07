@@ -85,30 +85,27 @@ shellSettings.load(settings => {
                 },
                 dataType: "json",
                 success: function youtube_success(data) {
-                    pblock.innerHTML = CmdUtils.renderTemplate(
+                    pblock.innerHTML =
                         `  <p>
-                           Found <b>\${numresults}</b> YouTube Videos matching <b>\${query}</b>
+                           Found <b>${data.pageInfo.totalResults}</b> YouTube Videos matching <b>${summary}</b>
                           </p>
-                          {for entry in results}
-                          <div style="clear: both; font-size: small">
-                           <kbd>\${(+entry_index < 35) ? (+entry_index + 1).toString(36) : "-"}</kbd>.
+                          ${data.items.reduce((acc, entry, entry_index) => acc +
+                          `<div style="clear: both; font-size: small">
+                           <kbd>${(entry_index < 35) ? (entry_index + 1).toString(36) : "-"}</kbd>.
                            <a style="font-size: small; font-weight:bold"
-                              accessKey="\${(+entry_index < 35) ? (+entry_index + 1).toString(36) : "-"}"
-                              href="https://www.youtube.com/watch?v=\${entry.id.videoId}">
+                              accessKey="${(entry_index < 35) ? (entry_index + 1).toString(36) : "-"}"
+                              href="https://www.youtube.com/watch?v=${entry.id.videoId}">
                            <img style="float:left; margin: 0 10px 5px 0; border: none"
-                                src="\${entry.snippet.thumbnails.default.url}" />
-                           \${entry.snippet.title}
+                                src="${entry.snippet.thumbnails.default.url}" />
+                           ${entry.snippet.title}
                            </a>
                            <p>
-                              \${entry.snippet.description}
+                              ${entry.snippet.description}
                            </p>
-                          </div>
-                          {/for}
-                        `, {
-                            results: data.items,
-                            query: summary,
-                            numresults: data.pageInfo.totalResults,
-                        });
+                          </div>`,
+                            "")
+                          }
+                        `;
                 },
                 error: function youtube_error({statusText}) {
                     pblock.innerHTML =
@@ -165,7 +162,14 @@ shellSettings.load(settings => {
                         let img = a.children[0]
                         ++i
                     }
-                    pblock.innerHTML = CmdUtils.renderTemplate(
+
+                    const range = images.length
+                        ? `${data.start + 1} ~ ${data.start + images.length}`
+                        : 'x';
+
+                    info = info ? info.outerHTML : '';
+
+                    pblock.innerHTML =
                         `<style>
                     .navi, .thumbs {text-align: center}
                     .prev, .next {position: absolute}
@@ -189,19 +193,13 @@ shellSettings.load(settings => {
                     }
                     </style>
                     <div class="navi">
-                      \${range}
+                      ${range}
                       <input type="button" class="prev" value="&lt;" accesskey="&lt;"/>
                       <input type="button" class="next" value="&gt;" accesskey="&gt;"/>
                     </div>
                     <!--div class="info">${info}</div-->
-                    <div class="thumbs">{for a in images}\${a.outerHTML}{/for}</div>
-                    `, {
-                            images,
-                            info: info ? info.outerHTML : '',
-                            range: images.length
-                                ? `${data.start + 1} ~ ${data.start + images.length}`
-                                : 'x',
-                        })
+                    <div class="thumbs">${images.map(a => a.outerHTML).reduce((acc, h) => acc + h, "")}</div>
+                    `;
 
                     if (!data.start)
                         pblock.querySelector(".prev").disabled = true
@@ -331,12 +329,12 @@ shellSettings.load(settings => {
                         .forEach(function genKey(o, i) { o.key = i < 35 ? (i+1).toString(36) : "-"});
                     previewData._MODIFIERS = {wikilink: generateWikipediaLink};
                     previewData.foundMessage =
-                        _("Wikipedia articles found matching <b>" + args.object.text + "</b>:", previewData);
+                        _("Wikipedia articles found matching <b>" + args.object.text + "</b>:");
                     previewData.retrievingArticleSummary =
                         _("Retreiving article summary...");
                     previewData.noArticlesFound = _("No articles found.");
 
-                    previewBlock.innerHTML = CmdUtils.renderTemplate(
+                    previewBlock.innerHTML =
                         `<style>
                         .wikipedia { margin: 0 }
                         .title { clear: left; margin-top: 0.4em }
@@ -349,21 +347,20 @@ shellSettings.load(settings => {
                         }
                         </style>
                         <dl class="wikipedia">
-                            \${foundMessage}
-                            {for article in results}
-                            <dt class="title">
-                            <span class="key">\${article.key}</span>
-                            <a href="\${article.title|wikilink}" accesskey="\${article.key}"
-                            >\${article.title}</a>
-                            </dt>
-                            <dd class="summary" wikiarticle="\${article.title}">
-                            <i>\${retrievingArticleSummary}</i>
-                            </dd>
-                        {forelse}
-                        <p class='error'>\${noArticlesFound}</p>
-                        {/for}
-                        </dl>`,
-                        previewData);
+                            ${previewData.foundMessage}
+                            ${previewData.results && previewData.results.length
+                                ? previewData.results.reduce((acc, article) => acc + 
+                                    `<dt class="title">
+                                        <span class="key">${article.key}</span>
+                                        <a href="${generateWikipediaLink(article.title)}" accesskey="${article.key}"
+                                          >${article.title}</a>
+                                     </dt>
+                                     <dd class="summary" wikiarticle="${article.title}">
+                                        <i>${previewData.retrievingArticleSummary}</i>
+                                     </dd>`, "")
+                                : `<p className='error'>${previewData.noArticlesFound}</p>`
+                            }
+                        </dl>`;
 
                     jQuery("dd", previewBlock).each(function eachDD() {
                         var article = this.getAttribute("wikiarticle");

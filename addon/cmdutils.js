@@ -9,11 +9,15 @@ if (!CmdUtils) var CmdUtils = {
             : "Chrome")
         : undefined,
     activeTab: null,   // tab that is currently active, updated via background.js
-    selectedText: "",   // currently selected text, update via content script selection.js
-    selectedHTML: ""    // currently selected html, update via content script selection.js
+    selectedText: "",   // currently selected text, update via content script content_get_selection.js
+    selectedHTML: ""    // currently selected html, update via content script content_get_selection.js
 };
 
 var _ = function(x, data) {
+    if (_MANIFEST_V3)
+        return x;
+
+    // TODO: remove completely in MV3
     return data
         ? TrimPath.parseTemplate(x).process(data, {keepWhitespace: true})
         : x
@@ -40,6 +44,10 @@ CmdUtils.deblog = function () {
 };
 
 CmdUtils.renderTemplate = function (template, data) {
+    if (_MANIFEST_V3)
+        return template;
+
+    // TODO: remove completely in MV3
     return TrimPath.parseTemplate(template).process(data);
 };
 
@@ -168,6 +176,20 @@ CmdUtils.loadScripts = function loadScripts(url, callback, wnd=window) {
     }
 };
 
+CmdUtils.__injectScriptFileMV3 = async function(tabId, options) {
+    const target = {tabId};
+
+    if (options.frameId)
+        target.frameIds = [options.frameId];
+
+    if (options.allFrames)
+        target.allFrames = options.allFrames;
+
+    return browser.scripting.executeScript({target, files: [options.file]});
+}
+
+CmdUtils.executeScriptFile = _MANIFEST_V3? CmdUtils.__injectScriptFileMV3: browser.tabs.executeScript;
+
 CmdUtils.loadCSS = function(doc, id, file) {
     if (!doc.getElementById(id)) {
         let head = doc.getElementsByTagName('head')[0];
@@ -189,7 +211,7 @@ CmdUtils.updateSelection = async function (tab_id) {
     let results;
 
     try {
-        results = await browser.tabs.executeScript(tab_id, {file: "/selection.js", allFrames: true});
+        results = await CmdUtils.executeScriptFile(tab_id, {file: "/content_get_selection.js", allFrames: true});
     }
     catch (e) {
         console.error(e)
@@ -198,6 +220,9 @@ CmdUtils.updateSelection = async function (tab_id) {
     if (results && results.length)
         for (let selection of results)
             if (selection) {
+                if (_MANIFEST_V3)
+                    selection = selection.result;
+
                 CmdUtils.selectedText = selection.text;
                 CmdUtils.selectedHtml = selection.html;
                 break;
@@ -223,7 +248,7 @@ CmdUtils.updateActiveTab = async function () {
         let tabs = await browser.tabs.query({active: true, currentWindow: true})
         if (tabs.length) {
             let tab = tabs[0];
-            if (tab.url.match('^https?://') || tab.url.match('^file://')) {
+            if (tab.url.match('^blob://') || tab.url.match('^https?://') || tab.url.match('^file://')) {
                 CmdUtils.activeTab = tab;
                 await CmdUtils.updateSelection(tab.id);
             }
@@ -237,50 +262,17 @@ CmdUtils.updateActiveTab = async function () {
 ContextUtils.getSelection = CmdUtils.getSelection = () => CmdUtils.selectedText;
 ContextUtils.getHtmlSelection = CmdUtils.getHtmlSelection = () => CmdUtils.selectedHtml;
 
-// TODO: getting nodes of a range
-// https://stackoverflow.com/questions/667951/how-to-get-nodes-lying-inside-a-range-with-javascript/7931003#7931003
-
 // replaces current selection with string provided
-ContextUtils.setSelection = CmdUtils.setSelection = function setSelection(s) {
-    if (typeof s!=='string') s = s+'';
-    s = s.replace(/(['"])/g, "\\$1");
-    s = s.replace(/\\\\/g, "\\");
-    // http://jsfiddle.net/b3Fk5/2/
+ContextUtils.setSelection = CmdUtils.setSelection = function setSelection(replacementText) {
+    if (typeof replacementText !== 'string') replacementText = replacementText + '';
+    replacementText = replacementText.replace(/(['"])/g, "\\$1");
+    replacementText = replacementText.replace(/\\\\/g, "\\");
 
-    var insertCode = `
-    function replaceSelectedText(replacementText) {
-        var sel, range;
-        sel = window.getSelection();
-        var activeElement = document.activeElement;
-        if (activeElement.nodeName == "TEXTAREA" ||
-            (activeElement.nodeName == "INPUT" && (activeElement.type.toLowerCase() == "text"
-                || activeElement.type.toLowerCase() == "search"))) {
-                var val = activeElement.value, start = activeElement.selectionStart, end = activeElement.selectionEnd;
-                activeElement.value = val.slice(0, start) + replacementText + val.slice(end);
-        } else {
-            if (sel.rangeCount) {
-                range = sel.getRangeAt(0);
-                
-                for (let i = 0; i < sel.rangeCount; ++i)
-                    sel.getRangeAt(i).deleteContents();  
-
-                var el = document.createElement("div");
-                el.innerHTML = replacementText;
-                var frag = document.createDocumentFragment(), node, lastNode;
-                while ( (node = el.firstChild) ) {
-                    lastNode = frag.appendChild(node);
-                }
-                range.insertNode(frag);
-            } else {
-                sel.deleteFromDocument();
-            }
-        }
-    }
-    replaceSelectedText(\``+s+`\`);`;
     if (CmdUtils.activeTab && CmdUtils.activeTab.id)
-        return chrome.tabs.executeScript( CmdUtils.activeTab.id, { code: insertCode } );
-    else 
-        return chrome.tabs.executeScript( { code: insertCode } );
+        CmdUtils.executeScriptFile(CmdUtils.activeTab.id, { file: "content_set_selection.js" } )
+            .then(() => {
+                browser.tabs.sendMessage(CmdUtils.activeTab.id, {type: "replaceSelectedText", text: replacementText})
+            });
 };
 
 // for measuring time the input is changed

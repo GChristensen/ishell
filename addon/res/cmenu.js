@@ -2,6 +2,7 @@
 $(() => shellSettings.load(settings => onDocumentLoad(settings)));
 
 async function onDocumentLoad(settings) {
+    await initializeIShellAPI();
 
     let commandList = $("#context-menu-commands");
     

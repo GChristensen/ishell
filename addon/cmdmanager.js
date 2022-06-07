@@ -241,7 +241,11 @@ class CommandManager {
                 }
                 else if (contextMenuCmd) {
                     CmdManager.selectedContextMenuCommand = info.menuItemId;
-                    chrome.browserAction.openPopup();
+
+                    if (_MANIFEST_V3)
+                        browser.action.openPopup();
+                    else
+                        chrome.browserAction.openPopup();
                 }
         }
     }
