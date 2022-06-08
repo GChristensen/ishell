@@ -7,6 +7,10 @@
     {
       "path": "example.js", // the path should be relative to the "commands" folder
       "syntax": "class"     // the only supported sytax is "class"
+    },
+    {
+      "path": "lingvo.js",
+      "syntax": "class"
     }
   ]
 }

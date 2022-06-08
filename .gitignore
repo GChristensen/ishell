@@ -1,6 +1,7 @@
 .idea
 *.iml
-web-ext-artifacts
-.web-extension-id
+/addon/web-ext-artifacts
+/addon/.web-extension-id
+/.local
 iShell.zip
 *.bak
