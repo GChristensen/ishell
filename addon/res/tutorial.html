@@ -179,35 +179,6 @@ class SayHello {
 </p>
 
 
-<!--h3><span id="Making_sure_your_command_is_localizable">Making sure your command is localizable</span>
-</h3>
-<p>iShell command parser supports multiple languages. That means that hopefully someday someone will be
-    translating
-    your commands to the other languages that iShell supports. There is currently no command localization
-    support
-    in iShell, although you may take measures in the case it will appear someday.
-    You just have to locate all strings that appear in your
-    <code>preview()</code> and <code>execute()</code> methods, that are intended for display to humans, and
-    wrap them with:
-</p>
-<pre>_()
-</pre>
-<p>This may look odd, but what it does is quite important: it makes your strings appear in the template
-    files that localizers will be using. So let's make our "Hello world!" command localizable:
-</p>
-<pre>
-cmdAPI.createCommand({
-names: ["say-hello", "greet"],
-execute: function hello_execute() {
-cmdAPI.notify(_("Hello, World!"));
-}
-});
-</pre>
-<p>Note that we don't need to wrap the names, or other strings that appear in the command metadata - these
-    are automatically wrapped for us. We only need to wrap strings that appear inside the functions.
-</p-->
-
-
 <h3><span id="Adding_a_Preview">Adding a Preview</span></h3>
 <p><img src="images/preview.jpg"></p>
 <p>Let's add a preview to our new command. Previews give the user feedback about what a command does
@@ -273,16 +244,16 @@ cmdAPI.notify(_("Hello, World!"));
 <pre><code data-language="javascript">cmdAPI.createCommand({
   names: ["insert-date"],
 
-  _date: function date__date() {
+  _date: function() {
     return new Date().toLocaleDateString();
   },
 
-  preview: function date_preview(pblock) {
-    var msg = _('Inserts today\'s date: "&lt;i&gt;${date}&lt;/i&gt;"');
-    pblock.innerHTML = cmdAPI.renderTemplate(msg, {date: this._date()});
+  preview: function(pblock) {
+    var date = this._date();
+    pblock.innerHTML = `Inserts today's date: "&lt;i&gt;${date}&lt;/i&gt;"`;
   },
 
-  execute: function date_execute() {
+  execute: function() {
     cmdAPI.setSelection(this._date());
   }
 })</code></pre>
@@ -298,31 +269,6 @@ cmdAPI.notify(_("Hello, World!"));
     the preview. In this case, we set the <code>innerHTML</code> of the preview block to be the
     message we want.
 </p>
-<p>The third thing we've done is to do some string formatting using the
-    <code>renderTemplate()</code> function. This takes a template string and performs the
-    appropriate substitution given the passed-in JSON object. Templates can handle a wide range of
-    functionality, as we are currently using TrimPath's <a
-            rel="nofollow" class="external text"
-            href="http://code.google.com/p/trimpath/wiki/JavaScriptTemplates">JavascriptTemplates</a>.
-    Although JavascriptTemplates has some nice features, such as ${for}, in the most cases it is
-    more convenient to use ES6 template literals (``) nowadays.
-</p>
-
-
-<h3><span id="A_shortcut_for_localization_and_rendering_templates">A shortcut for localization and rendering templates</span>
-</h3>
-<p>Note how in the code above, we used the localization wrapper <code>_()</code> before passing the
-    string to renderTemplate. Because this is such a very common combination when displaying
-    strings, we have a shortcut for it. Calling _() with a JSON object as the second argument will
-    automatically trigger <code>cmdAPI.renderTemplate()</code> on the post-localization string. So
-    the above preview method could be rewritten more simply as:
-</p>
-
-<pre><code data-language="javascript">preview: function date_preview(pblock) {
-  var msg = 'Inserts today's date: "&lt;i&gt;${date}&lt;/i&gt;"';
-   pblock.innerHTML = _(msg, {date: this._date()});
-},</code></pre>
-
 
 <h3><span id="Networking_calls_and_placeholder_previews">Networking calls and placeholder previews</span>
 </h3>
@@ -383,79 +329,7 @@ cmdAPI.notify(_("Hello, World!"));
     documentation comment, except the "help" attribute. Command help will be generated from the
     entire comment text (which may contain HTML), annotations excluded.</p>
 
-<!--
-<h2><span id="Map_Me.21_Location.2C_Snapshots.2C_and_Inserting_HTML">Map Me! Location, Snapshots, and Inserting HTML</span>
-</h2>
-<p>The "map" command that comes with iShell is fairly powerful. It's also fairly complicated—well,
-    comparatively. It's still only a couple hundred lines of code. The command, though, can get even more
-    useful. Imagine being able to select some houses on Craigslist, or a list of restaurant names, and run
-    "map these" to get just the map you want. The concept of "these" puts the power of mashups into the
-    users hands. But I digress. Let's make a simple command that inserts a map of your current location.
-</p>
-<p>In this command, we use the Google <a rel="nofollow" class="external text"
-                                         href="http://code.google.com/apis/maps/documentation/staticmaps/">static
-    map API</a> and the iShell function <code>cmdAPI.getGeoLocation()</code> to insert a map of your
-    current location. iShell currently uses the <a rel="nofollow" class="external text"
-                                                     href="http://www.maxmind.com/app/api">MaxMind</a> API
-    for trying to guess your location from your IP. That will probably change in the future.
-</p>
-<p>We'll call this command <code>"map me"</code> so that it won't be confused with the standard
-    <code>"map"</code> command.
-</p>
-            <pre>
-cmdAPI.createCommand({
-  names: ["map me"],
-
-  _getMapUrl: function() {
-    var loc = cmdAPI.getGeoLocation();
-    var mapUrl = "http://maps.google.com/staticmap?";
-
-    var params = {
-      center: loc.lat + "," + loc.long,
-      size: "500x400",
-      zoom: 14,
-      key: "ABQIAAAAGZ11mh1LzgQ8-8LRW3wEShQeSuJunOpTb3RsLsk00-MAdzxmXhQoiCd940lo0KlfQM5PeNYEPLW-3w"
-    };
-
-    return mapUrl + jQuery.param( params );
-  },
-
-  preview: function( pblock ) {
-    var msg = "Inserts a map of your current location: &lt;br/&gt;" +
-              "&lt;img src='${url}'/&gt;";
-    pblock.innerHTML = _(msg, {url: this._getMapUrl()});
-  },
-
-  execute: function( ) {
-    cmdAPI.getImageSnapshot( this._getMapUrl(), function(imgData) {
-      cmdAPI.setSelection( "&lt;img src='" + imgData +"'/&gt;");
-    })
-  }
-})
-</pre>
-    <p>There are three new things here: <code>cmdAPI.setSelection</code> to set HTML (yep, it can do that);
-        the use of <code>cmdAPI.getGeoLocation()</code>; and using <code>cmdAPI.snapshotImage()</code> to
-        capture the bits for the image.
-    </p>
-    <p>I find getting the location—as imprecise as IP-based location can be—useful for doing sensible defaults
-        for location-based commands, like Yelp. <code>cmdAPI.getGeoLocation()</code> returns an object which
-        has the following properties: city, state, country, lat, and long.
-    </p>
-    <p>Why do we need to use <code>cmdAPI.snapshotImage()</code>? Because the Google Maps API requires a key
-        that is tied to a particular URL. If we naively inject the image tag into a random web page, the image
-        won't load because the key doesn't match that random web page's URL. Thus, we use the <code>snapshotImage()</code>
-        function to convert the image into a <a rel="nofollow" class="external text"
-                                                href="http://en.wikipedia.org/wiki/Data:_URI_scheme">data
-            url</a>.
-    </p>
-    <p>There's also a <code>cmdAPI.snapshotWindow</code> function, which allows you to get the image data for
-        any tab/window. The function takes a window as the first paramater, and a callback for the second.
-    </p>
-</div>
--->
-
 <a id="commands-with-arguments"></a>
-
 
 <h1 class="section-heading"><span id="Commands_with_Arguments">Commands with Arguments</span></h1>
 
@@ -913,127 +787,6 @@ cmdAPI.createCommand({
     from RSS feeds, XML, and all sorts of other data formats. It also makes doing in-preview
     animations a breeze.
 </p>
-
-<!--
-        <h1 class="section-heading">
-            <div class="mw-ui-icon mw-ui-icon-element indicator"></div>
-            <span id="Twitter:_Putting_It_All_Together">Twitter: Putting It All Together</span></h1>
-        <div class="mf-section-3">
-            <p>We've now covered everything we need to cover in order to write a command that allows us to <a
-                    rel="nofollow" class="external text" href="http://en.wikipedia.org/wiki/Twitter">Twitter</a> from
-                iShell. The code below is the actual source code of the Twitter command as it appears in iShell 0.5.
-            </p>
-            <p>Many thanks to <a rel="nofollow" class="external text"
-                                 href="http://theunfocused.net/moz/iShell/verbs/">Blair McBride</a> for writing this
-                command. The source code is a bit more intricate than anything we've seen so far, but it's built using
-                exactly the same basic pieces - and demonstrates nearly all of those pieces in action.
-            </p>
-            <pre>
-const TWITTER_STATUS_MAXLEN = 140;
-
-cmdAPI.createCommand({
-  names: ["twitter", "tweet", "share using twitter"],
-  arguments: [
-    {role: "object", label: 'status', nountype: noun_arb_text},
-    {role: "alias", nountype: noun_type_twitter_user}
-  ],
-  icon: "http://twitter.com/favicon.ico",
-  description:
-  "Sets your Twitter status to a message of at most 160 characters.",
-  help: ("You'll need a &lt;a href=\"http://twitter.com\"&gt;Twitter account&lt;/a&gt;," +
-         " obviously.  If you're not already logged in" +
-         " you'll be asked to log in."),
-  preview: function(previewBlock, args) {
-    var statusText = (args.object ? args.object.text : '');
-    var usernameText = "";
-    if (args.alias) {
-      usernameText = args.alias.text;
-    } else if (args.as) {
-      usernameText = args.as.text;
-    }
-    var previewTemplate = (
-      "&lt;div class='twitter'&gt;"+_("Updates your Twitter status ${username} to:")+"&lt;br/&gt;" +
-      "&lt;b class='status'&gt;${status}&lt;/b&gt;&lt;br/&gt;&lt;br/&gt;" +
-      _("Characters remaining: &lt;b&gt;${chars}&lt;/b&gt;") +
-      "&lt;p&gt;&lt;small&gt;"+_("tip: tweet @mozillaiShell for help")+"&lt;/small&gt;&lt;/p&gt;&lt;/div&gt;");
-    var truncateTemplate = (
-      "&lt;strong&gt;"+_("The last &lt;b&gt;${truncate}&lt;/b&gt; characters will be truncated!")+"&lt;/strong&gt;");
-    var previewData = {
-      status: &lt;&gt;{statusText}&lt;/&gt;.toXMLString(),
-      username: usernameText &amp;&amp; _("(For user &lt;b&gt;${usernameText}&lt;/b&gt;)"),
-      chars: TWITTER_STATUS_MAXLEN - statusText.length
-    };
-
-    var previewHTML = cmdAPI.renderTemplate(
-                        cmdAPI.renderTemplate(previewTemplate, previewData),
-                        {usernameText:usernameText});
-
-    if (previewData.chars &lt; 0) {
-      var truncateData = {
-        truncate: 0 - previewData.chars
-      };
-
-      previewHTML += cmdAPI.renderTemplate(truncateTemplate, truncateData);
-    }
-
-    previewBlock.innerHTML = previewHTML;
-  },
-  execute: function(args) {
-    var statusText = args.object.text;
-    if(statusText.length &lt; 1) {
-      this._show(_("requires a status to be entered"));
-      return;
-    }
-
-    var updateUrl = "https://twitter.com/statuses/update.json";
-    var updateParams = {
-      source: "iShell",
-      status: statusText
-      //dont cut the input since sometimes, the user selects a big url,
-      //and the total lenght is more than 140, but tinyurl takes care of that
-    };
-    var me = this;
-
-    function sendMessage() {
-      jQuery.ajax({
-        type: "POST",
-        url: updateUrl,
-        data: updateParams,
-        dataType: "json",
-        error: function() {
-          me._show(_("error - status not updated"));
-        },
-        success: function() {
-          me._show(/^d /.test(statusText)
-                   ? _("direct message sent")
-                   : _("status updated"));
-        },
-        username: login.username,
-        password: login.password
-      });
-    }
-
-    var login;
-    var alias = args.alias;
-    if (alias &amp;&amp; alias.text &amp;&amp; alias.data) {
-      login = alias.data;
-      sendMessage();
-    } else {
-      login = {username: null,
-               password: null};
-      if (alias &amp;&amp; alias.text)
-        login.username = alias.text;
-      sendMessage();
-    }
-  },
-  _show: function(txt){
-    cmdAPI.notify({icon: this.icon, title: this.name, text: txt});
-  }
-});
-</pre>
-        </div>
--->
-
 
 <h1 class="section-heading"><span id="Switching_Tabs">Switching Tabs</span></h1>
 
