@@ -1,9 +1,9 @@
 (function () {
 
 // the css we are going to inject
-var __invertCss = 'html {filter: invert(100%);}',
-    __invertHead = document.getElementsByTagName('head')[0],
-    __invertStyle = document.createElement('style');
+var css = 'html {filter: invert(100%);}',
+    head = document.getElementsByTagName('head')[0],
+    style = document.createElement('style');
 
 // a hack, so you can "invert back" clicking the bookmarklet again
 if (!window.counter) {
@@ -16,16 +16,16 @@ else {
     }
 }
 
-__invertStyle.type = 'text/css';
-if (__invertStyle.styleSheet) {
-    __invertStyle.styleSheet.cssText = __invertCss;
+style.type = 'text/css';
+if (style.styleSheet) {
+    style.styleSheet.cssText = css;
 }
 else {
-    __invertStyle.appendChild(document.createTextNode(__invertCss));
+    style.appendChild(document.createTextNode(css));
 }
 
 //injecting the css to the head
-__invertHead.appendChild(__invertStyle);
+head.appendChild(style);
 
 function invert(rgb) {
     rgb = Array.prototype.join.call(arguments).match(/(-?[0-9.]+)/g);

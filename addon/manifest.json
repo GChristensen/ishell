@@ -3,7 +3,7 @@
     "applications": {
         "gecko": {
             "id": "ishell@gchristensen.github.io",
-            "strict_min_version": "78.0"
+            "strict_min_version": "95.0"
         }
     },
     "name": "iShell Extension",
@@ -52,7 +52,8 @@
         "tabHide",
         "clipboardRead", 
         "clipboardWrite", 
-        "notifications", 
+        "notifications",
+        "nativeMessaging",
         "storage",
         "unlimitedStorage",
         "contextMenus",

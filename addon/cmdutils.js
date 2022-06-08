@@ -154,7 +154,7 @@ CmdUtils.loadScripts = function loadScripts(url, callback, wnd=window) {
         console.error("there's no jQuery at " + wnd + ".");
         return false;
     }
-    if (url.length == 0)
+    if (url.length === 0)
         return callback();
 
     let thisurl = url.shift();
@@ -175,6 +175,42 @@ CmdUtils.loadScripts = function loadScripts(url, callback, wnd=window) {
         tempfunc();
     }
 };
+
+CmdUtils.__nativeEval = async function(text) {
+    const key = crypto.randomUUID();
+    const pullURL = helperApp.url(`/pull_script/${key}`);
+
+    var rejecter;
+    var errorListener = error => {
+        if (error.filename?.startsWith(pullURL)) {
+            window.removeEventListener("error", errorListener);
+            rejecter(error.error)
+        }
+    }
+
+    text = `{\n${text}\n}`;
+    await helperApp.post("/push_script", {text, key});
+
+    const script = jQuery("<script>")
+        .attr({crossorigin: "anonymous"})
+        .prop({src: pullURL});
+
+    window.addEventListener("error", errorListener);
+
+    document.head.appendChild(script[0]);
+    script.remove();
+
+    return {error: new Promise((resolve, reject) => {
+        rejecter = reject;
+
+        setTimeout(() => {
+            window.removeEventListener("error", errorListener);
+            resolve(true);
+        }, 1000);
+    })};
+}
+
+CmdUtils.eval = _MANIFEST_V3? CmdUtils.__nativeEval: eval;
 
 CmdUtils.__injectScriptFileMV3 = async function(tabId, options) {
     const target = {tabId};
@@ -308,9 +344,9 @@ CmdUtils.notify = function (message, title) {
         message = message.text;
     }
     if (CmdUtils.lastNotification === title + "/" + message) return;
-    chrome.notifications.create({
+    browser.notifications.create({
         "type": "basic",
-        "iconUrl": chrome.extension.getURL("/res/icons/logo.svg"),
+        "iconUrl": browser.runtime.getURL("/res/icons/logo.svg"),
         "title": title || "iShell",
         "message": message
     });

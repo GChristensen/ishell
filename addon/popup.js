@@ -459,8 +459,6 @@ function keyup_handler(evt) {
 async function initPopup(settings) {
     await initializeIShellAPI();
 
-    CmdUtils.loadScripts("http://localhost:30303/test.js", () => null, window);
-
     cmdAPI.getCommandLine = CmdUtils.getCommandLine = () => popup.getInput();
     cmdAPI.setCommandLine = CmdUtils.setCommandLine = function (text) {
         popup.setInput(text);

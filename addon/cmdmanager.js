@@ -365,7 +365,7 @@ class CommandManager {
                     let script = await this._loadDynamicFile(file.path);
                     if (script) {
                         script = preprocessor.run(script, file.syntax);
-                        eval(script);
+                        await CmdUtils.eval(script);
                     }
                 } catch (e) {
                     console.error("builtin script evaluation failed", e);
@@ -389,7 +389,7 @@ class CommandManager {
             try {
                 if (record.script) {
                     let script = preprocessor.run(record.script);
-                    eval(script);
+                    await CmdUtils.eval(script);
 
                     for (let cmd of this._commands.filter(c => !c._builtin && !c._namespace))
                         cmd._namespace = record.namespace;

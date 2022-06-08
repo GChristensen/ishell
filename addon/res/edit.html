@@ -20,6 +20,17 @@
             flex: 0 1 auto;
         }
 
+        #helper-app-warn {
+            border: 1px solid #5a0017;
+            background-color: lightcoral;
+            color: #5a0017;
+            padding: 5px;
+            font-weight: bold;
+            width: calc(100% - 40px);
+            margin: 5px 0;
+            display: none;
+        }
+
         #panel {
             flex: 1 1 auto;
         }
@@ -93,7 +104,6 @@
     <script src="/lib/uuid.js"></script>
     <script src="/bridge.js"></script>
     <script src="/parser/nounutils.js"></script>
-    <script src="/parser/nountypes.js"></script>
     <script src="/settings.js"></script>
     <script src="/preprocessor.js"></script>
     <script src="edit.js"></script>
@@ -114,6 +124,7 @@
 </div>
 
 <br id="head-br" clear="all"/>
+<div id="helper-app-warn">Please install iShell native helper application to use custom commands.</div>
 <div id="toolbar">
     <a href=# id="download"><img src="/res/icons/download.png" title="Download"
     /></a><a href=# id="upload"><img src="/res/icons/upload.png" title="Upload"/></a>

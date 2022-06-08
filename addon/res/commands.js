@@ -126,12 +126,6 @@ function fillTableRowForCmd(row, cmd, className) {
         '<div class="help"></div>' +
         '</td>');
 
-    if (cmd.oldAPI) {
-        cmdElement.addClass("old-api").prepend(
-            A("https://wiki.mozilla.org/Labs/Ubiquity/" +
-                "Parser_2_API_Conversion_Tutorial", "OLD API", "badge"));
-    }
-
     if (className) {
         checkBoxCell.addClass(className);
         cmdElement.addClass(className);
@@ -175,6 +169,7 @@ function insertNamespace(namespace, subtext, commands, table) {
 
 async function buildTable(settings) {
     await initializeIShellAPI();
+
     window.escapeHtml = Utils.escapeHtml;
 
     let table = jQuery("#commands-and-feeds-table");

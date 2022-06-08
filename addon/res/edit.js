@@ -250,12 +250,12 @@ let preprocessor = new CommandPreprocessor(CommandPreprocessor.CONTEXT_CUSTOM);
 
 // evaluates and saves scripts from editor
 async function saveScript() {
-    var customscode = editor.getSession().getValue();
+    var customcode = editor.getSession().getValue();
 
     if (scriptNamespace === SHELL_SETTINGS) {
         let settings;
         try {
-            settings = JSON.parse(customscode)
+            settings = JSON.parse(customcode)
         }
         catch (e) {
             console.error(e)
@@ -269,21 +269,58 @@ async function saveScript() {
     }
     else {
         // save
-        await DBStorage.saveCustomScript(scriptNamespace, customscode);
+        await DBStorage.saveCustomScript(scriptNamespace, customcode);
 
         // eval
-        try {
-            eval(preprocessor.run(customscode));
-            $("#info").html("Evaluated!");
-            await CmdManager.loadCustomScripts(scriptNamespace);
-        } catch (e) {
-            $("#info").html("<span style='background-color: red; color: white;'>&nbsp;" + e.message + "&nbsp;</span>");
-        }
+        if (_MANIFEST_V3)
+            await evalMV3(customcode);
+        else
+            await evalMV2(customcode);
     }
+}
+
+async function evalMV2(customcode) {
+    try {
+        const code = preprocessor.run(customcode);
+        CmdUtils.eval(code);
+
+        $("#info").html("Evaluated!");
+
+        await CmdManager.loadCustomScripts(scriptNamespace);
+    } catch (e) {
+        displayError(e.message);
+    }
+}
+
+async function evalMV3(customcode) {
+    const code = preprocessor.run(customcode);
+    const result = await CmdUtils.eval(code);
+
+    result.error.then(() => {
+        $("#info").html("Evaluated!");
+        CmdManager.loadCustomScripts(scriptNamespace);
+    })
+    .catch(error => {
+        displayError(error.message);
+    });
+}
+
+function displayError(message) {
+    $("#info").html("<span style='background-color: red; color: white;'>&nbsp;" + message + "&nbsp;</span>");
 }
 
 async function initEditor(settings) {
     await initializeIShellAPI();
+
+    if (_MANIFEST_V3) {
+        try {
+            const helperApp = await browser.runtime.sendMessage({type: "CHECK_HELPER_APP_AVAILABLE"});
+            if (!helperApp)
+                $("#helper-app-warn").show();
+        } catch (e) {
+            console.error(e);
+        }
+    }
 
     let lastNamespace = settings.last_editor_namespace();
 
