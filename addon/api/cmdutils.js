@@ -1,6 +1,9 @@
+import {helperApp} from "../helper_app.js";
+import {CmdManager} from "../cmdmanager.js";
+
 // CmdUtils
 
-if (!CmdUtils) var CmdUtils = {
+export var CmdUtils = {
     VERSION: chrome.runtime.getManifest().version,
     DEBUG: undefined,
     BROWSER: (typeof chrome !== "undefined")
@@ -13,7 +16,7 @@ if (!CmdUtils) var CmdUtils = {
     selectedHTML: ""    // currently selected html, update via content script content_get_selection.js
 };
 
-var _ = function(x, data) {
+export var _ = function(x, data) {
     if (_MANIFEST_V3)
         return x;
 
@@ -23,10 +26,13 @@ var _ = function(x, data) {
         : x
 };
 
-var H = Utils.escapeHtml;
+export var H = Utils.escapeHtml;
+
+CmdUtils.matchScore = NounUtils.matchScore;
+CmdUtils.makeSugg = NounUtils.makeSugg;
 
 // stub for original ubiquity string formatter
-function L(pattern) {
+export function L(pattern) {
     for (let sub of Array.prototype.slice.call(arguments, 1)) {
         pattern = pattern.replace("%S", sub);
     }
@@ -247,7 +253,7 @@ CmdUtils.updateSelection = async function (tab_id) {
     let results;
 
     try {
-        results = await CmdUtils.executeScriptFile(tab_id, {file: "/content_get_selection.js", allFrames: true});
+        results = await CmdUtils.executeScriptFile(tab_id, {file: "/scripts/content_get_selection.js", allFrames: true});
     }
     catch (e) {
         console.error(e)
@@ -295,17 +301,17 @@ CmdUtils.updateActiveTab = async function () {
     }
 };
 
-ContextUtils.getSelection = CmdUtils.getSelection = () => CmdUtils.selectedText;
-ContextUtils.getHtmlSelection = CmdUtils.getHtmlSelection = () => CmdUtils.selectedHtml;
+CmdUtils.getSelection = () => CmdUtils.selectedText;
+CmdUtils.getHtmlSelection = () => CmdUtils.selectedHtml;
 
 // replaces current selection with string provided
-ContextUtils.setSelection = CmdUtils.setSelection = function setSelection(replacementText) {
+CmdUtils.setSelection = function setSelection(replacementText) {
     if (typeof replacementText !== 'string') replacementText = replacementText + '';
     replacementText = replacementText.replace(/(['"])/g, "\\$1");
     replacementText = replacementText.replace(/\\\\/g, "\\");
 
     if (CmdUtils.activeTab && CmdUtils.activeTab.id)
-        CmdUtils.executeScriptFile(CmdUtils.activeTab.id, { file: "content_set_selection.js" } )
+        CmdUtils.executeScriptFile(CmdUtils.activeTab.id, { file: "/scripts/content_set_selection.js" } )
             .then(() => {
                 browser.tabs.sendMessage(CmdUtils.activeTab.id, {type: "replaceSelectedText", text: replacementText})
             });

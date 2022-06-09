@@ -87,4 +87,4 @@ class StorageIDB {
     }
 }
 
-DBStorage = new StorageIDB();
+export const DBStorage = new StorageIDB();

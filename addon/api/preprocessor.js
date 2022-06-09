@@ -1,17 +1,17 @@
 // Preprocessor used to support new object-oriented command syntax
 
-OBJECT = "object";
-FOR = "subject";
-TO = "goal";
-FROM = "source";
-NEAR = "location";
-AT = "time";
-WITH = "instrument";
-IN = "format";
-OF = "modifier";
-AS = "alias";
-BY = "cause";
-ON = "dependency"
+export const OBJECT = "object";
+export const FOR = "subject";
+export const TO = "goal";
+export const FROM = "source";
+export const NEAR = "location";
+export const AT = "time";
+export const WITH = "instrument";
+export const IN = "format";
+export const OF = "modifier";
+export const AS = "alias";
+export const BY = "cause";
+export const ON = "dependency"
 
 let PREPROCESSOR_PREPOSITION_MAP = new Map([
     [OBJECT, "OBJECT"],
@@ -29,7 +29,10 @@ let PREPROCESSOR_PREPOSITION_MAP = new Map([
 ]);
 
 
-class CommandPreprocessor {
+export class CommandPreprocessor {
+    static CONTEXT_BUILTIN = 0;
+    static CONTEXT_CUSTOM = 1;
+
     constructor(context) {
         this._context = context;
     }
@@ -424,6 +427,3 @@ class CommandPreprocessor {
         return script;
     }
 }
-
-CommandPreprocessor.CONTEXT_BUILTIN = 0;
-CommandPreprocessor.CONTEXT_CUSTOM = 1;

@@ -1,5 +1,7 @@
 // These commands are hidden by default and available only through an undocumented easter switch
 
+import {NS_MORE_COMMANDS} from "./common.js";
+
 {
     const JAVLIB_SEARCH_URL = "https://www.javlibrary.com/en/vl_searchbyid.php?keyword=";
 

@@ -1,10 +1,13 @@
+import {settings} from "./settings.js";
+import {DBStorage} from "./storage.js";
+
 class CommandManager {
     constructor() {
         this._commands = [];
         this._disabled_commands = [];
         this._context_menu_commands = [];
 
-        shellSettings.get("context_menu_commands").then(commands => {
+        settings.get("context_menu_commands").then(commands => {
            if (commands)
                this._context_menu_commands = commands;
            this.createContextMenu();
@@ -126,7 +129,7 @@ class CommandManager {
         if (input) {
             input = input.trim();
 
-            let history = await shellSettings.get("command_history");
+            let history = await settings.get("command_history");
 
             if (!history)
                 history = [];
@@ -137,23 +140,23 @@ class CommandManager {
 
                     history = [input, ...history];
 
-                    if (history.length > shellSettings.max_history_items())
+                    if (history.length > settings.max_history_items())
                         history.splice(history.length - 1, 1);
 
-                    shellSettings.set("command_history", history);
+                    settings.set("command_history", history);
                 }
         }
     }
 
     async commandHistory() {
-        return shellSettings.get("command_history");
+        return settings.get("command_history");
     }
 
     enableCommand(cmd) {
         if (cmd.name in this._disabled_commands) {
             delete this._disabled_commands[cmd.name];
-            shellSettings.load(() => {
-                shellSettings.disabled_commands(this._disabled_commands);
+            settings.load().then(() => {
+                settings.disabled_commands(this._disabled_commands);
             });
         }
     };
@@ -161,14 +164,14 @@ class CommandManager {
     disableCommand(cmd) {
         if (!(cmd.name in this._disabled_commands)) {
             this._disabled_commands[cmd.name] = true;
-            shellSettings.load(() => {
-                shellSettings.disabled_commands(this._disabled_commands);
+            settings.load().then(() => {
+                settings.disabled_commands(this._disabled_commands);
             });
         }
     };
 
     makeParser() {
-        return NLParser.makeParserForLanguage("en", this._commands, ContextUtils, new SuggestionMemory());
+        return NLParser.makeParserForLanguage("en", this._commands);
     };
 
     // adds a storage bin obtained from the command uuid as the last argument of the called function
@@ -215,7 +218,7 @@ class CommandManager {
             command: command
         });
 
-        await shellSettings.set("context_menu_commands", this._context_menu_commands);
+        await settings.set("context_menu_commands", this._context_menu_commands);
         this.createContextMenu();
     };
 
@@ -294,7 +297,7 @@ class CommandManager {
         let commandDef = this.getCommandByUUID(contextMenuCmd.uuid);
 
         let parser = this.makeParser();
-        let query = parser.newQuery(command, null, shellSettings.max_suggestions(), true);
+        let query = parser.newQuery(command, null, settings.max_suggestions(), true);
 
         let executed = false;
 
@@ -313,7 +316,7 @@ class CommandManager {
                     CmdUtils._internalClearSelection();
                 });
 
-                if (shellSettings.remember_context_menu_commands())
+                if (settings.remember_context_menu_commands())
                     this.commandHistoryPush(contextMenuCmd.command);
 
                 parser.strengthenMemory(sent);
@@ -401,4 +404,4 @@ class CommandManager {
     }
 }
 
-CmdManager = new CommandManager();
+export const CmdManager = new CommandManager();

@@ -1,5 +1,7 @@
 // These commands are hidden by default and available only through an undocumented easter switch
 
+import {NS_MORE_COMMANDS} from "./common.js";
+
 CmdUtils.CreateCommand({
     name: "dark-flow",
     uuid: "79C0722B-5D25-49A3-AE33-9ACA1152EC9C",

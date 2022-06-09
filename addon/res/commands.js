@@ -168,8 +168,6 @@ function insertNamespace(namespace, subtext, commands, table) {
 }
 
 async function buildTable(settings) {
-    await initializeIShellAPI();
-
     window.escapeHtml = Utils.escapeHtml;
 
     let table = jQuery("#commands-and-feeds-table");

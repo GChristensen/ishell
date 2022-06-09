@@ -1,3 +1,6 @@
+import "./api_backgorund.js";
+import {settings} from "./settings.js";
+
 let popup;
 let suggestions;
 
@@ -301,7 +304,7 @@ class PopupWindow {
     }
 
     saveInput() {
-        shellSettings.shell_last_command(this._input_element.value);
+        settings.shell_last_command(this._input_element.value);
         popup.rememberInput();
     }
 
@@ -309,12 +312,12 @@ class PopupWindow {
         if (CmdManager.selectedContextMenuCommand) {
             this.setInput(CmdManager.selectedContextMenuCommand);
             CmdManager.selectedContextMenuCommand = null;
-            if (shellSettings.remember_context_menu_commands())
+            if (settings.remember_context_menu_commands())
                 this.saveInput();
             return this._input_element.value;
         }
         else {
-            let input = shellSettings.shell_last_command() || "";
+            let input = settings.shell_last_command() || "";
             this._input_element.value = input;
             this._input_element.select();
             return input;
@@ -355,7 +358,7 @@ async function keydown_handler(evt) {
     if (kc === 13) {
         let input = popup.getInput();
 
-        if (Utils.easterListener(input))
+        if (await Utils.easterListener(input))
             return;
 
         if (evt.ctrlKey && evt.altKey) {
@@ -456,8 +459,8 @@ function keyup_handler(evt) {
     suggestions.displaySuggestions(input);
 }
 
-async function initPopup(settings) {
-    await initializeIShellAPI();
+async function initPopup() {
+    await settings.load();
 
     cmdAPI.getCommandLine = CmdUtils.getCommandLine = () => popup.getInput();
     cmdAPI.setCommandLine = CmdUtils.setCommandLine = function (text) {
@@ -491,7 +494,7 @@ async function initPopup(settings) {
     document.addEventListener('keyup', keyup_handler, false);
 }
 
-$(window).on('load', () => shellSettings.load(settings => initPopup(settings)));
+$(window).on('load', () => initPopup());
 
 $(window).on('beforeunload', function() {
     CmdManager.commandHistoryPush(popup.getInput());

@@ -1,56 +1,69 @@
 {
-    "version": "0.4.0.2",
+    "version": "0.4.0.1",
     "applications": {
         "gecko": {
             "id": "ishell@gchristensen.github.io",
-            "strict_min_version": "78.0"
+            "strict_min_version": "95.0"
         }
     },
     "name": "iShell Extension",
     "short_name": "iShell",
     "homepage_url": "https://gchristensen.github.io/#ishell",
     "author": "gchristnsn",
-    "description": "A natural language interface for browsers",
-    "content_security_policy": "script-src 'self' 'unsafe-eval'; object-src 'self';",
-    "manifest_version": 2,
+    "description": "A text command interface for browsers",
     "background": {
-      "page": "background.html",
-      "persistent": true
+        "page": "background.html"
     },
-    "browser_action": {
+    "content_security_policy": {
+       "extension_pages": "script-src 'self' http://localhost:41514; object-src 'self';"
+    },
+    "manifest_version": 3,
+    "icons": {
+        "128": "res/icons/logo.svg"
+    },
+    "action": {
         "default_title": "iShell",
         "default_popup": "popup.html",
-        "default_icon": "/res/icons/logo.svg"
+        "default_icon": {
+            "16": "res/icons/logo.svg",
+            "24": "res/icons/logo.svg",
+            "32": "res/icons/logo.svg",
+            "48": "res/icons/logo.svg",
+            "96": "res/icons/logo.svg"
+        }
     },
     "options_ui": {
         "page": "res/options.html",
         "open_in_tab": true
     },
     "commands": {
-        "_execute_browser_action": {
+        "_execute_action": {
             "suggested_key": {
-                "chromeos": "Ctrl+Space",
+                "default": "Ctrl+Space",
                 "linux": "Ctrl+Space",
                 "mac": "Command+Space",
                 "windows": "Ctrl+Space"
             }
         }
     },
-    "icons": { "128" : "/res/icons/logo.svg" },
     "permissions": [
-        "<all_urls>",
         "activeTab", 
         "tabs",
         "tabHide",
         "clipboardRead", 
         "clipboardWrite", 
-        "notifications", 
+        "notifications",
+        "nativeMessaging",
         "storage",
         "unlimitedStorage",
         "contextMenus",
         "history",
         "webNavigation",
         "management",
-        "downloads"
+        "downloads",
+        "scripting"
+    ],
+    "host_permissions": [
+        "<all_urls>"
     ]
 }

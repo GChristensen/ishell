@@ -1,6 +1,8 @@
 // BuildIn CmdUtils command definitions
 // jshint esversion: 6 
 
+import {settings} from "../settings.js";
+
 CmdUtils.CreateCommand({
     names: ["change-shell-settings", "change-shell-options"],
     uuid: "D6E7CBA7-920D-4F86-910E-63AB3C119906",
@@ -112,14 +114,14 @@ cmdAPI.createCommand({
             pblock.text(`Inserts a new dynamic setting <code>${args.alias.text}</code> 
                                 with the value: "${args.object.text}".`);
     },
-    execute: function(args, storage) {
-        if (args.alias?.text)
-            shellSettings.load(settings => {
-                let dynamic_settings = settings.dynamic_settings();
-                dynamic_settings[args.alias.text] = args.object.text;
-                settings.dynamic_settings(dynamic_settings);
-                browser.runtime.sendMessage({type: "ADDED_DYNAMIC_SETTING"})
-            })
+    execute: async function(args, storage) {
+        if (args.alias?.text) {
+            await settings.load();
+            let dynamic_settings = settings.dynamic_settings();
+            dynamic_settings[args.alias.text] = args.object.text;
+            settings.dynamic_settings(dynamic_settings);
+            browser.runtime.sendMessage({type: "ADDED_DYNAMIC_SETTING"});
+        }
     }
 });
 
@@ -193,7 +195,7 @@ CmdUtils.CreateCommand({
     description: "Inverts all colors on current page. Based on <a target=_blank href=https://stackoverflow.com/questions/4766201/javascript-invert-color-on-all-elements-of-a-page>this</a>.",
     icon: "/res/icons/invert.png",
     execute: function execute(){
-        CmdUtils.executeScriptFile(CmdUtils.activeTab.id, {file: "content_invert.js"});
+        CmdUtils.executeScriptFile(CmdUtils.activeTab.id, {file: "/scripts/content_invert.js"});
     },
 });
 
@@ -300,7 +302,7 @@ const noun_calc = {
             result = e.message
             score  = .1
         }
-        return [CmdUtils.makeSugg(txt, htm, result, score, si)];
+        return [NounUtils.makeSugg(txt, htm, result, score, si)];
     },
     _mathlike: /^[\w.+\-*\/^%(, )|]+$/,
 };

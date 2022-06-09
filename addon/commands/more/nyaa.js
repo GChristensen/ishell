@@ -1,6 +1,6 @@
-NS_MORE_COMMANDS = "More Commands";
-
 // These commands are hidden by default and available only through an undocumented easter switch
+
+import {NS_MORE_COMMANDS} from "./common.js";
 
 {
     const tableTemplate =

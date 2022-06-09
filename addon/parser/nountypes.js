@@ -1,49 +1,11 @@
-/* ***** BEGIN LICENSE BLOCK *****
- * Version: MPL 1.1/GPL 2.0/LGPL 2.1
- *
- * The contents of this file are subject to the Mozilla Public License Version
- * 1.1 (the "License"); you may not use this file except in compliance with
- * the License. You may obtain a copy of the License at
- * http://www.mozilla.org/MPL/
- *
- * Software distributed under the License is distributed on an "AS IS" basis,
- * WITHOUT WARRANTY OF ANY KIND, either express or implied. See the License
- * for the specific language governing rights and limitations under the
- * License.
- *
- * The Original Code is Ubiquity.
- *
- * The Initial Developer of the Original Code is Mozilla.
- * Portions created by the Initial Developer are Copyright (C) 2007
- * the Initial Developer. All Rights Reserved.
- *
- * Contributor(s):
- *   Jono DiCarlo <jdicarlo@mozilla.com>
- *   Blair McBride <unfocused@gmail.com>
- *   Abimanyu Raja <abimanyuraja@gmail.com>
- *   Michael Yoshitaka Erlewine <mitcho@mitcho.com>
- *   Satoshi Murakami <murky.satyr@gmail.com>
- *   Brandon Pung <brandonpung@gmail.com>
- *
- * Alternatively, the contents of this file may be used under the terms of
- * either the GNU General Public License Version 2 or later (the "GPL"), or
- * the GNU Lesser General Public License Version 2.1 or later (the "LGPL"),
- * in which case the provisions of the GPL or the LGPL are applicable instead
- * of those above. If you wish to allow use of your version of this file only
- * under the terms of either the GPL or the LGPL, and not to allow others to
- * use your version of this file under the terms of the MPL, indicate your
- * decision by deleting the provisions above and replace them with the notice
- * and other provisions required by the GPL or the LGPL. If you do not delete
- * the provisions above, a recipient may use your version of this file under
- * the terms of any one of the MPL, the GPL or the LGPL.
- *
- * ***** END LICENSE BLOCK ***** */
+import {settings} from "../settings.js";
+import {CmdManager} from "../cmdmanager.js";
 
 // === {{{ noun_arb_text }}} ===
 // Suggests the input as is.
 // * {{{text, html}}} : user input
 
-var noun_arb_text = {
+export const noun_arb_text = {
   label: "?",
   rankLast: true,
   noExternalCalls: true,
@@ -58,7 +20,7 @@ var noun_arb_text = {
 // * {{{text, html}}} : number text
 // * {{{data}}} : number
 
-var noun_type_number = {
+export const noun_type_number = {
     label: "number",
     noExternalCalls: true,
     cacheTime: -1,
@@ -74,7 +36,7 @@ var noun_type_number = {
 // * {{{text, html}}} : "?%"
 // * {{{data}}} : a float number (1.0 for 100% etc.)
 
-var noun_type_percentage = {
+export const noun_type_percentage = {
   label: "percentage",
   noExternalCalls: true,
   cacheTime: -1,
@@ -115,7 +77,7 @@ function __scoreDateTime(text) {
   return score > 1 ? 1 : score;
 }
 
-var noun_type_date = {
+export const noun_type_date = {
   label: "date",
   noExternalCalls: true,
   cacheTime: 0,
@@ -136,7 +98,7 @@ var noun_type_date = {
     NounUtils.makeSugg(date.toString("yyyy-MM-dd"), null, date, score),
 };
 
-var noun_type_time = {
+export const noun_type_time = {
   label: "time",
   noExternalCalls: true,
   cacheTime: 0,
@@ -158,7 +120,7 @@ var noun_type_time = {
     NounUtils.makeSugg(date.toString("hh:mm:ss tt"), null, date, score),
 };
 
-var noun_type_date_time = {
+export const noun_type_date_time = {
   label: "date and time",
   noExternalCalls: true,
   cacheTime: 0,
@@ -193,7 +155,7 @@ const __EMAIL_ADDRESS = RegExp("^(?:" + __EMAIL_ATOM + "(?:\\." + __EMAIL_ATOM +
                             __EMAIL_ATOM + "(?:\\." + __EMAIL_ATOM + ")*)$");
 const __EMAIL_USER =  RegExp("^(?:" + __EMAIL_ATOM + "(?:\\." + __EMAIL_ATOM +
                              ')*|(?:\\"(?:\\\\[^\\r\\n]|[^\\\\\\"])*\\"))$');
-var noun_type_email = {
+export const noun_type_email = {
     label: "email",
     noExternalCalls: true,
     cacheTime: -1,
@@ -214,7 +176,7 @@ var noun_type_email = {
 };
 
 const __STORED_EMAIL_UUID = "--stored-email-items";
-var noun_type_contact = {
+export const noun_type_contact = {
     label: "email",
     noExternalCalls: true,
     cacheTime: -1,
@@ -239,7 +201,7 @@ var noun_type_contact = {
             });
 
             let contactSuggs = matchingItems.map(c =>
-                NounUtils.makeSugg(c.email, c.email, null, CmdUtils.matchScore(c.match), selectionIndices));
+                NounUtils.makeSugg(c.email, c.email, null, NounUtils.matchScore(c.match), selectionIndices));
 
             if (__EMAIL_USER.test(text)) {
                 textSugg = NounUtils.makeSugg(text, html, null, 0.3, selectionIndices);
@@ -265,25 +227,25 @@ var noun_type_contact = {
     }
 };
 
-var noun_type_tab = {
+export const noun_type_tab = {
     label: "title or URL",
     noExternalCalls: true,
     suggest: function(text, html, cb, selectedIndices) {
         let fakeReq = {readyState: 2};
 
-        CmdUtils.tabs.search(text, shellSettings.max_suggestions(), tabs => {
+        CmdUtils.tabs.search(text, settings.max_suggestions(), tabs => {
             fakeReq.readyState = 4;
             cb(tabs.map(tab =>
                 NounUtils.makeSugg(
                     tab.title || tab.url,
-                    null, tab, CmdUtils.matchScore(tab.match), selectedIndices)));
+                    null, tab, NounUtils.matchScore(tab.match), selectedIndices)));
         });
 
         return [fakeReq];
     },
 };
 
-var noun_type_context_menu_command = {
+export const noun_type_context_menu_command = {
     label: "label",
     noExternalCalls: true,
     suggest: function(text, html, cb, selectedIndices) {
@@ -297,13 +259,13 @@ var noun_type_context_menu_command = {
 
         fakeReq.readyState = 4;
         cb(matchingItems.map(cm =>
-            NounUtils.makeSugg(cm.label, null, cm, CmdUtils.matchScore(cm.match), selectedIndices)));
+            NounUtils.makeSugg(cm.label, null, cm, NounUtils.matchScore(cm.match), selectedIndices)));
 
         return [fakeReq];
     },
 };
 
-var noun_type_lang_google = CmdUtils.NounType("language", {
+export const noun_type_lang_google = NounUtils.NounType("language", {
     Afrikaans: "af",
     Albanian: "sq",
     Arabic: "ar",
@@ -364,7 +326,7 @@ var noun_type_lang_google = CmdUtils.NounType("language", {
     Yiddish: "yi",
 });
 
-var noun_type_lang_wikipedia = CmdUtils.NounType("language", {
+export const noun_type_lang_wikipedia = NounUtils.NounType("language", {
     English: "en",
     German: "de",
     French: "fr",
@@ -554,7 +516,7 @@ for (let ntl of [noun_type_lang_google, noun_type_lang_wikipedia]) {
         NounUtils.makeSugg("English", null, "en"));
 }
 
-var noun_type_lang_microsoft;
+export let noun_type_lang_microsoft;
 
 {
     const MS_LANGS = {}
@@ -630,11 +592,11 @@ var noun_type_lang_microsoft;
         MS_LANGS[name] = code;
     }
 
-    noun_type_lang_microsoft = CmdUtils.NounType("language", MS_LANGS);
+    noun_type_lang_microsoft = NounUtils.NounType("language", MS_LANGS);
     noun_type_lang_microsoft.MS_LANGS_REV = MS_LANGS_REV;
 }
 
-var noun_type_lang_lingvo = CmdUtils.NounType("language", {
+export const noun_type_lang_lingvo = NounUtils.NounType("language", {
     "Chinese": [1028, "zh"],
     "Danish": [1030, "da"],
     "Dutch": [1043, "nl"],
@@ -657,7 +619,7 @@ var noun_type_lang_lingvo = CmdUtils.NounType("language", {
     "Ukrainian": [1058, "uk"]
 });
 
-var noun_type_history_date = {
+export const noun_type_history_date = {
     label: "day",
     noExternalCalls: true,
     cacheTime: -1,
@@ -676,21 +638,21 @@ var noun_type_history_date = {
         }
 
         suggs = matchingPredefs.map(p =>
-            CmdUtils.makeSugg(p.label, p.label, null, CmdUtils.matchScore(p.match), selectionIndices));
+            NounUtils.makeSugg(p.label, p.label, null, NounUtils.matchScore(p.match), selectionIndices));
 
         if (/\d{4}-d{1,2}-d{1,2}/.test(text)) {
-            suggs.push(CmdUtils.makeSugg(text, text, null, CmdUtils.matchScore(p.match), selectionIndices));
+            suggs.push(NounUtils.makeSugg(text, text, null, NounUtils.matchScore(p.match), selectionIndices));
         }
         else if (/\d{1,2}-\d{1,2}/.test(text)) {
             let now = new Date();
             let [month, day] = text.split("-");
             let date = now.getFullYear() + "-" + addZero(month) + "-" + addZero(day);
-            suggs.push(CmdUtils.makeSugg(date, date, null, 1, selectionIndices));
+            suggs.push(NounUtils.makeSugg(date, date, null, 1, selectionIndices));
         }
         else if (/\d{1,2}/.test(text)) {
             let now = new Date();
             let date = now.getFullYear() + "-" + addZero(now.getMonth() + 1) + "-" + addZero(text);
-            suggs.push(CmdUtils.makeSugg(date, date, null, 1, selectionIndices));
+            suggs.push(NounUtils.makeSugg(date, date, null, 1, selectionIndices));
         }
 
         return suggs;

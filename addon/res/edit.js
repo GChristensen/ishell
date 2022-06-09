@@ -310,8 +310,6 @@ function displayError(message) {
 }
 
 async function initEditor(settings) {
-    await initializeIShellAPI();
-
     if (_MANIFEST_V3) {
         try {
             const helperApp = await browser.runtime.sendMessage({type: "CHECK_HELPER_APP_AVAILABLE"});

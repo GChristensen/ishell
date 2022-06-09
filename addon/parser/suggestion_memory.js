@@ -1,16 +1,17 @@
-function SuggestionMemory() {
-}
+import {DBStorage} from "../storage.js";
 
-SuggestionMemory.prototype = {
-    constructor: SuggestionMemory,
+export class SuggestionMemory {
+    constructor() {
+    }
+
     toString() {
         return "[object SuggestionMemory]"
-    },
+    }
 
     // === {{{ SuggestionMemory#remember(input, suggestion, ammount) }}}
     // Increases the strength of the association between {{{input}}} and
     // {{{suggestion}}}.
-    remember: async function SM_remember(input, suggestion, amount) {
+    async remember(input, suggestion, amount) {
         amount = +amount || 1;
 
         const memory = (await DBStorage.getSuggestionMemory(input)) || {input, scores: {}};
@@ -23,7 +24,7 @@ SuggestionMemory.prototype = {
         }
 
         DBStorage.setSuggestionMemory(memory);
-    },
+    }
 
     // === {{{ SuggestionMemory#getScore(input, suggestion) }}} ===
     // === {{{ SuggestionMemory#setScore(input, suggestion, score) }}} ===
@@ -35,16 +36,16 @@ SuggestionMemory.prototype = {
             return memory.scores[suggestion] || 0
 
         return 0;
-    },
+    }
+
     setScore(input, suggestion, score) {
         //return this.remember(input, suggestion, score - this.getScore(input, suggestion));
-    },
+    }
 
     // === {{{ SuggestionMemory#wipe(input, suggestion) }}} ===
     // Wipes the specified entry out of this suggestion memory instance.
     // Omitting both {{{input}}} and {{{suggestion}}} deletes everything.
     // Be careful with this.
-    wipe: function SM_wipe(input, suggestion) {
-
-    },
-};
+    wipe(input, suggestion) {
+    }
+}

@@ -132,4 +132,4 @@ class HelperApp {
 
 }
 
-var helperApp = new HelperApp();
+export const helperApp = new HelperApp();
