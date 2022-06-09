@@ -1,5 +1,4 @@
 import {settings} from "../settings.js";
-import {CmdManager} from "../cmdmanager.js";
 
 export const cmdAPI = {
     get settings() {
@@ -17,10 +16,10 @@ function delegate (object, method) {
     }
 }
 
-cmdAPI.makeSugg = delegate(CmdUtils, NounUtils.makeSugg);
-cmdAPI.matchScore = delegate(CmdUtils, NounUtils.matchScore);
-cmdAPI.grepSuggs = delegate(CmdUtils, NounUtils.grepSuggs);
-cmdAPI.createCommand = delegate(CmdManager, CmdManager.createCommand);
+cmdAPI.makeSugg = delegate(NounUtils, NounUtils.makeSugg);
+cmdAPI.matchScore = delegate(NounUtils, NounUtils.matchScore);
+cmdAPI.grepSuggs = delegate(NounUtils, NounUtils.grepSuggs);
+cmdAPI.createCommand = delegate(CmdUtils, CmdUtils.CreateCommand);
 cmdAPI.makeSearchCommand = delegate(CmdUtils, CmdUtils.makeSearchCommand);
 cmdAPI.previewAjax = delegate(CmdUtils, CmdUtils.previewAjax);
 cmdAPI.previewGet = delegate(CmdUtils, CmdUtils.previewGet);

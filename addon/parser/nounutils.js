@@ -155,7 +155,7 @@ NounUtils.matchScore = function matchScore(match) {
 // {{{selectionIndices}}} is an optional array containing the start and end
 // indices of selection within {{{text}}}.
 
-NounUtils.makeSugg = NounUtils.makeSugg = function makeSugg(text, html, data, score, selectionIndices) {
+NounUtils.makeSugg = function makeSugg(text, html, data, score, selectionIndices) {
     if (text == null && html == null && arguments.length < 3)
     // all inputs empty!  There is no suggestion to be made.
         return null;
@@ -215,7 +215,7 @@ NounUtils.makeSugg = NounUtils.makeSugg = function makeSugg(text, html, data, sc
 // {{{key}}} is an optional string to specify the target property
 // to match with. Defaults to {{{"text"}}}.
 
-NounUtils.grepSuggs = NounUtils.grepSuggs = function grepSuggs(input, suggs, key) {
+NounUtils.grepSuggs = function grepSuggs(input, suggs, key) {
     if (!input) return [];
     if (key == null)
         key = "text";

@@ -6,36 +6,36 @@ import {settings} from "../settings.js";
 CmdUtils.CreateCommand({
     names: ["change-shell-settings", "change-shell-options"],
     uuid: "D6E7CBA7-920D-4F86-910E-63AB3C119906",
-    icon: "/res/icons/settings.svg",
+    icon: "/ui/icons/settings.svg",
 
     _namespace: "iShell", // do not set this field in custom commands
     description: "Takes you to the iShell <a href='options.html' target=_blank>settings page</a>.",
     execute: function() {
-        CmdUtils.addTab("res/options.html");
+        CmdUtils.addTab("ui/options/options.html");
     }
 });
 
 CmdUtils.CreateCommand({
     names: ["edit-shell-settings", "edit-shell-options"],
     uuid: "3A9CD64F-3D4D-4D90-BA5A-882615672396",
-    icon: "/res/icons/debug.png",
+    icon: "/ui/icons/debug.png",
     _hidden: true,
     _namespace: "iShell",
     description: "Live-edit iShell options as text.",
     execute: function() {
-        CmdUtils.addTab("res/edit.html?shell-settings");
+        CmdUtils.addTab("ui/options/edit.html?shell-settings");
     }
 });
 
 CmdUtils.CreateCommand({
     names: ["view-api-reference"],
     uuid: "3DB11207-1240-41F8-966C-CD77B58C6376",
-    icon: "/res/icons/debug.png",
+    icon: "/ui/icons/debug.png",
     _hidden: true,
     _namespace: "iShell",
     description: "View iShell API reference.",
     execute: function() {
-        CmdUtils.addTab("res/API.html");
+        CmdUtils.addTab("ui/options/API.html");
     }
 });
 
@@ -43,20 +43,20 @@ CmdUtils.CreateCommand({
     names: ["list-shell-commands", "command-list", "help"],
     uuid: "B8D3B9C2-D8DB-40F3-833F-639588A9EA8D",
     description: "Opens iShell command list page.",
-    icon: "/res/icons/list_table.png",
+    icon: "/ui/icons/list_table.png",
     _namespace: "iShell",
     preview: "Lists all available commands",
-    execute: function() {CmdUtils.addTab("res/commands.html")}
+    execute: function() {CmdUtils.addTab("ui/options/commands.html")}
 });
 
 CmdUtils.CreateCommand({
     names: ["edit-shell-commands", "hack-ishell"],
     uuid: "07E1ABDD-89BD-4666-8884-3E0B86611CE0",
-    icon: "/res/icons/plugin_edit.png",
+    icon: "/ui/icons/plugin_edit.png",
     _namespace: "iShell",
     description: "Takes you to the iShell command <a href='edit.html' target=_blank>editor page</a>.",
     execute: function() {
-        CmdUtils.addTab("res/edit.html");
+        CmdUtils.addTab("ui/options/edit.html");
     }
 });
 
@@ -65,7 +65,7 @@ CmdUtils.CreateCommand({
     uuid: "E9F2C758-FA25-46F1-90C4-02CB057A3269",
     _namespace: "iShell",
     description: "Reloads iShell extension.",
-    icon: "/res/icons/arrow_refresh.png",
+    icon: "/ui/icons/arrow_refresh.png",
     preview: "Reloads iShell extension.",
     execute: function() {
         chrome.runtime.reload();
@@ -78,7 +78,7 @@ CmdUtils.CreateCommand({
     description: "Debug the popup window in a separate tab.",
     _namespace: "iShell",
     _hidden: true,
-    icon: "/res/icons/debug.png",
+    icon: "/ui/icons/debug.png",
     preview: "Debug the popup window in a separate tab.",
     execute: function() {CmdUtils.addTab("popup.html")}
 });
@@ -89,7 +89,7 @@ CmdUtils.CreateCommand({
     description: "Open extension generated background page.",
     _namespace: "iShell",
     _hidden: true,
-    icon: "/res/icons/debug.png",
+    icon: "/ui/icons/debug.png",
     execute: function() {
         chrome.runtime.getBackgroundPage(p => CmdUtils.addTab(p.location.href));
     }
@@ -98,7 +98,7 @@ CmdUtils.CreateCommand({
 cmdAPI.createCommand({
     name: "add-setting",
     uuid: "C6D50448-A345-4FDC-8F4D-F724FAA2D7C2",
-    icon: "/res/icons/properties.png",
+    icon: "/ui/icons/properties.png",
     _namespace: "iShell",
     arguments: [{role: "object",     nountype: noun_arb_text, label: "value"},
                 {role: "alias",      nountype: noun_arb_text, label: "key"}, // as
@@ -132,7 +132,7 @@ CmdUtils.CreateCommand({
     description: "Switches to the tab whose title or URL matches the input.",
     previewDelay: 100,
     _namespace: "Browser",
-    icon: "/res/icons/tab_go.png",
+    icon: "/ui/icons/tab_go.png",
     execute: function execute({object}) {
         if (object && object.data)
             chrome.tabs.update(object.data.id, {active: true});
@@ -146,7 +146,7 @@ CmdUtils.CreateCommand({
     description: "Closes the tab whose title or URL matches the input or the current tab if no tab matches.",
     previewDelay: 100,
     _namespace: "Browser",
-    icon: "/res/icons/tab_delete.png",
+    icon: "/ui/icons/tab_delete.png",
     execute: function execute({object}) {
         if (!object || !object.data)
             CmdUtils.closeTab();
@@ -162,7 +162,7 @@ CmdUtils.CreateCommand({
     description: "Closes all open tabs that have the given word in common.",
     previewDelay: 100,
     _namespace: "Browser",
-    icon: "/res/icons/tab_delete.png",
+    icon: "/ui/icons/tab_delete.png",
     execute: function execute({object: {text}}) {
         if (text) {
             CmdUtils.tabs.search(text, null, tabs => {
@@ -178,7 +178,7 @@ CmdUtils.CreateCommand({
     uuid: "2909878D-DF99-4FD8-8DA6-FD2B5B7D0756",
     _namespace: "Browser",
     description: "Print the current page.",
-    icon: "/res/icons/print.gif",
+    icon: "/ui/icons/print.gif",
     preview: "Print the current page.",
     execute: function (directObj) {
         if (_MANIFEST_V3)
@@ -193,7 +193,7 @@ CmdUtils.CreateCommand({
     uuid: "D962E2B8-8ECD-41F9-BC28-ED77594C6A75",
     _namespace: "Browser",
     description: "Inverts all colors on current page. Based on <a target=_blank href=https://stackoverflow.com/questions/4766201/javascript-invert-color-on-all-elements-of-a-page>this</a>.",
-    icon: "/res/icons/invert.png",
+    icon: "/ui/icons/invert.png",
     execute: function execute(){
         CmdUtils.executeScriptFile(CmdUtils.activeTab.id, {file: "/scripts/content_invert.js"});
     },
@@ -204,7 +204,7 @@ CmdUtils.CreateCommand({
     uuid: "E5C587CB-5733-463E-80DD-A6D4C085EE53",
     _namespace: "Utility",
     description: "base64decode",
-    icon: "/res/icons/encoding.svg",
+    icon: "/ui/icons/encoding.svg",
     author: {
         name: "rostok",
     },
@@ -223,7 +223,7 @@ CmdUtils.CreateCommand({
     uuid: "A7337919-93A1-48AC-AE1F-B9C322B7169E",
     _namespace: "Utility",
     description: "base64encode",
-    icon: "/res/icons/encoding.svg",
+    icon: "/ui/icons/encoding.svg",
     author: {
         name: "rostok",
     },
@@ -250,7 +250,7 @@ CmdUtils.CreateCommand({
             <ul class="syntax">
                 <li>- <i>amount</i> - number, number of times to apply decodeURIComponent to the URL.</li>
             </ul>`,
-    icon: "/res/icons/encoding.svg",
+    icon: "/ui/icons/encoding.svg",
     arguments: [{role: "object", nountype: noun_arb_text, label: "text"},
                 {role: "cause",  nountype: noun_type_number, label: "amount"}, // by
                 ],
@@ -277,7 +277,7 @@ CmdUtils.CreateCommand({
     uuid: "80F43371-F330-4685-A153-9A493B07A553",
     _namespace: "Utility",
     description: "Encode an URL using encodeURIComponent",
-    icon: "/res/icons/encoding.svg",
+    icon: "/ui/icons/encoding.svg",
     arguments: [{role: "object", nountype: noun_arb_text, label: "text"}],
     execute: function execute({object: {text}}) {
         CmdUtils.setSelection(encodeURIComponent(text));
@@ -315,7 +315,7 @@ CmdUtils.CreateCommand({
          <a href="http://silentmatt.com/javascript-expression-evaluator/">\
          JavaScript Expression Evaluator</a>.',
     help: "Try: <code>22/7, 3^4^5, sin(sqrt(log(PI)))</code>",
-    icon: "/res/icons/calculator.png",
+    icon: "/ui/icons/calculator.png",
     _namespace: "Utility",
     author: "satyr",
     license: "Public domain",
@@ -332,7 +332,7 @@ CmdUtils.CreateCommand({
     names: ["shorten-url", "bitly"],
     uuid: "6475BAAA-4547-4FF0-BCA7-EE4236F20386",
     _namespace: "Utility",
-    icon: "/res/icons/bitly.png",
+    icon: "/ui/icons/bitly.png",
     description: "Shorten your URLs with the least possible keystrokes",
     homepage: "http://bit.ly",
     author: {
@@ -380,7 +380,7 @@ CmdUtils.CreateCommand({
 //     _namespace: "Utility",
 //     arguments: [{role: "object", nountype: noun_arb_text, label: "URL"}],
 //     previewDelay: 1000,
-//     icon: "/res/icons/isdown.ico",
+//     icon: "/ui/icons/isdown.ico",
 //     description: "Check if selected/typed URL is down.",
 //     preview: function (pblock, {object: {text}}) {
 //         if (!text)

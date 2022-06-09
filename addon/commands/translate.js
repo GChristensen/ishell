@@ -75,7 +75,7 @@ CmdUtils.CreateCommand({
     uuid: "43599939-571E-4EBF-AF64-8AD6F39C7B79",
     description: "Translates from one language to another using <a href='https://www.bing.com/translator'>Bing Translator</a>.",
     _namespace: "Translation",
-    icon: "/res/icons/translate_bing.ico",
+    icon: "/ui/icons/translate_bing.ico",
     arguments: {
         object: noun_arb_text,
         source: noun_type_lang_microsoft,
@@ -151,7 +151,7 @@ CmdUtils.CreateCommand({
     _namespace: "Translation",
     description: `Translates a whole page to the specified language using 
                     <a href="http://translate.google.com">Google Translate</a>.`,
-    icon: "/res/icons/translate_google.ico",
+    icon: "/ui/icons/translate_google.ico",
     author: "satyr",
     arguments: {
         object: noun_arb_text,

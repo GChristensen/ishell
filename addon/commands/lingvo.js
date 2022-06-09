@@ -17,7 +17,7 @@
      @namespace Translation
      @author g/christensen
      @delay 1000
-     @icon /res/icons/lingvo.png
+     @icon /ui/icons/lingvo.png
      @description Translate words using <a href='https://www.lingvolive.com/'>Abbyy Lingvo</a> online service.
      @uuid 757A2516-9A45-4D02-8756-854B5DE5A074
  */

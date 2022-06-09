@@ -8,7 +8,7 @@ CmdUtils.makeSearchCommand({
     url: `https://customsearch.googleapis.com/customsearch/v1?key=${cmdAPI.settings.google_cse_api_key}`
         + `&cx=${cmdAPI.settings.google_cse_api_id}&q=%s`,
     _namespace: "Search",
-    icon: "/res/icons/google.png",
+    icon: "/ui/icons/google.png",
     description: "Searches Google for your words.",
     arguments: [{role: "object", nountype: noun_arb_text, label: "query"}],
     previewDelay: 1000,
@@ -37,7 +37,7 @@ CmdUtils.makeSearchCommand({
 //     _hidden: true,
 //     arguments: [{role: "object", nountype: noun_arb_text, label: "query"}],
 //     previewDelay: 1000,
-//     icon: "/res/icons/bing.png",
+//     icon: "/ui/icons/bing.png",
 //     parser: {
 //         container: ".b_algo",
 //         title: "h2 > a",
@@ -54,7 +54,7 @@ CmdUtils.makeSearchCommand({
     _namespace: "Search",
     arguments: [{role: "object", nountype: noun_arb_text, label: "query"}],
     previewDelay: 1000,
-    icon: "/res/icons/imdb.png",
+    icon: "/ui/icons/imdb.png",
     parser: {
         container  : ".findResult",
         title      : ".result_text",
@@ -68,7 +68,7 @@ CmdUtils.makeSearchCommand({
     uuid: "223E9F19-1DD8-4725-B09C-86EA5DE44DB0",
     url: ("http://www.youtube.com/results?search_type=search_videos" +
         "&search=Search&search_sort=relevance&search_query={QUERY}"),
-    icon: "/res/icons/youtube.png",
+    icon: "/ui/icons/youtube.png",
     description: ("Searches YouTube for videos matching your words. Previews the top results."),
     _namespace: "Search",
     arguments: [{role: "object", nountype: noun_arb_text, label: "query"}],
@@ -125,7 +125,7 @@ CmdUtils.makeSearchCommand({
     contributor: "satyr",
     homepage: "http://www.jimmy2k.it/getimagescommand",
     license: "MPL",
-    icon: "/res/icons/google.png",
+    icon: "/ui/icons/google.png",
     description: "Browse pictures from Google Images.",
     url: "https://www.google.com/search?tbm=isch&q={QUERY}",
     preview: function gi_preview(pblock, {object: {text: q}}) {
@@ -277,7 +277,7 @@ CmdUtils.CreateCommand({
     author: {name: "Blair McBride", email: "blair@theunfocused.net"},
     contributors: ["Viktor Pyatkovka"],
     license: "MPL",
-    icon: "/res/icons/wikipedia.ico",
+    icon: "/ui/icons/wikipedia.ico",
     description: "Searches Wikipedia for your words, in a given language.",
     preview: function wikipedia_preview(previewBlock, args) {
         var searchText = Utils.trim(args.object.text);
@@ -382,7 +382,7 @@ CmdUtils.CreateCommand({
 //     uuid: "0898F48A-1550-4DA4-B86D-CA7D669E0332",
 //     _namespace: "Search",
 //     description: "Shows a location on the map.",
-//     icon: "/res/icons/google.png",
+//     icon: "/ui/icons/google.png",
 //     previewDelay: 1000,
 //     requirePopup: "https://maps.googleapis.com/maps/api/js?sensor=false",
 //     argument: [{role: "object", nountype: noun_arb_text, label: "query"}],
@@ -472,7 +472,7 @@ CmdUtils.CreateCommand({
     arguments: [{role: "object", nountype: noun_arb_text, label: "location"}],
     _namespace: "Search",
     description: "Shows a location on the map.",
-    icon: "/res/icons/google.png",
+    icon: "/ui/icons/google.png",
     author: "rostok",
     previewDelay: 1000,
     preview: function(pblock, args) {
@@ -565,7 +565,7 @@ CmdUtils.CreateCommand({
             <li><b>history</b> <i>books</i> <b>from</b> <i>01</i> <b>to</b> <i>10</i></li>
             <li><b>history</b> <i>news</i> <b>for</b> <i>example.com</i> <b>of</b> <i>week</i> <b>by</b> <i>50</i></li>
         </ul>`,
-    icon: "/res/icons/history.ico",
+    icon: "/ui/icons/history.ico",
     previewDelay: 1000,
     _namespace: "Browser",
     preview: function(pblock, args, {Bin}) {
@@ -773,7 +773,7 @@ CmdUtils.CreateCommand({
             <li><b>libgen</b> <i>philosophical investigations</i> <b>of</b> <i>year</i> <b>by</b> <i>50</i> <b>at</b> <i>.io</i></li>
         </ul>`,
     author: "g/christensen",
-    icon: "/res/icons/libgen.ico",
+    icon: "/ui/icons/libgen.ico",
     previewDelay: 1000,
     _namespace: "Search",
     _genQuery: function(args) {
@@ -841,7 +841,7 @@ CmdUtils.CreateCommand({
     arguments: [{role: "object", nountype: noun_arb_text, label: "title or doi"}],
     description: "Search articles on SCI-HUB",
     author: "g/christensen",
-    icon: "/res/icons/scihub.ico",
+    icon: "/ui/icons/scihub.ico",
     previewDelay: 1000,
     _article: null,
     _namespace: "Search",

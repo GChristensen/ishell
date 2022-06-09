@@ -5,13 +5,6 @@ class CommandManager {
     constructor() {
         this._commands = [];
         this._disabled_commands = [];
-        this._context_menu_commands = [];
-
-        settings.get("context_menu_commands").then(commands => {
-           if (commands)
-               this._context_menu_commands = commands;
-           this.createContextMenu();
-        });
     }
 
     createCommand(options) {
@@ -27,7 +20,7 @@ class CommandManager {
             if (options.homepage)
                 options.uuid = options.homepage;
             else
-                options.uuid = options.name;  // Utils.hash(options.name + JSON.stringify(args));
+                options.uuid = options.name;
         }
 
         options.id = options.uuid;
@@ -117,10 +110,6 @@ class CommandManager {
         this._commands = commands;
     }
 
-    get contextMenuCommands() {
-        return this._context_menu_commands;
-    }
-
     getCommandByUUID(uuid) {
         return this._commands.find(c => c.uuid.toUpperCase() === uuid.toUpperCase());
     };
@@ -204,130 +193,6 @@ class CommandManager {
         return this.callPersistent(sentence.getCommand(), sentence, sentence.execute)
     }
 
-    getContextMenuCommand(input) {
-        if (!input)
-            return null;
-        return this._context_menu_commands.find(c => c.command.toLowerCase() === input.toLowerCase());
-    };
-
-    async addContextMenuCommand(cmdDef, label, command) {
-        this._context_menu_commands.push({
-            uuid: cmdDef.uuid,
-            icon: cmdDef.icon,
-            label: label,
-            command: command
-        });
-
-        await settings.set("context_menu_commands", this._context_menu_commands);
-        this.createContextMenu();
-    };
-
-    static async contextMenuListener(info) {
-        switch(info.menuItemId) {
-            case "shell-settings":
-                chrome.tabs.create({"url": "res/options.html"});
-                break;
-            default:
-                let contextMenuCmd = CmdManager.getContextMenuCommand(info.menuItemId);
-
-                // open popup, if command "execute" flag is unchecked
-                if (contextMenuCmd && contextMenuCmd.execute) {
-                    await CmdUtils.updateActiveTab();
-
-                    if (info.linkUrl) {
-                        CmdUtils.selectedText = info.linkUrl;
-                        CmdUtils.selectedHtml = "<a class='__ishellLinkSelection' src='"
-                            + info.linkUrl + "'>" + info.linkText + "</a>";
-                    }
-
-                    CmdManager.executeContextMenuItem(info.menuItemId, contextMenuCmd);
-                }
-                else if (contextMenuCmd) {
-                    CmdManager.selectedContextMenuCommand = info.menuItemId;
-
-                    if (_MANIFEST_V3)
-                        browser.action.openPopup();
-                    else
-                        chrome.browserAction.openPopup();
-                }
-        }
-    }
-
-    createContextMenu() {
-        chrome.contextMenus.removeAll();
-
-        let contexts = ["selection", "link", "page", "editable"];
-
-        for (let c of this._context_menu_commands) {
-            let menuInfo = {
-                id: c.command,
-                title: c.label,
-                contexts: contexts
-            };
-
-            let commandDef = this.getCommandByUUID(c.uuid);
-
-            menuInfo.icons = {"16": commandDef && commandDef.icon? commandDef.icon: "/res/icons/logo.svg"};
-
-            chrome.contextMenus.create(menuInfo);
-        }
-
-        if (this._context_menu_commands.length > 0)
-            chrome.contextMenus.create({
-                id: "final-separator",
-                type: "separator",
-                contexts: contexts
-            });
-
-        let menuInfo = {
-            id: "shell-settings",
-            title: "iShell Settings",
-            contexts: contexts
-        };
-
-        menuInfo.icons = {"32": "/res/icons/settings.svg"};
-
-        chrome.contextMenus.create(menuInfo);
-
-        if (!chrome.contextMenus.onClicked.hasListener(CommandManager.contextMenuListener))
-            chrome.contextMenus.onClicked.addListener(CommandManager.contextMenuListener);
-    }
-
-    executeContextMenuItem(command, contextMenuCmd) {
-        let commandDef = this.getCommandByUUID(contextMenuCmd.uuid);
-
-        let parser = this.makeParser();
-        let query = parser.newQuery(command, null, settings.max_suggestions(), true);
-
-        let executed = false;
-
-        query.onResults = () => { // onResults can run several times, depending on suggestions with callbacks
-            if (executed)
-                return;
-
-            executed = true;
-
-            let sent = query.suggestionList
-                    && query.suggestionList.length > 0? query.suggestionList[0]: null;
-
-            if (sent && sent.getCommand().uuid.toLowerCase() === commandDef.uuid.toLowerCase()) {
-
-                this.callExecute(sent).then(() => {
-                    CmdUtils._internalClearSelection();
-                });
-
-                if (settings.remember_context_menu_commands())
-                    this.commandHistoryPush(contextMenuCmd.command);
-
-                parser.strengthenMemory(sent);
-            }
-            else
-                CmdUtils.deblog("Context menu command/parser result mismatch")
-        };
-
-        query.run();
-    }
-
     unloadCustomScripts(namespace) {
         if (namespace)
             this._commands = this._commands.filter(c => c._namespace !== namespace);
@@ -402,6 +267,43 @@ class CommandManager {
             }
         }
     }
+
+    prepareCommands() {
+        this._commands = this._commands.filter(cmd => CmdUtils.DEBUG || !cmd._hidden);
+
+        let disabledCommands = settings.disabled_commands();
+
+        if (disabledCommands)
+            for (const cmd of this._commands) {
+                if (cmd.name in disabledCommands)
+                    cmd.disabled = true;
+            }
+    }
+
+    async initializeCommands() {
+        for (const cmd of this._commands) {
+            try {
+                if (cmd.load)
+                    await this.initCommand(cmd, cmd.load);
+            }
+            catch (e) {
+                console.log(e, e.stack);
+            }
+        }
+    }
+
+    async initializeCommandsPopup(doc) {
+        for (let cmd of this._commands) {
+            try {
+                if (cmd.init) {
+                    await this.initCommand(cmd, cmd.init, doc);
+                }
+            }
+            catch (e) {
+                console.log(e.message);
+            }
+        }
+    }
 }
 
-export const CmdManager = new CommandManager();
+export const cmdManager = new CommandManager();

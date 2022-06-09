@@ -1,5 +1,8 @@
-import "./api_backgorund.js";
-import {settings} from "./settings.js";
+import "../api_backgorund.js";
+import {settings} from "../settings.js";
+
+const {__cmdManager: cmdManager} = CmdUtils;
+const {__contextMenuManager: contextMenu} = CmdUtils;
 
 let popup;
 let suggestions;
@@ -101,7 +104,7 @@ class SuggestionManager {
             default:
                 let previewCallback = () => {
                     this._popup.invalidatePreview();
-                    CmdManager.callPreview(sentence, this._popup.pblock);
+                    cmdManager.callPreview(sentence, this._popup.pblock);
                 };
 
                 // Command require and requirePopup properties are currently undocumented
@@ -144,7 +147,7 @@ class SuggestionManager {
 
     _decorateIcon(icon) {
         if (!icon || icon === "http://example.com/favicon.ico") {
-            icon = '/res/icons/logo.svg';
+            icon = '/ui/icons/logo.svg';
         }
         icon = '<img class="suggestion-icon" src="' + icon + '" alt=""> ';
         return icon;
@@ -216,7 +219,7 @@ class SuggestionManager {
 
     executeSelection() {
         if (this.selection) {
-            return CmdManager.callExecute(this.selection)
+            return cmdManager.callExecute(this.selection)
                 .then(() => {
                     CmdUtils._internalClearSelection();
                 });
@@ -309,11 +312,13 @@ class PopupWindow {
     }
 
     loadInput() {
-        if (CmdManager.selectedContextMenuCommand) {
-            this.setInput(CmdManager.selectedContextMenuCommand);
-            CmdManager.selectedContextMenuCommand = null;
+        if (contextMenu.selectedContextMenuCommand) {
+            this.setInput(contextMenu.selectedContextMenuCommand);
+            contextMenu.selectedContextMenuCommand = null;
+
             if (settings.remember_context_menu_commands())
                 this.saveInput();
+
             return this._input_element.value;
         }
         else {
@@ -366,13 +371,13 @@ async function keydown_handler(evt) {
             if (suggestions.hasSelection() && input) {
                 let command_text = suggestions.autocompleteSelection();
 
-                if (!CmdManager.getContextMenuCommand(command_text))
-                    CmdManager.addContextMenuCommand(suggestions.activeCommand, input.trim(), command_text);
+                if (!contextMenu.getContextMenuCommand(command_text))
+                    contextMenu.addContextMenuCommand(suggestions.activeCommand, input.trim(), command_text);
             }
             return;
         }
 
-        CmdManager.commandHistoryPush(input);
+        cmdManager.commandHistoryPush(input);
         await suggestions.executeSelection();
         window.close();
         return;
@@ -380,7 +385,7 @@ async function keydown_handler(evt) {
 
     if (kc === 220) {
         if (evt.ctrlKey && evt.altKey) {
-            const history = await CmdManager.commandHistory();
+            const history = await cmdManager.commandHistory();
 
             popup.invalidatePreview();
             CmdUtils.previewList(popup.pblock, history, (i, e) => {
@@ -469,21 +474,12 @@ async function initPopup() {
         suggestions.displaySuggestions(text);
     };
 
-    for (let cmd of CmdManager.commands) {
-        try {
-            if (cmd.init) {
-                await CmdManager.initCommand(cmd, cmd.init, document);
-            }
-        }
-        catch (e) {
-            console.log(e.message);
-        }
-    }
+    await cmdManager.initializeCommandsPopup(document);
 
     await CmdUtils.updateActiveTab();
 
     popup = new PopupWindow();
-    suggestions = new SuggestionManager(popup, CmdManager.makeParser(), settings.max_suggestions());
+    suggestions = new SuggestionManager(popup, cmdManager.makeParser(), settings.max_suggestions());
 
     let input = popup.loadInput()
     suggestions.displaySuggestions(input);
@@ -497,6 +493,6 @@ async function initPopup() {
 $(window).on('load', () => initPopup());
 
 $(window).on('beforeunload', function() {
-    CmdManager.commandHistoryPush(popup.getInput());
+    cmdManager.commandHistoryPush(popup.getInput());
     suggestions.strengthenMemory();
 });

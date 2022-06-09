@@ -1,5 +1,5 @@
 import {settings} from "../settings.js";
-import {CmdManager} from "../cmdmanager.js";
+import {cmdManager} from "../cmdmanager.js";
 
 const SCRAPYARD_NAMESPACE = "Scrapyard";
 
@@ -220,7 +220,7 @@ let shelfCmd = CmdUtils.CreateCommand({
     uuid: "C481A44B-071E-4100-8047-6B708498B3CF",
     arguments: [{role: "object", nountype: noun_scrapyard_group, label: "name"}],
     description: "Switch to or create a shelf in Scrapyard.",
-    icon: "/res/icons/scrapyard.svg",
+    icon: "/ui/icons/scrapyard.svg",
     _namespace: SCRAPYARD_NAMESPACE,
     preview: function(pblock, {object: {text}}) {
         let html = "Switch to or create <span style='color: #FD7221;'>"
@@ -295,7 +295,7 @@ let scrapyardCmd = CmdUtils.CreateCommand({
             <li><b>scrapyard</b> <i>important</i> <b>at</b> <i>~/papers</i> <b>as</b> <i>news</i></li>
             <li><b>scrapyard</b> <i>notes</i> <b>at</b> <i>clips/misc</i> <b>from</b> <i>group</i> <b>in</b> <i>content</i></li>
         </ul>`,
-    icon: "/res/icons/scrapyard.svg",
+    icon: "/ui/icons/scrapyard.svg",
     previewDelay: 1000,
     _namespace: SCRAPYARD_NAMESPACE,
     init: function(doc /* popup document */) {
@@ -333,7 +333,7 @@ function createBookmarkList(nodes, pblock, path) {
         let text = "";
 
         if (n.type === NODE_TYPE_GROUP) {
-            text = "<img class='n-icon' src='/res/icons/folder.svg'>"
+            text = "<img class='n-icon' src='/ui/icons/folder.svg'>"
                 + "<div class='n-group'>" + Utils.escapeHtml(n.path) + "</div>";
         }
         else {
@@ -342,7 +342,7 @@ function createBookmarkList(nodes, pblock, path) {
                 text = "<img class='n-icon' src='" + n.icon + "'>"
             }
             else
-                text = "<img class='n-icon' src='/res/icons/globe.svg'>";
+                text = "<img class='n-icon' src='/ui/icons/globe.svg'>";
 
 
             if (n.uri && !n.name)
@@ -426,7 +426,7 @@ function createBookmarkList(nodes, pblock, path) {
     );
 
     $(list).find("img.n-icon").on("error",
-        e => e.target.src = "/res/icons/globe.svg");
+        e => e.target.src = "/ui/icons/globe.svg");
 }
 
 function _todoColor(todo_state) {
@@ -532,7 +532,7 @@ let bookmarkCmd = CmdUtils.CreateCommand({
         <ul class="syntax">
             <li>Same as <b>archive</b>.</li>
         </ul>`,
-    icon: "/res/icons/scrapyard.svg",
+    icon: "/ui/icons/scrapyard.svg",
     //previewDelay: 1000,
     _namespace: SCRAPYARD_NAMESPACE,
     preview: bookmarkingCommandPreview(),
@@ -576,7 +576,7 @@ let archiveCmd = CmdUtils.CreateCommand({
         <ul class="syntax">
             <li><b>archive</b> <b>this</b> <b>at</b> <i>~/wiki</i> <b>as</b> <i>chem</i> <b>with</b> <i>todo</i> <b>to</b> <i>10</i> <b>for</b> <i>research</i></li>
         </ul>`,
-    icon: "/res/icons/scrapyard.svg",
+    icon: "/ui/icons/scrapyard.svg",
     //previewDelay: 1000,
     _namespace: SCRAPYARD_NAMESPACE,
     preview: bookmarkingCommandPreview(),
@@ -593,7 +593,7 @@ let archiveSiteCmd = CmdUtils.CreateCommand({
         <ul class="syntax">
             <li>Same as <b>archive</b>.</li>
         </ul>`,
-    icon: "/res/icons/scrapyard.svg",
+    icon: "/ui/icons/scrapyard.svg",
     //previewDelay: 1000,
     _namespace: SCRAPYARD_NAMESPACE,
     preview: bookmarkingCommandPreview(),
@@ -667,7 +667,7 @@ let copyAtCmd = CmdUtils.CreateCommand({
         <ul class="syntax">
             <li><b>copy-at</b> <i>~/wiki</i> <b>by</b> <i>switching</i></li>
         </ul>`,
-    icon: "/res/icons/scrapyard.svg",
+    icon: "/ui/icons/scrapyard.svg",
     //previewDelay: 1000,
     _namespace: SCRAPYARD_NAMESPACE,
     preview: copyingCommandPreview(),
@@ -684,7 +684,7 @@ let moveAtCmd = CmdUtils.CreateCommand({
         <ul class="syntax">
             <li>Same as <b>copy-at</b>.</li>
         </ul>`,
-    icon: "/res/icons/scrapyard.svg",
+    icon: "/ui/icons/scrapyard.svg",
     //previewDelay: 1000,
     _namespace: SCRAPYARD_NAMESPACE,
     preview: copyingCommandPreview(),
@@ -809,8 +809,8 @@ async function checkForScrapyard(retry = 1) {
     if (scrapyard_presents) {
         settings.scrapyard_presents(true)
 
-        if (CmdManager.commands.indexOf(scrapyard_commands[0]) < 0)
-            CmdManager.commands = [...CmdManager.commands, ...scrapyard_commands];
+        if (cmdManager.commands.indexOf(scrapyard_commands[0]) < 0)
+            cmdManager.commands = [...cmdManager.commands, ...scrapyard_commands];
     }
     else {
         if (retry < 10) {

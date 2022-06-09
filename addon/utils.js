@@ -7,12 +7,12 @@ export function merge(to, from) {
 }
 
 // injects legacy API into the global namespace
-export async function injectLegacyModules(modules) {
-    return loadLegacyModules(modules, true);
+export async function injectModules(modules) {
+    return loadModules(modules, true);
 }
 
 // imports modules for side effects
-export async function loadLegacyModules(modules, inject = false) {
+export async function loadModules(modules, inject = false) {
     for (const module of modules) {
         const namespace = await import(module);
         if (inject)

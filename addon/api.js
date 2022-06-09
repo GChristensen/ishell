@@ -1,6 +1,9 @@
-import {injectLegacyModules} from "./utils.js";
+import {injectModules} from "./utils.js";
+import {settings} from "./settings.js";
 
-await injectLegacyModules([
+await settings.load();
+
+await injectModules([
     "./api/utils.js",
     "./parser/nounutils.js",
     "./parser/nountypes.js",

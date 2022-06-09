@@ -3,7 +3,7 @@
 
 // (C) 2011 g/christensen (gchristnsn@gmail.com)
 
-var resurrect_commandIcon = "/res/icons/resurrect.gif";
+var resurrect_commandIcon = "/ui/icons/resurrect.gif";
 
 var resurrect_archiveServices =
     {

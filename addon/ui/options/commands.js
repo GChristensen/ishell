@@ -50,7 +50,7 @@ function formatMetaData(md) {
     var result = ('<div class="meta">'
         + (authors.length > 0? 'Authors: ': '')
         + span(authors, formatAuthors, "author", "createdby")
-        + (homepage? ' <a href="' + homepage + '"><img src="/res/icons/homepage.png"></a>': '')
+        + (homepage? ' <a href="' + homepage + '"><img src="/ui/icons/homepage.png"></a>': '')
         + (license && (authors.length > 0 || homepage)? ' | ': '')
         + (license? license + ' ': '')
         + '</div>');
@@ -103,15 +103,15 @@ function fillTableRowForCmd(row, cmd, className) {
         .bind("change", (e) => {
             cmd.disabled = !e.target.checked;
             if (cmd.disabled)
-                CmdManager.disableCommand(cmd);
+                cmdManager.disableCommand(cmd);
             else
-                CmdManager.enableCommand(cmd);
+                cmdManager.enableCommand(cmd);
         })
         [cmd.disabled ? "removeAttr" : "attr"]("checked", "checked"));
 
     var cmdElement = jQuery(
         '<td class="command"><img class="favicon" src="'
-        + escapeHtml((!("icon" in cmd) || cmd["icon"] === "http://example.com/favicon.ico")? "/res/icons/logo.svg": cmd.icon) + '"/>' +
+        + escapeHtml((!("icon" in cmd) || cmd["icon"] === "http://example.com/favicon.ico")? "/ui/icons/logo.svg": cmd.icon) + '"/>' +
         ('<a class="id" name="' + escapeHtml(cmd.id) + '"></a>' +
             '<span class="name">' + escapeHtml(name) + '</span>') +
         '<span class="description"></span>' +
@@ -172,8 +172,8 @@ async function buildTable(settings) {
 
     let table = jQuery("#commands-and-feeds-table");
 
-    let builtinCommands = CmdManager.commands.filter((c) => c._builtin).sort(compareByName);
-    let userCommands = CmdManager.commands.filter((c) => !c._builtin).sort(compareByName);
+    let builtinCommands = cmdManager.commands.filter((c) => c._builtin).sort(compareByName);
+    let userCommands = cmdManager.commands.filter((c) => !c._builtin).sort(compareByName);
     let commandCount = builtinCommands.length + userCommands.length;
 
     jQuery("#num-commands").text(commandCount);
@@ -181,7 +181,7 @@ async function buildTable(settings) {
     const BUILTIN_AUTHOR = "by iShell Authors";
 
     function insertBuiltinNamespace(ns) {
-        let namespaced = CmdManager.commands.filter((c) => c._builtin && c._namespace === ns).sort(compareByName);
+        let namespaced = cmdManager.commands.filter((c) => c._builtin && c._namespace === ns).sort(compareByName);
         if (namespaced.length)
             insertNamespace(ns, BUILTIN_AUTHOR, namespaced, table);
     }
@@ -198,7 +198,7 @@ async function buildTable(settings) {
     if (settings.enable_more_commands())
         insertBuiltinNamespace("More Commands");
 
-    builtinCommands = CmdManager.commands.filter((c) => c._builtin && !c._namespace).sort(compareByName);
+    builtinCommands = cmdManager.commands.filter((c) => c._builtin && !c._namespace).sort(compareByName);
     if (builtinCommands.length > 0)
         insertNamespace("Builtin Commands", BUILTIN_AUTHOR, builtinCommands, table);
 
@@ -208,7 +208,7 @@ async function buildTable(settings) {
 
     for (let n of namespaces) {
         if (n !== "default") {
-            let commands = CmdManager.commands.filter((c) => c._namespace === n).sort(compareByName);
+            let commands = cmdManager.commands.filter((c) => c._namespace === n).sort(compareByName);
             userCommandsByCat[n] = commands;
         }
     }
@@ -217,7 +217,7 @@ async function buildTable(settings) {
         insertNamespace(n, '<a href="edit.html?' + encodeURI(n)
             + '" target="_blank">Open in editor</a>', userCommandsByCat[n], table);
 
-    var defaultCommands = CmdManager.commands.filter((c) => c._namespace === "default").sort(compareByName);
+    var defaultCommands = cmdManager.commands.filter((c) => c._namespace === "default").sort(compareByName);
     insertNamespace("Other Commands", '<a href="edit.html?default" target="_blank">Open in editor</a>',
         defaultCommands, table);
 

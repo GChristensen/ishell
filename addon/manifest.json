@@ -19,11 +19,11 @@
     },
     "browser_action": {
         "default_title": "iShell",
-        "default_popup": "popup.html",
-        "default_icon": "/res/icons/logo.svg"
+        "default_popup": "/ui/popup.html",
+        "default_icon": "/ui/icons/logo.svg"
     },
     "options_ui": {
-        "page": "res/options.html",
+        "page": "ui/options/options.html",
         "open_in_tab": true
     },
     "commands": {
@@ -36,7 +36,7 @@
             }
         }
     },
-    "icons": { "128" : "/res/icons/logo.svg" },
+    "icons": { "128" : "/ui/icons/logo.svg" },
     "permissions": [
         "<all_urls>",
         "activeTab", 

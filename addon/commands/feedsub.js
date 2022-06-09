@@ -5,7 +5,7 @@ CmdUtils.CreateCommand({
     description: "Subscribe to a RSS feed in Feedly.",
     help: `The command uses the URL opened in the current tab. 
             Direct feed links, Instagram, Tumblr, Twitter and Youtube are supported.`,
-    icon: "/res/icons/feedly.png",
+    icon: "/ui/icons/feedly.png",
 
     preview: "Subscribe using Feedly",
     execute: function () {

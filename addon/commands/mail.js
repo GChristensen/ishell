@@ -23,7 +23,7 @@ CmdUtils.CreateCommand({
             </ul>`,
     _namespace: "Mail",
     author: "g/christensen",
-    icon: "/res/icons/email.png",
+    icon: "/ui/icons/email.png",
     preview: function(pblock, args) {
         let desc = "Send ";
 
@@ -96,7 +96,7 @@ CmdUtils.CreateCommand({
                 <li><b>compose</b> <i>shopping list</i> <b>to</b> <i>user@example.com</i> <b>at</b> <i>secondary</i>`,
     _namespace: "Mail",
     author: "g/christensen",
-    icon: "/res/icons/email.png",
+    icon: "/ui/icons/email.png",
     preview: function(pblock, args) {
         let desc = "Compose email to ";
 
@@ -153,7 +153,7 @@ CmdUtils.CreateCommand({
     description: "Do not show the specified email in suggestions anymore.",
     _namespace: "Mail",
     author: "g/christensen",
-    icon: "/res/icons/forget-email.png",
+    icon: "/ui/icons/forget-email.png",
     preview: function(pblock, args) {
         if (args.object.text) {
             pblock.text("Forget " + args.object.text + ".");
@@ -196,7 +196,7 @@ CmdUtils.CreateCommand({
         </ul>`,
     _namespace: "Mail",
     author: "g/christensen",
-    icon: "/res/icons/forget-email.png",
+    icon: "/ui/icons/forget-email.png",
     preview: function(pblock, args) {
         if (args.object.text) {
             if (args.object.text.toLowerCase() === "all")

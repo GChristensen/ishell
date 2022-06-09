@@ -1,10 +1,7 @@
-import {settings} from "./settings.js";
+import {loadModules} from "./utils.js";
 import "./api.js";
-import {loadLegacyModules} from "./utils.js";
 
-await settings.load();
-
-await loadLegacyModules([
+await loadModules([
     "./commands/more/more.js",
     "./commands/builtin.js",
     "./commands/mail.js",

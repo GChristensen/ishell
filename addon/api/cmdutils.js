@@ -1,16 +1,21 @@
+import {settings} from "../settings.js";
 import {helperApp} from "../helper_app.js";
-import {CmdManager} from "../cmdmanager.js";
-
-// CmdUtils
+import {cmdManager} from "../cmdmanager.js";
+import {contextMenuManager} from "../ui/contextmenu.js";
 
 export var CmdUtils = {
     VERSION: chrome.runtime.getManifest().version,
-    DEBUG: undefined,
-    BROWSER: (typeof chrome !== "undefined")
-        ? ((typeof browser !== "undefined")
-            ? "Firefox"
-            : "Chrome")
-        : undefined,
+    DEBUG: settings.debug_mode(),
+
+    __cmdManager: cmdManager,
+    __contextMenuManager: contextMenuManager,
+
+    NounType: NounUtils.NounType,
+    matchScore: NounUtils.matchScore,
+    makeSugg: NounUtils.makeSugg,
+    grepSuggs: NounUtils.grepSuggs,
+
+    // TODO: move?
     activeTab: null,   // tab that is currently active, updated via background.js
     selectedText: "",   // currently selected text, update via content script content_get_selection.js
     selectedHTML: ""    // currently selected html, update via content script content_get_selection.js
@@ -28,9 +33,6 @@ export var _ = function(x, data) {
 
 export var H = Utils.escapeHtml;
 
-CmdUtils.matchScore = NounUtils.matchScore;
-CmdUtils.makeSugg = NounUtils.makeSugg;
-
 // stub for original ubiquity string formatter
 export function L(pattern) {
     for (let sub of Array.prototype.slice.call(arguments, 1)) {
@@ -40,13 +42,10 @@ export function L(pattern) {
     return pattern;
 }
 
-CmdUtils.log = console.log;
-
 // debug log
 CmdUtils.deblog = function () {
-    if(CmdUtils.DEBUG){
+    if (CmdUtils.DEBUG)
         console.log.apply(console, arguments);
-    }
 };
 
 CmdUtils.renderTemplate = function (template, data) {
@@ -58,7 +57,7 @@ CmdUtils.renderTemplate = function (template, data) {
 };
 
 CmdUtils.CreateCommand = function CreateCommand(options) {
-   return CmdManager.createCommand(options);
+   return cmdManager.createCommand(options);
 };
 
 CmdUtils.tabs = {
@@ -325,9 +324,9 @@ CmdUtils.timeSinceInputUpdate = function timeSinceInputUpdate() {
 
 // returns command with this name
 CmdUtils.getcmd = function getcmd(cmdname) {
-    for (let c in CmdManager.commands)
-        if (CmdManager.commands[c].name === cmdname || CmdManager.commands[c].names.indexOf(cmdname) > -1)
-            return CmdManager.commands[c];
+    for (let c in cmdManager.commands)
+        if (cmdManager.commands[c].name === cmdname || cmdManager.commands[c].names.indexOf(cmdname) > -1)
+            return cmdManager.commands[c];
     return null;
 };
 
@@ -352,7 +351,7 @@ CmdUtils.notify = function (message, title) {
     if (CmdUtils.lastNotification === title + "/" + message) return;
     browser.notifications.create({
         "type": "basic",
-        "iconUrl": browser.runtime.getURL("/res/icons/logo.svg"),
+        "iconUrl": browser.runtime.getURL("/ui/icons/logo.svg"),
         "title": title || "iShell",
         "message": message
     });

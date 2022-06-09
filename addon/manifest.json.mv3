@@ -19,21 +19,21 @@
     },
     "manifest_version": 3,
     "icons": {
-        "128": "res/icons/logo.svg"
+        "128": "ui/icons/logo.svg"
     },
     "action": {
         "default_title": "iShell",
-        "default_popup": "popup.html",
+        "default_popup": "ui/popup.html",
         "default_icon": {
-            "16": "res/icons/logo.svg",
-            "24": "res/icons/logo.svg",
-            "32": "res/icons/logo.svg",
-            "48": "res/icons/logo.svg",
-            "96": "res/icons/logo.svg"
+            "16": "ui/icons/logo.svg",
+            "24": "ui/icons/logo.svg",
+            "32": "ui/icons/logo.svg",
+            "48": "ui/icons/logo.svg",
+            "96": "ui/icons/logo.svg"
         }
     },
     "options_ui": {
-        "page": "res/options.html",
+        "page": "ui/options/options.html",
         "open_in_tab": true
     },
     "commands": {

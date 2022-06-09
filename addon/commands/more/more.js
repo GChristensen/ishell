@@ -1,9 +1,9 @@
 import {NS_MORE_COMMANDS} from "./common.js";
-import {CmdManager} from "../../cmdmanager.js";
+import {cmdManager} from "../../cmdmanager.js";
 import {settings} from "../../settings.js";
-import {loadLegacyModules} from "../../utils.js";
+import {loadModules} from "../../utils.js";
 
-await loadLegacyModules([
+await loadModules([
     "./commands/more/nyaa.js",
     "./commands/more/kpop.js",
     "./commands/more/javlib.js",
@@ -11,9 +11,9 @@ await loadLegacyModules([
 ]);
 
 if (settings.enable_more_commands()) {
-    for (let cmd of CmdManager.commands)
+    for (let cmd of cmdManager.commands)
         if (cmd._builtin && cmd._namespace === NS_MORE_COMMANDS)
             cmd._hidden = false;
 }
 else
-    CmdManager.commands = CmdManager.commands.filter(cmd => !(cmd._builtin && cmd._namespace === NS_MORE_COMMANDS));
+    cmdManager.commands = cmdManager.commands.filter(cmd => !(cmd._builtin && cmd._namespace === NS_MORE_COMMANDS));

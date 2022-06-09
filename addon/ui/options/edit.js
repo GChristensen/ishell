@@ -286,7 +286,7 @@ async function evalMV2(customcode) {
 
         $("#info").html("Evaluated!");
 
-        await CmdManager.loadCustomScripts(scriptNamespace);
+        await cmdManager.loadCustomScripts(scriptNamespace);
     } catch (e) {
         displayError(e.message);
     }
@@ -298,7 +298,7 @@ async function evalMV3(customcode) {
 
     result.error.then(() => {
         $("#info").html("Evaluated!");
-        CmdManager.loadCustomScripts(scriptNamespace);
+        cmdManager.loadCustomScripts(scriptNamespace);
     })
     .catch(error => {
         displayError(error.message);
@@ -405,7 +405,7 @@ async function initEditor(settings) {
                     }
                 }
 
-                const builtin = CmdManager.commands.some(c => c._namespace === name && c._builtin);
+                const builtin = cmdManager.commands.some(c => c._namespace === name && c._builtin);
                 if (builtin) {
                     CmdUtils.notify("A builtin category with the same name already exists.");
                     break ADD_NAME;
@@ -438,13 +438,13 @@ async function initEditor(settings) {
     });
 
     $("#expand-editor").click(() => {
-        if ($("#expand-editor img").prop("src").endsWith("/res/icons/collapse.png")) {
+        if ($("#expand-editor img").prop("src").endsWith("/ui/icons/collapse.png")) {
             $("#panel").css("width", "870px");
             $("body").css("margin", "auto");
             $("body").css("max-width", "900px");
             $("#toolbar").css("padding-right", "30px");
             $(".head, #nav-container, #head-br").show();
-            $("#expand-editor img").prop("src", "/res/icons/expand.png");
+            $("#expand-editor img").prop("src", "/ui/icons/expand.png");
         }
         else {
             $(".head, #nav-container, #head-br").hide();
@@ -452,7 +452,7 @@ async function initEditor(settings) {
             $("body").css("margin", "0");
             $("body").css("max-width", "100%");
             $("#toolbar").css("padding-right", "5px");
-            $("#expand-editor img").prop("src", "/res/icons/collapse.png");
+            $("#expand-editor img").prop("src", "/ui/icons/collapse.png");
         }
         window.dispatchEvent(new Event('resize'));
         editor.focus();
