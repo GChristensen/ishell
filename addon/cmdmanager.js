@@ -268,7 +268,7 @@ class CommandManager {
         }
     }
 
-    prepareCommands() {
+    async prepareCommands() {
         this._commands = this._commands.filter(cmd => CmdUtils.DEBUG || !cmd._hidden);
 
         let disabledCommands = settings.disabled_commands();
@@ -278,6 +278,8 @@ class CommandManager {
                 if (cmd.name in disabledCommands)
                     cmd.disabled = true;
             }
+
+        return this.initializeCommands();
     }
 
     async initializeCommands() {

@@ -14,35 +14,19 @@ if (canLoadScripts) {
     await cmdManager.loadCustomScripts();
 }
 
-cmdManager.prepareCommands();
+await cmdManager.prepareCommands();
+
+contextMenuManager.loadMenu();
+
+chrome.i18n.getAcceptLanguages(ll => CmdUtils.acceptLanguages = ll);
 
 if (_MANIFEST_V3) {
-    // until there is no storage.session API,
-    // use an alarm as a flag to call initialization function only once
-    const alarm = await browser.alarms.get("startup-flag-alarm");
-
-    if (!alarm) {
-        await cmdManager.initializeCommands();
-        browser.alarms.create("startup-flag-alarm", {periodInMinutes: 525960}); // one year
-    }
-
     browser.runtime.onMessage.addListener(async message => {
         switch (message.type) {
             case "CHECK_HELPER_APP_AVAILABLE":
                 return helperAppPresents;
         }
     })
-}
-else {
-    await cmdManager.initializeCommands();
-}
-
-contextMenuManager.loadMenu();
-
-chrome.i18n.getAcceptLanguages(ll => CmdUtils.acceptLanguages = ll);
-
-globalThis.getCmdManager = function() {
-    return cmdManager;
 }
 
 CmdUtils.deblog("iShell v" + CmdUtils.VERSION + " background script loaded");

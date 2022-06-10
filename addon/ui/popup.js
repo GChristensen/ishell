@@ -1,237 +1,12 @@
 import "../api_backgorund.js";
 import {settings} from "../settings.js";
+import {SuggestionManager} from "./suggestions.js";
 
 const {__cmdManager: cmdManager} = CmdUtils;
 const {__contextMenuManager: contextMenu} = CmdUtils;
 
 let popup;
 let suggestions;
-
-class SuggestionManager {
-    constructor(popup, parser, max_suggestions) {
-        this._max_suggestions = max_suggestions;
-        this._selected_suggestion = 0;
-        this._selected_sentence = null;
-        this._suggestions = null;
-        this._parser = parser;
-        this._popup = popup;
-    }
-
-    reset() {
-        this._selected_suggestion = -1;
-        this._selected_sentence = null;
-    }
-
-    hasSelection() {
-        return !!this._selected_sentence;
-    }
-
-    get selection() {
-        return this._selected_sentence;
-    }
-
-    get activeCommand() {
-        if (this._selected_sentence)
-            return this._selected_sentence.getCommand();
-
-        return null;
-    }
-
-    autocompleteSelection() {
-        if (this._selected_sentence)
-            return this._selected_sentence.completionText.trim();
-
-        return "";
-    }
-
-    autocompleteInput() {
-        if (this.hasSelection()) {
-            let completion = this.autocompleteSelection();
-            let input = this._popup.getInput();
-            if (input && completion && completion.length < 100 && input.trim() !== completion)
-                this._popup.setInput(completion);
-        }
-    }
-
-    _ensureSelectionInRange() {
-        let in_range = false;
-
-        // Don't navigate outside boundaries of the list of matches
-        if (this._suggestions && this._selected_suggestion >= this._suggestions.length) {
-            this._selected_suggestion = this._suggestions.length - 1;
-        }
-        else if (this._suggestions && this._selected_suggestion < 0) {
-            this._selected_suggestion = 0;
-        }
-        else if (this._suggestions)
-            in_range = true;
-
-        return in_range;
-    }
-
-    _getNextCommandIndex(asc) {
-        let index = this._selected_suggestion + (asc? 1: -1);
-
-        // Don't navigate outside boundaries of the list of matches
-        if (this._suggestions && index >= this._suggestions.length) {
-            index = 0;
-        }
-        else if (index < 0) {
-            index = this._suggestions.length - 1;
-        }
-        else if (!this._suggestions)
-            return -1;
-
-        return index;
-    }
-
-    _showCommandPreview(sentence) {
-        if (sentence == null)
-            return;
-
-        let command = sentence.getCommand();
-        if (!command || !command.preview)
-            return;
-
-        switch(typeof command.preview)
-        {
-            case 'undefined':
-                this._popup.setPreview(command.description, true);
-                break;
-            case 'string':
-                this._popup.setPreview(command.preview, true);
-                break;
-            default:
-                let previewCallback = () => {
-                    this._popup.invalidatePreview();
-                    cmdManager.callPreview(sentence, this._popup.pblock);
-                };
-
-                // Command require and requirePopup properties are currently undocumented
-                // The properties should specify arrays of URLs to be loaded in the background or popup pages
-                // respectively. This may require modification of CSP manifest settings and addon rebuild
-                if (typeof command.require !== 'undefined')
-                    CmdUtils.loadScripts(command.require, previewCallback);
-                else if (typeof command.requirePopup !== 'undefined')
-                    CmdUtils.loadScripts(command.requirePopup, previewCallback, window);
-                else
-                    previewCallback();
-        }
-    }
-
-    _selectCommand(index) {
-        this._ensureSelectionInRange();
-        if (this._selected_suggestion != index) {
-            let previous_command_index = this._selected_suggestion;
-            this._selected_suggestion = index;
-            this._selected_sentence = this._suggestions[index];
-
-            $("#suggestion-item-" + previous_command_index).parent().removeClass("selected");
-            $(`#suggestion-item-${index}`).parent().addClass('selected');
-
-            this.autocompleteInput();
-            this._popup.setPreview(this.activeCommand?.description, true);
-            this._showCommandPreview(this._selected_sentence);
-        }
-    }
-
-    advanceSelection(asc) {
-        this._selectCommand(this._getNextCommandIndex(asc))
-    }
-
-    _resetWindow() {
-        this.reset();
-        this._popup.reset();
-        this._popup.displayHelp();
-    }
-
-    _decorateIcon(icon) {
-        if (!icon || icon === "http://example.com/favicon.ico") {
-            icon = '/ui/icons/logo.svg';
-        }
-        icon = '<img class="suggestion-icon" src="' + icon + '" alt=""> ';
-        return icon;
-    }
-
-    _generateSuggestionHtml(suggestions) {
-        let suggestions_div = document.createElement('div');
-        let suggestions_list = document.createElement('ul');
-
-        for (let i in suggestions) {
-            var s = suggestions[i];
-            var li = document.createElement('LI');
-            li.innerHTML = `<div id="suggestion-item-${i}" class="suggestion-item">        
-                                <div class="suggestion-icon">${this._decorateIcon(s.icon)}</div>
-                                <div class="suggestion-text">${s.displayHtml}</div>
-                            </div>`;
-            if (i == this._selected_suggestion) {
-                li.setAttribute('class', 'selected');
-            }
-            suggestions_list.appendChild(li);
-        }
-
-        suggestions_div.appendChild(suggestions_list);
-
-        return suggestions_div.innerHTML;
-    }
-
-    _populateSuggestionList(user_input) {
-        const query = this._parser.newQuery(user_input, null, this._max_suggestions, true);
-
-        query.onResults = () => {
-            this._suggestions = query.suggestionList.slice();
-
-            if (this._suggestions.length && this._suggestions.length > this._max_suggestions)
-                this._suggestions.splice(this._max_suggestions);
-
-            this._ensureSelectionInRange();
-
-            if (this._suggestions.length > 0) {
-                let suggestion_html = this._generateSuggestionHtml(this._suggestions);
-                this._popup.populateSuggestions(suggestion_html);
-
-                for (let i in this._suggestions)
-                    jQuery(`#suggestion-item-${i}`).click((e) => {
-                        this._selectCommand(i);
-                    });
-
-                let old_selection = this._selected_sentence;
-                this._selected_sentence = this._suggestions[this._selected_suggestion];
-
-                if (old_selection && !this._selected_sentence.equalCommands(old_selection) || !old_selection)
-                    this._popup.setPreview(this._selected_sentence.getCommand().description, true);
-
-                this._showCommandPreview(this._selected_sentence);
-            } else {
-                this._resetWindow();
-            }
-        };
-
-        query.run(); // WARNING: callback suggestions may make several calls of onResults
-    }
-
-    displaySuggestions(input) {
-        if (input)
-            this._populateSuggestionList(input); // will also show command preview
-        else
-            this._resetWindow();
-    }
-
-    executeSelection() {
-        if (this.selection) {
-            return cmdManager.callExecute(this.selection)
-                .then(() => {
-                    CmdUtils._internalClearSelection();
-                });
-        }
-    }
-
-    strengthenMemory() {
-        if (this.selection)
-            this._parser.strengthenMemory(this.selection);
-    }
-}
-
 
 class PopupWindow {
     constructor() {
@@ -346,9 +121,6 @@ class PopupWindow {
 }
 
 async function keydown_handler(evt) {
-	// measure the input 
-	//CmdUtils.inputUpdateTime = performance.now();
-
     if (!evt) return;
     let kc = evt.keyCode;
 
@@ -467,32 +239,32 @@ function keyup_handler(evt) {
 async function initPopup() {
     await settings.load();
 
-    cmdAPI.getCommandLine = CmdUtils.getCommandLine = () => popup.getInput();
-    cmdAPI.setCommandLine = CmdUtils.setCommandLine = function (text) {
-        popup.setInput(text);
-        popup.saveInput();
-        suggestions.displaySuggestions(text);
-    };
-
     await cmdManager.initializeCommandsPopup(document);
 
     await CmdUtils.updateActiveTab();
 
     popup = new PopupWindow();
-    suggestions = new SuggestionManager(popup, cmdManager.makeParser(), settings.max_suggestions());
+    suggestions = new SuggestionManager(popup, cmdManager, settings.max_suggestions());
 
     let input = popup.loadInput()
     suggestions.displaySuggestions(input);
 
-    CmdUtils.deblog("hello from iShell");
-
     document.addEventListener('keydown', keydown_handler, false);
     document.addEventListener('keyup', keyup_handler, false);
+
+    CmdUtils.deblog("iShell popup initialized");
 }
 
-$(window).on('load', () => initPopup());
+$(window).on('load', initPopup);
 
 $(window).on('beforeunload', function() {
     cmdManager.commandHistoryPush(popup.getInput());
     suggestions.strengthenMemory();
 });
+
+cmdAPI.getCommandLine = CmdUtils.getCommandLine = () => popup.getInput();
+cmdAPI.setCommandLine = CmdUtils.setCommandLine = function (text) {
+    popup.setInput(text);
+    popup.saveInput();
+    suggestions.displaySuggestions(text);
+};
