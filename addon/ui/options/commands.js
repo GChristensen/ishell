@@ -1,13 +1,80 @@
+import "../../api_backgorund.js";
+import {settings} from "../../settings.js";
+import {setupHelp} from "./utils.js";
+import {repository} from "../../storage.js";
+import {BUILTIN_NAMESPACES} from "../../commands/namespaces.js";
+
+const {__cmdManager: cmdManager} = CmdUtils;
+window.escapeHtml = Utils.escapeHtml;
+
+const BUILTIN_AUTHOR = "by iShell Authors";
+
+const commandTable = jQuery("#commands-and-feeds-table");
 var commandCategoryCount = 0;
 
-function setupHelp(clickee, help) {
-    var toggler = jQuery(clickee).click(function toggleHelp() {
-        jQuery(help)[(this.off ^= 1) ? "slideUp" : "slideDown"]();
-        [this.textContent, this.bin] = [this.bin, this.textContent];
-    })[0];
-    toggler.textContent = "Show help";
-    toggler.bin = "Hide help";
-    toggler.off = true;
+$(initPage);
+
+async function initPage() {
+    await settings.load();
+
+    setupHelp("#show-hide-help", "#cmdlist-help-div");
+    buildTable();
+}
+
+async function buildTable() {
+    const builtinCommands = cmdManager.builtinCommands.sort(compareByName);
+    const userCommands = cmdManager.userCommands.sort(compareByName);
+    const commandCount = builtinCommands.length + userCommands.length;
+
+    jQuery("#num-commands").text(commandCount);
+
+    for (const namespace of BUILTIN_NAMESPACES)
+        insertNamespace(namespace, builtinCommands);
+
+    if (settings.enable_more_commands())
+        insertNamespace("More Commands", builtinCommands);
+
+    const makeEditorLink = n => `<a href="edit.html?${encodeURI(n)}" target="_blank">Open in editor</a>`;
+
+    insertNamespace("default", userCommands, makeEditorLink("default"));
+
+    const userNamespaces = await repository.fetchUserScriptNamespaces();
+
+    for (const n of userNamespaces.filter(n => !!n && n !== "default").sort(compareByName))
+        insertNamespace(n, userCommands, makeEditorLink(n));
+
+    jQuery("#num-cats").text(commandCategoryCount);
+}
+
+function insertNamespace(ns, commands, subtext = BUILTIN_AUTHOR) {
+    let namespace = commands.filter(c => c._namespace === ns).sort(compareByName);
+    if (namespace.length)
+        insertCommands(ns, subtext, namespace, commandTable);
+}
+
+function insertCommands(namespace, subtext, commands, table) {
+    const aRow = jQuery("<tr></tr>");
+    const feedElement = jQuery('<td class="topcell command-feed" ' + 'rowspan="' + commands.length + '"></td>');
+
+    fillTableCellForFeed(feedElement, namespace, subtext);
+    aRow.append(feedElement);
+
+    if (commands.length > 0)
+        fillTableRowForCmd(aRow, commands.shift(), "topcell command");
+
+    table.append(aRow);
+
+    if (commands.length > 0) {
+        commands.forEach(c => {
+            let aRow = jQuery("<tr></tr>");
+            fillTableRowForCmd(aRow, c, "command");
+            table.append(aRow);
+        });
+    }
+    else
+        aRow.append("<td class=\"topcell command\">&nbsp</td><td class=\"topcell command\">&nbsp</td>");
+
+    commandCategoryCount += 1;
 }
 
 function A(url, text, className, attrs) {
@@ -142,89 +209,3 @@ function fillTableRowForCmd(row, cmd, className) {
 
     return row.append(checkBoxCell, cmdElement);
 }
-
-function insertNamespace(namespace, subtext, commands, table) {
-    aRow = jQuery("<tr></tr>");
-    feedElement = jQuery('<td class="topcell command-feed" ' + 'rowspan="' + commands.length + '"></td>');
-    fillTableCellForFeed(feedElement, namespace, subtext);
-    aRow.append(feedElement);
-
-    if (commands.length > 0)
-        fillTableRowForCmd(aRow, commands.shift(), "topcell command");
-
-    table.append(aRow);
-
-    if (commands.length > 0) {
-        commands.forEach(c => {
-            let aRow = jQuery("<tr></tr>");
-            fillTableRowForCmd(aRow, c, "command");
-            table.append(aRow);
-        });
-    }
-    else
-        aRow.append("<td class=\"topcell command\">&nbsp</td><td class=\"topcell command\">&nbsp</td>");
-
-    commandCategoryCount += 1;
-}
-
-async function buildTable(settings) {
-    window.escapeHtml = Utils.escapeHtml;
-
-    let table = jQuery("#commands-and-feeds-table");
-
-    let builtinCommands = cmdManager.commands.filter((c) => c._builtin).sort(compareByName);
-    let userCommands = cmdManager.commands.filter((c) => !c._builtin).sort(compareByName);
-    let commandCount = builtinCommands.length + userCommands.length;
-
-    jQuery("#num-commands").text(commandCount);
-
-    const BUILTIN_AUTHOR = "by iShell Authors";
-
-    function insertBuiltinNamespace(ns) {
-        let namespaced = cmdManager.commands.filter((c) => c._builtin && c._namespace === ns).sort(compareByName);
-        if (namespaced.length)
-            insertNamespace(ns, BUILTIN_AUTHOR, namespaced, table);
-    }
-
-    insertBuiltinNamespace("iShell");
-    insertBuiltinNamespace("Browser");
-    insertBuiltinNamespace("Utility");
-    insertBuiltinNamespace("Search");
-    insertBuiltinNamespace("Mail");
-    insertBuiltinNamespace("Syndication");
-    insertBuiltinNamespace("Translation");
-    insertBuiltinNamespace("Scrapyard");
-
-    if (settings.enable_more_commands())
-        insertBuiltinNamespace("More Commands");
-
-    builtinCommands = cmdManager.commands.filter((c) => c._builtin && !c._namespace).sort(compareByName);
-    if (builtinCommands.length > 0)
-        insertNamespace("Builtin Commands", BUILTIN_AUTHOR, builtinCommands, table);
-
-    let userCommandsByCat = {};
-
-    let namespaces = await DBStorage.fetchUserScriptNamespaces();
-
-    for (let n of namespaces) {
-        if (n !== "default") {
-            let commands = cmdManager.commands.filter((c) => c._namespace === n).sort(compareByName);
-            userCommandsByCat[n] = commands;
-        }
-    }
-
-    for (let n of Object.keys(userCommandsByCat).sort())
-        insertNamespace(n, '<a href="edit.html?' + encodeURI(n)
-            + '" target="_blank">Open in editor</a>', userCommandsByCat[n], table);
-
-    var defaultCommands = cmdManager.commands.filter((c) => c._namespace === "default").sort(compareByName);
-    insertNamespace("Other Commands", '<a href="edit.html?default" target="_blank">Open in editor</a>',
-        defaultCommands, table);
-
-    jQuery("#num-cats").text(commandCategoryCount);
-}
-
-jQuery(function onReady() {
-    setupHelp("#show-hide-help", "#cmdlist-help-div");
-    shellSettings.load(settings => buildTable(settings));
-});

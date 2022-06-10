@@ -1,7 +1,6 @@
 import {settings} from "../settings.js";
 import {cmdManager} from "../cmdmanager.js";
-
-const SCRAPYARD_NAMESPACE = "Scrapyard";
+import {NAMESPACE_SCRAPYARD} from "./namespaces.js";
 
 const DEFAULT_OUTPUT_LIMIT = 50;
 
@@ -221,7 +220,7 @@ let shelfCmd = CmdUtils.CreateCommand({
     arguments: [{role: "object", nountype: noun_scrapyard_group, label: "name"}],
     description: "Switch to or create a shelf in Scrapyard.",
     icon: "/ui/icons/scrapyard.svg",
-    _namespace: SCRAPYARD_NAMESPACE,
+    _namespace: NAMESPACE_SCRAPYARD,
     preview: function(pblock, {object: {text}}) {
         let html = "Switch to or create <span style='color: #FD7221;'>"
             + Utils.escapeHtml(text)
@@ -297,7 +296,7 @@ let scrapyardCmd = CmdUtils.CreateCommand({
         </ul>`,
     icon: "/ui/icons/scrapyard.svg",
     previewDelay: 1000,
-    _namespace: SCRAPYARD_NAMESPACE,
+    _namespace: NAMESPACE_SCRAPYARD,
     init: function(doc /* popup document */) {
         updateCompletion();
     },
@@ -534,7 +533,7 @@ let bookmarkCmd = CmdUtils.CreateCommand({
         </ul>`,
     icon: "/ui/icons/scrapyard.svg",
     //previewDelay: 1000,
-    _namespace: SCRAPYARD_NAMESPACE,
+    _namespace: NAMESPACE_SCRAPYARD,
     preview: bookmarkingCommandPreview(),
     execute: bookmarkingCommand("BOOKMARK")
 });
@@ -578,7 +577,7 @@ let archiveCmd = CmdUtils.CreateCommand({
         </ul>`,
     icon: "/ui/icons/scrapyard.svg",
     //previewDelay: 1000,
-    _namespace: SCRAPYARD_NAMESPACE,
+    _namespace: NAMESPACE_SCRAPYARD,
     preview: bookmarkingCommandPreview(),
     execute: bookmarkingCommand("ARCHIVE")
 });
@@ -595,7 +594,7 @@ let archiveSiteCmd = CmdUtils.CreateCommand({
         </ul>`,
     icon: "/ui/icons/scrapyard.svg",
     //previewDelay: 1000,
-    _namespace: SCRAPYARD_NAMESPACE,
+    _namespace: NAMESPACE_SCRAPYARD,
     preview: bookmarkingCommandPreview(),
     execute: bookmarkingCommand("SITE")
 });
@@ -669,7 +668,7 @@ let copyAtCmd = CmdUtils.CreateCommand({
         </ul>`,
     icon: "/ui/icons/scrapyard.svg",
     //previewDelay: 1000,
-    _namespace: SCRAPYARD_NAMESPACE,
+    _namespace: NAMESPACE_SCRAPYARD,
     preview: copyingCommandPreview(),
     execute: copyingCommand("SCRAPYARD_COPY_AT_ISHELL")
 });
@@ -686,7 +685,7 @@ let moveAtCmd = CmdUtils.CreateCommand({
         </ul>`,
     icon: "/ui/icons/scrapyard.svg",
     //previewDelay: 1000,
-    _namespace: SCRAPYARD_NAMESPACE,
+    _namespace: NAMESPACE_SCRAPYARD,
     preview: copyingCommandPreview(),
     execute: copyingCommand("SCRAPYARD_MOVE_AT_ISHELL")
 });

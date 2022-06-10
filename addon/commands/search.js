@@ -1,4 +1,5 @@
 import {settings} from "../settings.js";
+import {NAMESPACE_SEARCH} from "./namespaces.js";
 
 let maxSearchResults = settings.max_search_results() || 10;
 
@@ -7,7 +8,7 @@ CmdUtils.makeSearchCommand({
     uuid: "61A61D85-07B4-4375-AB42-D635190241EA",
     url: `https://customsearch.googleapis.com/customsearch/v1?key=${cmdAPI.settings.google_cse_api_key}`
         + `&cx=${cmdAPI.settings.google_cse_api_id}&q=%s`,
-    _namespace: "Search",
+    _namespace: NAMESPACE_SEARCH,
     icon: "/ui/icons/google.png",
     description: "Searches Google for your words.",
     arguments: [{role: "object", nountype: noun_arb_text, label: "query"}],
@@ -33,7 +34,7 @@ CmdUtils.makeSearchCommand({
 //     uuid: "44FF357D-C3C2-4CB3-91EB-B4E415DC9905",
 //     url: "http://www.bing.com/search?q=%s",
 //     defaultUrl: "http://www.bing.com/",
-//     _namespace: "Search",
+//     _namespace: NAMESPACE_SEARCH,
 //     _hidden: true,
 //     arguments: [{role: "object", nountype: noun_arb_text, label: "query"}],
 //     previewDelay: 1000,
@@ -51,7 +52,7 @@ CmdUtils.makeSearchCommand({
     uuid: "F34E6A8C-FBBD-4DB2-9999-1B653034D985",
     url: "http://www.imdb.com/find?q=%s",
     defaultUrl: "http://www.imdb.com",
-    _namespace: "Search",
+    _namespace: NAMESPACE_SEARCH,
     arguments: [{role: "object", nountype: noun_arb_text, label: "query"}],
     previewDelay: 1000,
     icon: "/ui/icons/imdb.png",
@@ -70,7 +71,7 @@ CmdUtils.makeSearchCommand({
         "&search=Search&search_sort=relevance&search_query={QUERY}"),
     icon: "/ui/icons/youtube.png",
     description: ("Searches YouTube for videos matching your words. Previews the top results."),
-    _namespace: "Search",
+    _namespace: NAMESPACE_SEARCH,
     arguments: [{role: "object", nountype: noun_arb_text, label: "query"}],
     previewDelay: 1000,
     preview: function(pblock, {object: {text, summary}}) {
@@ -119,7 +120,7 @@ CmdUtils.makeSearchCommand({
     name: "images",
     uuid: "3A1A73F1-C651-4AD5-B4B4-2FBAAB85CDD0",
     arguments: [{role: "object", nountype: noun_arb_text, label: "query"}],
-    _namespace: "Search",
+    _namespace: NAMESPACE_SEARCH,
     previewDelay: 1000,
     author: {name: "Federico Parodi", email: "getimages@jimmy2k.it"},
     contributor: "satyr",
@@ -271,7 +272,7 @@ CmdUtils.CreateCommand({
     argument: [
         {role: "object", nountype: noun_arb_text, label: "search term"},
         {role: "format", nountype: noun_type_lang_wikipedia}],
-    _namespace: "Search",
+    _namespace: NAMESPACE_SEARCH,
     previewDelay: 1000,
     homepage: "http://theunfocused.net/moz/ubiquity/verbs/",
     author: {name: "Blair McBride", email: "blair@theunfocused.net"},
@@ -380,7 +381,7 @@ CmdUtils.CreateCommand({
 // CmdUtils.CreateCommand({
 //     name: "maps",
 //     uuid: "0898F48A-1550-4DA4-B86D-CA7D669E0332",
-//     _namespace: "Search",
+//     _namespace: NAMESPACE_SEARCH,
 //     description: "Shows a location on the map.",
 //     icon: "/ui/icons/google.png",
 //     previewDelay: 1000,
@@ -470,7 +471,7 @@ CmdUtils.CreateCommand({
     name: "maps",
     uuid: "161A4B18-F577-40B9-99DB-B689690E657A",
     arguments: [{role: "object", nountype: noun_arb_text, label: "location"}],
-    _namespace: "Search",
+    _namespace: NAMESPACE_SEARCH,
     description: "Shows a location on the map.",
     icon: "/ui/icons/google.png",
     author: "rostok",
@@ -775,7 +776,7 @@ CmdUtils.CreateCommand({
     author: "g/christensen",
     icon: "/ui/icons/libgen.ico",
     previewDelay: 1000,
-    _namespace: "Search",
+    _namespace: NAMESPACE_SEARCH,
     _genQuery: function(args) {
         let sort_mode;
         if (args.instrument && args.instrument.text)
@@ -844,7 +845,7 @@ CmdUtils.CreateCommand({
     icon: "/ui/icons/scihub.ico",
     previewDelay: 1000,
     _article: null,
-    _namespace: "Search",
+    _namespace: NAMESPACE_SEARCH,
     preview: function(pblock, args, {Bin}) {
         pblock.text("Searching...");
 

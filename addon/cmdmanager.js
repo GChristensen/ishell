@@ -110,6 +110,14 @@ class CommandManager {
         this._commands = commands;
     }
 
+    get builtinCommands() {
+        return this._commands.filter(c => !!c._builtin)
+    }
+
+    get userCommands() {
+        return this._commands.filter(c => !c._builtin)
+    }
+
     getCommandByUUID(uuid) {
         return this._commands.find(c => c.uuid.toUpperCase() === uuid.toUpperCase());
     };

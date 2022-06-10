@@ -1,6 +1,6 @@
 // These commands are hidden by default and available only through an undocumented easter switch
 
-import {NS_MORE_COMMANDS} from "./common.js";
+import {MORE_COMMANDS} from "./common.js";
 
 CmdUtils.CreateCommand({
     name: "dark-flow",
@@ -9,7 +9,7 @@ CmdUtils.CreateCommand({
     description: "Follow the URL in <a href='https://gchristensen.github.io/dark-flow/'>Dark Flow</a>.",
     icon: "/commands/more/dark-flow.png",
     _hidden: true,
-    _namespace: NS_MORE_COMMANDS,
+    _namespace: MORE_COMMANDS,
     execute: function execute({object: {text}}) {
         chrome.runtime.sendMessage("dark-flow@firefox", {message: "dark-flow:follow-url", url: text}, null);
     },

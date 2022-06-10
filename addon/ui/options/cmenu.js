@@ -1,10 +1,14 @@
+import "../../api_backgorund.js";
+import {settings} from "../../settings.js";
 
-$(() => shellSettings.load(settings => onDocumentLoad(settings)));
+const {__contextMenuManager: contextMenu} = CmdUtils;
 
-async function onDocumentLoad(settings) {
+$(initPage);
+
+async function initPage() {
     let commandList = $("#context-menu-commands");
     
-    for (let cmd of cmdManager.contextMenuCommands) {
+    for (let cmd of contextMenu.contextMenuCommands) {
         commandList.append(`<tr id="${cmd.uuid}">
             <td class="remove-item" title="Remove item">&#xD7;</td>
             <td class="item-icon"><img height="16px" width="16px" src="${cmd.icon}"/></td>
@@ -18,30 +22,30 @@ async function onDocumentLoad(settings) {
     $("#context-menu-commands .remove-item").click((e) => {
         let tr = e.target.parentNode;
         if (confirm("Do you really want to delete \"" + $(tr).find("input[name='label']").val() + "\"?")) {
-            let cm = cmdManager.getContextMenuCommand($(tr).find("input[name='command']").val());
-            let i = cmdManager.contextMenuCommands.indexOf(cm);
-            cmdManager.contextMenuCommands.splice(i, 1);
+            let cm = contextMenu.getContextMenuCommand($(tr).find("input[name='command']").val());
+            let i = contextMenu.contextMenuCommands.indexOf(cm);
+            contextMenu.contextMenuCommands.splice(i, 1);
             tr.parentNode.removeChild(tr);
-            cmdManager.createContextMenu();
-            shellSettings.set("context_menu_commands", cmdManager.contextMenuCommands);
+            contextMenu.createContextMenu();
+            settings.set("context_menu_commands", contextMenu.contextMenuCommands);
         }
     });
 
     $("#context-menu-commands input[name='label']").blur((e) => {
         let tr = e.target.parentNode.parentNode;
         if (e.target.value) {
-            let cm = cmdManager.getContextMenuCommand($(tr).find("input[name='command']").val());
+            let cm = contextMenu.getContextMenuCommand($(tr).find("input[name='command']").val());
             cm.label = e.target.value;
-            cmdManager.createContextMenu();
-            shellSettings.set("context_menu_commands", cmdManager.contextMenuCommands);
+            contextMenu.createContextMenu();
+            settings.set("context_menu_commands", contextMenu.contextMenuCommands);
         }
     });
 
     $("#context-menu-commands input[name='execute']").change((e) => {
         let tr = e.target.parentNode.parentNode;
-        let cm = cmdManager.getContextMenuCommand($(tr).find("input[name='command']").val());
+        let cm = contextMenu.getContextMenuCommand($(tr).find("input[name='command']").val());
         cm.execute = e.target.checked;
-        shellSettings.set("context_menu_commands", cmdManager.contextMenuCommands);
+        settings.set("context_menu_commands", contextMenu.contextMenuCommands);
     });
 
 
@@ -50,5 +54,4 @@ async function onDocumentLoad(settings) {
     cmHistorySwitch.change((e) => {
         settings.remember_context_menu_commands(!e.target.checked)
     });
-
 }

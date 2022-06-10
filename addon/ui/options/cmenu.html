@@ -1,15 +1,13 @@
-<html xmlns="http://www.w3.org/1999/xhtml" style="cursor: auto ! important;" hasBrowserHandlers="true">
+<html>
 <head>
     <title>iShell Context Menu</title>
     <meta charset="utf-8">
-    <link href="/res/icons/logo.svg" rel="icon"/>
+    <link href="/ui/icons/logo.svg" rel="icon"/>
     <link rel="stylesheet" type="text/css" media="all" href="options.css"/>
 
     <script src="/global.js"></script>
     <script src="/lib/jquery.js"></script>
-    <script src="/bridge.js"></script>
-    <script src="/settings.js"></script>
-    <script src="cmenu.js"></script>
+    <script src="cmenu.js" type="module"></script>
 
     <style>
         #context-menu-container {
@@ -19,7 +17,7 @@
         }
 
         .remove-item {
-            width: 25px;
+            width: 15px;
             cursor: pointer;
         }
 
@@ -29,6 +27,10 @@
 
         .item-icon {
             width: 20px;
+        }
+
+        .item-icon img {
+            vertical-align: middle;
         }
 
         .item-label {
@@ -49,6 +51,7 @@
 
         #context-menu-commands input[type="text"] {
             width: 100%;
+            box-sizing: border-box;
         }
 
         #option-context-history-row {
@@ -60,30 +63,28 @@
     </style>
 </head>
 <body dir="ltr">
-<div class="head"><span class="large">iShell: </span>Context Menu</div>
-<div id="nav-container">
-    <ul id="nav">
-        <li class="selected"><a href="options.html">Settings</a></li>
-        <li><a href="commands.html">Your Commands</a></li>
-        <li><a href="cmenu.html">Context Menu</a></li>
-        <li><a href="edit.html">Command Editor</a></li>
-        <li><a href="API.html">API Reference</a></li>
-        <li><a href="tutorial.html">Tutorial</a></li>
-    </ul>
-</div>
+    <div class="head"><span class="large">iShell: </span>Context Menu</div>
+    <div id="nav-container">
+        <ul id="nav">
+            <li class="selected"><a href="options.html">Settings</a></li>
+            <li><a href="commands.html">Your Commands</a></li>
+            <li><a href="cmenu.html">Context Menu</a></li>
+            <li><a href="edit.html">Command Editor</a></li>
+            <li><a href="API.html">API Reference</a></li>
+            <li><a href="tutorial.html">Tutorial</a></li>
+        </ul>
+    </div>
 
-<br clear="all"/>
-<div class="page-tip">
-    <p>Add commands to context menu by pressing Ctrl+Alt+Enter in the command line.</p>
-</div>
+    <br clear="all"/>
 
-<div id="context-menu-container">
-    <h2 class="top">Context menu commands</h2>
-    <div id="context-menu-commands-wrapper"><table id="context-menu-commands"></table></div>
-    <div id="option-context-history-row"><input type="checkbox" id="cm-history-switch"/><label for="cm-history-switch">Do not add context menu commands to history</label></div>
-</div>
+    <div class="page-tip">
+        <p>Add commands to context menu by pressing Ctrl+Alt+Enter in the command line.</p>
+    </div>
 
-<!--br clear="all"/>
-
+    <div id="context-menu-container">
+        <h2 class="top">Context menu commands</h2>
+        <div id="context-menu-commands-wrapper"><table id="context-menu-commands"></table></div>
+        <div id="option-context-history-row"><input type="checkbox" id="cm-history-switch"/><label for="cm-history-switch">Do not add context menu commands to history</label></div>
+    </div>
 </body>
 </html>

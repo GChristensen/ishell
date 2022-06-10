@@ -1,3 +1,5 @@
+import Dexie from "./lib/dexie.js";
+
 const dexie = new Dexie("ishell");
 
 dexie.version(1).stores({

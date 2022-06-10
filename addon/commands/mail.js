@@ -1,3 +1,5 @@
+import {NAMESPACE_MAIL} from "./namespaces.js";
+
 CmdUtils.CreateCommand({
     name: "email",
     uuid: "65947074-CF99-4114-827E-0FC7CB348CE1",
@@ -21,7 +23,7 @@ CmdUtils.CreateCommand({
             <ul class="syntax">
                 <li><b>email</b> <b>this</b> <b>to</b> <i>user@example.com</i> <b>at</b> <i>secondary</i></li>
             </ul>`,
-    _namespace: "Mail",
+    _namespace: NAMESPACE_MAIL,
     author: "g/christensen",
     icon: "/ui/icons/email.png",
     preview: function(pblock, args) {
@@ -94,7 +96,7 @@ CmdUtils.CreateCommand({
             <span class="arguments">Example</span>
             <ul class="syntax">
                 <li><b>compose</b> <i>shopping list</i> <b>to</b> <i>user@example.com</i> <b>at</b> <i>secondary</i>`,
-    _namespace: "Mail",
+    _namespace: NAMESPACE_MAIL,
     author: "g/christensen",
     icon: "/ui/icons/email.png",
     preview: function(pblock, args) {
@@ -151,7 +153,7 @@ CmdUtils.CreateCommand({
     uuid: "C1B5C976-2BBE-4DD6-95E9-A65CC84E1B51",
     arguments: [{role: "object", nountype: noun_type_contact, label: "email"}],
     description: "Do not show the specified email in suggestions anymore.",
-    _namespace: "Mail",
+    _namespace: NAMESPACE_MAIL,
     author: "g/christensen",
     icon: "/ui/icons/forget-email.png",
     preview: function(pblock, args) {
@@ -194,7 +196,7 @@ CmdUtils.CreateCommand({
             <li>- <b>all</b> - forget all emails</li>
             <li>- <i>pattern</i> - forget emails containing this string (may be a regular expression)</li>
         </ul>`,
-    _namespace: "Mail",
+    _namespace: NAMESPACE_MAIL,
     author: "g/christensen",
     icon: "/ui/icons/forget-email.png",
     preview: function(pblock, args) {

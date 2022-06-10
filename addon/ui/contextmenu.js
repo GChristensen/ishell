@@ -55,7 +55,7 @@ class ContextMenuManager {
                     contextMenuManager.executeContextMenuItem(info.menuItemId, contextMenuCmd);
                 }
                 else if (contextMenuCmd) {
-                    this.selectedContextMenuCommand = info.menuItemId;
+                    contextMenuManager.selectedContextMenuCommand = info.menuItemId;
 
                     if (_MANIFEST_V3)
                         chrome.action.openPopup();
@@ -124,7 +124,7 @@ class ContextMenuManager {
 
             if (sent && sent.getCommand().uuid.toLowerCase() === commandDef.uuid.toLowerCase()) {
 
-                this.callExecute(sent).then(() => {
+                cmdManager.callExecute(sent).then(() => {
                     ContextUtils.clearSelection();
                 });
 

@@ -1,6 +1,6 @@
 // These commands are hidden by default and available only through an undocumented easter switch
 
-import {NS_MORE_COMMANDS} from "./common.js";
+import {MORE_COMMANDS} from "./common.js";
 
 {
     const JAVLIB_SEARCH_URL = "https://www.javlibrary.com/en/vl_searchbyid.php?keyword=";
@@ -132,7 +132,7 @@ import {NS_MORE_COMMANDS} from "./common.js";
         icon: "/commands/more/jav.png",
         previewDelay: 1000,
         _hidden: true,
-        _namespace: NS_MORE_COMMANDS,
+        _namespace: MORE_COMMANDS,
         execute: function execute({object: {text}}) {
             Utils.openUrlInBrowser(JAVLIB_SEARCH_URL + encodeURI(text.trim()));
         },

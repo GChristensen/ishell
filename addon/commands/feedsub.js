@@ -1,7 +1,9 @@
+import {NAMESPACE_SYNDICATION} from "./namespaces.js";
+
 CmdUtils.CreateCommand({
     names: ["feedsub"],
     uuid: "A2910385-002A-4BBE-AA22-9E92FC06352B",
-    _namespace: "Syndication",
+    _namespace: NAMESPACE_SYNDICATION,
     description: "Subscribe to a RSS feed in Feedly.",
     help: `The command uses the URL opened in the current tab. 
             Direct feed links, Instagram, Tumblr, Twitter and Youtube are supported.`,

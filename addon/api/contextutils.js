@@ -37,7 +37,6 @@ export class ContextUtils {
     static clearSelection() {
         this.selectedText = "";
         this.selectedHtml = "";
-        console.log("selection cleared");
     };
 
     static getSelectionObject(context) {

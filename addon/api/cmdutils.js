@@ -57,6 +57,10 @@ CmdUtils.renderTemplate = function (template, data) {
     return TrimPath.parseTemplate(template).process(data);
 };
 
+CmdUtils.reduceTemplate = function (items, f) {
+    return items?.reduce((acc, v, i, arr) => acc + f(v, i, arr), "");
+}
+
 CmdUtils.CreateCommand = function CreateCommand(options) {
    return cmdManager.createCommand(options);
 };

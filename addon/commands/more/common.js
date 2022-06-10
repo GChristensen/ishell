@@ -1,1 +1,1 @@
-export const NS_MORE_COMMANDS = "More Commands";
+export const MORE_COMMANDS = "More Commands";

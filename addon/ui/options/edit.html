@@ -1,17 +1,22 @@
-<html xmlns="http://www.w3.org/1999/xhtml" style="cursor: auto ! important;" hasBrowserHandlers="true">
+<html>
 <head>
     <title>iShell Command Editor</title>
     <meta charset="utf-8">
-    <link href="/res/icons/logo.svg" rel="icon" />
+    <link href="/ui/icons/logo.svg" rel="icon" />
     <link rel="stylesheet" type="text/css" media="all" href="options.css"/>
 
     <style>
-        body {
+        html, body {
             height: 100%;
-            display: flex;
-            flex-flow: column;
             overflow: hidden;
         }
+
+        #container {
+            display: flex;
+            flex-flow: column;
+            height: 100%;
+        }
+
         #panel {
             width: 870px;
         }
@@ -32,7 +37,7 @@
         }
 
         #panel {
-            flex: 1 1 auto;
+            flex: 1 0 auto;
         }
 
         #code {
@@ -101,15 +106,13 @@
     <script src="/global.js"></script>
     <script src="/lib/jquery.js"></script>
     <script src="/lib/marked.js"></script>
-    <script src="/lib/uuid.js"></script>
-    <script src="/bridge.js"></script>
-    <script src="/parser/nounutils.js"></script>
-    <script src="/settings.js"></script>
-    <script src="/preprocessor.js"></script>
-    <script src="edit.js"></script>
+    <script src="/lib/template.js"></script>
+    <script src="/lib/math_parser.js"></script>
+    <script src="edit.js" type="module"></script>
 
 </head>
 <body dir="ltr">
+<div id="container">
 <div id="header">
 <div class="head"><span class="large">iShell: </span>Command Editor</div>
 <div id="nav-container">
@@ -126,8 +129,8 @@
 <br id="head-br" clear="all"/>
 <div id="helper-app-warn">Please install iShell native helper application to use custom commands.</div>
 <div id="toolbar">
-    <a href=# id="download"><img src="/res/icons/download.png" title="Download"
-    /></a><a href=# id="upload"><img src="/res/icons/upload.png" title="Upload"/></a>
+    <a href=# id="download"><img src="/ui/icons/download.png" title="Download"
+    /></a><a href=# id="upload"><img src="/ui/icons/upload.png" title="Upload"/></a>
 
     <input type="file" id="file-picker"/>
 
@@ -137,9 +140,9 @@
     <select id="script-namespaces">
         <option value="default">&lt;default&gt;</option>
     </select>
-    <a href=# id="create-namespace"><img src="/res/icons/document_create.png" title="Create category"/></a>
-    <a href=# id="delete-namespace"><img src="/res/icons/document_delete.png" title="Delete category"/></a>
-    <a href=# id="expand-editor"><img src="/res/icons/expand.png"/></a>
+    <a href=# id="create-namespace"><img src="/ui/icons/document_create.png" title="Create category"/></a>
+    <a href=# id="delete-namespace"><img src="/ui/icons/document_delete.png" title="Delete category"/></a>
+    <a href=# id="expand-editor"><img src="/ui/icons/expand.png"/></a>
 </div>
 </div>
 <div id="panel">
@@ -155,11 +158,12 @@
             <option value="CmdUtils">CmdUtils</option>
         </select>
         &nbsp;Insert templates:
-        <a href=# id="insertsimplecommandstub">SIMPLE</a> |
-        <a href=# id="insertcommandstub">ALL FEATURES</a> |
-        <a href=# id="insertsearchstub">SEARCH</a>
-        <span id="capture-stub" style="display: none;"> | <a href=# id="insertcapturestub">CAPTURE</a></span>
+        <a href=# id="simple">SIMPLE</a> |
+        <a href=# id="full">ALL FEATURES</a> |
+        <a href=# id="search">SEARCH</a>
+        <span id="capture-stub" style="display: none;"> | <a href=# id="capture">CAPTURE</a></span>
     </div>
+</div>
 </div>
 </body>
 </html>

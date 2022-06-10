@@ -3,6 +3,8 @@
 
 // (C) 2011 g/christensen (gchristnsn@gmail.com)
 
+import {NAMESPACE_SEARCH} from "./namespaces.js";
+
 var resurrect_commandIcon = "/ui/icons/resurrect.gif";
 
 var resurrect_archiveServices =
@@ -104,7 +106,7 @@ CmdUtils.CreateCommand({
     /*---------------------------------------------------------------------------*/
     author: {name: "g/christensen"},
     /*---------------------------------------------------------------------------*/
-    _namespace: "Search",
+    _namespace: NAMESPACE_SEARCH,
     /*---------------------------------------------------------------------------*/
     license: "GPL",
     /*---------------------------------------------------------------------------*/
