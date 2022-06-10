@@ -28,6 +28,7 @@ cmdAPI.previewList = delegate(CmdUtils, CmdUtils.previewList);
 cmdAPI.htmlPreviewList = delegate(CmdUtils, CmdUtils.previewList);
 cmdAPI.objectPreviewList = delegate(CmdUtils, CmdUtils.previewList2);
 cmdAPI.renderTemplate = delegate(CmdUtils, CmdUtils.renderTemplate);
+cmdAPI.reduceTemplate = delegate(CmdUtils, CmdUtils.reduceTemplate);
 cmdAPI.absUrl = delegate(CmdUtils, CmdUtils.absUrl);
 cmdAPI.copyToClipboard = delegate(CmdUtils, CmdUtils.copyToClipboard);
 cmdAPI.notify = delegate(CmdUtils, CmdUtils.notify);
@@ -42,6 +43,7 @@ cmdAPI.parseHtml = delegate(Utils, Utils.parseHtml);
 cmdAPI.escapeHtml = delegate(Utils, Utils.escapeHtml);
 cmdAPI.makeBin = delegate(Utils, Utils.makeBin);
 cmdAPI.getActiveTab = delegate(CmdUtils, CmdUtils.getActiveTab);
+cmdAPI.eval = delegate(CmdUtils, CmdUtils.eval);
 
 cmdAPI.previewFetch = async function(pblock, resource, init) {
     const controller = new AbortController();
