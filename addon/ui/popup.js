@@ -255,7 +255,7 @@ async function initPopup() {
     CmdUtils.deblog("iShell popup initialized");
 }
 
-$(window).on('load', initPopup);
+$(document).ready(initPopup);
 
 $(window).on('beforeunload', function() {
     cmdManager.commandHistoryPush(popup.getInput());

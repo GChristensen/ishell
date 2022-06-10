@@ -24,3 +24,17 @@ export function injectModule(namespace) {
     for (const key of Object.keys(namespace))
         globalThis[key] = namespace[key];
 }
+
+async function executeScriptFileMV3 (tabId, options) {
+    const target = {tabId};
+
+    if (options.frameId)
+        target.frameIds = [options.frameId];
+
+    if (options.allFrames)
+        target.allFrames = options.allFrames;
+
+    return browser.scripting.executeScript({target, files: [options.file]});
+}
+
+export const executeScriptFile = _MANIFEST_V3? executeScriptFileMV3: browser.tabs.executeScript;

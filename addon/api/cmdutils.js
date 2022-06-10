@@ -2,6 +2,8 @@ import {settings} from "../settings.js";
 import {helperApp} from "../helper_app.js";
 import {cmdManager} from "../cmdmanager.js";
 import {contextMenuManager} from "../ui/contextmenu.js";
+import {executeScriptFile} from "../utils.js";
+import {ContextUtils} from "./contextutils.js";
 
 export var CmdUtils = {
     VERSION: chrome.runtime.getManifest().version,
@@ -15,10 +17,9 @@ export var CmdUtils = {
     makeSugg: NounUtils.makeSugg,
     grepSuggs: NounUtils.grepSuggs,
 
-    // TODO: move?
-    activeTab: null,   // tab that is currently active, updated via background.js
-    selectedText: "",   // currently selected text, update via content script content_get_selection.js
-    selectedHTML: ""    // currently selected html, update via content script content_get_selection.js
+    executeScriptFile,
+
+    activeTab: null   // tab that is currently active, updated via popup.js
 };
 
 export var _ = function(x, data) {
@@ -217,20 +218,6 @@ CmdUtils.__nativeEval = async function(text) {
 
 CmdUtils.eval = _MANIFEST_V3? CmdUtils.__nativeEval: eval;
 
-CmdUtils.__injectScriptFileMV3 = async function(tabId, options) {
-    const target = {tabId};
-
-    if (options.frameId)
-        target.frameIds = [options.frameId];
-
-    if (options.allFrames)
-        target.allFrames = options.allFrames;
-
-    return browser.scripting.executeScript({target, files: [options.file]});
-}
-
-CmdUtils.executeScriptFile = _MANIFEST_V3? CmdUtils.__injectScriptFileMV3: browser.tabs.executeScript;
-
 CmdUtils.loadCSS = function(doc, id, file) {
     if (!doc.getElementById(id)) {
         let head = doc.getElementsByTagName('head')[0];
@@ -244,46 +231,14 @@ CmdUtils.loadCSS = function(doc, id, file) {
     }
 };
 
-// updates selectedText variable
-CmdUtils.updateSelection = async function (tab_id) {
-    CmdUtils.selectedText = "";
-    CmdUtils.selectedHtml = "";
-
-    let results;
-
-    try {
-        results = await CmdUtils.executeScriptFile(tab_id, {file: "/scripts/content_get_selection.js", allFrames: true});
-    }
-    catch (e) {
-        console.error(e)
-    }
-
-    if (results && results.length)
-        for (let selection of results)
-            if (selection) {
-                if (_MANIFEST_V3)
-                    selection = selection.result;
-
-                CmdUtils.selectedText = selection.text;
-                CmdUtils.selectedHtml = selection.html;
-                break;
-            }
-};
-
-CmdUtils._internalClearSelection = function() {
-    CmdUtils.selectedText = "";
-    CmdUtils.selectedHtml = "";
-};
-
 CmdUtils.getActiveTab = function () {
     return CmdUtils.activeTab;
 };
 
-// called when tab is switched or changed, updates selectedText and activeTab
+// called when tab is switched or changed, updates selection and activeTab
 CmdUtils.updateActiveTab = async function () {
     CmdUtils.activeTab = null;
-    CmdUtils.selectedText = '';
-    CmdUtils.selectedHtml = '';
+    ContextUtils.clearSelection();
 
     try {
         let tabs = await browser.tabs.query({active: true, currentWindow: true})
@@ -291,7 +246,7 @@ CmdUtils.updateActiveTab = async function () {
             let tab = tabs[0];
             if (tab.url.match('^blob://') || tab.url.match('^https?://') || tab.url.match('^file://')) {
                 CmdUtils.activeTab = tab;
-                await CmdUtils.updateSelection(tab.id);
+                await ContextUtils.getSelection(tab.id);
             }
         }
     }
@@ -300,8 +255,8 @@ CmdUtils.updateActiveTab = async function () {
     }
 };
 
-CmdUtils.getSelection = () => CmdUtils.selectedText;
-CmdUtils.getHtmlSelection = () => CmdUtils.selectedHtml;
+CmdUtils.getSelection = () => ContextUtils.selectedText;
+CmdUtils.getHtmlSelection = () => ContextUtils.selectedHtml;
 
 // replaces current selection with string provided
 CmdUtils.setSelection = function setSelection(replacementText) {
@@ -310,10 +265,7 @@ CmdUtils.setSelection = function setSelection(replacementText) {
     replacementText = replacementText.replace(/\\\\/g, "\\");
 
     if (CmdUtils.activeTab && CmdUtils.activeTab.id)
-        CmdUtils.executeScriptFile(CmdUtils.activeTab.id, { file: "/scripts/content_set_selection.js" } )
-            .then(() => {
-                browser.tabs.sendMessage(CmdUtils.activeTab.id, {type: "replaceSelectedText", text: replacementText})
-            });
+        return ContextUtils.setSelection(CmdUtils.activeTab.id, replacementText);
 };
 
 // for measuring time the input is changed

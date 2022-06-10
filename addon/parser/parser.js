@@ -1,6 +1,3 @@
-import {ContextUtils} from "./contextutils.js";
-import {SuggestionMemory} from "./suggestion_memory.js";
-
 export const NLParser = {};
 
 var PLUGINS = [];

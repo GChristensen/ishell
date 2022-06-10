@@ -215,7 +215,7 @@ export class SuggestionManager {
         if (this.selection) {
             return this._cmdManager.callExecute(this.selection)
                 .then(() => {
-                    CmdUtils._internalClearSelection();
+                    ContextUtils.clearSelection();
                 });
         }
     }

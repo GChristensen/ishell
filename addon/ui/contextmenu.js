@@ -125,7 +125,7 @@ class ContextMenuManager {
             if (sent && sent.getCommand().uuid.toLowerCase() === commandDef.uuid.toLowerCase()) {
 
                 this.callExecute(sent).then(() => {
-                    CmdUtils._internalClearSelection();
+                    ContextUtils.clearSelection();
                 });
 
                 if (settings.remember_context_menu_commands())

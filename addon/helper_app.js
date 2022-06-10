@@ -2,6 +2,13 @@ class HelperApp {
     constructor() {
         this.auth = crypto.randomUUID();
         this.version = undefined;
+
+        if (_MANIFEST_V3) {
+            this._host = browser.runtime.getManifest().content_security_policy.extension_pages
+                .split(";")[0]
+                .split(" ").at(-1);
+            this._portNumber = parseInt(this._host.split(":").at(-1));
+        }
     }
 
     async getPort() {
@@ -33,7 +40,7 @@ class HelperApp {
                 try {
                     port.postMessage({
                         type: "INITIALIZE",
-                        port: _HELPER_APP_PORT,
+                        port: this._portNumber,
                         auth: this.auth
                     });
                 }
@@ -104,7 +111,7 @@ class HelperApp {
     }
 
     url(path) {
-        return `${_HELPER_APP_HOST}${path.startsWith("/")? "": "/"}${path}`;
+        return `${this._host}${path.startsWith("/")? "": "/"}${path}`;
     }
 
     _injectAuth(init) {
