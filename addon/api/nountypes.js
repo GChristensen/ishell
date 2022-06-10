@@ -1,5 +1,5 @@
 import {settings} from "../settings.js";
-import {cmdManager} from "../cmdmanager.js";
+import {contextMenuManager} from "../ui/contextmenu.js";
 
 // === {{{ noun_arb_text }}} ===
 // Suggests the input as is.
@@ -252,7 +252,7 @@ export const noun_type_context_menu_command = {
         let fakeReq = {readyState: 2};
         let matcher = new RegExp(text, "i");
 
-        let matchingItems = cmdManager.contextMenuCommands.filter(m => {
+        let matchingItems = contextMenuManager.contextMenuCommands.filter(m => {
             m.match = matcher.exec(m.label);
             return !!m.match;
         });

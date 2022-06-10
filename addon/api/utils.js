@@ -1,5 +1,5 @@
 import {settings} from "../settings.js";
-import {DBStorage} from "../storage.js";
+import {repository} from "../storage.js";
 
 export var Utils = {};
 
@@ -372,7 +372,7 @@ var BinHandler = {
                 delete bin[key]
             }
             else bin[key] = val;
-            DBStorage.setCommandStorage(target.__uuid__, bin);
+            repository.setCommandStorage(target.__uuid__, bin);
             return key in bin ? bin[key] : old
         }
     },
@@ -385,7 +385,7 @@ var BinHandler = {
 };
 
 Utils.makeBin = async function(uuid, callback) {
-    const bin = await DBStorage.getCommandStorage(uuid);
+    const bin = await repository.getCommandStorage(uuid);
 
     const proxy = new Proxy({
         __proto__ : null,

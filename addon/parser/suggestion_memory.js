@@ -1,4 +1,4 @@
-import {DBStorage} from "../storage.js";
+import {repository} from "../storage.js";
 
 export class SuggestionMemory {
     constructor() {
@@ -14,7 +14,7 @@ export class SuggestionMemory {
     async remember(input, suggestion, amount) {
         amount = +amount || 1;
 
-        const memory = (await DBStorage.getSuggestionMemory(input)) || {input, scores: {}};
+        const memory = (await repository.getSuggestionMemory(input)) || {input, scores: {}};
 
         if (suggestion in memory.scores) {
             memory.scores[suggestion] += amount;
@@ -23,7 +23,7 @@ export class SuggestionMemory {
             memory.scores[suggestion] = amount;
         }
 
-        DBStorage.setSuggestionMemory(memory);
+        return repository.setSuggestionMemory(memory);
     }
 
     // === {{{ SuggestionMemory#getScore(input, suggestion) }}} ===
@@ -31,7 +31,7 @@ export class SuggestionMemory {
     // Gets/Sets the number of times that {{{suggestion}}} has been associated
     // with {{{input}}}.
     async getScore(input, suggestion) {
-        const memory = await DBStorage.getSuggestionMemory(input);
+        const memory = await repository.getSuggestionMemory(input);
         if (memory)
             return memory.scores[suggestion] || 0
 

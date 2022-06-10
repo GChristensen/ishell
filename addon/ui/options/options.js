@@ -117,7 +117,7 @@ async function onDocumentLoad(settings) {
         delete exported.command_history;
 
         exported.command_storage = await DBStorage.fetchCommandStorage();
-        exported.custom_scripts = await DBStorage.fetchCustomScripts();
+        exported.custom_scripts = await DBStorage.fetchUserScripts();
 
         // download link
         let file = new Blob([JSON.stringify(exported, null, 2)], {type: "application/json"});
@@ -180,7 +180,7 @@ async function onDocumentLoad(settings) {
                     let multipleObjects = [];
                     try {
                         multipleObjects = customScripts.map(record =>
-                            DBStorage.saveCustomScript(record.namespace, record.script));
+                            DBStorage.saveUserScript(record.namespace, record.script));
                     }
                     catch (e) {
                         console.error(e);

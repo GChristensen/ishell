@@ -269,7 +269,7 @@ async function saveScript() {
     }
     else {
         // save
-        await DBStorage.saveCustomScript(scriptNamespace, customcode);
+        await DBStorage.saveUserScript(scriptNamespace, customcode);
 
         // eval
         if (_MANIFEST_V3)
@@ -391,14 +391,14 @@ async function initEditor(settings) {
             ADD_NAME: {
                 await saveScript();
 
-                let namespaces = await DBStorage.fetchCustomScriptNamespaces();
+                let namespaces = await DBStorage.fetchUserScriptNamespaces();
 
                 for (let n of namespaces) {
                     if (n.toLowerCase() == name.toLowerCase()) {
                         scriptNamespace = n;
                         $("#script-namespaces").val(n);
 
-                        let record = await DBStorage.fetchCustomScripts(scriptNamespace);
+                        let record = await DBStorage.fetchUserScripts(scriptNamespace);
                         editScript(record?.script);
 
                         break ADD_NAME;
@@ -426,13 +426,13 @@ async function initEditor(settings) {
     $("#delete-namespace").click(async () => {
         if (scriptNamespace !== "default" && scriptNamespace !== SHELL_SETTINGS)
             if (confirm("Do you really want to delete \"" + scriptNamespace + "\"?")) {
-                await DBStorage.deleteCustomScript(scriptNamespace);
+                await DBStorage.deleteUserScript(scriptNamespace);
                 $('option:selected', $("#script-namespaces")).remove();
 
                 scriptNamespace = $("#script-namespaces").val();
                 settings.last_editor_namespace(scriptNamespace);
 
-                let record = await DBStorage.fetchCustomScripts(scriptNamespace);
+                let record = await DBStorage.fetchUserScripts(scriptNamespace);
                 editScript(record?.script);
             }
     });
@@ -483,7 +483,7 @@ async function initEditor(settings) {
             }
         });
     else {
-        let namespaces = await DBStorage.fetchCustomScriptNamespaces();
+        let namespaces = await DBStorage.fetchUserScriptNamespaces();
 
         namespaces = namespaces.sort(function (a, b) {
             if (a.toLocaleLowerCase() < b.toLocaleLowerCase())
@@ -506,11 +506,11 @@ async function initEditor(settings) {
             scriptNamespace = $("#script-namespaces").val();
             settings.last_editor_namespace(scriptNamespace);
 
-            let record = await DBStorage.fetchCustomScripts(scriptNamespace);
+            let record = await DBStorage.fetchUserScripts(scriptNamespace);
             editScript(record?.script);
         });
 
-        let record = await DBStorage.fetchCustomScripts(scriptNamespace);
+        let record = await DBStorage.fetchUserScripts(scriptNamespace);
         editScript(record?.script);
     }
 

@@ -1,5 +1,5 @@
 import {settings} from "./settings.js";
-import {DBStorage} from "./storage.js";
+import {repository} from "./storage.js";
 
 class CommandManager {
     constructor() {
@@ -248,7 +248,7 @@ class CommandManager {
         this.unloadCustomScripts(namespace);
 
         let preprocessor = new CommandPreprocessor(CommandPreprocessor.CONTEXT_CUSTOM);
-        let customscripts = await DBStorage.fetchCustomScripts(namespace);
+        let customscripts = await repository.fetchUserScripts(namespace);
 
         if (namespace)
             customscripts = [customscripts];

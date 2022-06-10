@@ -204,7 +204,7 @@ async function buildTable(settings) {
 
     let userCommandsByCat = {};
 
-    let namespaces = await DBStorage.fetchCustomScriptNamespaces();
+    let namespaces = await DBStorage.fetchUserScriptNamespaces();
 
     for (let n of namespaces) {
         if (n !== "default") {

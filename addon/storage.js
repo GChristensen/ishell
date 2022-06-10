@@ -53,11 +53,11 @@ class StorageIDB {
         return dexie.command_storage.toArray();
     }
 
-    async fetchCustomScriptNamespaces() {
+    async fetchUserScriptNamespaces() {
         return dexie.custom_scripts.orderBy("namespace").keys();
     }
 
-    async fetchCustomScripts(namespace) {
+    async fetchUserScripts(namespace) {
         let customScripts;
 
         if (namespace)
@@ -69,7 +69,7 @@ class StorageIDB {
         return customScripts;
     }
 
-    async saveCustomScript(namespace, script) {
+    async saveUserScript(namespace, script) {
         const exists = await dexie.custom_scripts.where("namespace").equals(namespace).count();
 
         if (exists) {
@@ -82,9 +82,9 @@ class StorageIDB {
         }
     }
 
-    async deleteCustomScript(namespace) {
+    async deleteUserScript(namespace) {
         await dexie.custom_scripts.where("namespace").equals(namespace).delete();
     }
 }
 
-export const DBStorage = new StorageIDB();
+export const repository = new StorageIDB();
