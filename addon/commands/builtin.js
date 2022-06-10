@@ -146,8 +146,14 @@ CmdUtils.CreateCommand({
     _namespace: NAMESPACE_BROWSER,
     icon: "/ui/icons/tab_delete.png",
     execute: function execute({object}) {
-        if (!object || !object.data)
-            CmdUtils.closeTab();
+        if (!object || !object.data) {
+            chrome.tabs.query({active: true, currentWindow: true}, function(tabs) {
+                if (tabs && tabs[0])
+                    chrome.tabs.remove(tabs[0].id, function() { });
+                else
+                    console.error("closeTab failed because 'tabs' is not set");
+            });
+        }
         else
             chrome.tabs.remove(object.data.id);
     }

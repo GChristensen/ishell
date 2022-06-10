@@ -13,7 +13,6 @@ dexie.on('populate', () => {
 });
 
 class StorageIDB {
-
     async getSuggestionMemory(input) {
         return dexie.suggestion_memory.where("input").equals(input).first();
     }

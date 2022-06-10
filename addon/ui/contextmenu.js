@@ -44,7 +44,7 @@ class ContextMenuManager {
 
                 // open popup, if command "execute" flag is unchecked
                 if (contextMenuCmd && contextMenuCmd.execute) {
-                    await CmdUtils.updateActiveTab();
+                    await CmdUtils._updateActiveTab();
 
                     if (info.linkUrl) {
                         CmdUtils.selectedText = info.linkUrl;

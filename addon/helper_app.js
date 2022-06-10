@@ -1,3 +1,5 @@
+import {hasCSRPermission} from "./utils.js";
+
 class HelperApp {
     constructor() {
         this.auth = crypto.randomUUID();
@@ -56,7 +58,7 @@ class HelperApp {
     }
 
     async probe(verbose = false) {
-        if (!await Utils._hasCSRPermission())
+        if (!await hasCSRPermission())
             return false;
 
         const port = await this.getPort();

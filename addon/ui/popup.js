@@ -241,7 +241,7 @@ async function initPopup() {
 
     await cmdManager.initializeCommandsPopup(document);
 
-    await CmdUtils.updateActiveTab();
+    await CmdUtils._updateActiveTab();
 
     popup = new PopupWindow();
     suggestions = new SuggestionManager(popup, cmdManager, settings.max_suggestions());

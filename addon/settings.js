@@ -85,8 +85,7 @@ class IShellSettings {
     }
 }
 
-export const shellSettings = new Proxy({}, new IShellSettings());
-export const settings = shellSettings;
+export const settings = new Proxy({}, new IShellSettings());
 
 browser.storage.onChanged.addListener(function (changes, areaName) {
     if (changes[ISHELL_SETTINGS_KEY])

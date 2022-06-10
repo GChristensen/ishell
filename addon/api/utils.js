@@ -59,7 +59,7 @@ Utils.parseHtml = function (htmlText, callback) {
     return doc;
 };
 
-// borrowed from utils.js of original Ubiquity
+// borrowed from utils.js of the original Ubiquity
 
 // === {{{ Utils.extend(target, object1, [objectN ...]) }}} ===
 // Extends {{{target}}} by copying properties from the rest of arguments.
@@ -426,24 +426,3 @@ Utils.easterListener = async function(input) {
 
     return false;
 };
-
-
-Utils._askCSRPermission = async function() {
-    if (_MANIFEST_V3)
-        return browser.permissions.request({origins: ["<all_urls>"]});
-
-    return true;
-}
-
-Utils._hasCSRPermission = async function(verbose = true) {
-    if (_MANIFEST_V3) {
-        const response = await browser.permissions.contains({origins: ["<all_urls>"]});
-
-        if (!response && verbose)
-            displayMessage("Please, enable optional add-on permissions at the Firefox add-on settings page (about:addons).");
-
-        return response;
-    }
-
-    return true;
-}

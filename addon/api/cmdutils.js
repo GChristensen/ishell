@@ -1,14 +1,15 @@
 import {settings} from "../settings.js";
-import {helperApp} from "../helper_app.js";
 import {cmdManager} from "../cmdmanager.js";
 import {contextMenuManager} from "../ui/contextmenu.js";
-import {executeScriptFile} from "../utils.js";
+import {executeScriptFile, nativeEval} from "../utils.js";
 import {ContextUtils} from "./contextutils.js";
 
 export var CmdUtils = {
     VERSION: chrome.runtime.getManifest().version,
     DEBUG: settings.debug_mode(),
 
+    // these classes are not part of the original Ubiquity API and are not exposed into the global namespace,
+    // although it is nice to have them in the popup and option pages
     __cmdManager: cmdManager,
     __contextMenuManager: contextMenuManager,
 
@@ -17,12 +18,16 @@ export var CmdUtils = {
     makeSugg: NounUtils.makeSugg,
     grepSuggs: NounUtils.grepSuggs,
 
-    executeScriptFile,
+    eval: _MANIFEST_V3? nativeEval: eval,
 
-    activeTab: null   // tab that is currently active, updated via popup.js
+    // injects a content script bundled with the addon into the given tab
+    // undocumented, works both in MV2 and MV3
+    executeScriptFile, 
+
+    activeTab: null   // tab that is currently active, updated via _updateActiveTAb
 };
 
-export var _ = function(x, data) {
+export const _ = function(x, data) {
     if (_MANIFEST_V3)
         return x;
 
@@ -32,9 +37,9 @@ export var _ = function(x, data) {
         : x
 };
 
-export var H = Utils.escapeHtml;
+export const H = Utils.escapeHtml;
 
-// stub for original ubiquity string formatter
+// a stub without the original Ubiquity string formatter functionality
 export function L(pattern) {
     for (let sub of Array.prototype.slice.call(arguments, 1)) {
         pattern = pattern.replace("%S", sub);
@@ -43,12 +48,24 @@ export function L(pattern) {
     return pattern;
 }
 
-// debug log
 CmdUtils.deblog = function () {
     if (CmdUtils.DEBUG)
         console.log.apply(console, arguments);
 };
 
+CmdUtils.CreateCommand = function CreateCommand(options) {
+    return cmdManager.createCommand(options);
+};
+
+// returns a command with the given name
+CmdUtils.findCommand = function(name) {
+    for (let c in cmdManager.commands)
+        if (cmdManager.commands[c].name === name || cmdManager.commands[c].names.indexOf(name) > -1)
+            return cmdManager.commands[c];
+    return null;
+};
+
+// deprecated
 CmdUtils.renderTemplate = function (template, data) {
     if (_MANIFEST_V3)
         return template;
@@ -61,204 +78,6 @@ CmdUtils.reduceTemplate = function (items, f) {
     return items?.reduce((acc, v, i, arr) => acc + f(v, i, arr), "");
 }
 
-CmdUtils.CreateCommand = function CreateCommand(options) {
-   return cmdManager.createCommand(options);
-};
-
-CmdUtils.tabs = {
-    search(text, maxResults, callback) {
-        let matcher = new RegExp(text, "i");
-
-        chrome.tabs.query({}, tabs => {
-            let results = [];
-            for (let tab of tabs) {
-                let match = matcher.exec(tab.title) || matcher.exec(tab.url);
-                if (!match) continue;
-                tab.match = match;
-                results.push(tab);
-                if (maxResults && results.length >= maxResults) break;
-            }
-            callback(results);
-        });
-    }
-};
-
-// closes current tab
-CmdUtils.closeTab = function closeTab() {
-	chrome.tabs.query({active:true,currentWindow:true},function(tabs){
-        if (tabs && tabs[0]) 
-            chrome.tabs.remove(tabs[0].id, function() { });
-        else 
-            console.error("closeTab failed because 'tabs' is not set");
-	});
-};
-
-// returns active tabs URL if avaiable
-CmdUtils.getLocation = function getLocation() {
-    if (CmdUtils.activeTab && CmdUtils.activeTab.url)
-        return CmdUtils.activeTab.url;
-    else 
-        return ""; 
-};
-
-// opens new tab with provided url
-Utils.openUrlInBrowser = CmdUtils.addTab = function addTab(url, callback) {
-    let result = browser.tabs.create({ "url": url });
-
-    if (callback)
-        result.then(callback)
-
-    return result;
-};
-
-// gets json with xhr
-CmdUtils.ajaxGetJSON = function ajaxGetJSON(url, callback) {
-    var xhr = new XMLHttpRequest();
-    xhr.open("GET", url, true);
-    xhr.onreadystatechange = function() {
-        if (xhr.readyState == 4) {
-            var resp = JSON.parse(xhr.responseText);
-            callback(resp, xhr);
-        }
-    };
-    xhr.send();
-};
-
-// gets page with xhr
-CmdUtils.ajaxGet = function ajaxGet(url, callback) {
-    var xhr = new XMLHttpRequest();
-    xhr.open("GET", url, true);
-    xhr.onreadystatechange = function() {
-        if (xhr.readyState == 4) {
-            callback(xhr.responseText, xhr);
-        }
-    };
-    xhr.send();
-};
-
-// performs jQuery get and returns jqXHR that implements Promise 
-CmdUtils.get = function get(url) {
-	return jQuery.ajax({
-    	url: url,
-        async: true
-	});
-};
-
-// performs jQuery post and return jsXHR
-CmdUtils.post = function post(url, data) {
-	return jQuery.ajax({
-    	url: url,
-    	data: data,
-        async: true
-	});
-};
-
-// loads remote scripts into specified window (or background if not specified)
-CmdUtils.loadScripts = function loadScripts(url, callback, wnd=window) {
-    // this array will hold all loaded scripts into this window
-    wnd.loadedScripts = wnd.loadedScripts || [];
-    url = url || [];
-    if (url.constructor === String) url = [url];
-
-    if (typeof wnd.jQuery === "undefined") {
-        console.error("there's no jQuery at " + wnd + ".");
-        return false;
-    }
-    if (url.length === 0)
-        return callback();
-
-    let thisurl = url.shift();
-    let tempfunc = function(data, textStatus, jqXHR) {
-        return loadScripts(url, callback, wnd);
-    };
-    if (wnd.loadedScripts.indexOf(thisurl) == -1) {
-        console.log("loading :::: ", thisurl);
-        wnd.loadedScripts.push(thisurl);
-        wnd.jQuery.ajax({
-            url: thisurl,
-            dataType: 'script',
-            success: tempfunc,
-            async: true
-        });
-    }
-    else {
-        tempfunc();
-    }
-};
-
-CmdUtils.__nativeEval = async function(text) {
-    const key = crypto.randomUUID();
-    const pullURL = helperApp.url(`/pull_script/${key}`);
-
-    var rejecter;
-    var errorListener = error => {
-        if (error.filename?.startsWith(pullURL)) {
-            window.removeEventListener("error", errorListener);
-            rejecter(error.error)
-        }
-    }
-
-    text = `{\n${text}\n}`;
-    await helperApp.post("/push_script", {text, key});
-
-    const script = jQuery("<script>")
-        .attr({crossorigin: "anonymous"})
-        .prop({src: pullURL});
-
-    window.addEventListener("error", errorListener);
-
-    document.head.appendChild(script[0]);
-    script.remove();
-
-    return {error: new Promise((resolve, reject) => {
-        rejecter = reject;
-
-        setTimeout(() => {
-            window.removeEventListener("error", errorListener);
-            resolve(true);
-        }, 1000);
-    })};
-}
-
-CmdUtils.eval = _MANIFEST_V3? CmdUtils.__nativeEval: eval;
-
-CmdUtils.loadCSS = function(doc, id, file) {
-    if (!doc.getElementById(id)) {
-        let head = doc.getElementsByTagName('head')[0];
-        let link = doc.createElement('link');
-        link.id = id;
-        link.rel = 'stylesheet';
-        link.type = 'text/css';
-        link.href = file;
-        link.media = 'all';
-        head.appendChild(link);
-    }
-};
-
-CmdUtils.getActiveTab = function () {
-    return CmdUtils.activeTab;
-};
-
-// called when tab is switched or changed, updates selection and activeTab
-CmdUtils.updateActiveTab = async function () {
-    CmdUtils.activeTab = null;
-    ContextUtils.clearSelection();
-
-    try {
-        let tabs = await browser.tabs.query({active: true, currentWindow: true})
-        if (tabs.length) {
-            let tab = tabs[0];
-            if (tab.url.match('^blob://') || tab.url.match('^https?://') || tab.url.match('^file://')) {
-                CmdUtils.activeTab = tab;
-                await ContextUtils.getSelection(tab.id);
-            }
-        }
-    }
-    catch (e) {
-        console.error(e);
-    }
-};
-
 CmdUtils.getSelection = () => ContextUtils.selectedText;
 CmdUtils.getHtmlSelection = () => ContextUtils.selectedHtml;
 
@@ -270,20 +89,6 @@ CmdUtils.setSelection = function setSelection(replacementText) {
 
     if (CmdUtils.activeTab && CmdUtils.activeTab.id)
         return ContextUtils.setSelection(CmdUtils.activeTab.id, replacementText);
-};
-
-// for measuring time the input is changed
-CmdUtils.inputUpdateTime = performance.now();
-CmdUtils.timeSinceInputUpdate = function timeSinceInputUpdate() {
-	return (performance.now() - CmdUtils.inputUpdateTime) * 0.001;
-};
-
-// returns command with this name
-CmdUtils.getcmd = function getcmd(cmdname) {
-    for (let c in cmdManager.commands)
-        if (cmdManager.commands[c].name === cmdname || cmdManager.commands[c].names.indexOf(cmdname) > -1)
-            return cmdManager.commands[c];
-    return null;
 };
 
 // sets clipboard
@@ -314,7 +119,80 @@ CmdUtils.notify = function (message, title) {
     CmdUtils.lastNotification = title + "/" + message;
 };
 
-var displayMessage = CmdUtils.notify;
+export const displayMessage = CmdUtils.notify;
+
+// returns active tabs URL if available
+CmdUtils.getLocation = function getLocation() {
+    if (CmdUtils.activeTab?.url)
+        return CmdUtils.activeTab.url;
+    else 
+        return ""; 
+};
+
+// opens a new tab with the provided url
+Utils.openUrlInBrowser = CmdUtils.addTab = function addTab(url, callback) {
+    let result = browser.tabs.create({ "url": url });
+
+    if (callback)
+        result.then(callback)
+
+    return result;
+};
+
+CmdUtils.getActiveTab = function () {
+    return CmdUtils.activeTab;
+};
+
+CmdUtils.tabs = {
+    search(text, maxResults, callback) {
+        let matcher = new RegExp(text, "i");
+
+        chrome.tabs.query({}, tabs => {
+            let results = [];
+            for (let tab of tabs) {
+                let match = matcher.exec(tab.title) || matcher.exec(tab.url);
+                if (!match) continue;
+                tab.match = match;
+                results.push(tab);
+                if (maxResults && results.length >= maxResults) break;
+            }
+            callback(results);
+        });
+    }
+};
+
+// called when the popup is shown or a context menu command is selected
+CmdUtils._updateActiveTab = async function () {
+    CmdUtils.activeTab = null;
+    ContextUtils.clearSelection();
+
+    try {
+        let tabs = await browser.tabs.query({active: true, currentWindow: true})
+        if (tabs.length) {
+            let tab = tabs[0];
+            if (tab.url.match('^blob://') || tab.url.match('^https?://') || tab.url.match('^file://')) {
+                CmdUtils.activeTab = tab;
+                await ContextUtils.getSelection(tab.id);
+            }
+        }
+    }
+    catch (e) {
+        console.error(e);
+    }
+};
+
+CmdUtils.loadCSS = function(doc, id, file) {
+    if (!doc.getElementById(id)) {
+        let head = doc.getElementsByTagName('head')[0];
+        let link = doc.createElement('link');
+        link.id = id;
+        link.rel = 'stylesheet';
+        link.type = 'text/css';
+        link.href = file;
+        link.media = 'all';
+        head.appendChild(link);
+    }
+};
 
 // === {{{ CmdUtils.absUrl(data, baseUrl) }}} ===
 // Fixes relative URLs in {{{data}}} (e.g. as returned by Ajax calls).
@@ -664,9 +542,10 @@ CmdUtils.previewList.CSS = `\
   #preview-list > li:hover {outline: 1px solid;}
 `;
 
+// a fancy new object-based preview list with two lines of text per entry
 CmdUtils.previewList2 = function(block, items, fs, css) {
-    
     let lines = [];
+
     for (let i of items) {
         let html = "";
         let thumb = fs.thumb? fs.thumb(i): undefined;
@@ -753,48 +632,49 @@ CmdUtils.previewList2 = function(block, items, fs, css) {
     );
 };
 
-// Some legacy code
 
-(function ( $ ) {
-    $.fn.blankify = function( url ) {
-        return this.find("a").not('[href^="http"],[href^="//:"],[href^="mailto:"],[href^="#"]').each(function() {
-            $(this).attr("target", "_blank").attr('href', function(index, value) {
-                if (value.substr(0,1) !== "/") value = "/"+value;
-                return url + value;
-            });
-});
-        };
-}( jQuery ));
 
-// https://stackoverflow.com/questions/8498592/extract-hostname-name-from-string
-function url_domain(data) {
-    var    a      = document.createElement('a');
-           a.href = data;
-    return a.hostname;
-}
+// Some legacy code, subject to removal
 
-(function ( $ ) {
-    $.fn.loadAbs = function( url, complete ) {
-        var result = this;
-        return this.load(url, function() {
-            url = "http://"+url_domain( url );
-            result.find("a")
-                    .not('[href^="http"],[href^="//:"],[href^="mailto:"],[href^="#"]')
-                    .attr("target", "_blank")
-                    .attr('href', function(index, value) {
-                if (typeof value === "undefined") return url;
-                if (value.substr(0,1) !== "/") value = "/" + value;
-                return url + value;
-            });
-            result.find("img")
-                    .not('[src^="http"],[src^="//:"],[src^="mailto:"],[src^="#"]')
-                    .attr('src', function(index, value) {
-                if (typeof value === "undefined") return url;
-                if (value.substr(0,1) !== "/") value = "/" + value;
-                return url + value;
-            });
-            if (typeof complete === 'function') complete();
-        });
+// loads remote scripts into specified window (or background if not specified)
+CmdUtils.loadScripts = function loadScripts(url, callback, wnd=window) {
+    // this array will hold all loaded scripts into this window
+    wnd.loadedScripts = wnd.loadedScripts || [];
+    url = url || [];
+    if (url.constructor === String) url = [url];
+
+    if (typeof wnd.jQuery === "undefined") {
+        console.error("there's no jQuery at " + wnd + ".");
+        return false;
+    }
+    if (url.length === 0)
+        return callback();
+
+    let thisurl = url.shift();
+    let tempfunc = function(data, textStatus, jqXHR) {
+        return loadScripts(url, callback, wnd);
     };
-}( jQuery ));
+    if (wnd.loadedScripts.indexOf(thisurl) == -1) {
+        console.log("loading :::: ", thisurl);
+        wnd.loadedScripts.push(thisurl);
+        wnd.jQuery.ajax({
+            url: thisurl,
+            dataType: 'script',
+            success: tempfunc,
+            async: true
+        });
+    }
+    else {
+        tempfunc();
+    }
+};
+
+$.fn.blankify = function (url) {
+    return this.find("a").not('[href^="http"],[href^="//:"],[href^="mailto:"],[href^="#"]').each(function () {
+        $(this).attr("target", "_blank").attr('href', function (index, value) {
+            if (value.substr(0, 1) !== "/") value = "/" + value;
+            return url + value;
+        });
+    });
+};
 
