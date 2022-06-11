@@ -1,3 +1,9 @@
+export function delegate (object, method) {
+    return function () {
+        return method.apply(object, arguments);
+    }
+}
+
 export function merge(to, from) {
     for (const [k, v] of Object.entries(from)) {
         if (!to.hasOwnProperty(k))
@@ -25,25 +31,6 @@ export function injectModule(namespace) {
         globalThis[key] = namespace[key];
 }
 
-async function executeScriptFileMV3 (tabId, options) {
-    const target = {tabId};
-
-    if (options.frameId)
-        target.frameIds = [options.frameId];
-
-    if (options.allFrames)
-        target.allFrames = options.allFrames;
-
-    return browser.scripting.executeScript({target, files: [options.file]});
-}
-
-export function executeScriptFile(...args) {
-    if (_MANIFEST_V3)
-        return executeScriptFileMV3(...args)
-    else
-        return browser.tabs.executeScript(...args);
-}
-
 export async function fetchWithTimeout(resource, options = {}) {
     const { timeout = 10000 } = options;
 
@@ -57,24 +44,4 @@ export async function fetchWithTimeout(resource, options = {}) {
     clearTimeout(id);
 
     return response;
-}
-
-export async function askCSRPermission() {
-    if (_MANIFEST_V3)
-        return browser.permissions.request({origins: ["<all_urls>"]});
-
-    return true;
-}
-
-export async function hasCSRPermission(verbose = true) {
-    if (_MANIFEST_V3) {
-        const response = await browser.permissions.contains({origins: ["<all_urls>"]});
-
-        if (!response && verbose)
-            displayMessage("Please, enable optional add-on permissions at the Firefox add-on settings page (about:addons).");
-
-        return response;
-    }
-
-    return true;
 }

@@ -1,6 +1,6 @@
 import {settings} from "../settings.js";
 import {NAMESPACE_BROWSER, NAMESPACE_ISHELL, NAMESPACE_UTILITY} from "./namespaces.js";
-import {executeScriptFile} from "../utils.js";
+import {executeScriptFile} from "../utils_browser.js";
 
 CmdUtils.CreateCommand({
     names: ["change-shell-settings", "change-shell-options"],
@@ -72,6 +72,24 @@ CmdUtils.CreateCommand({
 });
 
 CmdUtils.CreateCommand({
+    names: ["debug-mode"],
+    arguments: [{role: "object", nountype: ["on", "off"] , label: "state"}],
+    uuid: "810CFA30-3A39-4123-B140-B69C50A2D008",
+    description: "Switches the debug mode or on off.",
+    _namespace: NAMESPACE_ISHELL,
+    icon: "/ui/icons/debug.png",
+    //preview: "Debug the popup window in a separate tab.",
+    execute: async function({OBJECT}) {
+        if (OBJECT?.text)
+            await settings.debug_mode(OBJECT.text === "on");
+        else
+            await settings.debug_mode(!settings.debug_mode());
+
+        chrome.runtime.reload();
+    }
+});
+
+CmdUtils.CreateCommand({
     names: ["debug-popup"],
     uuid: "6E788674-71FF-486E-AAD4-7D241670C0FC",
     description: "Debug the popup window in a separate tab.",
@@ -79,7 +97,7 @@ CmdUtils.CreateCommand({
     _hidden: true,
     icon: "/ui/icons/debug.png",
     preview: "Debug the popup window in a separate tab.",
-    execute: function() {CmdUtils.addTab("popup.html")}
+    execute: function() {CmdUtils.addTab("/ui/popup.html")}
 });
 
 CmdUtils.CreateCommand({
@@ -99,9 +117,7 @@ cmdAPI.createCommand({
     uuid: "C6D50448-A345-4FDC-8F4D-F724FAA2D7C2",
     icon: "/ui/icons/properties.png",
     _namespace: NAMESPACE_ISHELL,
-    arguments: [{role: "object",     nountype: noun_arb_text, label: "value"},
-                {role: "alias",      nountype: noun_arb_text, label: "key"}, // as
-    ],
+
     description: "Adds a new dynamic setting.",
     help: `<span class="syntax">Syntax</span>
             <ul class="syntax">

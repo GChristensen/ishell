@@ -1,14 +1,13 @@
 // A manifest for dynamically loaded command scripts that require preprocessing
 // The only supported property is "files"
-// The file named "example.js" is always ignored for performance reasons
 {
   "files": [
     {
-      "path": "example.js", // the path should be relative to the "commands" folder
-      "syntax": "class"     // supported syntaxes are "class" and "module"
+      "path": "lingvo.js",  // the path should be relative to the "commands" folder
+      "syntax": "module"    // supported values of the "syntax" property are "class" and "module"
     },                      // modules should export all annotated items and could be loaded without
-    {                       // the helper app in the MV3 version of add-on, but not support metaclasses
-      "path": "lingvo.js",
+    {                       // the helper app in the MV3 version of the add-on, but do not support metaclasses
+      "path": "history.js",
       "syntax": "module"
     }
   ]

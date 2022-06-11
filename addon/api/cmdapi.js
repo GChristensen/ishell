@@ -1,8 +1,9 @@
 import {settings} from "../settings.js";
 import {helperApp} from "../helper_app.js";
-import {CmdUtils} from "./cmdutils.js";
 import {cmdManager} from "../cmdmanager.js";
 import {contextMenuManager} from "../ui/contextmenu.js";
+import {delegate} from "../utils.js";
+import {nativeEval} from "../utils_browser.js";
 
 export const cmdAPI = {
     // these classes are not part of the original Ubiquity API and are not exposed into the global namespace,
@@ -44,12 +45,6 @@ export const cmdAPI = {
 };
 
 export const R = cmdAPI.reduceTemplate;
-
-function delegate (object, method) {
-    return function () {
-        return method.apply(object, arguments);
-    }
-}
 
 cmdAPI.makeSugg = delegate(NounUtils, NounUtils.makeSugg);
 cmdAPI.matchScore = delegate(NounUtils, NounUtils.matchScore);
@@ -120,36 +115,3 @@ cmdAPI.fetchAborted = function(error) {
 };
 
 
-async function nativeEval(text) {
-    const key = crypto.randomUUID();
-    const pullURL = helperApp.url(`/pull_script/${key}`);
-
-    var rejecter;
-    var errorListener = error => {
-        if (error.filename?.startsWith(pullURL)) {
-            window.removeEventListener("error", errorListener);
-            rejecter(error.error)
-        }
-    }
-
-    text = `{\n${text}\n}`;
-    await helperApp.post("/push_script", {text, key});
-
-    const script = jQuery("<script>")
-        .attr({crossorigin: "anonymous"})
-        .prop({src: pullURL});
-
-    window.addEventListener("error", errorListener);
-
-    document.head.appendChild(script[0]);
-    script.remove();
-
-    return {error: new Promise((resolve, reject) => {
-            rejecter = reject;
-
-            setTimeout(() => {
-                window.removeEventListener("error", errorListener);
-                resolve(true);
-            }, 1000);
-        })};
-}

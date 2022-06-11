@@ -376,6 +376,9 @@ function createBookmarkList(nodes, pblock, path) {
                  .preview-list-item > span:nthchild(2) {
                     flex 1 1 auto;
                  }
+                 .preview-item-key {
+                    align-self: center;
+                 }
                  .preview-item-text {
                     color: #45BCFF;
                     white-space: nowrap;
@@ -395,6 +398,7 @@ function createBookmarkList(nodes, pblock, path) {
                     margin-right: 5px;
                     display: inline-block;
                     flex: 0 1 auto;
+                    align-self: center;
                  }
                  .cnt {
                   flex: 1 1 auto;

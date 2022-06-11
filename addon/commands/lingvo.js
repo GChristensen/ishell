@@ -1,7 +1,3 @@
-// Use lingvolive.com online service with the Firefox iShell extension
-
-// (C) 2010-2022 g/christensen (gchristnsn@gmail.com)
-
 import {NAMESPACE_TRANSLATION} from "./namespaces.js";
 
 /**

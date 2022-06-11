@@ -116,7 +116,7 @@ CmdUtils.CreateCommand({
 
         if (instrument === "")
             instrument = (function () {
-                for (first in resurrect_archiveServices)
+                for (var first in resurrect_archiveServices)
                     break;
                 return first;
             })();
@@ -134,7 +134,7 @@ CmdUtils.CreateCommand({
 
         if (instrument == "")
             instrument = (function () {
-                for (first in resurrect_archiveServices)
+                for (var first in resurrect_archiveServices)
                     break;
                 return first;
             })();

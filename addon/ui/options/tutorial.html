@@ -251,7 +251,7 @@ class SayHello {
   },
 
   preview(pblock) {
-    var date = this._date();
+    const date = this._date();
     pblock.innerHTML = `Inserts today's date: "&lt;i&gt;${date}&lt;/i&gt;"`;
   },
 
@@ -277,14 +277,15 @@ class SayHello {
     from the provided array of items:
 </p>
 
-<pre><code data-language="javascript">`<ul>${
+<pre><code data-language="javascript">const html =
+  `<ul>${
     R(items, item =>
-        `<li>${item.text}:
-            <ul>
-              ${R(items.subitems, subitem => `<li>${subitem.text}</li>`)}
-            </ul>
-        </li>`)
-}</ul>`
+      `<li>${item.text}:
+        <ul>
+          ${R(item.subitems, subitem => `<li>${subitem.text}</li>`)}
+        </ul>
+      </li>`)
+  }</ul>`;
 </code></pre>
 
 <h3><span id="Networking_calls_and_placeholder_previews">Networking calls and placeholder previews</span>
@@ -363,7 +364,7 @@ class SayHello {
     pblock.innerHTML = "Will echo: " + args.object.text;
   },
   execute(args) {
-    var msg = args.object.text + "... " + args.object.text + "......";
+    const msg = args.object.text + "... " + args.object.text + "......";
     cmdAPI.notify(msg);
   },
 });</code></pre>
@@ -723,7 +724,7 @@ arguments: [{role: "object",
   name: "insert-email",
   arguments: {modifier: noun_type_contact},
   preview: "Inserts someone's email address.",
-  execute: function(args) {
+  execute(args) {
     cmdAPI.setSelection(args.modifier.html);
   },
 });</code></pre>
@@ -793,9 +794,9 @@ cmdAPI.createCommand({
                nountype: noun_arb_text,
                label: "url to shorten"}],
   execute(args) {
-    var baseUrl = "http://tinyurl.com/api-create.php";
-    var params = {url: args.object.text};
-    jQuery.get(baseUrl, params, function(tinyUrl) {
+    const baseUrl = "http://tinyurl.com/api-create.php";
+    const params = {url: args.object.text};
+    jQuery.get(baseUrl, params, tinyUrl => {
       cmdAPI.setSelection(tinyUrl);
     });
   },
@@ -923,7 +924,7 @@ cmdAPI.createCommand({
   },
 
   preview(pblock, args) {
-    var tabName = args.object.text;
+    const tabName = args.object.text;
     if (tabName)
       pblock.innerHTML = `Changes to &lt;strong&gt;${tabName}&lt;/strong&gt; tab.`;
     else

@@ -87,25 +87,23 @@ CmdUtils.makeSearchCommand({
             dataType: "json",
             success: function youtube_success(data) {
                 pblock.innerHTML =
-                    `  <p>
+                    `<p>
                        Found <b>${data.pageInfo.totalResults}</b> YouTube Videos matching <b>${summary}</b>
-                      </p>
-                      ${data.items.reduce((acc, entry, entry_index) => acc +
-                      `<div style="clear: both; font-size: small">
-                       <kbd>${(entry_index < 35) ? (entry_index + 1).toString(36) : "-"}</kbd>.
-                       <a style="font-size: small; font-weight:bold"
-                          accessKey="${(entry_index < 35) ? (entry_index + 1).toString(36) : "-"}"
-                          href="https://www.youtube.com/watch?v=${entry.id.videoId}">
-                       <img style="float:left; margin: 0 10px 5px 0; border: none"
-                            src="${entry.snippet.thumbnails.default.url}" />
-                       ${entry.snippet.title}
-                       </a>
-                       <p>
-                          ${entry.snippet.description}
-                       </p>
-                      </div>`,
-                        "")
-                      }
+                     </p>
+                     ${R(data.items, (entry, entry_index) => 
+                       `<div style="clear: both; font-size: small">
+                         <kbd>${(entry_index < 35) ? (entry_index + 1).toString(36) : "-"}</kbd>.
+                         <a style="font-size: small; font-weight:bold"
+                            accessKey="${(entry_index < 35) ? (entry_index + 1).toString(36) : "-"}"
+                            href="https://www.youtube.com/watch?v=${entry.id.videoId}">
+                           <img style="float:left; margin: 0 10px 5px 0; border: none"
+                                src="${entry.snippet.thumbnails.default.url}" />
+                           ${entry.snippet.title}
+                         </a>
+                         <p>
+                           ${entry.snippet.description}
+                         </p>
+                        </div>`)}
                     `;
             },
             error: function youtube_error({statusText}) {
@@ -172,35 +170,35 @@ CmdUtils.makeSearchCommand({
 
                 pblock.innerHTML =
                     `<style>
-                .navi, .thumbs {text-align: center}
-                .prev, .next {position: absolute}
-                .navi {font-weight: bold}
-                .prev {left:  0}
-                .next {right: 0}
-                .thumbs a {
-                  display: inline-block; vertical-align: top; position: relative;
-                  margin: 0 1px 2px; padding: 0;
-                }
-                .thumbs a::after {
-                  content: attr(accesskey);
-                  position: absolute; top: 0; left: 0;
-                  padding: 0 4px 2px 3px; border-bottom-right-radius: 6px;
-                  opacity: 0.5; color: #fff; background-color: #000;
-                  font:bold medium monospace;
-                }
-                img {
-                    max-width: 150px;
-                    max-height: 150px;
-                }
-                </style>
-                <div class="navi">
-                  ${range}
-                  <input type="button" class="prev" value="&lt;" accesskey="&lt;"/>
-                  <input type="button" class="next" value="&gt;" accesskey="&gt;"/>
-                </div>
-                <!--div class="info">${info}</div-->
-                <div class="thumbs">${images.map(a => a.outerHTML).reduce((acc, h) => acc + h, "")}</div>
-                `;
+                        .navi, .thumbs {text-align: center}
+                        .prev, .next {position: absolute}
+                        .navi {font-weight: bold}
+                        .prev {left:  0}
+                        .next {right: 0}
+                        .thumbs a {
+                          display: inline-block; vertical-align: top; position: relative;
+                          margin: 0 1px 2px; padding: 0;
+                        }
+                        .thumbs a::after {
+                          content: attr(accesskey);
+                          position: absolute; top: 0; left: 0;
+                          padding: 0 4px 2px 3px; border-bottom-right-radius: 6px;
+                          opacity: 0.5; color: #fff; background-color: #000;
+                          font:bold medium monospace;
+                        }
+                        img {
+                            max-width: 150px;
+                            max-height: 150px;
+                        }
+                     </style>
+                     <div class="navi">
+                       ${range}
+                       <input type="button" class="prev" value="&lt;" accesskey="&lt;"/>
+                       <input type="button" class="next" value="&gt;" accesskey="&gt;"/>
+                     </div>
+                     <!--div class="info">${info}</div-->
+                     <div class="thumbs">${R(images.map(a => a.outerHTML),h => h)}</div>
+                    `;
 
                 if (!data.start)
                     pblock.querySelector(".prev").disabled = true
@@ -337,20 +335,20 @@ CmdUtils.CreateCommand({
 
                 previewBlock.innerHTML =
                     `<style>
-                    .wikipedia { margin: 0 }
-                    .title { clear: left; margin-top: 0.4em }
-                    .title a { font-weight: bold }
-                    .key:after {content: ":"}
-                    .summary { margin: 0.2em 0 0 1em; font-size: smaller }
-                    .thumbnail {
-                        float: left; max-width: 80px; max-height: 80px; background-color: white;
-                        margin-right: 0.2em;
-                    }
+                        .wikipedia { margin: 0 }
+                        .title { clear: left; margin-top: 0.4em }
+                        .title a { font-weight: bold }
+                        .key:after {content: ":"}
+                        .summary { margin: 0.2em 0 0 1em; font-size: smaller }
+                        .thumbnail {
+                            float: left; max-width: 80px; max-height: 80px; background-color: white;
+                            margin-right: 0.2em;
+                        }
                     </style>
                     <dl class="wikipedia">
                         ${previewData.foundMessage}
                         ${previewData.results && previewData.results.length
-                            ? previewData.results.reduce((acc, article) => acc + 
+                            ? R(previewData.results, article => 
                                 `<dt class="title">
                                     <span class="key">${article.key}</span>
                                     <a href="${generateWikipediaLink(article.title)}" accesskey="${article.key}"
@@ -358,7 +356,7 @@ CmdUtils.CreateCommand({
                                  </dt>
                                  <dd class="summary" wikiarticle="${article.title}">
                                     <i>${previewData.retrievingArticleSummary}</i>
-                                 </dd>`, "")
+                                 </dd>`)
                             : `<p className='error'>${previewData.noArticlesFound}</p>`
                         }
                     </dl>`;
@@ -410,138 +408,6 @@ CmdUtils.CreateCommand({
     }
 });
 
-function dayToDate(day) {
-    let date;
-    switch (day) {
-        case "today":
-            date = new Date();
-            date.setHours(0,0,0,0);
-            break;
-        case "yesterday":
-            date = new Date();
-            date.setHours(0,0,0,0);
-            date.setDate(date.getDate() - 1);
-            break;
-        case "week":
-            date = new Date();
-            date.setHours(0,0,0,0);
-            date.setDate(date.getDate() - 7);
-            break;
-        case "month":
-            date = new Date();
-            date.setHours(0,0,0,0);
-            date.setDate(date.getDate() - 30);
-            break;
-        default:
-            if (day)
-                date = new Date(day + "T00:00:00");
-            else {
-                date = new Date();
-                date.setHours(0,0,0,0);
-                date.setDate(date.getDate() - 30);
-            }
-    }
-    return date;
-}
-
-
-CmdUtils.CreateCommand({
-    name: "history",
-    uuid: "128DEB45-F187-4A1F-A74D-566EDAE8DD0F",
-    arguments: [{role: "object",   nountype: noun_arb_text, label: "title or url"},
-        {role: "subject",  nountype: /[^\s]+/, label: "url"},
-        {role: "modifier", nountype: noun_type_history_date, label: "day"},
-        {role: "goal",     nountype: noun_type_history_date, label: "day"},
-        {role: "source",   nountype: noun_type_history_date, label: "day"},
-        {role: "cause",    nountype: noun_type_number, label: "amount"}],
-    description: "Browsing history search.",
-    help:  `<span class="syntax">Syntax</span>
-        <ul class="syntax">
-            <li><b>history</b> [<i>filter</i>] [<b>for</b> <i>domain</i>] [<b>of</b> <i>day</i>] [<b>from</b> <i>day</i>] [<b>to</b> <i>day</i>] [<b>by</b> <i>amount</i>]</li>
-        </ul>
-        <span class="arguments">Arguments</span><br>
-        <ul class="syntax">
-            <li>- <i>filter</i> - arbitrary text, filters history items by title or URL if specified.</li>
-        </ul>
-        <ul class="syntax">
-            <li>- <i>domain</i> - additional filter by URL.</li>
-        </ul>
-        <ul class="syntax">
-            <li>- <i>day</i> - {<b>today</b> | yesterday | week | month | YYYY-MM-DD | MM-DD | DD | D}, specifies date to search history for. </li>
-        </ul>
-        <ul class="syntax">
-            <li>- <i>amount</i> - number, specifies the maximum amount of listed items.</li>
-        </ul>
-        <span class="arguments">Examples</span>
-        <ul class="syntax">
-            <li><b>history</b> <i>books</i> <b>from</b> <i>01</i> <b>to</b> <i>10</i></li>
-            <li><b>history</b> <i>news</i> <b>for</b> <i>example.com</i> <b>of</b> <i>week</i> <b>by</b> <i>50</i></li>
-        </ul>`,
-    icon: "/ui/icons/history.ico",
-    previewDelay: 1000,
-    _namespace: "Browser",
-    preview: function(pblock, args, {Bin}) {
-        let maxResults = args.cause && args.cause.data
-            ? args.cause.data
-            : settings.max_history_items() || 20;
-
-        let forDomain;
-
-        if (args.subject && args.subject.text)
-            forDomain = args.subject.text;
-
-        let startDate = dayToDate(args.modifier.text);
-
-        if (args.source && args.source.text)
-            startDate = dayToDate(args.source.text);
-
-        let endDate;
-        if (startDate) {
-            if (args.modifier && args.modifier.text === "yesterday") {
-                endDate = new Date(startDate);
-                endDate.setDate(endDate.getDate() + 1);
-            }
-            else
-                endDate = new Date();
-        }
-
-        if (args.goal && args.goal.text)
-            endDate = dayToDate(args.goal.text);
-
-        chrome.history.search({
-                text: args.object.text,
-                startTime: startDate,
-                endTime: endDate,
-                maxResults: forDomain? maxResults * 2: maxResults
-            },
-            (historyItems) => {
-
-                if (!historyItems || historyItems.length === 0) {
-                    pblock.text("History is empty.");
-                }
-                else {
-                    if (forDomain) {
-                        let matcher = new RegExp(forDomain, "i");
-                        historyItems = historyItems.filter(hi => !!matcher.exec(hi.url))
-                    }
-
-                    //historyItems = historyItems.slice(0, maxResults);
-
-                    CmdUtils.previewList2(pblock, historyItems, {
-                        text: ((h) => h.url && !h.title? h.url: h.title),
-                        subtext: ((h) => h.url && !h.title? null: h.url),
-                        action: (h) =>  chrome.tabs.create({"url": h.url, active: false})
-                    });
-                }
-            });
-
-    },
-    execute: function(args, {Bin}) {
-    }
-});
-
-
-
 const LIBGEN_HOST = "http://libgen.is/";
 const LIBGEN_HOST2 = "http://libgen.io/";
 
@@ -579,12 +445,12 @@ var libgenSearch = {
         let data = [];
         let $rows = $(table).children("tbody").children("tr").not(":first");
 
-        for (i=0; i<$rows.length; i++){
+        for (let i=0; i<$rows.length; i++){
             let $row = $($rows)[i];
             let $cols = $($row).children("td");
-            entry = new Object();
+            let entry = new Object();
             entry.mirrors = [];
-            for (j=0;j<$cols.length; j++){
+            for (let j=0;j<$cols.length; j++){
                 switch(j) {
                     case 1:
                         entry.authors = $cols[j].innerText;

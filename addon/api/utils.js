@@ -404,17 +404,6 @@ Utils.makeBin = async function(uuid, callback) {
 ///////////////////////////////////////////////////////////////////////////////
 
 Utils.easterListener = async function(input) {
-    if (input.trim().toLowerCase() === "enable debug mode") {
-        await settings.debug_mode(true);
-        chrome.runtime.reload();
-        return true;
-    }
-    else if (input.trim().toLowerCase() === "disable debug mode") {
-        await settings.debug_mode(false);
-        chrome.runtime.reload();
-        return true;
-    }
-
     if (input.trim().toLowerCase() === "enable more commands") {
         await settings.enable_more_commands(true);
         chrome.runtime.reload();

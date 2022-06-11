@@ -175,7 +175,7 @@ export const noun_type_email = {
     }
 };
 
-const __STORED_EMAIL_UUID = "--stored-email-items";
+export const __STORED_EMAIL_UUID = "--stored-email-items";
 export const noun_type_contact = {
     label: "email",
     noExternalCalls: true,
@@ -193,7 +193,6 @@ export const noun_type_contact = {
 
             let textSugg;
             let matcher = new RegExp(text, "i");
-
 
             let matchingItems = contacts.map(c => ({email: c})).filter(c => {
                 c.match = matcher.exec(c.email);

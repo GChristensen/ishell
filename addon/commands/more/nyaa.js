@@ -19,7 +19,7 @@ import {MORE_COMMANDS} from "./common.js";
          return e => {
              e.preventDefault();
              let link = e.target.parentNode;
-             chrome.runtime.sendMessage("torrent-add@firefox", {
+             chrome.runtime.sendMessage("torrent-add@gchristensen.github.io", {
                  type: "ADD_TORRENT",
                  url: link.href,
                  folder: category

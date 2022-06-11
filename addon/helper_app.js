@@ -1,4 +1,4 @@
-import {hasCSRPermission} from "./utils.js";
+import {hasCSRPermission} from "./utils_browser.js";
 
 class HelperApp {
     constructor() {
