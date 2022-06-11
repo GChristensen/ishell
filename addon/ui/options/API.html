@@ -28,7 +28,7 @@
 <h2><a id="user-content-shell-api-reference" class="anchor" aria-hidden="true"
        href="#shell-api-reference"></a>iShell API Reference</h2>
 
-<p>Currently iShell supports both the modern <code>cmdAPI</code> namespace and legacy
+<p>Currently, iShell supports both the modern <code>cmdAPI</code> namespace and legacy
     <code>CmdUtils</code> and <code>Utils</code> namespaces from Ubiquity API.</p>
 
 
@@ -47,13 +47,13 @@
         </li>
         <li><strong>execute</strong> - the function which gets run when the user executes your
             command. If your command takes arguments (see below), your execute method will be passed
-            an dictionary object containing the arguments assigned by the parser.
+            a dictionary object containing the arguments assigned by the parser.
         </li>
     </ul>
 
     <p>The following properties are optional but strongly recommended:</p>
     <ul>
-        <li><strong>uuid</strong> (<code>@uuid</code>) - an unique string, such as an URL of the
+        <li><strong>uuid</strong> (<code>@uuid</code>) - a unique string, such as an URL of the
             command homepage.
         </li>
         <li><strong>description</strong> (<code>@description</code>) - an XHTML string containing a
@@ -75,7 +75,7 @@
             (favicon-sized) to be displayed alongside the name of your command in the interface.
         </li>
         <li><strong>author</strong>/<strong>authors</strong>, <strong>contributor</strong>/<strong>contributors</strong>
-            (<code>@author</code>) - a plain text or dictionary object (which can have
+            (<code>@author</code>) - a plain text or dictionary object (which can have the
             <strong>name</strong>, <strong>email</strong>, and <strong>homepage</strong> properties,
             all plain text) describing the command's author/contributor. Can be an array of them if
             multiple.
@@ -84,7 +84,7 @@
             homepage, if any.
         </li>
         <li><strong>license</strong> (<code>@license</code>) - a string naming the license under
-            which your command is distributed, for example <strong>"MPL"</strong>.
+            which your command is distributed, for example, <strong>"MPL"</strong>.
         </li>
         <li><strong>load</strong> - function, called exactly once after iShell is loaded.</li>
         <li><strong>init</strong> - function, called each time after iShell popup window is shown.
@@ -104,7 +104,7 @@
                 <li><b>text</b> - sets <strong>pblock.innerHTML</strong> by adding the same margins
                     as the displayed description of the command has.
                 </li>
-                <li><b>error</b> - displays error message in the same way as the <b>text</b> method
+                <li><b>error</b> - displays an error message in the same way as the <b>text</b> method
                     but in red color.
                 </li>
             </ul>
@@ -126,8 +126,8 @@
 <p class="legacy-name">Legacy name: CmdUtils.makeSearchCommand</p>
 <blockquote>
     <p>A specialized version of <strong>cmdAPI.createCommand()</strong>. This lets you make commands
-        that interface with search engines, without having to write so much boilerplate code. Also
-        see <a href="https://wiki.mozilla.org/Labs/Ubiquity/Writing_A_Search_Command"
+        that interface with search engines, without having to write so much boilerplate code. See also
+        <a href="https://wiki.mozilla.org/Labs/Ubiquity/Writing_A_Search_Command"
                rel="nofollow">https://wiki.mozilla.org/Labs/Ubiquity/Writing_A_Search_Command</a>.
     </p>
     <p><strong>options</strong> is same as the argument of <strong>cmdAPI.createCommand()</strong>,
@@ -139,7 +139,7 @@
             which will be replaced with the user's search term to generate a URL that should point
             to the correct page of search results. (We're assuming that the user's search term
             appears in the URL of the search results page, which is true for most search engines.)
-            For example: <a href="http://www.google.com/search?q=%7BQUERY%7D" rel="nofollow">http://www.google.com/search?q={QUERY}</a>
+            For example <a href="http://www.google.com/search?q=%7BQUERY%7D" rel="nofollow">http://www.google.com/search?q={QUERY}</a>
         </li>
     </ul>
     <p>If not specified, <strong>options.name</strong>, <strong>options.icon</strong>, <strong>options.description</strong>,
@@ -158,19 +158,19 @@
             user has not provided a search string.
         </li>
         <li>
-            <strong>charset</strong> - a string specifying the character set of query (currently not
+            <strong>charset</strong> - a string specifying the character set of the query (currently not
             implemented in iShell).
         </li>
         <li>
             <strong>parser</strong> - generates keyboard navigatable previews by parsing the search
-            results. It is passed as an object containing following properties. The ones marked as
-            <em>path</em> expect either a jQuery selector string, a JSON path string (like <strong>"items.url"</strong>).
+            results. It is passed as an object containing the following properties. The ones marked as
+            <em>path</em> expect either a jQuery selector string, or a JSON path string (like <strong>"items.url"</strong>).
             Each of them can also be a filter function that receives a parent context and returns a
             result of the same type.
             <ul>
                 <li><strong>parser.type</strong> - a string that's passed to
                     <strong>jQuery.ajax()</strong>'s <strong>dataType</strong> parameter when
-                    requesting. If <strong>"json"</strong> is specified, the parser expects JSON a
+                    requesting. If <strong>"json"</strong> is specified, the parser expects a JSON
                     path in the form: "object1.object2.property". CSS selectors are expected in the
                     case of <strong>"html"</strong>.
                 </li>
@@ -187,7 +187,7 @@
                     <strong>&lt;a&gt;</strong>/<strong>&lt;img&gt;</strong> if jQuery mode.
                 </li>
                 <li><strong>parser.url</strong> / <strong>parser.postData</strong> - specifies
-                    another versions of
+                    another version of
                     <strong>options.url</strong>/<strong>options.postData</strong>, in the case when
                     a different request set is used for preview.
                 </li>
@@ -242,7 +242,7 @@
 <p class="legacy-name">Legacy name: CmdUtils.previewAjax</p>
 <blockquote>
     <p>Does an asynchronous request to a remote web service. It is used just like <strong>jQuery.ajax()</strong>,
-        which is documented at <a href="https://api.jquery.com/jQuery.Ajax" target="_blank">here</a>.<br>
+        which is documented <a href="https://api.jquery.com/jQuery.Ajax" target="_blank">here</a>.<br>
         The difference is that <strong>cmdAPI.previewAjax()</strong> is designed to handle command
         previews, which can be canceled by a user action between the time it is requested and the
         time it displays. If the preview is canceled, no callbacks in the options object will be
@@ -258,8 +258,8 @@
     <p>Does an asynchronous request to a remote web service. It is used just like <b>jQuery.get()/jQuery.post()</b>,
         which is documented <a href="https://api.jquery.com/jQuery.get"
                                target="_blank">here</a>.<br> The difference is that <b>previewGet()/previewPost()</b>
-        is designed to handle command previews, which can be cancelled by a user action between the
-        time it is requested and the time it displays. If the preview is cancelled, the given
+        is designed to handle command previews, which can be canceled by a user action between the
+        time it is requested and the time it displays. If the preview is canceled, the given
         callback will not be called.</p>
 </blockquote>
 
@@ -273,11 +273,11 @@
     <ul>
         <li><strong>block</strong> is the DOM element the list will be placed into.</li>
         <li><strong>htmls</strong> is the array/dictionary of HTML strings to be listed.</li>
-        <li><strong>callback(id, ev)</strong> is the function called when one of the list item
+        <li><strong>callback(id, ev)</strong> is the function called when one of the list items
             clicked or selected.
             <ul>
-                <li><strong>id</strong> : one of the keys of <strong>htmls</strong></li>
-                <li><strong>ev</strong> : the event object</li>
+                <li><strong>id</strong>: one of the keys of <strong>htmls</strong></li>
+                <li><strong>ev</strong>: the event object</li>
             </ul>
         </li>
         <li><strong>css</strong> is an optional CSS string inserted along with the list.</li>
@@ -299,26 +299,26 @@
         <ul>
             <li><strong>text: function(item)</strong> should return the main list item text.
                 <ul>
-                    <li><strong>item</strong> : an object from the items array.</li>
+                    <li><strong>item</strong>: an object from the items array.</li>
                 </ul>
             </li>
             <li><strong>subtext: function(item)</strong> should return the secondary list item text
                 displayed in small font.
                 <ul>
-                    <li><strong>item</strong> : an object from the items array.</li>
+                    <li><strong>item</strong>: an object from the items array.</li>
                 </ul>
             </li>
             <li><strong>thumb: function(item)</strong> should return the url of thumbnail image
                 (optional).
                 <ul>
-                    <li><strong>item</strong> : an object from the items array.</li>
+                    <li><strong>item</strong>: an object from the items array.</li>
                 </ul>
             </li>
             <li><strong>action: function(item, ev)</strong> is the function called when one of the
                 list items is clicked or selected.
                 <ul>
-                    <li><strong>item</strong> : an object from the items array.</li>
-                    <li><strong>ev</strong> : the event object.</li>
+                    <li><strong>item</strong>: an object from the items array.</li>
+                    <li><strong>ev</strong>: the event object.</li>
                 </ul>
             </li>
         </ul>
@@ -342,12 +342,12 @@
     </ul>
 </blockquote-->
 
-<h3><a id="user-content-cmdutilsreducetemplatetemplate-data" class="anchor" aria-hidden="true"
+<h3><a id="user-content-cmdutilsreducetemplate" class="anchor" aria-hidden="true"
        href="#cmdutilsreducetemplatetemplate-data"></a>cmdAPI.reduceTemplate(array, func)</h3>
 <blockquote>
     <p>Also called <strong>R</strong> in the global namespace. Reduces the given
-        <strong>array</strong> by concatenating the string values returned by <strong>func</strong>
-        applied to the array items. Useful for the generation of HTML lists by utilizing JavaScript
+        <strong>array</strong> by concatenating the string values returned by the <strong>func</strong>
+        applied to the array items. Useful for the generation of HTML lists with JavaScript
         template literals.
     </p>
     The function passed through the <strong>func</strong> parameter has the following arguments:
@@ -370,7 +370,7 @@
             or a jQuery/DOM object.
         </li>
         <li>
-            <strong>baseUrl</strong> is the URL used for base.
+            <strong>baseUrl</strong> is the URL used for the base.
         </li>
     </ul>
 </blockquote>
@@ -470,19 +470,19 @@
 <p class="legacy-name">Legacy name: NounUtils.makeSugg</p>
 <blockquote>
     <p>
-        Creates a suggestion object used by parser to make suggestions displayed at the popup window.
+        Creates a suggestion object used by the parser to make suggestions displayed at the popup window.
         These suggestion objects are returned by the <code>suggest</code> function of a noun type.
         Fills in <b>text</b> and <b>html</b> if missing
         and constructs <b>summary</b> from <b>text</b> and <b>selectionIndices</b>.
-        At least one of <b>text</b>, <b>html</b> or <b>data</b> is required.
+        At least one of <b>text</b>, <b>html</b>, or <b>data</b> is required.
         <ul>
           <li><b>text</b> can be any string.</li>
           <li><b>html</b> must be a valid HTML string.</li>
-          <li><b>data</b> can be any value.</li>
+          <li><b>data</b> can be of any value.</li>
           <li><b>score</b> is an optional float number representing
           the score of the suggestion. Defaults to 1.0.</li>
           <li><b>selectionIndices</b> is an optional array containing the start and end
-          indices of selection (displayed at the interface) within <b>text</b>.</li>
+          indices of selection (displayed at the interface) within the <b>text</b>.</li>
         </ul>
     </p>
 </blockquote>
@@ -495,7 +495,7 @@
         commands.</p>
     <ul>
         <li><strong>uuid</strong> - unique identifier that defines storage space.</li>
-        <li><strong>callback</strong> - callback function that receives the Bin object. The result
+        <li><strong>callback</strong> - a callback function that receives the Bin object. The result
             returned as a promise if not specified.
         </li>
     </ul>
@@ -530,7 +530,7 @@
 
 <h3><a id="user-content-dynamic-settings" class="anchor" aria-hidden="true" href="#dynamic_settings"></a>cmdAPI.settings</h3>
 <blockquote>
-    <p>Returns an objects with key/value pairs customizable through the main setting page (read-only).</p>
+    <p>Returns an object with key/value pairs customizable through the main setting page (read-only).</p>
 </blockquote>
 
 <h3><a id="user-content-bin" class="anchor" aria-hidden="true" href="#bin"></a>Bin</h3>
@@ -547,7 +547,7 @@
     }
     </pre>
 
-    <p>The interface offers a separate storage space for each command.</p>
+    <p>The interface offers separate storage space for each command.</p>
 </blockquote>
 
 <h3><a id="user-content-jquery" class="anchor" aria-hidden="true" href="#bin"></a>jQuery, $</h3>
@@ -558,12 +558,12 @@
 
 <h2><a id="user-content-built-in-noun-types" class="anchor" aria-hidden="true"
        href="#built-in-noun-types"></a>Built-in Noun Types</h2>
-<p>NounType system of the iShell parser is a powerful tool which allows to add dynamic entities
+<p>NounType system of the iShell parser is a powerful tool that allows adding of dynamic entities
     (such as the set of current tabs) to argument autocompletion and suggestion list. See the
     command authoring tutorial for an example.</p>
 <p>Currently, the following noun types are built-in into iShell:</p>
 <ul>
-    <li><strong>noun_arb_text</strong> - an arbitrary text, suggests the input as is.</li>
+    <li><strong>noun_arb_text</strong> - an arbitrary text that suggests the input as is.</li>
     <li><strong>noun_type_number</strong> - a numeric value.</li>
     <li><strong>noun_type_percentage</strong> - a percentage value.</li>
     <li><strong>noun_type_date</strong>, <strong>noun_type_time</strong>, <strong>noun_type_date_time</strong>

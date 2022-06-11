@@ -25,47 +25,6 @@ export function injectModule(namespace) {
         globalThis[key] = namespace[key];
 }
 
-// loads bundled scripts into specified window (or background if not specified)
-export async function loadScripts(url, wnd= window) {
-    wnd.loadedScripts = wnd.loadedScripts || [];
-    url = url || [];
-    if (!Array.isArray(url))
-        url = [url];
-
-    if (typeof wnd.jQuery === "undefined") {
-        console.error("there's no jQuery at " + wnd + ".");
-        return false;
-    }
-
-    if (url.length === 0)
-        return;
-
-    let urlToLoad = url.shift();
-    let continueLoad = function(data, textStatus, jqXHR) {
-        return loadScripts(url, wnd);
-    };
-    if (wnd.loadedScripts.indexOf(urlToLoad) === -1) {
-        console.log("loading :::: ", chrome.runtime.getURL(urlToLoad));
-        wnd.loadedScripts.push(urlToLoad);
-        await new Promise(resolve => {
-            wnd.jQuery.ajax({
-                url: chrome.runtime.getURL(urlToLoad),
-                dataType: 'script',
-                success: async () => {
-                    console.log("success")
-                    await continueLoad();
-                    resolve();
-                },
-                error: e => console.error(e),
-                async: true
-            });
-        })
-    }
-    else {
-        await continueLoad();
-    }
-}
-
 async function executeScriptFileMV3 (tabId, options) {
     const target = {tabId};
 
@@ -83,6 +42,21 @@ export function executeScriptFile(...args) {
         return executeScriptFileMV3(...args)
     else
         return browser.tabs.executeScript(...args);
+}
+
+export async function fetchWithTimeout(resource, options = {}) {
+    const { timeout = 10000 } = options;
+
+    const controller = new AbortController();
+    const id = setTimeout(() => controller.abort(), timeout);
+
+    const response = await fetch(resource, {
+        ...options,
+        signal: controller.signal
+    });
+    clearTimeout(id);
+
+    return response;
 }
 
 export async function askCSRPermission() {

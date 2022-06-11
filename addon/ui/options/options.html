@@ -10,6 +10,14 @@
     <script src="options.js" type="module"></script>
 
     <style>
+        .section-header {
+            margin-bottom: 0;
+        }
+
+        .spacer {
+            flex: 1 0 auto;
+        }
+
         #file-picker {
             display: none;
         }
@@ -45,6 +53,14 @@
             width: 100%;
             box-sizing: border-box;
         }
+
+        #helper-update {
+            display: none;
+        }
+
+        #last-helper-link {
+            display: flex;
+        }
     </style>
 </head>
 <body dir="ltr">
@@ -77,14 +93,17 @@
     </div>
 
     <div class="col-five">
-        <h2 class="top">Dynamic Settings<sup class="help" title="You can add new custom settings and access them in the code. See the help above.">?</sup></h2>
+        <h2 class="top section-header">Dynamic Settings<sup class="help" title="You can add new custom settings and access them in the code. See the help above.">?</sup></h2>
         <div id="dynamic-settings-wrapper"><table id="dynamic-settings"></table></div>
     </div>
 
     <div class="col-four">
-        <h2 class="top">Version Information</h2>
-        <p>You are using <b>iShell</b> v<span id="shell-version"></span> <img id="shell-debug-mode" src="/ui/icons/debug.png" title="Debug mode"/></p>
-
+        <h2 class="top section-header">Version Information</h2>
+        <div class="advanced">You are using <b>iShell</b> v<span id="ishell-version"></span> (<span id="manifest-version"></span>)
+            <img id="shell-debug-mode" src="/ui/icons/debug.png" title="Debug mode"/></div>
+        <div class="advanced">Helper application <span id="helper-version">...</span>
+            <span id="helper-update">(<a href="https://github.com/GChristensen/ishell/releases" target="_blank">update</a>)</span>
+        </div>
         <!--h2>Language Settings</h2>
         <p>
             Command parser language:
@@ -92,7 +111,7 @@
             </select>
         </p-->
 
-        <h2>Listing Settings</h2>
+        <h2 class="section-header">Listing Settings</h2>
         <table cellpadding="5" class="setting-table">
             <tr>
                 <td>Maximum number of suggestions:</td>
@@ -104,7 +123,14 @@
             </tr>
         </table>
 
-        <h2>Import/Export</h2>
+        <h2 class="section-header">Helper Application</h2>
+        <div class="advanced"><a href="#" id="helper-windows">Automated Windows installer</a></div>
+        <div class="advanced" id="last-helper-link"><a href="#" id="helper-pyton">Python package</a>
+            <div class="spacer"></div>
+            <a href="tutorial.html#helper" target="_blank">About</a>
+        </div>
+
+        <h2 class="section-header">Import/Export</h2>
         <div class="advanced"><a href="#" id="export-settings">Export iShell settings</a></div>
         <div class="advanced"><a href="#" id="import-settings">Import iShell settings</a></div>
         <input type="file" id="file-picker"/>

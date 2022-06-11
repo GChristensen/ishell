@@ -307,7 +307,7 @@ const noun_calc = {
             result = e.message
             score  = .1
         }
-        return [NounUtils.makeSugg(txt, htm, result, score, si)];
+        return [CmdUtils.makeSugg(txt, htm, result, score, si)];
     },
     _mathlike: /^[\w.+\-*\/^%(, )|]+$/,
 };

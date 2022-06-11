@@ -59,10 +59,10 @@ function openListSuggestion(text, html, cb, selectionIndices) {
         let suggs = this._items.filter(i => {
             i.match = matcher.exec(i.path || i.name);
             return (i.path || i.name) && i.match;
-        }).map(i => NounUtils.makeSugg(i.path || i.name, i.path || i.name, null,
-            i.match.input? NounUtils.matchScore(i.match): .0001, selectionIndices));
+        }).map(i => CmdUtils.makeSugg(i.path || i.name, i.path || i.name, null,
+            i.match.input? CmdUtils.matchScore(i.match): .0001, selectionIndices));
 
-        let textSugg = NounUtils.makeSugg(text, html, null, suggs.length ? .001 : 1, selectionIndices);
+        let textSugg = CmdUtils.makeSugg(text, html, null, suggs.length ? .001 : 1, selectionIndices);
         if (textSugg)
             suggs.push(textSugg);
 
@@ -110,18 +110,18 @@ let noun_type_date = {
         suggs = [];
 
         if (/^\d{4}-\d{1,2}-\d{1,2}$/.test(text)) {
-            suggs.push(NounUtils.makeSugg(text, text, null, 1, selectionIndices));
+            suggs.push(CmdUtils.makeSugg(text, text, null, 1, selectionIndices));
         }
         else if (/^\d{1,2}-\d{1,2}$/.test(text)) {
             let now = new Date();
             let [month, day] = text.split("-");
             let date = now.getFullYear() + "-" + addZero(month) + "-" + addZero(day);
-            suggs.push(NounUtils.makeSugg(date, date, null, 1, selectionIndices));
+            suggs.push(CmdUtils.makeSugg(date, date, null, 1, selectionIndices));
         }
         else if (/^\d{1,2}$/.test(text)) {
             let now = new Date();
             let date = now.getFullYear() + "-" + addZero(now.getMonth() + 1) + "-" + addZero(text);
-            suggs.push(NounUtils.makeSugg(date, date, null, 1, selectionIndices));
+            suggs.push(CmdUtils.makeSugg(date, date, null, 1, selectionIndices));
         }
 
         return suggs;

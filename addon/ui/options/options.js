@@ -1,7 +1,8 @@
-import "../../ishell.js";
+import {helperApp} from "../../ishell.js";
 import {settings} from "../../settings.js";
 import {repository} from "../../storage.js";
 import {setupHelp} from "./utils.js";
+import {fetchWithTimeout} from "../../utils.js";
 
 $(initPage);
 
@@ -10,7 +11,8 @@ async function initPage() {
 
     setupHelp("#show-hide-help", "#options-help-div");
 
-    $("#shell-version").text(CmdUtils.VERSION);
+    $("#ishell-version").text(CmdUtils.VERSION);
+    $("#manifest-version").text(_MANIFEST_V3? "MV3": "MV2");
 
     if (CmdUtils.DEBUG)
         $("#shell-debug-mode").show();
@@ -39,6 +41,8 @@ async function initPage() {
         if (e.target.files.length > 0)
             importSettings(e.target.files[0]);
     });
+
+    loadHelperAppLinks();
 }
 
 function configureDynamicSettings() {
@@ -98,7 +102,7 @@ function populateDynamicSettings() {
 
     const builtinKeys = Object.keys(helpLinks);
 
-    let html = CmdUtils.reduceTemplate(Object.entries(settings.dynamic_settings()),
+    let html = cmdAPI.reduceTemplate(Object.entries(settings.dynamic_settings()),
         item =>
             `<tr id="${item[0]}">
                 ${(builtinKeys.some(k => k === item[0]))
@@ -199,4 +203,52 @@ async function importSettings(file) {
             chrome.runtime.reload();
     };
     reader.readAsText(file);
+}
+
+async function loadHelperAppLinks() {
+    let latestHelperAppVersion;
+
+    function setDownloadLinks(link1, link2) {
+        const app = link1.endsWith(".exe")? link1: link2;
+        const archive = link1.endsWith(".zip")? link1: link2;
+        $("#helper-windows").attr("href", app);
+        $("#helper-python").attr("href", archive);
+    }
+
+    try {
+        const apiURL = "https://api.github.com/repos/gchristensen/ishell/releases/latest";
+        const response = await fetchWithTimeout(apiURL, {timeout: 30000});
+
+        if (response.ok) {
+            let release = JSON.parse(await response.text());
+            setDownloadLinks(release.assets[0].browser_download_url, release.assets[1].browser_download_url);
+
+            latestHelperAppVersion = release.name.split(" ");
+            latestHelperAppVersion = version[version.length - 1];
+        }
+        else
+            throw new Error();
+    }
+    catch (e) {
+        console.error(e);
+        setDownloadLinks("#", "#");
+        //latestHelperAppVersion.html(`<b>Latest version:</b> error`);
+    }
+
+    let installedHelperAppVersion;
+    let update = false;
+
+    if (await helperApp.probe()) {
+        installedHelperAppVersion = helperApp.getVersion();
+        if (latestHelperAppVersion && !await helperApp.hasVersion(latestHelperAppVersion))
+            update = true;
+    }
+
+    if (installedHelperAppVersion)
+        $("#helper-version").text(`v${installedHelperAppVersion}`);
+    else
+        $("#helper-version").text(`is not installed`);
+
+    if (update)
+        $("#helper-update").show();
 }
