@@ -1,7 +1,5 @@
-import "../../api_backgorund.js";
+import {contextMenuManager as contextMenu} from "../../ishell.js";
 import {settings} from "../../settings.js";
-
-const {__contextMenuManager: contextMenu} = CmdUtils;
 
 $(initPage);
 

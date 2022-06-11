@@ -1,10 +1,9 @@
-import "../../api_backgorund.js";
+import {cmdManager} from "../../ishell.js";
 import {settings} from "../../settings.js";
 import {setupHelp} from "./utils.js";
 import {repository} from "../../storage.js";
 import {BUILTIN_NAMESPACES} from "../../commands/namespaces.js";
 
-const {__cmdManager: cmdManager} = CmdUtils;
 window.escapeHtml = Utils.escapeHtml;
 
 const BUILTIN_AUTHOR = "by iShell Authors";

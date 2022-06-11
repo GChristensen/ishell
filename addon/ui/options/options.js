@@ -1,4 +1,4 @@
-import "../../api_backgorund.js";
+import "../../ishell.js";
 import {settings} from "../../settings.js";
 import {repository} from "../../storage.js";
 import {setupHelp} from "./utils.js";

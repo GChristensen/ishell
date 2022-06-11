@@ -1,8 +1,8 @@
 import {settings} from "../settings.js";
 import {cmdManager} from "../cmdmanager.js";
 import {contextMenuManager} from "../ui/contextmenu.js";
-import {executeScriptFile, nativeEval} from "../utils.js";
 import {ContextUtils} from "./contextutils.js";
+import {helperApp} from "../helper_app.js";
 
 export var CmdUtils = {
     VERSION: chrome.runtime.getManifest().version,
@@ -12,6 +12,7 @@ export var CmdUtils = {
     // although it is nice to have them in the popup and option pages
     __cmdManager: cmdManager,
     __contextMenuManager: contextMenuManager,
+    __helperApp: helperApp,
 
     NounType: NounUtils.NounType,
     matchScore: NounUtils.matchScore,
@@ -20,21 +21,11 @@ export var CmdUtils = {
 
     eval: _MANIFEST_V3? nativeEval: eval,
 
-    // injects a content script bundled with the addon into the given tab
-    // undocumented, works both in MV2 and MV3
-    executeScriptFile, 
-
-    activeTab: null   // tab that is currently active, updated via _updateActiveTAb
+    activeTab: null   // tab that is currently active, updated via _updateActiveTab
 };
 
-export const _ = function(x, data) {
-    if (_MANIFEST_V3)
-        return x;
-
-    // TODO: remove completely in MV3
-    return data
-        ? TrimPath.parseTemplate(x).process(data, {keepWhitespace: true})
-        : x
+export const _ = function(x) {
+    return x;
 };
 
 export const H = Utils.escapeHtml;
@@ -67,16 +58,14 @@ CmdUtils.findCommand = function(name) {
 
 // deprecated
 CmdUtils.renderTemplate = function (template, data) {
-    if (_MANIFEST_V3)
-        return template;
-
-    // TODO: remove completely in MV3
-    return TrimPath.parseTemplate(template).process(data);
+    return template;
 };
 
 CmdUtils.reduceTemplate = function (items, f) {
     return items?.reduce((acc, v, i, arr) => acc + f(v, i, arr), "");
 }
+
+export const R = CmdUtils.reduceTemplate;
 
 CmdUtils.getSelection = () => ContextUtils.selectedText;
 CmdUtils.getHtmlSelection = () => ContextUtils.selectedHtml;
@@ -632,49 +621,36 @@ CmdUtils.previewList2 = function(block, items, fs, css) {
     );
 };
 
+async function nativeEval(text) {
+    const key = crypto.randomUUID();
+    const pullURL = helperApp.url(`/pull_script/${key}`);
 
-
-// Some legacy code, subject to removal
-
-// loads remote scripts into specified window (or background if not specified)
-CmdUtils.loadScripts = function loadScripts(url, callback, wnd=window) {
-    // this array will hold all loaded scripts into this window
-    wnd.loadedScripts = wnd.loadedScripts || [];
-    url = url || [];
-    if (url.constructor === String) url = [url];
-
-    if (typeof wnd.jQuery === "undefined") {
-        console.error("there's no jQuery at " + wnd + ".");
-        return false;
+    var rejecter;
+    var errorListener = error => {
+        if (error.filename?.startsWith(pullURL)) {
+            window.removeEventListener("error", errorListener);
+            rejecter(error.error)
+        }
     }
-    if (url.length === 0)
-        return callback();
 
-    let thisurl = url.shift();
-    let tempfunc = function(data, textStatus, jqXHR) {
-        return loadScripts(url, callback, wnd);
-    };
-    if (wnd.loadedScripts.indexOf(thisurl) == -1) {
-        console.log("loading :::: ", thisurl);
-        wnd.loadedScripts.push(thisurl);
-        wnd.jQuery.ajax({
-            url: thisurl,
-            dataType: 'script',
-            success: tempfunc,
-            async: true
-        });
-    }
-    else {
-        tempfunc();
-    }
-};
+    text = `{\n${text}\n}`;
+    await helperApp.post("/push_script", {text, key});
 
-$.fn.blankify = function (url) {
-    return this.find("a").not('[href^="http"],[href^="//:"],[href^="mailto:"],[href^="#"]').each(function () {
-        $(this).attr("target", "_blank").attr('href', function (index, value) {
-            if (value.substr(0, 1) !== "/") value = "/" + value;
-            return url + value;
-        });
-    });
-};
+    const script = jQuery("<script>")
+        .attr({crossorigin: "anonymous"})
+        .prop({src: pullURL});
 
+    window.addEventListener("error", errorListener);
+
+    document.head.appendChild(script[0]);
+    script.remove();
+
+    return {error: new Promise((resolve, reject) => {
+            rejecter = reject;
+
+            setTimeout(() => {
+                window.removeEventListener("error", errorListener);
+                resolve(true);
+            }, 1000);
+        })};
+}

@@ -12,5 +12,9 @@ await injectModules([
     "./api/nountypes.js",
     "./api/cmdutils.js",
     "./api/preprocessor.js",
-    "./api/cmdapi.js"
+    "./api/cmdapi.js",
+    "./lib/math_parser.js",
+    "./lib/marked.js"
 ]);
+
+chrome.i18n.getAcceptLanguages(ll => CmdUtils.acceptLanguages = ll);

@@ -1,6 +1,3 @@
-import {helperApp} from "./helper_app.js";
-import {Utils} from "./api/utils.js";
-
 export function merge(to, from) {
     for (const [k, v] of Object.entries(from)) {
         if (!to.hasOwnProperty(k))
@@ -28,6 +25,47 @@ export function injectModule(namespace) {
         globalThis[key] = namespace[key];
 }
 
+// loads bundled scripts into specified window (or background if not specified)
+export async function loadScripts(url, wnd= window) {
+    wnd.loadedScripts = wnd.loadedScripts || [];
+    url = url || [];
+    if (!Array.isArray(url))
+        url = [url];
+
+    if (typeof wnd.jQuery === "undefined") {
+        console.error("there's no jQuery at " + wnd + ".");
+        return false;
+    }
+
+    if (url.length === 0)
+        return;
+
+    let urlToLoad = url.shift();
+    let continueLoad = function(data, textStatus, jqXHR) {
+        return loadScripts(url, wnd);
+    };
+    if (wnd.loadedScripts.indexOf(urlToLoad) === -1) {
+        console.log("loading :::: ", chrome.runtime.getURL(urlToLoad));
+        wnd.loadedScripts.push(urlToLoad);
+        await new Promise(resolve => {
+            wnd.jQuery.ajax({
+                url: chrome.runtime.getURL(urlToLoad),
+                dataType: 'script',
+                success: async () => {
+                    console.log("success")
+                    await continueLoad();
+                    resolve();
+                },
+                error: e => console.error(e),
+                async: true
+            });
+        })
+    }
+    else {
+        await continueLoad();
+    }
+}
+
 async function executeScriptFileMV3 (tabId, options) {
     const target = {tabId};
 
@@ -40,40 +78,11 @@ async function executeScriptFileMV3 (tabId, options) {
     return browser.scripting.executeScript({target, files: [options.file]});
 }
 
-export const executeScriptFile = _MANIFEST_V3? executeScriptFileMV3: browser.tabs.executeScript;
-
-export async function nativeEval(text) {
-    const key = crypto.randomUUID();
-    const pullURL = helperApp.url(`/pull_script/${key}`);
-
-    var rejecter;
-    var errorListener = error => {
-        if (error.filename?.startsWith(pullURL)) {
-            window.removeEventListener("error", errorListener);
-            rejecter(error.error)
-        }
-    }
-
-    text = `{\n${text}\n}`;
-    await helperApp.post("/push_script", {text, key});
-
-    const script = jQuery("<script>")
-        .attr({crossorigin: "anonymous"})
-        .prop({src: pullURL});
-
-    window.addEventListener("error", errorListener);
-
-    document.head.appendChild(script[0]);
-    script.remove();
-
-    return {error: new Promise((resolve, reject) => {
-            rejecter = reject;
-
-            setTimeout(() => {
-                window.removeEventListener("error", errorListener);
-                resolve(true);
-            }, 1000);
-        })};
+export function executeScriptFile(...args) {
+    if (_MANIFEST_V3)
+        return executeScriptFileMV3(...args)
+    else
+        return browser.tabs.executeScript(...args);
 }
 
 export async function askCSRPermission() {

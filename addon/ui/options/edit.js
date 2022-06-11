@@ -1,10 +1,7 @@
-import "../../api_backgorund.js";
-import "../../api/preprocessor.js";
+import {cmdManager, helperApp} from "../../ishell.js";
 import {settings} from "../../settings.js";
 import {repository} from "../../storage.js";
 import {CommandPreprocessor} from "../../api/preprocessor.js";
-
-const {__cmdManager: cmdManager} = CmdUtils;
 
 const SHELL_SETTINGS = "shell-settings";
 
@@ -23,13 +20,8 @@ async function initPage() {
 
 async function initEditor() {
     if (_MANIFEST_V3) {
-        try {
-            const helperAppPresents = await browser.runtime.sendMessage({type: "CHECK_HELPER_APP_AVAILABLE"});
-            if (!helperAppPresents)
-                $("#helper-app-warn").show();
-        } catch (e) {
-            console.error(e);
-        }
+        if (!await helperApp.probe())
+            CmdUtils.notify("Please, install the helper applications to execute custom commands");
     }
 
     let lastNamespace = settings.last_editor_namespace();

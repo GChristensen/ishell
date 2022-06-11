@@ -1,9 +1,7 @@
-import "../api_backgorund.js";
+import "../api_background.js";
 import {settings} from "../settings.js";
 import {SuggestionManager} from "./suggestions.js";
-
-const {__cmdManager: cmdManager} = CmdUtils;
-const {__contextMenuManager: contextMenu} = CmdUtils;
+import {cmdManager, contextMenuManager as contextMenu} from "../ishell.js";
 
 let popup;
 let suggestions;
