@@ -18,8 +18,8 @@ if (_DEPLOY_FIREFOX) {
     else {
         await import("./api_background.js");
 
-        cmdManager = _BACKGROUND_API.CmdUtils.__cmdManager;
-        contextMenuManager = _BACKGROUND_API.CmdUtils.__contextMenuManager;
-        helperApp = _BACKGROUND_API.CmdUtils.__helperApp;
+        cmdManager = _BACKGROUND_API.cmdAPI.__cmdManager;
+        contextMenuManager = _BACKGROUND_API.cmdAPI.__contextMenuManager;
+        helperApp = _BACKGROUND_API.cmdAPI.__helperApp;
     }
 }

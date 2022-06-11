@@ -14,11 +14,11 @@ await loadModules([
     "./commands/scrapyard.js"
 ]);
 
-const canLoadScripts = !_MANIFEST_V3 || _MANIFEST_V3 && await helperApp.probe();
+await cmdManager.loadBuiltinScripts();
 
-if (canLoadScripts) {
-    await cmdManager.loadBuiltinScripts();
-    await cmdManager.loadCustomScripts();
-}
+const canLoadUserScripts = !_MANIFEST_V3 || _MANIFEST_V3 && await helperApp.probe();
+
+if (canLoadUserScripts)
+    await cmdManager.loadUserScripts();
 
 await cmdManager.prepareCommands();

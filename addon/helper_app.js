@@ -5,12 +5,12 @@ class HelperApp {
         this.auth = crypto.randomUUID();
         this.version = undefined;
 
-        if (_MANIFEST_V3) {
-            this._host = browser.runtime.getManifest().content_security_policy.extension_pages
+        this._host = (_MANIFEST_V3
+            ? browser.runtime.getManifest().content_security_policy.extension_pages
+            :  browser.runtime.getManifest().content_security_policy)
                 .split(";")[0]
                 .split(" ").at(-1);
-            this._portNumber = parseInt(this._host.split(":").at(-1));
-        }
+        this._portNumber = parseInt(this._host.split(":").at(-1));
     }
 
     async getPort() {

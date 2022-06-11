@@ -307,11 +307,11 @@ async function saveScript() {
 async function evalMV2(customcode) {
     try {
         const code = preprocessor.transform(customcode);
-        CmdUtils.execute(code);
+        cmdAPI.evaluate(code);
 
         $("#info").html("Evaluated!");
 
-        await cmdManager.loadCustomScripts(scriptNamespace);
+        await cmdManager.loadUserScripts(scriptNamespace);
     } catch (e) {
         displayError(e.message);
     }
@@ -319,11 +319,11 @@ async function evalMV2(customcode) {
 
 async function evalMV3(customcode) {
     const code = preprocessor.transform(customcode);
-    const result = await CmdUtils.execute(code);
+    const result = await cmdAPI.evaluate(code);
 
     result.error.then(() => {
         $("#info").html("Evaluated!");
-        cmdManager.loadCustomScripts(scriptNamespace);
+        cmdManager.loadUserScripts(scriptNamespace);
     })
         .catch(error => {
             displayError(error.message);

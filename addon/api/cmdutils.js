@@ -1,25 +1,17 @@
+// Any new functionality should be added to cmdapi.js
+
 import {settings} from "../settings.js";
 import {cmdManager} from "../cmdmanager.js";
-import {contextMenuManager} from "../ui/contextmenu.js";
 import {ContextUtils} from "./contextutils.js";
-import {helperApp} from "../helper_app.js";
 
 export var CmdUtils = {
     VERSION: chrome.runtime.getManifest().version,
     DEBUG: settings.debug_mode(),
 
-    // these classes are not part of the original Ubiquity API and are not exposed into the global namespace,
-    // although it is nice to have them in the popup and option pages
-    __cmdManager: cmdManager,
-    __contextMenuManager: contextMenuManager,
-    __helperApp: helperApp,
-
     NounType: NounUtils.NounType,
     matchScore: NounUtils.matchScore,
     makeSugg: NounUtils.makeSugg,
     grepSuggs: NounUtils.grepSuggs,
-
-    execute: _MANIFEST_V3? nativeEval: eval,
 
     activeTab: null   // tab that is currently active, updated via _updateActiveTab
 };
@@ -60,12 +52,6 @@ CmdUtils.findCommand = function(name) {
 CmdUtils.renderTemplate = function (template, data) {
     return template;
 };
-
-CmdUtils.reduceTemplate = function (items, f) {
-    return items?.reduce((acc, v, i, arr) => acc + f(v, i, arr), "");
-}
-
-export const R = CmdUtils.reduceTemplate;
 
 CmdUtils.getSelection = () => ContextUtils.selectedText;
 CmdUtils.getHtmlSelection = () => ContextUtils.selectedHtml;
@@ -620,37 +606,3 @@ CmdUtils.previewList2 = function(block, items, fs, css) {
          ${css? css: ""}`
     );
 };
-
-async function nativeEval(text) {
-    const key = crypto.randomUUID();
-    const pullURL = helperApp.url(`/pull_script/${key}`);
-
-    var rejecter;
-    var errorListener = error => {
-        if (error.filename?.startsWith(pullURL)) {
-            window.removeEventListener("error", errorListener);
-            rejecter(error.error)
-        }
-    }
-
-    text = `{\n${text}\n}`;
-    await helperApp.post("/push_script", {text, key});
-
-    const script = jQuery("<script>")
-        .attr({crossorigin: "anonymous"})
-        .prop({src: pullURL});
-
-    window.addEventListener("error", errorListener);
-
-    document.head.appendChild(script[0]);
-    script.remove();
-
-    return {error: new Promise((resolve, reject) => {
-            rejecter = reject;
-
-            setTimeout(() => {
-                window.removeEventListener("error", errorListener);
-                resolve(true);
-            }, 1000);
-        })};
-}

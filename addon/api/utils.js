@@ -1,3 +1,5 @@
+// Sealed for backward compatibility. Use ES6 module system to add new utility functions.
+
 import {settings} from "../settings.js";
 import {repository} from "../storage.js";
 

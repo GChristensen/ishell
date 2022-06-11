@@ -201,7 +201,7 @@ class CommandManager {
         return this.callPersistent(sentence.getCommand(), sentence, sentence.execute)
     }
 
-    unloadCustomScripts(namespace) {
+    unloadUserScripts(namespace) {
         if (namespace)
             this._commands = this._commands.filter(c => c._namespace !== namespace);
         else
@@ -245,7 +245,8 @@ class CommandManager {
                             preprocessor.load(script);
                         else {
                             script = preprocessor.transform(script.content);
-                            await CmdUtils.execute(script);
+                            if (script)
+                                await cmdAPI.evaluate(script);
                         }
                     }
                 } catch (e) {
@@ -257,8 +258,8 @@ class CommandManager {
         }
     }
 
-    async loadCustomScripts(namespace) {
-        this.unloadCustomScripts(namespace);
+    async loadUserScripts(namespace) {
+        this.unloadUserScripts(namespace);
 
         let preprocessor = new CommandPreprocessor(CommandPreprocessor.CONTEXT_CUSTOM);
         let customscripts = await repository.fetchUserScripts(namespace);
@@ -270,7 +271,7 @@ class CommandManager {
             try {
                 if (record.script) {
                     let script = preprocessor.transform(record.script);
-                    await CmdUtils.execute(script);
+                    await cmdAPI.evaluate(script);
 
                     for (let cmd of this._commands.filter(c => !c._builtin && !c._namespace))
                         cmd._namespace = record.namespace;

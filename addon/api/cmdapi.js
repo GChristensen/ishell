@@ -1,6 +1,16 @@
 import {settings} from "../settings.js";
+import {helperApp} from "../helper_app.js";
+import {CmdUtils} from "./cmdutils.js";
+import {cmdManager} from "../cmdmanager.js";
+import {contextMenuManager} from "../ui/contextmenu.js";
 
 export const cmdAPI = {
+    // these classes are not part of the original Ubiquity API and are not exposed into the global namespace,
+    // although it is nice to get them in the popup through the background page
+    __cmdManager: cmdManager,
+    __contextMenuManager: contextMenuManager,
+    __helperApp: helperApp,
+
     get settings() {
         return settings.dynamic_settings();
     },
@@ -8,7 +18,32 @@ export const cmdAPI = {
     get activeTab() {
         return CmdUtils.getActiveTab();
     },
+
+    evaluate(javaScript) {
+        if (_MANIFEST_V3)
+            return nativeEval(javaScript);
+        else
+            return eval(javaScript);
+    },
+
+    reduceTemplate (items, f) {
+        return items?.reduce((acc, v, i, arr) => acc + f(v, i, arr), "");
+    },
+
+    helperAppProbe(verbose) {
+        return helperApp.probe(verbose)
+    },
+
+    getHelperAppURL(path) {
+        return helperApp.url(path);
+    },
+
+    getHelperAppAuth() {
+        return helperApp._injectAuth().Authorization;
+    },
 };
+
+export const R = cmdAPI.reduceTemplate;
 
 function delegate (object, method) {
     return function () {
@@ -28,7 +63,6 @@ cmdAPI.previewList = delegate(CmdUtils, CmdUtils.previewList);
 cmdAPI.htmlPreviewList = delegate(CmdUtils, CmdUtils.previewList);
 cmdAPI.objectPreviewList = delegate(CmdUtils, CmdUtils.previewList2);
 cmdAPI.renderTemplate = delegate(CmdUtils, CmdUtils.renderTemplate);
-cmdAPI.reduceTemplate = delegate(CmdUtils, CmdUtils.reduceTemplate);
 cmdAPI.absUrl = delegate(CmdUtils, CmdUtils.absUrl);
 cmdAPI.copyToClipboard = delegate(CmdUtils, CmdUtils.copyToClipboard);
 cmdAPI.notify = delegate(CmdUtils, CmdUtils.notify);
@@ -43,7 +77,6 @@ cmdAPI.parseHtml = delegate(Utils, Utils.parseHtml);
 cmdAPI.escapeHtml = delegate(Utils, Utils.escapeHtml);
 cmdAPI.makeBin = delegate(Utils, Utils.makeBin);
 cmdAPI.getActiveTab = delegate(CmdUtils, CmdUtils.getActiveTab);
-cmdAPI.execute = delegate(CmdUtils, CmdUtils.execute);
 
 cmdAPI.previewFetch = async function(pblock, resource, init) {
     const controller = new AbortController();
@@ -87,3 +120,36 @@ cmdAPI.fetchAborted = function(error) {
 };
 
 
+async function nativeEval(text) {
+    const key = crypto.randomUUID();
+    const pullURL = helperApp.url(`/pull_script/${key}`);
+
+    var rejecter;
+    var errorListener = error => {
+        if (error.filename?.startsWith(pullURL)) {
+            window.removeEventListener("error", errorListener);
+            rejecter(error.error)
+        }
+    }
+
+    text = `{\n${text}\n}`;
+    await helperApp.post("/push_script", {text, key});
+
+    const script = jQuery("<script>")
+        .attr({crossorigin: "anonymous"})
+        .prop({src: pullURL});
+
+    window.addEventListener("error", errorListener);
+
+    document.head.appendChild(script[0]);
+    script.remove();
+
+    return {error: new Promise((resolve, reject) => {
+            rejecter = reject;
+
+            setTimeout(() => {
+                window.removeEventListener("error", errorListener);
+                resolve(true);
+            }, 1000);
+        })};
+}

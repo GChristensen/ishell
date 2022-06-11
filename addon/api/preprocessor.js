@@ -470,24 +470,24 @@ export class CommandPreprocessor {
         return script;
     }
 
-    transform(script) {
-        script = this.preprocessNounTypes(script);
-        script = this.preprocessCommands(script);
+    transform(text) {
+        text = this.preprocessNounTypes(text);
+        text = this.preprocessCommands(text);
 
-        return script;
+        return text;
     }
 
-    async load(script) {
-        const module = await import(`..${script.path}`);
+    async load(file) {
+        const module = await import(`..${file.path}`);
 
-        const functions = this.extractFunctions(script.content);
+        const functions = this.extractFunctions(file.content);
 
         for (const funMeta of functions) {
             const fun = Object.entries(module).find(e => e[0] === funMeta.name)[1];
             this.instantiateNounType(fun, funMeta);
         }
 
-        const classes = this.extractClasses(script.content);
+        const classes = this.extractClasses(file.content);
 
         for (const classMeta of classes) {
             const classDef = Object.entries(module).find(e => e[0] === classMeta.name)[1];
