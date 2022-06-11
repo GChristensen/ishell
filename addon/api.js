@@ -14,7 +14,8 @@ await injectModules([
     "./api/preprocessor.js",
     "./api/cmdapi.js",
     "./lib/math_parser.js",
-    "./lib/marked.js"
+    "./lib/marked.js",
+    "./lib/browser-polyfill.js"
 ]);
 
 chrome.i18n.getAcceptLanguages(ll => CmdUtils.acceptLanguages = ll);
