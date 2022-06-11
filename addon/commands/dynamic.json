@@ -5,11 +5,11 @@
   "files": [
     {
       "path": "example.js", // the path should be relative to the "commands" folder
-      "syntax": "class"     // the only supported sytax is "class"
-    },
-    {
+      "syntax": "class"     // supported syntaxes are "class" and "module"
+    },                      // modules should export all annotated items and could be loaded without
+    {                       // the helper app in the MV3 version of add-on, but not support metaclasses
       "path": "lingvo.js",
-      "syntax": "class"
+      "syntax": "module"
     }
   ]
 }

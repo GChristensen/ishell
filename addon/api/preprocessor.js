@@ -40,14 +40,14 @@ export class CommandPreprocessor {
     camelToKebab(name) {
         let result = name.replace(/([a-z0-9]|(?=[A-Z]))([A-Z])/g, '$1-$2').toLowerCase();
         if (result.startsWith("-"))
-            return result.substr(1);
+            return result.substring(1);
         return result;
     }
 
     extractFullDefinition(script, object) {
         let literalChar = c => c === "\"" || c === "\'" || c === "\`";
         
-        let body = script.substr(object.index + object.all.length - 1);
+        let body = script.substring(object.index + object.all.length - 1);
 
         // transform most common regex forms to string literals
         body = body.replace(/\/(.+?)\/([a-z.]+)/g, '"$1"$2');
@@ -112,14 +112,14 @@ export class CommandPreprocessor {
     }
 
     extractAnnotatedClasses(script) {
-        const rxClassCommand = /\/\*\*(.*?)\*\/\s*^\s*class\s+(\w+).*?{/gsm
+        const rxClassCommand = /\/\*\*(.*?)\*\/\s*^\s*(?:export\s*)?class\s+(\w+).*?{/gsm
         const matches = [...script.matchAll(rxClassCommand)];
 
         return matches.map(m => ({name: m[2], comment: m[1], all: m[0], index: m.index}));
     }
 
     extractAnnotatedFunctions(script) {
-        const rxFun = /\/\*\*(.*?)\*\/\s*^\s*function\s*(\w+)(.*?){/gsm
+        const rxFun = /\/\*\*(.*?)\*\/\s*^\s*(?:export\s*)?function\s*(\w+)(.*?){/gsm
         const matches = [...script.matchAll(rxFun)];
 
         return matches.map(m => ({name: m[2], comment: m[1], args: m[3], all: m[0], index: m.index}));
@@ -303,18 +303,40 @@ export class CommandPreprocessor {
             block += `    ${prefix}_namespace = ${this.generateProperty(properties.namespace)};\n`;
         if (properties.hidden)
             block += `    ${prefix}_hidden = true;\n`;
-        if (properties.require)
-            block += `    ${prefix}require = ${JSON.stringify(properties.require)};\n`;
-        if (properties.requirePopup)
-            block += `    ${prefix}requirePopup = ${JSON.stringify(properties.requirePopup)};\n`;
+        // if (properties.require)
+        //     block += `    ${prefix}require = ${JSON.stringify(properties.require)};\n`;
+        // if (properties.requirePopup)
+        //     block += `    ${prefix}requirePopup = ${JSON.stringify(properties.requirePopup)};\n`;
         
         return block;
+    }
+
+    assignCommandProperties(object, properties) {
+        object._hidden = properties.hidden || object._hidden;
+        delete properties.hidden;
+
+        object._namespace = properties.namespace || object._namespace;
+        delete properties.namespace;
+
+        object.preview = properties.preview || object.preview;
+        delete properties.preview;
+
+        if (Array.isArray(properties.command))
+            object.names = properties.command;
+        else
+            object.name = typeof properties.command === "string"
+                ? properties.command
+                : properties.name;
+
+        delete properties.command;
+
+        Object.assign(object, properties);
     }
     
     generateCommandSetupBlock(object) {
         let block = `\n{
-    let args = {};
-    let command = new ${object.name}(args);
+    const args = {};
+    const command = new ${object.name}(args);
     command.arguments = CommandPreprocessor.assignCommandArguments(args);
     
     CommandPreprocessor.assignCommandPreview(command);\n\n`
@@ -323,6 +345,17 @@ export class CommandPreprocessor {
         block += `\n    cmdAPI.createCommand(command);\n}\n`;
 
         return block;
+    }
+
+    instantiateCommand(classDef, classMeta) {
+        const args = {};
+        const command = new classDef(args);
+
+        command.arguments = CommandPreprocessor.assignCommandArguments(args);
+        this.assignCommandProperties(command, classMeta.properties);
+        CommandPreprocessor.assignCommandPreview(command);
+
+        return command;
     }
 
     generateCommand(script, object) {
@@ -371,7 +404,12 @@ export class CommandPreprocessor {
         return definition;
     }
 
-    preprocessNounTypes(script) {
+    instantiateNounType(fun, funMeta) {
+        fun.label = funMeta.label;
+        fun.suggest = (...args) => fun(...args);
+    }
+
+    extractFunctions(script) {
         const functionMatches = this.extractAnnotatedFunctions(script);
 
         for (let object of functionMatches) {
@@ -386,6 +424,12 @@ export class CommandPreprocessor {
             object.nounType = this.generateNounType(object, properties);
         }
 
+        return functionMatches;
+    }
+
+    preprocessNounTypes(script) {
+        const functionMatches = this.extractFunctions(script);
+
         for (let object of functionMatches)
             if (!object.skip)
                 script = script.replace(object.fullDefinition, object.nounType);
@@ -393,7 +437,7 @@ export class CommandPreprocessor {
         return script;
     }
 
-    preprocessCommands(script) {
+    extractClasses(script) {
         const classMatches = this.extractAnnotatedClasses(script);
 
         for (let object of classMatches) {
@@ -411,6 +455,12 @@ export class CommandPreprocessor {
             object.properties = properties;
         }
 
+        return classMatches;
+    }
+
+    preprocessCommands(script) {
+        const classMatches = this.extractClasses(script);
+
         for (let object of classMatches)
             if (!object.skip) {
                 script = this.preprocessCommand(script, object);
@@ -420,10 +470,30 @@ export class CommandPreprocessor {
         return script;
     }
 
-    run(script, syntax) {
+    transform(script) {
         script = this.preprocessNounTypes(script);
         script = this.preprocessCommands(script);
 
         return script;
+    }
+
+    async load(script) {
+        const module = await import(`..${script.path}`);
+
+        const functions = this.extractFunctions(script.content);
+
+        for (const funMeta of functions) {
+            const fun = Object.entries(module).find(e => e[0] === funMeta.name)[1];
+            this.instantiateNounType(fun, funMeta);
+        }
+
+        const classes = this.extractClasses(script.content);
+
+        for (const classMeta of classes) {
+            const classDef = Object.entries(module).find(e => e[0] === classMeta.name)[1];
+            const command = this.instantiateCommand(classDef, classMeta);
+
+            cmdAPI.createCommand(command);
+        }
     }
 }

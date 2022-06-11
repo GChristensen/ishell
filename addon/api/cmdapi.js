@@ -43,7 +43,7 @@ cmdAPI.parseHtml = delegate(Utils, Utils.parseHtml);
 cmdAPI.escapeHtml = delegate(Utils, Utils.escapeHtml);
 cmdAPI.makeBin = delegate(Utils, Utils.makeBin);
 cmdAPI.getActiveTab = delegate(CmdUtils, CmdUtils.getActiveTab);
-cmdAPI.eval = delegate(CmdUtils, CmdUtils.eval);
+cmdAPI.execute = delegate(CmdUtils, CmdUtils.execute);
 
 cmdAPI.previewFetch = async function(pblock, resource, init) {
     const controller = new AbortController();

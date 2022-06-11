@@ -306,8 +306,8 @@ async function saveScript() {
 
 async function evalMV2(customcode) {
     try {
-        const code = preprocessor.run(customcode);
-        CmdUtils.eval(code);
+        const code = preprocessor.transform(customcode);
+        CmdUtils.execute(code);
 
         $("#info").html("Evaluated!");
 
@@ -318,8 +318,8 @@ async function evalMV2(customcode) {
 }
 
 async function evalMV3(customcode) {
-    const code = preprocessor.run(customcode);
-    const result = await CmdUtils.eval(code);
+    const code = preprocessor.transform(customcode);
+    const result = await CmdUtils.execute(code);
 
     result.error.then(() => {
         $("#info").html("Evaluated!");

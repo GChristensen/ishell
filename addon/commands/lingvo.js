@@ -2,6 +2,8 @@
 
 // (C) 2010-2022 g/christensen (gchristnsn@gmail.com)
 
+import {NAMESPACE_TRANSLATION} from "./namespaces.js";
+
 /**
      # Syntax
      **lingvo** {[**this**] | *words*} [**from** *language*] [**to** *language*]
@@ -14,14 +16,14 @@
 
      @command
      @markdown
-     @namespace Translation
      @author g/christensen
      @delay 1000
      @icon /ui/icons/lingvo.png
      @description Translate words using <a href='https://www.lingvolive.com/'>Abbyy Lingvo</a> online service.
      @uuid 757A2516-9A45-4D02-8756-854B5DE5A074
  */
-class Lingvo {
+export class Lingvo {
+    _namespace = NAMESPACE_TRANSLATION;
     #abbyyAPI = "https://developers.lingvolive.com/api";
 
     #lingvoAPIToken;

@@ -19,7 +19,7 @@ export var CmdUtils = {
     makeSugg: NounUtils.makeSugg,
     grepSuggs: NounUtils.grepSuggs,
 
-    eval: _MANIFEST_V3? nativeEval: eval,
+    execute: _MANIFEST_V3? nativeEval: eval,
 
     activeTab: null   // tab that is currently active, updated via _updateActiveTab
 };

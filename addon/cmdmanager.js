@@ -217,14 +217,15 @@ class CommandManager {
         }
     }
 
-    async _loadDynamicFile(file) {
+    async _loadAnnotatedDefinitions(file) {
         if (file) {
             if (file.startsWith("/"))
-                file = file.substr(1);
+                file = file.substring(1);
 
-            let response = await fetch(`/commands/${file}`);
+            const path = `/commands/${file}`;
+            const response = await fetch(path);
             if (response.ok)
-                return await response.text();
+                return {path, content: await response.text()};
         }
     }
 
@@ -238,10 +239,14 @@ class CommandManager {
                     continue;
 
                 try {
-                    let script = await this._loadDynamicFile(file.path);
+                    let script = await this._loadAnnotatedDefinitions(file.path);
                     if (script) {
-                        script = preprocessor.run(script, file.syntax);
-                        await CmdUtils.eval(script);
+                        if (file.syntax === "module")
+                            preprocessor.load(script);
+                        else {
+                            script = preprocessor.transform(script.content);
+                            await CmdUtils.execute(script);
+                        }
                     }
                 } catch (e) {
                     console.error("builtin script evaluation failed", e);
@@ -264,8 +269,8 @@ class CommandManager {
         for (let record of customscripts) {
             try {
                 if (record.script) {
-                    let script = preprocessor.run(record.script);
-                    await CmdUtils.eval(script);
+                    let script = preprocessor.transform(record.script);
+                    await CmdUtils.execute(script);
 
                     for (let cmd of this._commands.filter(c => !c._builtin && !c._namespace))
                         cmd._namespace = record.namespace;
