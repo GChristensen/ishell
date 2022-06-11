@@ -91,9 +91,9 @@ export class Lingvo {
 
         const wordsURI = encodeURIComponent(words);
         const fromCode = this.#getLangCode(from, isLatin ? EN: RU);
-        const toCode = this.#getLangCode(from, isLatin ? RU: EN);
+        const toCode = this.#getLangCode(to, isLatin ? RU: EN);
         const fromID = this.#getLangID(from, isLatin ? EN: RU);
-        const toID = this.#getLangID(from, isLatin ? RU: EN);
+        const toID = this.#getLangID(to, isLatin ? RU: EN);
 
         this.#articleURL = `https://www.lingvolive.com/en-us/translate/${fromID}-${toID}/${wordsURI}`;
 
