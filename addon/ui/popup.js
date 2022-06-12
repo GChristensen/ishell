@@ -3,9 +3,6 @@ import {settings} from "../settings.js";
 import {SuggestionManager} from "./suggestions.js";
 import {cmdManager, contextMenuManager as contextMenu} from "../ishell.js";
 
-let popup;
-let suggestions;
-
 class PopupWindow {
     constructor() {
         this._last_input_text = "";
@@ -30,10 +27,22 @@ class PopupWindow {
             this._preview_element.error = function (html) {this.innerHTML = `<div class="description error">${html}</div>`};
         else
             console.error("Preview element has error property:", this._preview_element.error);
+
+        this._suggestions = new SuggestionManager(this, cmdManager, settings.max_suggestions());
+
+        let input = this.loadInput()
+        this._suggestions.displaySuggestions(input);
     }
 
+    // used from suggestion manager
     populateSuggestions(html) {
         this._suggestions_element.innerHTML = html;
+    }
+
+    // used from input handler
+    displaySuggestions(input) {
+        this.persistInput()
+        this._suggestions.displaySuggestions(input);
     }
 
     invalidatePreview() {
@@ -59,14 +68,6 @@ class PopupWindow {
         this.setPreview();
     }
 
-    getInput() {
-        return this._input_element.value;
-    }
-
-    rememberInput() {
-        this._last_input_text = this._input_element.value;
-    }
-
     get lastInput() {
         return this._last_input_text;
     }
@@ -75,13 +76,23 @@ class PopupWindow {
         this._last_input_text = text;
     }
 
+    getInput() {
+        return this._input_element.value;
+    }
+
     setInput(text) {
         this._input_element.value = text;
     }
 
-    saveInput() {
-        settings.shell_last_command(this._input_element.value);
-        popup.rememberInput();
+    setCommandLine(text) {
+        this.setInput(text);
+        this.displaySuggestions(text);
+    }
+
+    persistInput() {
+        const input = this.getInput();
+        settings.shell_last_command(input);
+        this.lastInput = input;
     }
 
     loadInput() {
@@ -90,7 +101,7 @@ class PopupWindow {
             contextMenu.selectedContextMenuCommand = null;
 
             if (settings.remember_context_menu_commands())
-                this.saveInput();
+                this.persistInput();
 
             return this._input_element.value;
         }
@@ -116,105 +127,135 @@ class PopupWindow {
 
         this.setPreview(html);
     }
-}
 
-async function keydown_handler(evt) {
-    if (!evt) return;
-    let kc = evt.keyCode;
-
-    // On TAB, autocomplete
-    if (kc === 9) {
-        evt.preventDefault();
-        suggestions.autocompleteInput();
-        return;
+    autocomplete() {
+        this._suggestions.autocompleteInput();
     }
 
-    // On ENTER, execute the given command
-    if (kc === 13) {
-        let input = popup.getInput();
+    addContextMenuItem(input) {
+        if (this._suggestions.hasSelection() && input) {
+            const commandText = this._suggestions.autocompleteSelection();
 
-        if (await Utils.easterListener(input))
-            return;
-
-        if (evt.ctrlKey && evt.altKey) {
-            // make context menu item
-            if (suggestions.hasSelection() && input) {
-                let command_text = suggestions.autocompleteSelection();
-
-                if (!contextMenu.getContextMenuCommand(command_text))
-                    contextMenu.addContextMenuCommand(suggestions.activeCommand, input.trim(), command_text);
-            }
-            return;
+            if (!contextMenu.getContextMenuCommand(commandText))
+                contextMenu.addContextMenuCommand(this._suggestions.activeCommand, input.trim(), commandText);
         }
+    }
 
-        cmdManager.commandHistoryPush(input);
-        await suggestions.executeSelection();
+    async execute(input) {
+        await cmdManager.commandHistoryPush(input);
+        await this._suggestions.executeSelection();
         window.close();
-        return;
     }
 
-    if (kc === 220) {
-        if (evt.ctrlKey && evt.altKey) {
-            const history = await cmdManager.commandHistory();
+    async showHistory() {
+        const history = await cmdManager.commandHistory();
 
-            popup.invalidatePreview();
-            CmdUtils.previewList(popup.pblock, history, (i, e) => {
-                popup.setInput(history[i]);
-                suggestions.displaySuggestions(history[i]);
-            });
-            return;
-        }
+        this.invalidatePreview();
+        CmdUtils.previewList(this.pblock, history, (i, e) => {
+            this.setInput(history[i]);
+            this._suggestions.displaySuggestions(history[i]);
+        });
     }
 
-    // On F5 restart extension
-    if (kc === 116) {
-        chrome.runtime.reload();
-        return;
+    advanceSelection(direction) {
+        this.lastInput = "";
+        this._suggestions.advanceSelection(direction);
     }
 
-    // Cursor up
-    if (kc === 38) {
-        evt.preventDefault();
-        popup.lastInput = "";
-        suggestions.advanceSelection(false);
-        return;
-    }
-    // Cursor Down
-    else if (kc === 40) {
-        evt.preventDefault();
-        popup.lastInput = "";
-        suggestions.advanceSelection(true);
-        return;
-    }
-
-    // execute events from preview lists
-    if (evt.ctrlKey && evt.altKey && kc >= 40 && kc <= 90) {
-        let items = jQuery("[accessKey='" + String.fromCharCode(kc).toLowerCase() + "']");
+    selectListItem(keyCode) {
+        let items = jQuery("[accessKey='" + String.fromCharCode(keyCode).toLowerCase() + "']");
         if (items.length > 0) {
             if (items[0].href)
                 chrome.tabs.create({ "url": items[0].href, active: false });
             else
                 items.click();
         }
+    }
+
+    addCurrentInputToHistory() {
+        cmdManager.commandHistoryPush(this.getInput());
+        this._suggestions.strengthenMemory();
+    }
+}
+
+let popup;
+
+async function keydown_handler(evt) {
+    if (!evt) return;
+    let keyCode = evt.keyCode;
+    const input = popup.getInput();
+
+    // On TAB, autocomplete
+    if (keyCode === 9) {
+        evt.preventDefault();
+        popup.autocomplete();
+        return;
+    }
+
+    // On ENTER, execute the given command
+    if (keyCode === 13) {
+        if (await Utils.easterListener(input))
+            return;
+
+        if (evt.ctrlKey && evt.altKey) {
+            popup.addContextMenuItem(input);
+            return;
+        }
+
+        await popup.execute(input);
+        return;
+    }
+
+    // /
+    if (keyCode === 220) {
+        if (evt.ctrlKey && evt.altKey) {
+            await popup.showHistory();
+            return;
+        }
+    }
+
+    // On F5 restart extension
+    if (keyCode === 116) {
+        chrome.runtime.reload();
+        return;
+    }
+
+    // Cursor up
+    if (keyCode === 38) {
+        evt.preventDefault();
+        popup.advanceSelection(false);
+        return;
+    }
+    // Cursor Down
+    else if (keyCode === 40) {
+        evt.preventDefault();
+        popup.advanceSelection(true);
+        return;
+    }
+
+    // execute events from preview lists
+    if (evt.ctrlKey && evt.altKey && keyCode >= 40 && keyCode <= 90) {
+        popup.selectListItem(keyCode);
         return;
     }
 
     // Ctrl+C copies preview to clipboard
-    if (kc === 67 && evt.ctrlKey) {
+    if (keyCode === 67 && evt.ctrlKey) {
         CmdUtils.setClipboard(popup.pblock.innerText);
         return;
     }
 
-    if (kc === 33 || kc === 34) {
-        popup.pblock.scrollBy(0, (kc === 33? -1: 1) * popup.pblock.clientHeight - 20);
+    if (keyCode === 33 || keyCode === 34) {
+        console.log(evt);
+        popup.pblock.scrollBy(0, (keyCode === 33? -1: 1) * popup.pblock.clientHeight - 20);
     }
 
-    popup.rememberInput();
+    popup.lastInput = input;
 }
 
 function keyup_handler(evt) {
     if (!evt) return;
-    let kc = evt.keyCode;
+    let keyCode = evt.keyCode;
     let input = popup.getInput();
     if (input === popup.lastInput) return;
 
@@ -222,30 +263,25 @@ function keyup_handler(evt) {
         return;
 
     // Cursor up
-    if (kc == 38) {
+    if (keyCode == 38) {
         return;
     }
     // Cursor Down
-    else if (kc == 40) {
+    else if (keyCode == 40) {
         return;
     }
 
-    popup.saveInput()
-    suggestions.displaySuggestions(input);
+    popup.displaySuggestions(input);
 }
 
 async function initPopup() {
     await settings.load();
 
-    await cmdManager.initializeCommandsPopup(document);
+    await cmdManager.initializeCommandsOnPopup(document);
 
     await CmdUtils._updateActiveTab();
 
     popup = new PopupWindow();
-    suggestions = new SuggestionManager(popup, cmdManager, settings.max_suggestions());
-
-    let input = popup.loadInput()
-    suggestions.displaySuggestions(input);
 
     document.addEventListener('keydown', keydown_handler, false);
     document.addEventListener('keyup', keyup_handler, false);
@@ -256,13 +292,8 @@ async function initPopup() {
 $(document).ready(initPopup);
 
 $(window).on('beforeunload', function() {
-    cmdManager.commandHistoryPush(popup.getInput());
-    suggestions.strengthenMemory();
+    popup.addCurrentInputToHistory();
 });
 
-cmdAPI.getCommandLine = CmdUtils.getCommandLine = () => popup.getInput();
-cmdAPI.setCommandLine = CmdUtils.setCommandLine = function (text) {
-    popup.setInput(text);
-    popup.saveInput();
-    suggestions.displaySuggestions(text);
-};
+cmdAPI.getCommandLine = () => popup.getInput();
+cmdAPI.setCommandLine = text => popup.setCommandLine(text);

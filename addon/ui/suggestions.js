@@ -1,5 +1,6 @@
 
 export class SuggestionManager {
+    #popup;
 
     constructor(popup, cmdManager, max_suggestions) {
         this._cmdManager = cmdManager;
@@ -8,7 +9,11 @@ export class SuggestionManager {
         this._selected_sentence = null;
         this._suggestions = null;
         this._parser = cmdManager.makeParser();
-        this._popup = popup;
+        this.#popup = new WeakRef(popup);
+    }
+
+    get _popup() {
+        return this.#popup.deref();
     }
 
     reset() {

@@ -25,7 +25,7 @@ class ContextMenuManager {
     async addContextMenuCommand(cmdDef, label, command) {
         this._context_menu_commands.push({
             uuid: cmdDef.uuid,
-            icon: cmdDef.icon,
+            icon: cmdDef.icon || "/ui/icons/logo.svg",
             label: label,
             command: command
         });

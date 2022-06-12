@@ -308,7 +308,7 @@ class CommandManager {
         }
     }
 
-    async initializeCommandsPopup(doc) {
+    async initializeCommandsOnPopup(doc) {
         for (let cmd of this._commands) {
             try {
                 if (cmd.init) {
