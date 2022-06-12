@@ -180,7 +180,7 @@ class CommandManager {
         new_args.push(bin);
 
         try {
-            f.apply(obj, new_args);
+            return f.apply(obj, new_args);
         } catch (e) {
             console.error(e.toString() + "\n" + e.stack);
         }
@@ -283,7 +283,7 @@ class CommandManager {
     }
 
     async prepareCommands() {
-        this._commands = this._commands.filter(cmd => CmdUtils.DEBUG || !cmd._hidden);
+        this._commands = this._commands.filter(cmd => cmdAPI.DEBUG || !cmd._hidden);
 
         let disabledCommands = settings.disabled_commands();
 

@@ -277,16 +277,15 @@ class SayHello {
     from the provided array of items:
 </p>
 
-<pre><code data-language="javascript">const html =
-  `<ul>${
-    R(items, item =>
-      `<li>${item.text}:
-        <ul>
-          ${R(item.subitems, subitem => `<li>${subitem.text}</li>`)}
-        </ul>
-      </li>`)
-  }</ul>`;
-</code></pre>
+<pre>const html =
+  `&lt;ul&gt;${
+    R(items, item =&gt;
+      `&lt;li&gt;${item.text}:
+        &lt;ul&gt;
+          ${R(item.subitems, subitem =&gt; `&lt;li&gt;${subitem.text}&lt;/li&gt;`)}
+        &lt;/ul&gt;
+      &lt;/li&gt;`)
+  }&lt;/ul&gt;`;</pre>
 
 <h3><span id="Networking_calls_and_placeholder_previews">Networking calls and placeholder previews</span>
 </h3>
@@ -497,7 +496,7 @@ class ShowTextCommandClass {
 
   preview(args, display, storage) {
     if (args[OBJECT]?.text) {
-      let msg = `Shows &lt;i&gt;${args[OBJECT]?.text}&lt;/i&gt; in &lt;b&gt;${args[IN]?.text || "popup"}&lt;/b&gt;`;
+      cont msg = `Shows &lt;i&gt;${args[OBJECT]?.text}&lt;/i&gt; in &lt;b&gt;${args[IN]?.text || "popup"}&lt;/b&gt;`;
       display.set(msg);
     }
     else
@@ -505,8 +504,8 @@ class ShowTextCommandClass {
   }
 
   execute(args, storage) {
-    let destination = args[IN]?.text;
-    let message = args[OBJECT]?.text;
+    const destination = args[IN]?.text;
+    const message = args[OBJECT]?.text;
 
     if (destination === "log")
       console.log(message);
@@ -809,7 +808,7 @@ cmdAPI.createCommand({
 
 <h1 class="section-heading"><span id="Switching_Tabs">Switching Tabs</span></h1>
 
-<p>The final command in this tutorial is for switching between tabs. The end goal is this: type a
+<p>The next command in this tutorial is for switching between tabs. The end goal is this: type a
     few characters that match the title of an open tab (in any window), hit return, and you've
     switched to that tab.
 </p>
@@ -829,28 +828,28 @@ cmdAPI.createCommand({
 
 <pre><code data-language="javascript">var noun_type_browser_tab = {
     label: "tab title or URL",
-    _searchTabs(text, maxResults, callback) {
-        let matcher = new RegExp(text, "i");
 
-        chrome.tabs.query({}, tabs => {
-            let results = [];
-            for (let tab of tabs) {
-                let match = matcher.exec(tab.title) || matcher.exec(tab.url);
-                if (!match) continue;
-                tab.match = match;
-                results.push(tab);
-                if (maxResults && results.length >= maxResults) break;
-            }
-            callback(results);
+    async _searchTabs(text, maxResults) {
+        const matcher = new RegExp(text, "i");
+        const tabs = await browser.tabs.query({});
+        const results = tabs.filter(tab => {
+           tab.__match = matcher.exec(tab.title) || matcher.exec(tab.url);
+           return !!tab.__match;
         });
+
+        console.log(results);
+
+        return results.slice(0, maxResults)
     },
-    suggest: function(text, html, callback, selectedIndices) {
-        this._searchTabs(text, 5, tabs => {
-            callback(tabs.map(tab =>
-                cmdAPI.makeSugg(
-                    tab.title || tab.url,
-                    null, tab, cmdAPI.matchScore(tab.match), selectedIndices)));
-        });
+
+    async suggest(text, html, callback, selectedIndices) {
+        const tabs = await this._searchTabs(text, 5);
+        const makeSugg = tab => cmdAPI.makeSugg(tab.title || tab.url, null, tab,
+                                                cmdAPI.matchScore(tab.__match),
+                                                selectedIndices);
+        const results = tabs.map(makeSugg);
+
+        callback(results);
 
         return []; // normally, we should return suggestions here, but our noun type is asynchronous
     }
@@ -913,14 +912,13 @@ function noun_type_foo(text, html, callback, selectedIndices) {
 <p>Now that we are armed with the tab nountype, it is easy to make the tab-switching command.
 </p>
 
-<pre><code data-language="javascript">
-cmdAPI.createCommand({
+<pre><code data-language="javascript">cmdAPI.createCommand({
   names: ["switch-tab"],
   arguments: {object: noun_type_browser_tab},
 
   execute(args) {
-    let tab = args.object.data;
-    chrome.tabs.update(tab.id, {active: true});
+    const tab = args.object.data;
+    browser.tabs.update(tab.id, {active: true});
   },
 
   preview(pblock, args) {
@@ -932,6 +930,133 @@ cmdAPI.createCommand({
   }
 });</code></pre>
 
+<h1 class="section-heading"><span id="Using_Browser_APIs">Executing Content Scripts</span></h1>
+<p>Content scripts allow to modify or retrieve content of the live document loaded in a browser
+    tab. Use the <a href="API.html#user-content-executescript" target="_blank">cmdAPI.executeScript()</a>
+    function to run JavaScript code in the context of the tab document. For an
+    example, let's create a command that changes the color of the heading tags of the given
+    level (for example, H1 or H2) and prints the text of each heading in the preview area.</p>
+
+<pre><code data-language="javascript">/**
+ Content script example
+
+ @command
+ @description Changes the color of the given heading tags.
+ @uuid E4AF2528-384C-4B08-B794-4306682866D4
+ */
+class ChangeColor {
+    constructor(args) {
+        args[OF] = {nountype: ["H1", "H2", "H3", "H4", "H5"], label: "selector"};
+        args[TO] = {nountype: ["red", "green", "blue"], label: "color"};
+    }
+    
+    async preview({OF}, display) {
+        // a message handler that receives the list of headings from the tab document
+        const onHeadingsExtracted = message => {
+            if (message.type !== "headingsExtracted")
+                return;
+
+            const headingList = `<ul>${
+                R(message.headings, h => (`<li>${h}</li>`))
+            }</ul>`;
+            display.set(headingList)
+
+            browser.runtime.onMessage.removeListener(onHeadingsExtracted);
+        };
+
+        await browser.runtime.onMessage.addListener(onHeadingsExtracted);
+
+        await this.injectJQuery();
+        // a function should be passed to executeScript, this works both in MV2 and MV3
+        // do not pass references to class methods
+        await cmdAPI.executeScript({func: extractHeadings});
+        // the only way we can pass the heading selector to the tab is through a message
+        browser.tabs.sendMessage(cmdAPI.activeTab.id, {type: "extractHeadings", selector: OF.text});
+    }
+
+    async execute({OF, TO}) {
+        await this.injectJQuery();
+        await cmdAPI.executeScript({func: ChangeColor.colorHeadings});
+        browser.tabs.sendMessage(cmdAPI.activeTab.id, {type: "colorHeadings", selector: OF.text, color: TO.text});
+    }
+
+    async injectJQuery() {
+        // here we can obtain the result of script execution directly
+        const hasJQuery = await cmdAPI.executeScript({func: () => !!window.$});
+
+        // inject jQuery bundled with the add-on
+        if (!hasJQuery[0]?.result)
+            await cmdAPI.executeScript({file: "/lib/jquery.js"});
+    }
+}
+
+// these functions are executed as content scripts in the context of the tab document
+
+function colorHeadings() {
+    const onColorHeadings = message => {
+        if (message.type !== "colorHeadings")
+            return ;
+
+        $(message.selector).css("color", message.color);
+
+        browser.runtime.onMessage.removeListener(onColorHeadings);
+    };
+
+    browser.runtime.onMessage.addListener(onColorHeadings);
+}
+
+function extractHeadings() {
+    const onExtractHeadings = message => {
+        if (message.type !== "extractHeadings")
+            return ;
+
+        const headings = $(message.selector).map((_, element) => element.textContent);
+
+        browser.runtime.onMessage.removeListener(onExtractHeadings);
+        browser.runtime.sendMessage({type: "headingsExtracted", headings: Array.from(headings)});
+    };
+
+    browser.runtime.onMessage.addListener(onExtractHeadings);
+}</code></pre>
+
+<h1 class="section-heading"><span id="Persistent_Storage">Persistent Storage</span></h1>
+<p>Some commands may want to store data that persist even after closing Firefox.
+    Meet the <code>Bin</code> interface:
+</p>
+
+<pre><code data-language="javascript">let gId = 42; // used to avoid needless preview updates when typing
+cmdAPI.createCommand({
+    name: "memo",
+    uuid: "FA6A3460-E825-4CFA-A24F-5908131D29FD",
+    description: "Lets you jot a memo for the page.",
+    author: "satyr",
+    argument: noun_arb_text,
+    previewDelay: 1000,
+    execute({object: {html}}, Bin) {
+        const href = cmdAPI.getLocation();
+        const list = Bin[href]() || [];
+        list.push(html);
+        Bin[href](list);
+        gId = +new Date;
+    },
+    preview(pb, _, Bin) {
+        const href = cmdAPI.getLocation();
+        const list = Bin[href]();
+        if (!list) {
+            pb.innerHTML =
+                `No memos taken for: &lt;small&gt;&lt;code&gt;${href}&lt;/code&gt;&lt;/small&gt;`;
+            return;
+        }
+        if ($("ol[data-id='" + gId + "']").length > 0) return;
+        let ol = cmdAPI.previewList(pb, list, function deleteMemo(i, ev) {
+            $(ev.target).closest("li").slideUp();
+            list.splice(i, 1);
+            Bin[href](list.length ? list : null);
+            gId = +new Date;
+        });
+        ol.setAttribute("data-id", gId);
+    },
+});</code></pre>
 
 <h1 class="section-heading"><span id="Development_Hints">Development Hints</span></h1>
 
@@ -986,46 +1111,7 @@ application is the only way to compile user commands in MV3 version of iShell.</
 <p>If you installed the helper application as a Python package, you may develop your own
 <a href="https://flask.palletsprojects.com/en/2.1.x/" target="_blank">Flask</a> handlers
 callable from user commands. See the Python source code for the details of what
-<code>cmdAPI</code> methods are employed in the work with the helper application.</p>
-
-<h2><span id="Persistent_Storage">Persistent Storage</span></h2>
-<p>Some commands may want to store data that persist even after closing Firefox.
-    Meet the <code>Bin</code> interface:
-</p>
-
-<pre><code data-language="javascript">let gId = 42; // used to avoid needless preview updates when typing
-cmdAPI.createCommand({
-    name: "memo",
-    uuid: "FA6A3460-E825-4CFA-A24F-5908131D29FD",
-    description: "Lets you jot a memo for the page.",
-    author: "satyr",
-    argument: noun_arb_text,
-    previewDelay: 1000,
-    execute({object: {html}}, Bin) {
-        let href = cmdAPI.getLocation();
-        let list = Bin.href() || [];
-        list.push(html);
-        Bin.href(list);
-        gId = +new Date;
-    },
-    preview(pb, _, Bin) {
-        let href = cmdAPI.getLocation();
-        let list = Bin.href();
-        if (!list) {
-            pb.innerHTML =
-                `No memos taken for: &lt;small&gt;&lt;code&gt;${href}&lt;/code&gt;&lt;/small&gt;`;
-            return;
-        }
-        if ($("ol[data-id='" + gId + "']").length > 0) return;
-        let ol = cmdAPI.previewList(pb, list, function deleteMemo(i, ev) {
-            $(ev.target).closest("li").slideUp();
-            list.splice(i, 1);
-            Bin.href(list.length ? list : null);
-            gId = +new Date;
-        });
-        ol.setAttribute("data-id", gId);
-    },
-});</code></pre>
+<code>cmdAPI</code> methods could be used to interact with the helper application.</p>
 
 <h2><span id="Ace_Code_Editor">Ace Code Editor</span></h2>
 <p>iShell uses <a href="https://ace.c9.io/" target="_blank">Ace</a> code editor to edit user-defined

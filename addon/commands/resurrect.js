@@ -13,10 +13,6 @@ var resurrect_archiveServices =
         , "wayback machine list": ["web.archive.org", "http://web.archive.org/web/*/"]
         , "google cache": ["google.com", "http://www.google.com/search?q=cache:"]
         , "google cache text only": ["google.com", "http://www.google.com/search?strip=1&q=cache:"]
-        , "coralcdn": ["coralcdn.org", function (loc) {
-            return loc.split(/\/+/g)[loc.indexOf("://") > 0 ? 1 : 0] + ".nyud.net";
-        }]
-        , "webcite": ["webcitation.org", "http://webcitation.org/query.php?url="]
     };
 
 
@@ -95,8 +91,6 @@ CmdUtils.CreateCommand({
                     <li>- <i>wayback machine list</i></li>
                     <li>- <i>google cache</i></li>
                     <li>- <i>google cache text only</i></li>
-                    <li>- <i>coralcdn</i></li>
-                    <li>- <i>webcite</i></li>
                </ul></li>
            </ul>
            <span class="arguments">Example</span>

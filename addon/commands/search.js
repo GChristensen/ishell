@@ -279,7 +279,7 @@ CmdUtils.CreateCommand({
     icon: "/ui/icons/wikipedia.ico",
     description: "Searches Wikipedia for your words, in a given language.",
     preview: function wikipedia_preview(previewBlock, args) {
-        var searchText = Utils.trim(args.object.text);
+        var searchText = args.object?.text?.trim();
         var lang = args.format.html || "English";
         if (!searchText) {
             previewBlock.text(`Searches Wikipedia in ${lang}.`);

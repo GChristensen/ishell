@@ -1,13 +1,9 @@
 // Any new functionality should be added to cmdapi.js
 
-import {settings} from "../settings.js";
 import {cmdManager} from "../cmdmanager.js";
 import {ContextUtils} from "./contextutils.js";
 
 export var CmdUtils = {
-    VERSION: chrome.runtime.getManifest().version,
-    DEBUG: settings.debug_mode(),
-
     NounType: NounUtils.NounType,
     matchScore: NounUtils.matchScore,
     makeSugg: NounUtils.makeSugg,
@@ -30,11 +26,6 @@ export function L(pattern) {
 
     return pattern;
 }
-
-CmdUtils.deblog = function () {
-    if (CmdUtils.DEBUG)
-        console.log.apply(console, arguments);
-};
 
 CmdUtils.CreateCommand = function CreateCommand(options) {
     return cmdManager.createCommand(options);
@@ -62,7 +53,7 @@ CmdUtils.setSelection = function setSelection(replacementText) {
     replacementText = replacementText.replace(/(['"])/g, "\\$1");
     replacementText = replacementText.replace(/\\\\/g, "\\");
 
-    if (CmdUtils.activeTab && CmdUtils.activeTab.id)
+    if (CmdUtils.activeTab?.id)
         return ContextUtils.setSelection(CmdUtils.activeTab.id, replacementText);
 };
 
@@ -301,9 +292,6 @@ CmdUtils.makeSearchCommand = function(options) {
     return CmdUtils.CreateCommand(options);
 };
 
-CmdUtils.makeSearchCommand.log = function searchLog(it, type) {
-    Utils.log("SearchCommand: " + type + " =", it);
-};
 CmdUtils.makeSearchCommand.query = function searchQuery(target, query, charset) {
     var re = /%s|{QUERY}/g, fn = encodeURIComponent;
     if (charset) {

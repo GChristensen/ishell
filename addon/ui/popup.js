@@ -250,7 +250,7 @@ async function initPopup() {
     document.addEventListener('keydown', keydown_handler, false);
     document.addEventListener('keyup', keyup_handler, false);
 
-    CmdUtils.deblog("iShell popup initialized");
+    cmdAPI.dbglog("iShell popup initialized");
 }
 
 $(document).ready(initPopup);

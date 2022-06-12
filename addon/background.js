@@ -5,4 +5,4 @@ if (_MANIFEST_V3)
 
 contextMenuManager.loadMenu();
 
-CmdUtils.deblog("iShell v" + CmdUtils.VERSION + " background script loaded");
+cmdAPI.dbglog("iShell v" + cmdAPI.VERSION + " background script loaded");

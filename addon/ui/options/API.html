@@ -29,8 +29,9 @@
        href="#shell-api-reference"></a>iShell API Reference</h2>
 
 <p>Currently, iShell supports both the modern <code>cmdAPI</code> namespace and legacy
-    <code>CmdUtils</code> and <code>Utils</code> namespaces from Ubiquity API.</p>
-
+    <code>CmdUtils</code> functions from the Ubiquity API. The API is intended
+to be as minimal as possible. The use of native JavaScript and WebExtension APIs
+    is suggested whenever available.</p>
 
 <h3><a id="user-content-cmdutilscreatecommandoptions" class="anchor" aria-hidden="true"
        href="#cmdutilscreatecommandoptions"></a>cmdAPI.createCommand(options)</h3>
@@ -214,53 +215,10 @@
     </ul>
 </blockquote>
 
-<h3><a id="preview-fetch" class="anchor" aria-hidden="true" href="#preview-fetch"></a>cmdAPI.previewFetch(pblock,
-    resource, init)</h3>
+<h3><a id="user-content-cmdutilsnotifymessage-title" class="anchor" aria-hidden="true" href="#cmdutilsnotifymessage-title"></a>cmdAPI.notify(message, title)</h3>
+<p class="legacy-name">Legacy names: CmdUtils.notify, displayMessage</p>
 <blockquote>
-    <p>Does an asynchronous request to a remote web service. It is a wrapper around the standard <a
-            href="https://developer.mozilla.org/en-US/docs/Web/API/WindowOrWorkerGlobalScope/fetch"
-            target="_blank">fetch()</a> function. The difference is that <strong>cmdAPI.previewFetch()</strong>
-        is designed to handle command previews, which can be canceled by a user action between the
-        time it is requested and the time it displays. If the preview is canceled, an "AbortError"
-        exception is thrown.</p>
-</blockquote>
-
-<h3><a id="fetch-aborted" class="anchor" aria-hidden="true" href="#preview-fetch"></a>cmdAPI.fetchAborted(error)
-</h3>
-<blockquote>
-    <p>Determines if the call to <b>cmdAPI.previewFetch</b> was aborted by a user action.</p>
-    <ul>
-        <li><strong>error</strong> - exception thrown by <b>cmdAPI.previewFetch</b> or one of the <a
-                href="https://developer.mozilla.org/en-US/docs/Web/API/Response" target="_blank">Response</a>
-            object methods returned by it.
-        </li>
-    </ul>
-</blockquote>
-
-<h3><a id="user-content-cmdutilspreviewajaxpblock-options" class="anchor" aria-hidden="true"
-       href="#cmdutilspreviewajaxpblock-options"></a>cmdAPI.previewAjax(pblock, options)</h3>
-<p class="legacy-name">Legacy name: CmdUtils.previewAjax</p>
-<blockquote>
-    <p>Does an asynchronous request to a remote web service. It is used just like <strong>jQuery.ajax()</strong>,
-        which is documented <a href="https://api.jquery.com/jQuery.Ajax" target="_blank">here</a>.<br>
-        The difference is that <strong>cmdAPI.previewAjax()</strong> is designed to handle command
-        previews, which can be canceled by a user action between the time it is requested and the
-        time it displays. If the preview is canceled, no callbacks in the options object will be
-        called.</p>
-</blockquote>
-
-<h3><a id="user-content-cmdutilspreviewgetpost" class="anchor" aria-hidden="true"
-       href="#cmdutilspreviewgetpost"></a>cmdAPI.previewGet(pblock, url, data, callback, type)<br>
-    cmdAPI.previewPost(pblock, url, data, callback, type)
-</h3>
-<p class="legacy-name">Legacy names: CmdUtils.previewGet, CmdUtils.previewPost</p>
-<blockquote>
-    <p>Does an asynchronous request to a remote web service. It is used just like <b>jQuery.get()/jQuery.post()</b>,
-        which is documented <a href="https://api.jquery.com/jQuery.get"
-                               target="_blank">here</a>.<br> The difference is that <b>previewGet()/previewPost()</b>
-        is designed to handle command previews, which can be canceled by a user action between the
-        time it is requested and the time it displays. If the preview is canceled, the given
-        callback will not be called.</p>
+    <p>Display a popup notification with the specified <strong>message</strong> and <strong>title</strong>.</p>
 </blockquote>
 
 <h3><a id="user-content-cmdutilspreviewlistblock-htmls-callback-css" class="anchor"
@@ -350,12 +308,138 @@
         applied to the array items. Useful for the generation of HTML lists with JavaScript
         template literals.
     </p>
-    The function passed through the <strong>func</strong> parameter has the following arguments:
+    The function accepted through the <strong>func</strong> parameter has the following arguments:
     <ul>
         <li><strong>item</strong> is an array item being processed.</li>
         <li><strong>index</strong> is the index of the array item being processed.</li>
         <li><strong>array</strong> is the array passed through the <strong>array</strong> argument.</li>
     </ul>
+</blockquote>
+
+<h3><a id="user-content-contextutilsgetselection" class="anchor" aria-hidden="true" href="#contextutilsgetselection"></a>cmdAPI.getSelection()</h3>
+<p class="legacy-name">Legacy name: CmdUtils.getSelection</p>
+<blockquote>
+    <p>Returns a string containing the text and just the text of the user's
+      current selection, i.e. with HTML tags stripped out.</p>
+</blockquote>
+
+<h3><a id="user-content-contextutilsgethtmlselection" class="anchor" aria-hidden="true" href="#contextutilsgethtmlselection"></a>cmdAPI.getHtmlSelection()</h3>
+<p class="legacy-name">Legacy name: CmdUtils.getHtmlSelection</p>
+<blockquote>
+    <p>Returns a string containing the HTML representation of the
+      user's current selection, i.e. text including tags.</p>
+  </blockquote>
+
+<h3><a id="user-content-contextutilssetselectioncontent" class="anchor" aria-hidden="true" href="#contextutilssetselectioncontent"></a>cmdAPI.setSelection(content)</h3>
+<p class="legacy-name">Legacy name: CmdUtils.setSelection</p>
+<blockquote>
+    <p>Replaces the current selection with <strong>content</strong>.</p>
+</blockquote>
+
+<h3><a id="user-content-cmdutilscopytoclipboardtext" class="anchor" aria-hidden="true" href="#cmdutilscopytoclipboardtext"></a>cmdAPI.copyToClipboard(text)</h3>
+<p class="legacy-name">Legacy name: CmdUtils.copyToClipboard</p>
+<blockquote>
+    <p>This function places the passed-in text into the OS's clipboard.
+        If the text is empty, the copy isn't performed.</p>
+    <ul>
+        <li><strong>text</strong> is a plaintext string that will be put into the clipboard.</li>
+    </ul>
+</blockquote>
+
+<h3><a id="user-content-cmdutilsgetlocation" class="anchor" aria-hidden="true" href="#cmdutilsgetlocation"></a>cmdAPI.getLocation()</h3>
+<p class="legacy-name">Legacy name: CmdUtils.getLocation</p>
+<blockquote>
+    <p>Returns the location URL of the active tab, if available.</p>
+</blockquote>
+
+<h3><a id="user-content-utilsopenurlinbrowserurlstring" class="anchor" aria-hidden="true" href="#utilsopenurlinbrowserurlstring"></a>cmdAPI.addTab(url, callback)</h3>
+<p class="legacy-name">Legacy names: Utils.openUrlInBrowser</p>
+<blockquote>
+    <p>
+      Opens the given URL in the user's browser, using
+      their current preferences for how new URLs should be opened (e.g.,
+      in a new window vs. a new tab, etc).
+      Passes the newly opened tab object to the callback function or returns it as a promise if the callback is omitted.</p>
+    <ul>
+      <li><strong>url</strong> a URL to be opened.</li>
+    </ul>
+</blockquote>
+
+<h3><a id="user-content-active_tab" class="anchor" aria-hidden="true" href="#active_tab"></a>cmdAPI.getActiveTab()</h3>
+<blockquote>
+    <p>Also available as a read-only property <b>cmdAPI.activeTab</b>. Returns the <a href="https://developer.mozilla.org/en-US/docs/Mozilla/Add-ons/WebExtensions/API/tabs/Tab">Tab</a> object of the currently active tab.
+        May return <b>null</b> for the special tabs.</p>
+</blockquote>
+
+<h3><a id="user-content-executescript" class="anchor" aria-hidden="true" href="#active_tab"></a>cmdAPI.executeScript(tabId, options)</h3>
+<blockquote>
+    <p>Executes a content script in the tab with the given ID.</p>
+    <ul>
+        <li><strong>tabId</strong> - ID of the tab in which to execute the script, optional. If not specified, the active tab is used.</li>
+        <li><strong>options</strong> - an object with the following properties:
+            <ul>
+                <li><strong>func</strong> - a function to execute. Because the function is cloned, all local context is lost.</li>
+                <li><strong>file</strong> - a file to execute. Only files bundled with the add-on may be used.</li>
+                <li><strong>allFrames</strong> - a boolean that indicates that the script should be executed in all frames.</li>
+                <li><strong>frameId</strong> - ID of the frame to execute the script into.</li>
+            </ul>
+        </li>
+    </ul>
+    <p>Returns an object with the following properties:</p>
+    <ul>
+        <li><strong>result</strong> - result of the script execution.</li>
+        <li><strong>frameId</strong> - frame ID from which the result is obtained (MV3 only).</li>
+        <li><strong>error</strong> - details of the script execution error (MV3 only).</li>
+    </ul>
+</blockquote>
+
+<h3><a id="preview-fetch" class="anchor" aria-hidden="true" href="#preview-fetch"></a>cmdAPI.previewFetch(pblock,
+    resource, init)</h3>
+<blockquote>
+    <p>Does an asynchronous request to a remote web service. It is a wrapper around the standard <a
+            href="https://developer.mozilla.org/en-US/docs/Web/API/WindowOrWorkerGlobalScope/fetch"
+            target="_blank">fetch()</a> function. The difference is that <strong>cmdAPI.previewFetch()</strong>
+        is designed to handle command previews, which can be canceled by a user action between the
+        time it is requested and the time it displays. If the preview is canceled, an "AbortError"
+        exception is thrown.</p>
+</blockquote>
+
+<h3><a id="fetch-aborted" class="anchor" aria-hidden="true" href="#preview-fetch"></a>cmdAPI.fetchAborted(error)
+</h3>
+<blockquote>
+    <p>Determines if the call to <b>cmdAPI.previewFetch</b> was aborted by a user action.</p>
+    <ul>
+        <li><strong>error</strong> - exception thrown by <b>cmdAPI.previewFetch</b> or one of the <a
+                href="https://developer.mozilla.org/en-US/docs/Web/API/Response" target="_blank">Response</a>
+            object methods returned by it.
+        </li>
+    </ul>
+</blockquote>
+
+<h3><a id="user-content-cmdutilspreviewajaxpblock-options" class="anchor" aria-hidden="true"
+       href="#cmdutilspreviewajaxpblock-options"></a>cmdAPI.previewAjax(pblock, options)</h3>
+<p class="legacy-name">Legacy name: CmdUtils.previewAjax</p>
+<blockquote>
+    <p>Does an asynchronous request to a remote web service. It is used just like <strong>jQuery.ajax()</strong>,
+        which is documented <a href="https://api.jquery.com/jQuery.Ajax" target="_blank">here</a>.<br>
+        The difference is that <strong>cmdAPI.previewAjax()</strong> is designed to handle command
+        previews, which can be canceled by a user action between the time it is requested and the
+        time it displays. If the preview is canceled, no callbacks in the options object will be
+        called.</p>
+</blockquote>
+
+<h3><a id="user-content-cmdutilspreviewgetpost" class="anchor" aria-hidden="true"
+       href="#cmdutilspreviewgetpost"></a>cmdAPI.previewGet(pblock, url, data, callback, type)<br>
+    cmdAPI.previewPost(pblock, url, data, callback, type)
+</h3>
+<p class="legacy-name">Legacy names: CmdUtils.previewGet, CmdUtils.previewPost</p>
+<blockquote>
+    <p>Does an asynchronous request to a remote web service. It is used just like <b>jQuery.get()/jQuery.post()</b>,
+        which is documented <a href="https://api.jquery.com/jQuery.get"
+                               target="_blank">here</a>.<br> The difference is that <b>previewGet()/previewPost()</b>
+        is designed to handle command previews, which can be canceled by a user action between the
+        time it is requested and the time it displays. If the preview is canceled, the given
+        callback will not be called.</p>
 </blockquote>
 
 <h3><a id="user-content-cmdutilsabsurldata-baseurl" class="anchor" aria-hidden="true"
@@ -375,61 +459,6 @@
     </ul>
 </blockquote>
 
-<h3><a id="user-content-cmdutilscopytoclipboardtext" class="anchor" aria-hidden="true" href="#cmdutilscopytoclipboardtext"></a>cmdAPI.copyToClipboard(text)</h3>
-<p class="legacy-name">Legacy name: CmdUtils.copyToClipboard</p>
-<blockquote>
-    <p>This function places the passed-in text into the OS's clipboard.
-      If the text is empty, the copy isn't performed.</p>
-    <ul>
-      <li><strong>text</strong> is a plaintext string that will be put into the clipboard.</li>
-    </ul>
-  </blockquote>
-
-<h3><a id="user-content-cmdutilsnotifymessage-title" class="anchor" aria-hidden="true" href="#cmdutilsnotifymessage-title"></a>cmdAPI.notify(message, title)</h3>
-<p class="legacy-name">Legacy names: CmdUtils.notify, displayMessage</p>
-<blockquote>
-    <p>Display a popup notification with the specified <strong>message</strong> and <strong>title</strong>.</p>
-</blockquote>
-
-<h3><a id="user-content-cmdutilsgetlocation" class="anchor" aria-hidden="true" href="#cmdutilsgetlocation"></a>cmdAPI.getLocation()</h3>
-<p class="legacy-name">Legacy name: CmdUtils.getLocation</p>
-<blockquote>
-    <p>Returns the location URL of the active tab, if available.</p>
-  </blockquote>
-
-<h3><a id="user-content-contextutilsgetselection" class="anchor" aria-hidden="true" href="#contextutilsgetselection"></a>cmdAPI.getSelection()</h3>
-<p class="legacy-name">Legacy name: CmdUtils.getSelection</p>
-<blockquote>
-    <p>Returns a string containing the text and just the text of the user's
-      current selection, i.e. with HTML tags stripped out.</p>
-  </blockquote>
-
-<h3><a id="user-content-contextutilsgethtmlselection" class="anchor" aria-hidden="true" href="#contextutilsgethtmlselection"></a>cmdAPI.getHtmlSelection()</h3>
-<p class="legacy-name">Legacy name: CmdUtils.getHtmlSelection</p>
-<blockquote>
-    <p>Returns a string containing the HTML representation of the
-      user's current selection, i.e. text including tags.</p>
-  </blockquote>
-
-<h3><a id="user-content-contextutilssetselectioncontent" class="anchor" aria-hidden="true" href="#contextutilssetselectioncontent"></a>cmdAPI.setSelection(content)</h3>
-<p class="legacy-name">Legacy name: CmdUtils.setSelection</p>
-<blockquote>
-    <p>Replaces the current selection with <strong>content</strong>.</p>
-  </blockquote>
-
-<h3><a id="user-content-utilsopenurlinbrowserurlstring" class="anchor" aria-hidden="true" href="#utilsopenurlinbrowserurlstring"></a>cmdAPI.addTab(urlString, callback)</h3>
-<p class="legacy-name">Legacy names: Utils.openUrlInBrowser</p>
-<blockquote>
-    <p>
-      Opens the given URL in the user's browser, using
-      their current preferences for how new URLs should be opened (e.g.,
-      in a new window vs. a new tab, etc).
-      Passes the newly opened tab object to the callback function or returns it as a promise if the callback is omitted.</p>
-    <ul>
-      <li><strong>urlString</strong> a URL to be opened.</li>
-    </ul>
-  </blockquote>
-
 <h3><a id="user-content-utilsparamstostringparams-prefix--" class="anchor" aria-hidden="true" href="#utilsparamstostringparams-prefix--"></a>cmdAPI.paramsToString(params, prefix = "?")</h3>
 <p class="legacy-name">Legacy name: Utils.paramsToString</p>
 <blockquote>
@@ -441,10 +470,10 @@
     </ul>
   </blockquote>
 
-<h3><a id="user-content-utilsurltoparamsurlstring" class="anchor" aria-hidden="true" href="#utilsurltoparamsurlstring"></a>cmdAPI.urlToParams(urlString)</h3>
+<h3><a id="user-content-utilsurltoparamsurlstring" class="anchor" aria-hidden="true" href="#utilsurltoparamsurlstring"></a>cmdAPI.urlToParams(url)</h3>
 <p class="legacy-name">Legacy name: Utils.urlToParams</p>
 <blockquote>
-    <p>Given a <strong>urlString</strong>, returns an object containing keys and values
+    <p>Given a <strong>url</strong>, returns an object containing keys and values
       retrieved from its query-part.</p>
   </blockquote>
 
@@ -471,7 +500,7 @@
 <blockquote>
     <p>
         Creates a suggestion object used by the parser to make suggestions displayed at the popup window.
-        These suggestion objects are returned by the <code>suggest</code> function of a noun type.
+        These suggestion objects are the same that are returned by the <code>suggest</code> function of a noun type.
         Fills in <b>text</b> and <b>html</b> if missing
         and constructs <b>summary</b> from <b>text</b> and <b>selectionIndices</b>.
         At least one of <b>text</b>, <b>html</b>, or <b>data</b> is required.
@@ -499,12 +528,6 @@
             returned as a promise if not specified.
         </li>
     </ul>
-</blockquote>
-
-<h3><a id="user-content-active_tab" class="anchor" aria-hidden="true" href="#active_tab"></a>cmdAPI.getActiveTab()</h3>
-<blockquote>
-    <p>Also available as a read-only property <b>cmdAPI.activeTab</b>. Returns the <a href="https://developer.mozilla.org/en-US/docs/Mozilla/Add-ons/WebExtensions/API/tabs/Tab">Tab</a> object of the currently active tab.
-        May return <b>null</b> for the special tabs.</p>
 </blockquote>
 
 <h3><a id="user-content-getcommandline" class="anchor" aria-hidden="true" href="#getcommandline"></a>cmdAPI.getCommandLine()</h3>

@@ -1,4 +1,4 @@
-import {executeScriptFile} from "../utils_browser.js";
+import {executeScript} from "../utils_browser.js";
 
 export class ContextUtils {
     static selectedText = "";
@@ -11,26 +11,27 @@ export class ContextUtils {
         let results;
 
         try {
-            results = await executeScriptFile(tabId, {file: "/scripts/content_get_selection.js", allFrames: true});
+            results = await executeScript(tabId, {file: "/scripts/content_get_selection.js", allFrames: true});
         }
         catch (e) {
             console.error(e)
         }
 
         if (results && results.length)
-            for (let selection of results)
-                if (selection) {
-                    if (_MANIFEST_V3)
-                        selection = selection.result;
+            for (let selection of results) {
+                if (_MANIFEST_V3)
+                    selection = selection?.result;
 
+                if (selection) {
                     this.selectedText = selection.text;
                     this.selectedHtml = selection.html;
                     break;
                 }
+            }
     };
 
     static async setSelection(tabId, text) {
-        await executeScriptFile(tabId, { file: "/scripts/content_set_selection.js" } );
+        await executeScript(tabId, { file: "/scripts/content_set_selection.js" } );
         return browser.tabs.sendMessage(tabId, {type: "replaceSelectedText", text});
     }
 

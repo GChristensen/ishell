@@ -36,7 +36,7 @@ async function keepAlive() {
 }
 
 async function retryOnTabUpdate(tabId, info, tab) {
-    if (info.url && /^(about|blob|https?):/.test(info.url)) {
+    if (info.url && /^(about|blob|https|file?):/.test(info.url)) {
         keepAlive();
     }
 }

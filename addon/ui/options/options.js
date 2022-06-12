@@ -11,10 +11,10 @@ async function initPage() {
 
     setupHelp("#show-hide-help", "#options-help-div");
 
-    $("#ishell-version").text(CmdUtils.VERSION);
+    $("#ishell-version").text(cmdAPI.VERSION);
     $("#manifest-version").text(_MANIFEST_V3? "MV3": "MV2");
 
-    if (CmdUtils.DEBUG)
+    if (cmdAPI.DEBUG)
         $("#shell-debug-mode").show();
 
     configureDynamicSettings();
@@ -126,7 +126,7 @@ function populateDynamicSettings() {
 async function exportSettings() {
     let exported = {};
     exported.addon = "iShell";
-    exported.version = CmdUtils.VERSION;
+    exported.version = cmdAPI.VERSION;
 
     let settings = await browser.storage.local.get();
 

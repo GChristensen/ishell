@@ -134,7 +134,7 @@ class ContextMenuManager {
                 parser.strengthenMemory(sent);
             }
             else
-                CmdUtils.deblog("Context menu command/parser result mismatch")
+                cmdAPI.dbglog("Context menu command/parser result mismatch")
         };
 
         query.run();

@@ -1,6 +1,6 @@
 import {settings} from "../settings.js";
 import {NAMESPACE_BROWSER, NAMESPACE_ISHELL, NAMESPACE_UTILITY} from "./namespaces.js";
-import {executeScriptFile} from "../utils_browser.js";
+import {executeScript} from "../utils_browser.js";
 
 CmdUtils.CreateCommand({
     names: ["change-shell-settings", "change-shell-options"],
@@ -216,7 +216,7 @@ CmdUtils.CreateCommand({
     description: "Inverts all colors on current page. Based on <a target=_blank href=https://stackoverflow.com/questions/4766201/javascript-invert-color-on-all-elements-of-a-page>this</a>.",
     icon: "/ui/icons/invert.png",
     execute: function execute(){
-        executeScriptFile(CmdUtils.activeTab.id, {file: "/scripts/content_invert.js"});
+        executeScript(CmdUtils.activeTab.id, {file: "/scripts/content_invert.js"});
     },
 });
 

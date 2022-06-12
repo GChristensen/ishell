@@ -34,7 +34,6 @@ function translate(target, from, to, back) {
 }
 
 function msTranslator_v3(method, params, back) {
-    //CmdUtils.deblog("Using Bing Translate API v3");
     let url = "https://api.cognitive.microsofttranslator.com/translate?api-version=3.0";
     if (params.from)
         url += "&from=" + params.from;
@@ -113,7 +112,7 @@ CmdUtils.CreateCommand({
         if (object.text && object.text.length <= MS_TRANSLATOR_LIMIT)
             translate(object, from, to, CmdUtils.setSelection.bind(CmdUtils));
         else
-            CmdUtils.deblog("Error performing translation: no text or text exceeded limits");
+            console.log("Error performing translation: no text or text exceeded limits");
     },
     preview: function translate_preview(pblock, {object, goal, source}) {
         let limitExceeded = cmdAPI.settings.bing_translator_api_v3_key

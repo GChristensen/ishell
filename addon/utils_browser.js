@@ -1,6 +1,6 @@
 import {helperApp} from "./helper_app.js";
 
-async function executeScriptFileMV3(tabId, options) {
+async function executeScriptMV3(tabId, options) {
     const target = {tabId};
 
     if (options.frameId)
@@ -9,14 +9,38 @@ async function executeScriptFileMV3(tabId, options) {
     if (options.allFrames)
         target.allFrames = options.allFrames;
 
-    return browser.scripting.executeScript({target, files: [options.file]});
+    const scriptingOptions = {target};
+
+    if (options.file)
+        scriptingOptions.files = [options.file];
+
+    if (options.func)
+        scriptingOptions.func = options.func;
+
+    return browser.scripting.executeScript(scriptingOptions);
 }
 
-export function executeScriptFile(...args) {
+async function executeScriptMV2(tabId, options) {
+    if (options.func) {
+        options.code = options.func.toString().trim();
+
+        if (!options.code.startsWith("function") && !options.code.startsWith("("))
+            options.code = "function " + options.code;
+
+        options.code = `(${options.code})()`;
+        delete options.func;
+    }
+
+    const results = await browser.tabs.executeScript(tabId, options);
+
+    return results?.map(r => ({result: r}));
+}
+
+export function executeScript(tabId, options) {
     if (_MANIFEST_V3)
-        return executeScriptFileMV3(...args)
+        return executeScriptMV3(tabId, options);
     else
-        return browser.tabs.executeScript(...args);
+        return executeScriptMV2(tabId, options);
 }
 
 export async function askCSRPermission() {

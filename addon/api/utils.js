@@ -1,4 +1,4 @@
-// Sealed for backward compatibility. Use ES6 module system to add new utility functions.
+// Sealed for backwards compatibility. Use ES6 module system to add new utility functions.
 
 import {settings} from "../settings.js";
 import {repository} from "../storage.js";
@@ -6,15 +6,6 @@ import {repository} from "../storage.js";
 export var Utils = {};
 
 const TO_STRING = Object.prototype.toString;
-
-Utils.log = console.log;
-
-Utils.jsLog = (o) => console.log(JSON.stringify(o));
-
-Utils.trim = function(s) {
-    if (s)
-        return s.trim();
-};
 
 Utils.setTimeout = function() {setTimeout.apply(window, arguments)};
 Utils.isArray = Array.isArray;
@@ -60,8 +51,6 @@ Utils.parseHtml = function (htmlText, callback) {
 
     return doc;
 };
-
-// borrowed from utils.js of the original Ubiquity
 
 // === {{{ Utils.extend(target, object1, [objectN ...]) }}} ===
 // Extends {{{target}}} by copying properties from the rest of arguments.
