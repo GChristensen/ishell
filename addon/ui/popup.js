@@ -1,8 +1,8 @@
 import "../api/background.js";
 import {settings} from "../settings.js";
-import {CommandList} from "./commandlist.js";
-import {SelectionList} from "./selectionlist.js";
-import {cmdManager, contextMenuManager as contextMenu} from "../api/ishell.js";
+import {CommandList} from "./command_list.js";
+import {SelectionList} from "./selection_list.js";
+import {cmdManager, contextMenuManager as contextMenu} from "../ishell.js";
 
 class PopupWindow {
     constructor() {
@@ -304,7 +304,7 @@ let popup;
 async function initPopup() {
     await settings.load();
     await cmdManager.initializeCommandsOnPopup(document);
-    await CmdUtils._updateActiveTab();
+    await cmdAPI.__updateActiveTab();
 
     popup = new PopupWindow();
 

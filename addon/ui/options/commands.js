@@ -1,4 +1,4 @@
-import {cmdManager} from "../../api/ishell.js";
+import {cmdManager} from "../../ishell.js";
 import {settings} from "../../settings.js";
 import {setupHelp} from "./utils.js";
 import {repository} from "../../storage.js";

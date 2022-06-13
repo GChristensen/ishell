@@ -23,8 +23,8 @@ export class ContextUtils {
                     selection = selection?.result;
 
                 if (selection) {
-                    this.selectedText = selection.text;
-                    this.selectedHtml = selection.html;
+                    this.selectedText = selection.result.text;
+                    this.selectedHtml = selection.result.html;
                     break;
                 }
             }

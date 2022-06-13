@@ -1,4 +1,4 @@
-import {cmdManager, helperApp} from "../../api/ishell.js";
+import {cmdManager, helperApp} from "../../ishell.js";
 import {settings} from "../../settings.js";
 import {repository} from "../../storage.js";
 import {CommandPreprocessor} from "../../api/preprocessor.js";

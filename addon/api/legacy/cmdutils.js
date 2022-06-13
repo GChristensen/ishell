@@ -1,7 +1,6 @@
 // Sealed for backwards compatibility. Any new functionality should be added to cmdapi.js
 
 import {cmdManager} from "../../cmdmanager.js";
-import {ContextUtils} from "./contextutils.js";
 
 export var CmdUtils = {
     NounType: NounUtils.NounType,
@@ -107,26 +106,6 @@ Utils.openUrlInBrowser = CmdUtils.addTab = function addTab(url, callback) {
 
 CmdUtils.getActiveTab = function () {
     return CmdUtils.activeTab;
-};
-
-// called when the popup is shown or a context menu command is selected
-CmdUtils._updateActiveTab = async function () {
-    CmdUtils.activeTab = null;
-    ContextUtils.clearSelection();
-
-    try {
-        let tabs = await browser.tabs.query({active: true, currentWindow: true})
-        if (tabs.length) {
-            let tab = tabs[0];
-            if (tab.url.match('^blob://') || tab.url.match('^https?://') || tab.url.match('^file://')) {
-                CmdUtils.activeTab = tab;
-                await ContextUtils.getSelection(tab.id);
-            }
-        }
-    }
-    catch (e) {
-        console.error(e);
-    }
 };
 
 // === {{{ CmdUtils.absUrl(data, baseUrl) }}} ===

@@ -1,4 +1,4 @@
-import {helperApp} from "../../api/ishell.js";
+import {helperApp} from "../../ishell.js";
 import {settings} from "../../settings.js";
 import {repository} from "../../storage.js";
 import {setupHelp} from "./utils.js";

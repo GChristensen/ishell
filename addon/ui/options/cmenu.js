@@ -1,4 +1,4 @@
-import {contextMenuManager as contextMenu} from "../../api/ishell.js";
+import {contextMenuManager as contextMenu} from "../../ishell.js";
 import {settings} from "../../settings.js";
 
 $(initPage);

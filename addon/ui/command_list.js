@@ -1,4 +1,4 @@
-import {cmdManager, contextMenuManager as contextMenu} from "../api/ishell.js";
+import {cmdManager, contextMenuManager as contextMenu} from "../ishell.js";
 
 export class CommandList {
     #popup;
