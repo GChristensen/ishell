@@ -16,7 +16,7 @@ export const cmdAPI = {
     __helperApp: helperApp,
 
     dbglog(...args) {
-        if (cmdAPI.DEBUG) console.log.apply(console, args);
+        if (cmdAPI.DEBUG) console.log(...args);
     },
 
     get settings() {

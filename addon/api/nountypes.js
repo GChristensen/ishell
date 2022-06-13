@@ -227,21 +227,33 @@ export const noun_type_contact = {
 };
 
 export const noun_type_tab = {
-    label: "title or URL",
-    noExternalCalls: true,
-    suggest: function(text, html, cb, selectedIndices) {
-        let fakeReq = {readyState: 2};
+    label: "tab title or URL",
 
-        CmdUtils.tabs.search(text, settings.max_suggestions(), tabs => {
-            fakeReq.readyState = 4;
-            cb(tabs.map(tab =>
-                NounUtils.makeSugg(
-                    tab.title || tab.url,
-                    null, tab, NounUtils.matchScore(tab.match), selectedIndices)));
+    async _searchTabs(text, maxResults) {
+        const matcher = new RegExp(text, "i");
+        const tabs = await browser.tabs.query({});
+        const results = tabs.filter(tab => {
+            tab.__match = matcher.exec(tab.title) || matcher.exec(tab.url);
+            return !!tab.__match;
         });
 
-        return [fakeReq];
+        if (maxResults)
+            return results.slice(0, maxResults)
+        else
+            return results;
     },
+
+    async suggest(text, html, callback, selectedIndices) {
+        const tabs = await this._searchTabs(text, 5);
+        const makeSugg = tab => cmdAPI.makeSugg(tab.title || tab.url, null, tab,
+                                                cmdAPI.matchScore(tab.__match),
+                                                selectedIndices);
+        const results = tabs.map(makeSugg);
+
+        callback(results);
+
+        return []; // normally, we should return suggestions here, but our noun type is asynchronous
+    }
 };
 
 export const noun_type_context_menu_command = {

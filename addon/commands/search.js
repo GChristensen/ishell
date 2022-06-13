@@ -87,23 +87,25 @@ CmdUtils.makeSearchCommand({
             dataType: "json",
             success: function youtube_success(data) {
                 pblock.innerHTML =
-                    `<p>
-                       Found <b>${data.pageInfo.totalResults}</b> YouTube Videos matching <b>${summary}</b>
-                     </p>
-                     ${R(data.items, (entry, entry_index) => 
-                       `<div style="clear: both; font-size: small">
-                         <kbd>${(entry_index < 35) ? (entry_index + 1).toString(36) : "-"}</kbd>.
-                         <a style="font-size: small; font-weight:bold"
-                            accessKey="${(entry_index < 35) ? (entry_index + 1).toString(36) : "-"}"
-                            href="https://www.youtube.com/watch?v=${entry.id.videoId}">
-                           <img style="float:left; margin: 0 10px 5px 0; border: none"
-                                src="${entry.snippet.thumbnails.default.url}" />
-                           ${entry.snippet.title}
-                         </a>
-                         <p>
-                           ${entry.snippet.description}
-                         </p>
-                        </div>`)}
+                    `<div class="search-result-list">
+                       <p>
+                         Found <b>${data.pageInfo.totalResults}</b> YouTube Videos matching <b>${summary}</b>
+                       </p>
+                       ${R(data.items, (entry, entry_index) => 
+                         `<div style="clear: both; font-size: small" class="search-result-item">
+                           <kbd>${(entry_index < 35) ? (entry_index + 1).toString(36) : "-"}</kbd>.
+                           <a style="font-size: small; font-weight:bold"
+                              accessKey="${(entry_index < 35) ? (entry_index + 1).toString(36) : "-"}"
+                              href="https://www.youtube.com/watch?v=${entry.id.videoId}">
+                             <img style="float:left; margin: 0 10px 5px 0; border: none"
+                                  src="${entry.snippet.thumbnails.default.url}" />
+                             ${entry.snippet.title}
+                           </a>
+                           <p>
+                             ${entry.snippet.description}
+                           </p>
+                          </div>`)}
+                       </div>
                     `;
             },
             error: function youtube_error({statusText}) {

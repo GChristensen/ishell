@@ -2,6 +2,7 @@ import "../api_background.js";
 import {settings} from "../settings.js";
 import {SuggestionManager} from "./suggestions.js";
 import {cmdManager, contextMenuManager as contextMenu} from "../ishell.js";
+import {SelectionList} from "./selectionlist.js";
 
 class PopupWindow {
     constructor() {
@@ -14,24 +15,33 @@ class PopupWindow {
         if (!this._preview_element.set)
             this._preview_element.set = function (html) {this.innerHTML = html};
         else
-            console.error("Preview element has set property:", this._preview_element.set);
+            console.error("Preview element has 'set' property:", this._preview_element.set);
 
         // wraps html text into a div with some margins
         if (!this._preview_element.text)
             this._preview_element.text = function (html) {this.innerHTML = `<div class="description">${html}</div>`};
         else
-            console.error("Preview element has text property:", this._preview_element.text);
+            console.error("Preview element has 'text' property:", this._preview_element.text);
 
         // wraps html text into a div with some margins
         if (!this._preview_element.error)
             this._preview_element.error = function (html) {this.innerHTML = `<div class="description error">${html}</div>`};
         else
-            console.error("Preview element has error property:", this._preview_element.error);
+            console.error("Preview element has 'error' property:", this._preview_element.error);
 
         this._suggestions = new SuggestionManager(this, cmdManager, settings.max_suggestions());
 
         let input = this.loadInput()
         this._suggestions.displaySuggestions(input);
+    }
+
+    get pblock() {
+        return this._preview_element;
+    }
+
+    reset() {
+        this._suggestions_element.innerHTML = "<ul/>";
+        this.setPreview();
     }
 
     // used from suggestion manager
@@ -45,6 +55,7 @@ class PopupWindow {
         this._suggestions.displaySuggestions(input);
     }
 
+    // command has changed preview by setting innerHTMl
     invalidatePreview() {
         this._preview_element.dispatchEvent(new Event("preview-change"));
     }
@@ -57,15 +68,6 @@ class PopupWindow {
 
         this.invalidatePreview();
         this._preview_element.innerHTML = html || "";
-    }
-
-    get pblock() {
-        return this._preview_element;
-    }
-
-    reset() {
-        this._suggestions_element.innerHTML = "<ul/>";
-        this.setPreview();
     }
 
     get lastInput() {
@@ -93,6 +95,11 @@ class PopupWindow {
         const input = this.getInput();
         settings.shell_last_command(input);
         this.lastInput = input;
+    }
+
+    addCurrentInputToHistory() {
+        cmdManager.commandHistoryPush(this.getInput());
+        this._suggestions.strengthenMemory();
     }
 
     loadInput() {
@@ -123,6 +130,7 @@ class PopupWindow {
         html += "<span class='keys'>Ctrl+Alt+\\</span> - show command history<br>";
         html += "<span class='keys'>Ctrl+Alt+&ltkey&gt;</span> - select the list item prefixed with the &ltkey&gt;<br>";
         html += "<span class='keys'>&#8593;/&#8595;</span> - cycle through command suggestions<br>";
+        html += "<span class='keys'>Ctrl+&#8593;/&#8595;</span> - cycle through preview list items<br>";
         html += "<span class='keys'>F5</span> - reload the extension</div></p>";
 
         this.setPreview(html);
@@ -142,9 +150,25 @@ class PopupWindow {
     }
 
     async execute(input) {
-        await cmdManager.commandHistoryPush(input);
-        await this._suggestions.executeSelection();
+        const selectionList = new SelectionList(this.pblock);
+        const previewSelection = selectionList.getSelectedElement();
+
+        if (previewSelection)
+            this.executePreviewItem(previewSelection, true)
+        else {
+            await cmdManager.commandHistoryPush(input);
+            await this._suggestions.executeSelection();
+        }
         window.close();
+    }
+
+    executePreviewItem(object, activate) {
+        if (object.length > 0) {
+            if (object[0].href)
+                browser.tabs.create({ "url": object[0].href, active: activate });
+            else
+                object.click();
+        }
     }
 
     async showHistory() {
@@ -157,24 +181,19 @@ class PopupWindow {
         });
     }
 
-    advanceSelection(direction) {
+    advanceSuggestionSelection(direction) {
         this.lastInput = "";
         this._suggestions.advanceSelection(direction);
     }
 
-    selectListItem(keyCode) {
-        let items = jQuery("[accessKey='" + String.fromCharCode(keyCode).toLowerCase() + "']");
-        if (items.length > 0) {
-            if (items[0].href)
-                chrome.tabs.create({ "url": items[0].href, active: false });
-            else
-                items.click();
-        }
+    selectPreviewItem(keyCode) {
+        const object = $("[accessKey='" + String.fromCharCode(keyCode).toLowerCase() + "']");
+        this.executePreviewItem(object);
     }
 
-    addCurrentInputToHistory() {
-        cmdManager.commandHistoryPush(this.getInput());
-        this._suggestions.strengthenMemory();
+    advancePreviewSelection(direction) {
+        const selectionList = new SelectionList(this.pblock);
+        selectionList.advanceSelection(direction);
     }
 }
 
@@ -223,19 +242,25 @@ async function keydown_handler(evt) {
     // Cursor up
     if (keyCode === 38) {
         evt.preventDefault();
-        popup.advanceSelection(false);
+        if (evt.ctrlKey)
+            popup.advancePreviewSelection(false);
+        else
+            popup.advanceSelection(false);
         return;
     }
     // Cursor Down
     else if (keyCode === 40) {
         evt.preventDefault();
-        popup.advanceSelection(true);
+        if (evt.ctrlKey)
+            popup.advancePreviewSelection(true);
+        else
+            popup.advanceSuggestionSelection(true);
         return;
     }
 
     // execute events from preview lists
     if (evt.ctrlKey && evt.altKey && keyCode >= 40 && keyCode <= 90) {
-        popup.selectListItem(keyCode);
+        popup.selectPreviewItem(keyCode);
         return;
     }
 
@@ -246,7 +271,6 @@ async function keydown_handler(evt) {
     }
 
     if (keyCode === 33 || keyCode === 34) {
-        console.log(evt);
         popup.pblock.scrollBy(0, (keyCode === 33? -1: 1) * popup.pblock.clientHeight - 20);
     }
 

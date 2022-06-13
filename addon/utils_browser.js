@@ -63,6 +63,18 @@ export async function hasCSRPermission(verbose = true) {
     return true;
 }
 
+export function loadCSS(doc, id, file) {
+    if (!doc.getElementById(id)) {
+        let link = doc.createElement('link');
+        link.id = id;
+        link.rel = 'stylesheet';
+        link.type = 'text/css';
+        link.href = file;
+        link.media = 'all';
+        doc.head.appendChild(link);
+    }
+}
+
 export async function nativeEval(text, global = false, wnd = window) {
     const doc = wnd.document;
     const key = crypto.randomUUID();

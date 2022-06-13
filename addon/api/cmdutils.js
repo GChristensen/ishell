@@ -109,24 +109,6 @@ CmdUtils.getActiveTab = function () {
     return CmdUtils.activeTab;
 };
 
-CmdUtils.tabs = {
-    search(text, maxResults, callback) {
-        let matcher = new RegExp(text, "i");
-
-        chrome.tabs.query({}, tabs => {
-            let results = [];
-            for (let tab of tabs) {
-                let match = matcher.exec(tab.title) || matcher.exec(tab.url);
-                if (!match) continue;
-                tab.match = match;
-                results.push(tab);
-                if (maxResults && results.length >= maxResults) break;
-            }
-            callback(results);
-        });
-    }
-};
-
 // called when the popup is shown or a context menu command is selected
 CmdUtils._updateActiveTab = async function () {
     CmdUtils.activeTab = null;
@@ -144,19 +126,6 @@ CmdUtils._updateActiveTab = async function () {
     }
     catch (e) {
         console.error(e);
-    }
-};
-
-CmdUtils.loadCSS = function(doc, id, file) {
-    if (!doc.getElementById(id)) {
-        let head = doc.getElementsByTagName('head')[0];
-        let link = doc.createElement('link');
-        link.id = id;
-        link.rel = 'stylesheet';
-        link.type = 'text/css';
-        link.href = file;
-        link.media = 'all';
-        head.appendChild(link);
     }
 };
 
@@ -292,6 +261,9 @@ CmdUtils.makeSearchCommand = function(options) {
     return CmdUtils.CreateCommand(options);
 };
 
+CmdUtils.makeSearchCommand.log = function searchLog(it, type) {
+    Utils.log("SearchCommand: " + type + " =", it);
+};
 CmdUtils.makeSearchCommand.query = function searchQuery(target, query, charset) {
     var re = /%s|{QUERY}/g, fn = encodeURIComponent;
     if (charset) {

@@ -1,6 +1,7 @@
 import {settings} from "../settings.js";
 import {NAMESPACE_BROWSER, NAMESPACE_ISHELL, NAMESPACE_UTILITY} from "./namespaces.js";
 import {executeScript} from "../utils_browser.js";
+import {noun_type_tab} from "../api/nountypes.js";
 
 CmdUtils.CreateCommand({
     names: ["change-shell-settings", "change-shell-options"],
@@ -184,13 +185,11 @@ CmdUtils.CreateCommand({
     previewDelay: 100,
     _namespace: NAMESPACE_BROWSER,
     icon: "/ui/icons/tab_delete.png",
-    execute: function execute({object: {text}}) {
-        if (text) {
-            CmdUtils.tabs.search(text, null, tabs => {
-                for(let tab of tabs)
-                    chrome.tabs.remove(tab.id);
-            });
-        }
+    async execute({object: {text}}) {
+        const tabs = await noun_type_tab._searchTabs(text);
+
+        for(let tab of tabs)
+            chrome.tabs.remove(tab.id);
     }
 });
 

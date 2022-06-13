@@ -7,6 +7,8 @@ export var Utils = {};
 
 const TO_STRING = Object.prototype.toString;
 
+Utils.log = (...args) => console.log(...args);
+
 Utils.setTimeout = function() {setTimeout.apply(window, arguments)};
 Utils.isArray = Array.isArray;
 

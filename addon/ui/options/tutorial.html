@@ -826,7 +826,7 @@ cmdAPI.createCommand({
     objects, each one containing the name of a matching tab.
 </p>
 
-<pre><code data-language="javascript">var noun_type_browser_tab = {
+<pre><code data-language="javascript">const noun_type_browser_tab = {
     label: "tab title or URL",
 
     async _searchTabs(text, maxResults) {
@@ -836,8 +836,6 @@ cmdAPI.createCommand({
            tab.__match = matcher.exec(tab.title) || matcher.exec(tab.url);
            return !!tab.__match;
         });
-
-        console.log(results);
 
         return results.slice(0, maxResults)
     },
@@ -981,7 +979,8 @@ class ChangeColor {
     }
 
     async injectJQuery() {
-        // here we can obtain the result of script execution directly
+        // because there is nothing to pass into the function
+        // we can obtain the result of script evaluation directly
         const hasJQuery = await cmdAPI.executeScript({func: () => !!window.$});
 
         // inject jQuery bundled with the add-on
