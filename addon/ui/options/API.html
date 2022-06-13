@@ -397,17 +397,17 @@
     <p>Sends message to the specified tab. Could be used in content scripts. From the tab context, the message is sent system-wide.</p>
     <ul>
         <li><strong>tabId</strong> - ID of the tab in which to execute the script, optional. If not specified, the active tab is used.</li>
-        <li><strong>messageId</strong> - ID of the message for use in <code>cmdAPI.onMessage()</code>.</li>
+        <li><strong>messageId</strong> - ID of the message for use in <b>cmdAPI.onMessage()</b>.</li>
         <li><strong>payload</strong> - arbirary object.</li>
     </ul>
 </blockquote>
 
 <h3><a id="user-content-onmessage" class="anchor" aria-hidden="true"></a>cmdAPI.onMessage(messageId, handler)</h3>
 <blockquote>
-    <p>Creates a one-time message handler to receive messages sent by <code>cmdAPI.sendMessage()</code>. Use the WebExtension APIs if a
+    <p>Creates a one-time message handler to receive messages sent by <b>cmdAPI.sendMessage()</b>. Use the WebExtension APIs if a
     permanent handler is required.</p>
     <ul>
-        <li><strong>messageId</strong> - ID of the message send with <code>cmdAPI.sendMessage()</code></li>
+        <li><strong>messageId</strong> - ID of the message send with <b>cmdAPI.sendMessage()</b></li>
         <li><strong>handler</strong> - a function that receives message payload.</li>
     </ul>
 </blockquote>

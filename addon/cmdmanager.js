@@ -145,7 +145,7 @@ class CommandManager {
         }
     }
 
-    async commandHistory() {
+    async getCommandHistory() {
         return settings.get("command_history");
     }
 
@@ -174,13 +174,13 @@ class CommandManager {
     // adds a storage bin obtained from the command uuid as the last argument of the called function
     async callPersistent(cmd, obj, f) {
         let args = arguments;
-        let new_args = Array.prototype.slice.call(args, 3);
+        let newArgs = Array.prototype.slice.call(args, 3);
 
         const bin = await Utils.makeBin(cmd.uuid);
-        new_args.push(bin);
+        newArgs.push(bin);
 
         try {
-            f.apply(obj, new_args); // sic!
+            f.apply(obj, newArgs); // sic!
         } catch (e) {
             console.error(e.toString() + "\n" + e.stack);
         }
@@ -193,8 +193,8 @@ class CommandManager {
             return this.callPersistent(cmd, cmd, f)
     }
 
-    callPreview(sentence, preview_element) {
-        return this.callPersistent(sentence.getCommand(), sentence, sentence.preview, preview_element);
+    callPreview(sentence, pblock) {
+        return this.callPersistent(sentence.getCommand(), sentence, sentence.preview, pblock);
     }
 
     callExecute(sentence) {

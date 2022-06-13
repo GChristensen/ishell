@@ -59,10 +59,10 @@ function openListSuggestion(text, html, cb, selectionIndices) {
         let suggs = this._items.filter(i => {
             i.match = matcher.exec(i.path || i.name);
             return (i.path || i.name) && i.match;
-        }).map(i => CmdUtils.makeSugg(i.path || i.name, i.path || i.name, null,
-            i.match.input? CmdUtils.matchScore(i.match): .0001, selectionIndices));
+        }).map(i => cmdAPI.makeSugg(i.path || i.name, i.path || i.name, null,
+            i.match.input? cmdAPI.matchScore(i.match): .0001, selectionIndices));
 
-        let textSugg = CmdUtils.makeSugg(text, html, null, suggs.length ? .001 : 1, selectionIndices);
+        let textSugg = cmdAPI.makeSugg(text, html, null, suggs.length ? .001 : 1, selectionIndices);
         if (textSugg)
             suggs.push(textSugg);
 
@@ -110,18 +110,18 @@ let noun_type_date = {
         suggs = [];
 
         if (/^\d{4}-\d{1,2}-\d{1,2}$/.test(text)) {
-            suggs.push(CmdUtils.makeSugg(text, text, null, 1, selectionIndices));
+            suggs.push(cmdAPI.makeSugg(text, text, null, 1, selectionIndices));
         }
         else if (/^\d{1,2}-\d{1,2}$/.test(text)) {
             let now = new Date();
             let [month, day] = text.split("-");
             let date = now.getFullYear() + "-" + addZero(month) + "-" + addZero(day);
-            suggs.push(CmdUtils.makeSugg(date, date, null, 1, selectionIndices));
+            suggs.push(cmdAPI.makeSugg(date, date, null, 1, selectionIndices));
         }
         else if (/^\d{1,2}$/.test(text)) {
             let now = new Date();
             let date = now.getFullYear() + "-" + addZero(now.getMonth() + 1) + "-" + addZero(text);
-            suggs.push(CmdUtils.makeSugg(date, date, null, 1, selectionIndices));
+            suggs.push(cmdAPI.makeSugg(date, date, null, 1, selectionIndices));
         }
 
         return suggs;
@@ -130,9 +130,9 @@ let noun_type_date = {
 
 function genericErrorHandler(error) {
     if (error.status)
-        CmdUtils.notify("Scrapyard: HTTP error: " + error.status)
+        cmdAPI.notify("Scrapyard: HTTP error: " + error.status)
     else
-        CmdUtils.notify("Cannot contact backend")
+        cmdAPI.notify("Cannot contact backend")
 }
 
 
@@ -170,7 +170,7 @@ function updateCompletion() {
 }
 
 let getArgumentText = arg =>
-    arg && arg.text && arg.text !== CmdUtils.getSelection() && arg.text !== "this"
+    arg && arg.text && arg.text !== cmdAPI.getSelection() && arg.text !== "this"
         ? arg.text
         : null;
 
@@ -201,7 +201,7 @@ function unpackArgs(cmd, args) {
     if (!result.limit)
         result.limit = DEFAULT_OUTPUT_LIMIT;
 
-    let selection = CmdUtils.getSelection();
+    let selection = cmdAPI.getSelection();
 
     for (let k of Object.keys(result)) {
         if (!result[k] || result[k] === selection)
@@ -214,7 +214,7 @@ function unpackArgs(cmd, args) {
 }
 
 
-let shelfCmd = CmdUtils.CreateCommand({
+let shelfCmd = cmdAPI.createCommand({
     name: "shelf",
     uuid: "C481A44B-071E-4100-8047-6B708498B3CF",
     arguments: [{role: "object", nountype: noun_scrapyard_group, label: "name"}],
@@ -234,7 +234,7 @@ let shelfCmd = CmdUtils.CreateCommand({
 });
 
 
-let scrapyardCmd = CmdUtils.CreateCommand({
+let scrapyardCmd = cmdAPI.createCommand({
     name: "scrapyard",
     uuid: "F39C4D86-C987-4A8A-8109-8D683C25BE4E",
     arguments: [{role: "object",     nountype: noun_arb_text, label: "title"},
@@ -354,10 +354,10 @@ function createBookmarkList(nodes, pblock, path) {
         items.push(text);
     }
 
-    let list = CmdUtils.previewList(pblock, items, (i, _) => {
+    let list = cmdAPI.previewList(pblock, items, (i, _) => {
             if (nodes[i].type === NODE_TYPE_GROUP) {
                 let itemPath = path? path + "/": "";
-                CmdUtils.setCommandLine("scrapyard from group at " + itemPath + nodes[i].path);
+                cmdAPI.setCommandLine("scrapyard from group at " + itemPath + nodes[i].path);
             }
             else {
                 ///if (typeof nodes[i].id === "string" && nodes[i].id.startsWith("firefox_"))
@@ -480,8 +480,8 @@ function bookmarkingCommandPreview() {
 
         let title = search
             ? search
-            : (CmdUtils.activeTab
-                ? CmdUtils.activeTab.title
+            : (cmdAPI.activeTab
+                ? cmdAPI.activeTab.title
                 : "Bookmark");
 
         let html = "";
@@ -492,7 +492,7 @@ function bookmarkingCommandPreview() {
         if (path)
             html += "Path: <span style='color: #FD7221;'>" + Utils.escapeHtml(path) + "</span><br>";
 
-        if (tags && CmdUtils.getSelection() !== tags)
+        if (tags && cmdAPI.getSelection() !== tags)
             html += "Tags: <span style='color: #7DE22E;'>" + Utils.escapeHtml(tags) + "</span><br>";
 
         if (todo_state)
@@ -519,14 +519,14 @@ function bookmarkingCommand(nodeType) {
         delete this.__scr__args;
 
         payload.name = payload.search;
-        payload.uri = CmdUtils.getLocation();
+        payload.uri = cmdAPI.getLocation();
 
         scrapyardSend(`SCRAPYARD_ADD_${nodeType}_ISHELL`, payload);
     };
 }
 
 
-let bookmarkCmd = CmdUtils.CreateCommand({
+let bookmarkCmd = cmdAPI.createCommand({
     name: "bookmark",
     uuid: "520F182C-34D0-4837-B42A-64A7E859D3D5",
     arguments: bookmarkingArgs,
@@ -543,7 +543,7 @@ let bookmarkCmd = CmdUtils.CreateCommand({
 });
 
 
-let archiveCmd = CmdUtils.CreateCommand({
+let archiveCmd = cmdAPI.createCommand({
     name: "archive",
     uuid: "2CFD7052-84E2-465C-A450-45BFFE3C6C80",
     arguments: bookmarkingArgs,
@@ -587,7 +587,7 @@ let archiveCmd = CmdUtils.CreateCommand({
 });
 
 
-let archiveSiteCmd = CmdUtils.CreateCommand({
+let archiveSiteCmd = cmdAPI.createCommand({
     names: ["archive-site", "arcsite"],
     uuid: "AE2C458E-DA04-46D7-8D6A-3FE62069285A",
     arguments: bookmarkingArgs,
@@ -647,7 +647,7 @@ function copyingCommand(message) {
     }
 }
 
-let copyAtCmd = CmdUtils.CreateCommand({
+let copyAtCmd = cmdAPI.createCommand({
     name: "copy-at",
     uuid: "F21CD346-D5B0-41F1-BAC0-1E325DB9DD21",
     arguments: copyingArgs,
@@ -678,7 +678,7 @@ let copyAtCmd = CmdUtils.CreateCommand({
 });
 
 
-let moveAtCmd = CmdUtils.CreateCommand({
+let moveAtCmd = cmdAPI.createCommand({
     name: "move-at",
     uuid: "425CC0C9-8794-486E-AF8C-3D64F92F9AD7",
     arguments: copyingArgs,
@@ -695,7 +695,7 @@ let moveAtCmd = CmdUtils.CreateCommand({
 });
 
 
-cmdAPI.makeCaptureCommand = CmdUtils.makeCaptureCommand = function (options) {
+CmdUtils.makeCaptureCommand = cmdAPI.makeCaptureCommand = function (options) {
     let node_type = options.type === "bookmark"
         ? NODE_TYPE_BOOKMARK
         : NODE_TYPE_ARCHIVE;
@@ -757,7 +757,7 @@ cmdAPI.makeCaptureCommand = CmdUtils.makeCaptureCommand = function (options) {
         execute: bookmarkingCommand(node_type)
     });
 
-    CmdUtils.CreateCommand(options);
+    cmdAPI.createCommand(options);
 };
 
 let scrapyard_commands = [shelfCmd, scrapyardCmd, bookmarkCmd, archiveCmd, copyAtCmd, moveAtCmd];
