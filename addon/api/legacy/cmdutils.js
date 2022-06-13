@@ -1,6 +1,6 @@
-// Any new functionality should be added to cmdapi.js
+// Sealed for backwards compatibility. Any new functionality should be added to cmdapi.js
 
-import {cmdManager} from "../cmdmanager.js";
+import {cmdManager} from "../../cmdmanager.js";
 import {ContextUtils} from "./contextutils.js";
 
 export var CmdUtils = {

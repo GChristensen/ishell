@@ -1,4 +1,3 @@
-import {settings} from "../settings.js";
 import {contextMenuManager} from "../ui/contextmenu.js";
 
 // === {{{ noun_arb_text }}} ===

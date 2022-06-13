@@ -1,8 +1,8 @@
-import "../api_background.js";
+import "../api/background.js";
 import {settings} from "../settings.js";
 import {CommandList} from "./commandlist.js";
 import {SelectionList} from "./selectionlist.js";
-import {cmdManager, contextMenuManager as contextMenu} from "../ishell.js";
+import {cmdManager, contextMenuManager as contextMenu} from "../api/ishell.js";
 
 class PopupWindow {
     constructor() {

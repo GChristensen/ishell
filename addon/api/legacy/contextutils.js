@@ -1,4 +1,4 @@
-import {executeScript} from "../utils_browser.js";
+import {executeScript} from "../../utils_browser.js";
 
 export class ContextUtils {
     static selectedText = "";

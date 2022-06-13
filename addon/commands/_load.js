@@ -1,7 +1,7 @@
-import "./api.js";
-import {loadModules} from "./utils.js";
-import {cmdManager} from "./cmdmanager.js";
-import {helperApp} from "./helper_app.js";
+import "../api/global.js";
+import {loadModules} from "../utils.js";
+import {cmdManager} from "../cmdmanager.js";
+import {helperApp} from "../helper_app.js";
 
 await loadModules([
     "./commands/more/more.js",

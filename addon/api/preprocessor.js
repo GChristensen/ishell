@@ -1,4 +1,4 @@
-// Preprocessor used to support new object-oriented command syntax
+// Preprocessor used to provide new object-oriented command syntax
 
 export const OBJECT = "object";
 export const FOR = "subject";

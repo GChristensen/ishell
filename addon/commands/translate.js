@@ -2,8 +2,12 @@ import {NAMESPACE_TRANSLATION} from "./namespaces.js";
 
 const MS_TRANSLATOR_LIMIT = 1e4;
 
+let ACCEPTED_LANGUAGES;
+
+chrome.i18n.getAcceptLanguages(ll => ACCEPTED_LANGUAGES = ll);
+
 function defaultLanguage(code2name, exclude) {
-    for (let code of [chrome.i18n.getUILanguage()].concat(CmdUtils.acceptLanguages)) {
+    for (let code of [chrome.i18n.getUILanguage()].concat(ACCEPTED_LANGUAGES)) {
         if (!(code = code.trim())) continue;
         code = (/^(..-)(..)$/i.test(code)
             ? RegExp.$1.toLowerCase() + RegExp.$2.toUpperCase()

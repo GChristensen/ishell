@@ -1,4 +1,4 @@
-import {contextMenuManager} from "./ishell.js";
+import {contextMenuManager} from "./api/ishell.js";
 
 if (_MANIFEST_V3)
     await import("./mv3_persistent.js");

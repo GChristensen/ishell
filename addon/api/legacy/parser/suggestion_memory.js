@@ -1,4 +1,4 @@
-import {repository} from "../storage.js";
+import {repository} from "../../../storage.js";
 
 export class SuggestionMemory {
     constructor() {
