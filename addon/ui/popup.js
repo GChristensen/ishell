@@ -129,7 +129,7 @@ class PopupWindow {
         html += "<span class='keys'>Ctrl+Alt+Enter</span> - add the selected command to context menu<br>";
         html += "<span class='keys'>Ctrl+Alt+\\</span> - show command history<br>";
         html += "<span class='keys'>Ctrl+Alt+&ltkey&gt;</span> - select the list item prefixed with the &ltkey&gt;<br>";
-        html += "<span class='keys'>&#8593;/&#8595;</span> - cycle through command suggestions<br>";
+        html += "<span class='keys'>&#8593;/&#8595;</span> - scroll through command suggestions<br>";
         html += "<span class='keys'>Ctrl+&#8593;/&#8595;</span> - cycle through preview list items<br>";
         html += "<span class='keys'>F5</span> - reload the extension</div></p>";
 

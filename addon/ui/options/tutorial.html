@@ -496,7 +496,7 @@ class ShowTextCommandClass {
 
   preview(args, display, storage) {
     if (args[OBJECT]?.text) {
-      cont msg = `Shows &lt;i&gt;${args[OBJECT]?.text}&lt;/i&gt; in &lt;b&gt;${args[IN]?.text || "popup"}&lt;/b&gt;`;
+      const msg = `Shows &lt;i&gt;${args[OBJECT]?.text}&lt;/i&gt; in &lt;b&gt;${args[IN]?.text || "popup"}&lt;/b&gt;`;
       display.set(msg);
     }
     else
@@ -789,9 +789,7 @@ arguments: [{role: "object",
 cmdAPI.createCommand({
   names: ["tinyurl"],
   description: "Replaces the selected URL with a TinyUrl.",
-  arguments: [{role: "object",
-               nountype: noun_arb_text,
-               label: "url to shorten"}],
+  arguments: [{role: "object", nountype: noun_arb_text, label: "url to shorten"}],
   execute(args) {
     const baseUrl = "http://tinyurl.com/api-create.php";
     const params = {url: args.object.text};
@@ -827,30 +825,30 @@ cmdAPI.createCommand({
 </p>
 
 <pre><code data-language="javascript">const noun_type_browser_tab = {
-    label: "tab title or URL",
+  label: "tab title or URL",
 
-    async _searchTabs(text, maxResults) {
-        const matcher = new RegExp(text, "i");
-        const tabs = await browser.tabs.query({});
-        const results = tabs.filter(tab => {
-           tab.__match = matcher.exec(tab.title) || matcher.exec(tab.url);
-           return !!tab.__match;
-        });
+  async _searchTabs(text, maxResults) {
+    const matcher = new RegExp(text, "i");
+    const tabs = await browser.tabs.query({});
+    const results = tabs.filter(tab => {
+      tab.__match = matcher.exec(tab.title) || matcher.exec(tab.url);
+      return !!tab.__match;
+    });
 
-        return results.slice(0, maxResults)
-    },
+    return results.slice(0, maxResults)
+  },
 
-    async suggest(text, html, callback, selectedIndices) {
-        const tabs = await this._searchTabs(text, 5);
-        const makeSugg = tab => cmdAPI.makeSugg(tab.title || tab.url, null, tab,
-                                                cmdAPI.matchScore(tab.__match),
-                                                selectedIndices);
-        const results = tabs.map(makeSugg);
+  async suggest(text, html, callback, selectedIndices) {
+    const tabs = await this._searchTabs(text, 5);
+    const makeSugg = tab => cmdAPI.makeSugg(tab.title || tab.url, null, tab,
+                                            cmdAPI.matchScore(tab.__match),
+                                            selectedIndices);
+    const results = tabs.map(makeSugg);
 
-        callback(results);
+    callback(results);
 
-        return []; // normally, we should return suggestions here, but our noun type is asynchronous
-    }
+    return []; // normally, we should return suggestions here, but our noun type is asynchronous
+  }
 };</code></pre>
 
 <p>The suggest method of a noun type always gets passed both text and html. If the input is coming
@@ -929,11 +927,13 @@ function noun_type_foo(text, html, callback, selectedIndices) {
 });</code></pre>
 
 <h1 class="section-heading"><span id="Using_Browser_APIs">Executing Content Scripts</span></h1>
-<p>Content scripts allow to modify or retrieve content of the live document loaded in a browser
-    tab. Use the <a href="API.html#user-content-executescript" target="_blank">cmdAPI.executeScript()</a>
-    function to run JavaScript code in the context of the tab document. For an
-    example, let's create a command that changes the color of the heading tags of the given
-    level (for example, H1 or H2) and prints the text of each heading in the preview area.</p>
+<p>Content scripts allow to modify or retrieve items of the live document loaded into a browser
+    tab. Use the <a href="API.html#user-content-executescript" target="_blank">cmdAPI.executeScript()</a>,
+    <a href="API.html#user-content-sendmessage" target="_blank">cmdAPI.sendMessage()</a>, and
+    <a href="API.html#user-content-onmessage" target="_blank">cmdAPI.onMessage()</a>
+    functions to run JavaScript code in the context of the tab document. For an
+    example, let's create a command that changes the color of the heading tags
+    (for example, H1 or H2) and prints the text of each heading in the preview area.</p>
 
 <pre><code data-language="javascript">/**
  Content script example
@@ -941,7 +941,7 @@ function noun_type_foo(text, html, callback, selectedIndices) {
  @command
  @description Changes the color of the given heading tags.
  @uuid E4AF2528-384C-4B08-B794-4306682866D4
- */
+*/
 class ChangeColor {
     constructor(args) {
         args[OF] = {nountype: ["H1", "H2", "H3", "H4", "H5"], label: "selector"};
@@ -950,32 +950,25 @@ class ChangeColor {
     
     async preview({OF}, display) {
         // a message handler that receives the list of headings from the tab document
-        const onHeadingsExtracted = message => {
-            if (message.type !== "headingsExtracted")
-                return;
-
+        cmdAPI.onMessage("headingsExtracted", message => {
             const headingList = `<ul>${
                 R(message.headings, h => (`<li>${h}</li>`))
             }</ul>`;
             display.set(headingList)
-
-            browser.runtime.onMessage.removeListener(onHeadingsExtracted);
-        };
-
-        await browser.runtime.onMessage.addListener(onHeadingsExtracted);
+        });
 
         await this.injectJQuery();
         // a function should be passed to executeScript, this works both in MV2 and MV3
         // do not pass references to class methods
         await cmdAPI.executeScript({func: extractHeadings});
         // the only way we can pass the heading selector to the tab is through a message
-        browser.tabs.sendMessage(cmdAPI.activeTab.id, {type: "extractHeadings", selector: OF.text});
+        cmdAPI.sendMessage("extractHeadings", {selector: OF.text});
     }
 
     async execute({OF, TO}) {
         await this.injectJQuery();
-        await cmdAPI.executeScript({func: ChangeColor.colorHeadings});
-        browser.tabs.sendMessage(cmdAPI.activeTab.id, {type: "colorHeadings", selector: OF.text, color: TO.text});
+        await cmdAPI.executeScript({func: colorHeadings});
+        cmdAPI.sendMessage("colorHeadings", {selector: OF.text, color: TO.text});
     }
 
     async injectJQuery() {
@@ -991,71 +984,67 @@ class ChangeColor {
 
 // these functions are executed as content scripts in the context of the tab document
 
-function colorHeadings() {
-    const onColorHeadings = message => {
-        if (message.type !== "colorHeadings")
-            return ;
-
-        $(message.selector).css("color", message.color);
-
-        browser.runtime.onMessage.removeListener(onColorHeadings);
-    };
-
-    browser.runtime.onMessage.addListener(onColorHeadings);
+function extractHeadings() {
+    // cmdAPI.onMessage and cmdAPI.sendMessage could be used inside scripts
+    // executed with cmdAPI.executeScript()
+    cmdAPI.onMessage("extractHeadings", message => {
+        const headings = $(message.selector).map((_, element) => element.textContent);
+        cmdAPI.sendMessage("headingsExtracted", {headings: Array.from(headings)});
+    });
 }
 
-function extractHeadings() {
-    const onExtractHeadings = message => {
-        if (message.type !== "extractHeadings")
-            return ;
-
-        const headings = $(message.selector).map((_, element) => element.textContent);
-
-        browser.runtime.onMessage.removeListener(onExtractHeadings);
-        browser.runtime.sendMessage({type: "headingsExtracted", headings: Array.from(headings)});
-    };
-
-    browser.runtime.onMessage.addListener(onExtractHeadings);
+function colorHeadings() {
+    cmdAPI.onMessage("colorHeadings", message => {
+        $(message.selector).css("color", message.color);
+    });
 }</code></pre>
 
 <h1 class="section-heading"><span id="Persistent_Storage">Persistent Storage</span></h1>
 <p>Some commands may want to store data that persist even after closing Firefox.
-    Meet the <code>Bin</code> interface:
+    Meet the <a href="API.html#user-content-bin" target="_blank">Bin</a> interface. Note the use of
+    <a href="API.html#user-content-previewlist" target="_blank">cmdAPI.previewList()</a> function to create
+    a list with clickable items.
 </p>
 
-<pre><code data-language="javascript">let gId = 42; // used to avoid needless preview updates when typing
-cmdAPI.createCommand({
-    name: "memo",
-    uuid: "FA6A3460-E825-4CFA-A24F-5908131D29FD",
-    description: "Lets you jot a memo for the page.",
-    author: "satyr",
-    argument: noun_arb_text,
-    previewDelay: 1000,
-    execute({object: {html}}, Bin) {
-        const href = cmdAPI.getLocation();
-        const list = Bin[href]() || [];
-        list.push(html);
-        Bin[href](list);
-        gId = +new Date;
-    },
-    preview(pb, _, Bin) {
+<pre><code data-language="javascript">/**
+ @command
+ @delay 1000
+ @description Lets you jot a memo for the page.
+ @uuid FA6A3460-E825-4CFA-A24F-5908131D29FD
+*/
+class Memo {
+    constructor(args) {
+        args[OBJECT] = {nountype: noun_arb_text, label: "text"};
+    }
+
+    preview(_, display, Bin) {
         const href = cmdAPI.getLocation();
         const list = Bin[href]();
+
         if (!list) {
-            pb.innerHTML =
-                `No memos taken for: &lt;small&gt;&lt;code&gt;${href}&lt;/code&gt;&lt;/small&gt;`;
+            display.text(`No memos taken for: <small><code>${href}</code></small>`);
             return;
         }
-        if ($("ol[data-id='" + gId + "']").length > 0) return;
-        let ol = cmdAPI.previewList(pb, list, function deleteMemo(i, ev) {
+
+        let ol = cmdAPI.previewList(display, list, function deleteMemo(i, ev) {
             $(ev.target).closest("li").slideUp();
             list.splice(i, 1);
             Bin[href](list.length ? list : null);
             gId = +new Date;
         });
+
         ol.setAttribute("data-id", gId);
-    },
-});</code></pre>
+    }
+
+    execute({object: {html}}, Bin) {
+        const href = cmdAPI.getLocation();
+        const list = Bin[href]() || [];
+
+        list.push(html);
+        Bin[href](list);
+        this.ID = +new Date;
+    }
+}</code></pre>
 
 <h1 class="section-heading"><span id="Development_Hints">Development Hints</span></h1>
 
@@ -1064,7 +1053,6 @@ cmdAPI.createCommand({
 <p>Here are some miscellaneous tips that didn't fit elsewhere on this page, that may make
     development easier for you.
 </p>
-
 
 <h2><span id="Anaphora">Anaphora</span></h2>
 <p>If there is an active selection, and the value of an <i>arbitrary text argument</i> is equal to one of the

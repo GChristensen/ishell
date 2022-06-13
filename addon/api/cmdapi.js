@@ -33,19 +33,7 @@ export const cmdAPI = {
 
     reduceTemplate (items, f) {
         return items?.reduce((acc, v, i, arr) => acc + f(v, i, arr), "");
-    },
-
-    helperAppProbe(verbose) {
-        return helperApp.probe(verbose)
-    },
-
-    getHelperAppURL(path) {
-        return helperApp.url(path);
-    },
-
-    getHelperAppAuth() {
-        return helperApp._injectAuth().Authorization;
-    },
+    }
 };
 
 export const R = cmdAPI.reduceTemplate;
@@ -124,5 +112,72 @@ cmdAPI.executeScript = async function(tabId, options) {
         tabId = this.activeTab.id;
     }
 
+    const cmdAPIInjected = await executeScript(tabId, {func: () => !!window.cmdAPI});
+
+    if (!cmdAPIInjected[0].result)
+        await injectCMDAPI(tabId);
+
     return executeScript(tabId, options);
 };
+
+cmdAPI.onMessage = function(messageId, handler) {
+    const listener = (message, sender) => {
+        if (message.__cmdAPIType !== messageId)
+            return ;
+
+        browser.runtime.onMessage.removeListener(listener);
+        handler(message.payload, sender);
+    };
+
+    browser.runtime.onMessage.addListener(listener);
+};
+
+cmdAPI.sendMessage = function(tabId, messageId, payload) {
+    let _tabId = tabId, _messageId = messageId, _payload = payload;
+
+    if (arguments.length === 2) {
+        _tabId = this.activeTab.id;
+        _messageId = tabId;
+        _payload = messageId;
+    }
+
+    if (_tabId)
+        browser.tabs.sendMessage(_tabId, {__cmdAPIType: _messageId, payload: _payload});
+    else
+        browser.runtime.sendMessage({__cmdAPIType: _messageId, payload: _payload});
+};
+
+async function injectCMDAPI(tabId) {
+    await executeScript(tabId, {func: injectOnMessage});
+    await executeScript(tabId, {func: injectSendMessage});
+}
+
+function injectOnMessage() {
+    if (window.cmdAPI?.onMessage)
+        return;
+
+    window.cmdAPI = window.cmdAPI || {};
+
+    window.cmdAPI.onMessage = function(messageId, handler) {
+        const listener = (message, sender) => {
+            if (message.__cmdAPIType !== messageId)
+                return ;
+
+            browser.runtime.onMessage.removeListener(listener);
+            handler(message.payload, sender);
+        };
+
+        browser.runtime.onMessage.addListener(listener);
+    };
+}
+
+function injectSendMessage() {
+    if (window.cmdAPI?.sendMessage)
+        return;
+
+    window.cmdAPI = window.cmdAPI || {};
+
+    window.cmdAPI.sendMessage = function(messageId, payload) {
+        browser.runtime.sendMessage({__cmdAPIType: messageId, payload: payload});
+    };
+}

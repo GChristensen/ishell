@@ -180,7 +180,7 @@ class CommandManager {
         new_args.push(bin);
 
         try {
-            return f.apply(obj, new_args);
+            f.apply(obj, new_args); // sic!
         } catch (e) {
             console.error(e.toString() + "\n" + e.stack);
         }

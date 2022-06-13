@@ -220,8 +220,8 @@
     <p>Display a popup notification with the specified <strong>message</strong> and <strong>title</strong>.</p>
 </blockquote>
 
-<h3><a id="user-content-cmdutilspreviewlistblock-htmls-callback-css" class="anchor"
-       aria-hidden="true" href="#cmdutilspreviewlistblock-htmls-callback-css"></a>cmdAPI.previewList(block,
+<h3><a id="user-content-previewlist" class="anchor"
+       aria-hidden="true"></a>cmdAPI.previewList(block,
     htmls, [callback], [css])</h3>
 <p class="legacy-name">Legacy name: CmdUtils.previewList</p>
 <blockquote>
@@ -364,13 +364,13 @@
     </ul>
 </blockquote>
 
-<h3><a id="user-content-active_tab" class="anchor" aria-hidden="true" href="#active_tab"></a>cmdAPI.getActiveTab()</h3>
+<h3><a id="user-content-active_tab" class="anchor" aria-hidden="true"></a>cmdAPI.getActiveTab()</h3>
 <blockquote>
     <p>Also available as a read-only property <b>cmdAPI.activeTab</b>. Returns the <a href="https://developer.mozilla.org/en-US/docs/Mozilla/Add-ons/WebExtensions/API/tabs/Tab">Tab</a> object of the currently active tab.
         May return <b>null</b> for the special tabs.</p>
 </blockquote>
 
-<h3><a id="user-content-executescript" class="anchor" aria-hidden="true" href="#active_tab"></a>cmdAPI.executeScript(tabId, options)</h3>
+<h3><a id="user-content-executescript" class="anchor" aria-hidden="true"></a>cmdAPI.executeScript(tabId, options)</h3>
 <blockquote>
     <p>Executes a content script in the tab with the given ID.</p>
     <ul>
@@ -389,6 +389,26 @@
         <li><strong>result</strong> - result of the script evaluation.</li>
         <li><strong>frameId</strong> - frame ID from which the result is obtained (MV3 only).</li>
         <li><strong>error</strong> - details of the script evaluation error (MV3 only).</li>
+    </ul>
+</blockquote>
+
+<h3><a id="user-content-sendmessage" class="anchor" aria-hidden="true"></a>cmdAPI.sendMessage(tabId, messageId, payload)</h3>
+<blockquote>
+    <p>Sends message to the specified tab. Could be used in content scripts. From the tab context, the message is sent system-wide.</p>
+    <ul>
+        <li><strong>tabId</strong> - ID of the tab in which to execute the script, optional. If not specified, the active tab is used.</li>
+        <li><strong>messageId</strong> - ID of the message for use in <code>cmdAPI.onMessage()</code>.</li>
+        <li><strong>payload</strong> - arbirary object.</li>
+    </ul>
+</blockquote>
+
+<h3><a id="user-content-onmessage" class="anchor" aria-hidden="true"></a>cmdAPI.onMessage(messageId, handler)</h3>
+<blockquote>
+    <p>Creates a one-time message handler to receive messages sent by <code>cmdAPI.sendMessage()</code>. Use the WebExtension APIs if a
+    permanent handler is required.</p>
+    <ul>
+        <li><strong>messageId</strong> - ID of the message send with <code>cmdAPI.sendMessage()</code></li>
+        <li><strong>handler</strong> - a function that receives message payload.</li>
     </ul>
 </blockquote>
 

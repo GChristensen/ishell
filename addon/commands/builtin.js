@@ -76,7 +76,7 @@ CmdUtils.CreateCommand({
     names: ["debug-mode"],
     arguments: [{role: "object", nountype: ["on", "off"] , label: "state"}],
     uuid: "810CFA30-3A39-4123-B140-B69C50A2D008",
-    description: "Switches the debug mode or on off.",
+    description: "Toggles the debug mode.",
     _namespace: NAMESPACE_ISHELL,
     icon: "/ui/icons/debug.png",
     //preview: "Debug the popup window in a separate tab.",
