@@ -1097,8 +1097,9 @@ application is the only way to compile user commands in MV3 version of iShell.</
 
 <p>If you installed the helper application as a Python package, you may develop your own
 <a href="https://flask.palletsprojects.com/en/2.1.x/" target="_blank">Flask</a> handlers
-callable from user commands. See the Python source code for the details of what
-<code>cmdAPI</code> methods could be used to interact with the helper application.</p>
+callable from user commands. Use the <a href="API.html#helper-fetch" target="_blank">cmdAPI.helperFetch()</a>
+function to call helper application handlers.
+</p>
 
 <h2><span id="Ace_Code_Editor">Ace Code Editor</span></h2>
 <p>iShell uses <a href="https://ace.c9.io/" target="_blank">Ace</a> code editor to edit user-defined

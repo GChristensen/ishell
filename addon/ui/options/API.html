@@ -435,6 +435,21 @@
     </ul>
 </blockquote>
 
+<h3><a id="helper-fetch" class="anchor" aria-hidden="true" href="#helper-fetch"></a>cmdAPI.helperFetch(pblock, path, init)</h3>
+<blockquote>
+    <p>Does an asynchronous request to the web server being run by iShell helper application.
+        If pblock parameter is specified, <b>cmdAPI.previewFetch()</b> function is used.
+        Built-in JavaScript <b>fetch</b> is used otherwise. If the helper application could not be run,
+        throws "IShellNoHelperApp" exception.</p>
+    <ul>
+        <li><strong>pblock</strong> - the preview block element that could be obtained through the <b>pblock</b> or
+            <b>display</b> parameter of a command preview handler. Optional.</li>
+        <li><strong>path</strong> - a relative path to the retrieved resource. For example, "/my_handler".</li>
+        <li><strong>init</strong> - init parameter passed to the fetch function.</li>
+    </ul>
+
+</blockquote>
+
 <h3><a id="user-content-cmdutilspreviewajaxpblock-options" class="anchor" aria-hidden="true"
        href="#cmdutilspreviewajaxpblock-options"></a>cmdAPI.previewAjax(pblock, options)</h3>
 <p class="legacy-name">Legacy name: CmdUtils.previewAjax</p>

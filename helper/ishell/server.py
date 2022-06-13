@@ -113,6 +113,7 @@ def add_header(r):
 
 
 from . import server_scripts
+from . import server_user
 
 
 @app.route("/")

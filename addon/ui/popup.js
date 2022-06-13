@@ -26,6 +26,8 @@ class PopupWindow {
     }
 
     _enhancePBlock() {
+        this.pblock.__cmdAPIPBlock = true;
+
         // add a handy set method to populate innerHTML of the preview area
         if (!this.pblock.set)
             this.pblock.set = function (html) {this.innerHTML = html};

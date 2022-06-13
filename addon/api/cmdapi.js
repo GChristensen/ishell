@@ -106,6 +106,30 @@ cmdAPI.fetchAborted = function(error) {
     return error?.name === "AbortError";
 };
 
+cmdAPI.helperFetch = async function(pblock, path, init) {
+    let _pblock = pblock, _path = path, _init = init;
+
+    if (!pblock?.__cmdAPIPBlock) {
+        _path = pblock;
+        _init = path;
+    }
+
+    if (!await helperApp.probe()) {
+        const error = new Error();
+        error.name = "IShellNoHelperApp";
+        error.message = "Can not run iShell helper app."
+        throw error;
+    }
+
+    const url = helperApp.url(path);
+    _init = helperApp._injectAuth(init);
+
+    if (pblock?.__cmdAPIPBlock)
+        return this.previewFetch(_pblock, url, _init);
+    else
+        return fetch(url, _init);
+}
+
 cmdAPI.executeScript = async function(tabId, options) {
     if (typeof tabId === "object") {
         options = tabId;
