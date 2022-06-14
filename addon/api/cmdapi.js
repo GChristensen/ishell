@@ -4,7 +4,6 @@ import {cmdManager} from "../cmdmanager.js";
 import {contextMenuManager} from "../ui/contextmenu.js";
 import {delegate} from "../utils.js";
 import {executeScript, nativeEval} from "../utils_browser.js";
-import {ContextUtils} from "./legacy/contextutils.js";
 
 export const cmdAPI = {
     DEBUG: settings.debug_mode(),
@@ -110,9 +109,11 @@ cmdAPI.fetchAborted = function(error) {
 cmdAPI.helperFetch = async function(pblock, path, init) {
     let _pblock = pblock, _path = path, _init = init;
 
-    if (!pblock?.__cmdAPIPBlock) {
+    let preview = true;
+    if (typeof pblock === "string") {
         _path = pblock;
         _init = path;
+        preview = false;
     }
 
     if (!await helperApp.probe()) {
@@ -122,10 +123,10 @@ cmdAPI.helperFetch = async function(pblock, path, init) {
         throw error;
     }
 
-    const url = helperApp.url(path);
-    _init = helperApp._injectAuth(init);
+    const url = helperApp.url(_path);
+    _init = helperApp._injectAuth(_init);
 
-    if (pblock?.__cmdAPIPBlock)
+    if (preview)
         return this.previewFetch(_pblock, url, _init);
     else
         return fetch(url, _init);

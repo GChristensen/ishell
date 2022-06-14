@@ -476,7 +476,7 @@ export class CommandPreprocessor {
         for (let object of classMatches)
             if (!object.skip) {
                 script = this.preprocessCommand(script, object);
-                //console.log(script);
+                console.log(script);
             }
 
         return script;
