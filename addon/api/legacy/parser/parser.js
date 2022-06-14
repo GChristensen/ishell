@@ -776,19 +776,26 @@ PartiallyParsedSentence.prototype = {
                     self._query.onNewParseGenerated();
                 }
 
+                const printError = e => console.error(
+                    'Exception occured while getting suggestions for "'
+                    + this._verb.name + '" with noun "' + (noun.name || noun.id) + '": ' + e.message, e);
+
                 try {
                     suggestions = noun.suggest(text, html, callback, selectionIndices);
                 } catch (e) {
-                    console.error(
-                        'Exception occured while getting suggestions for "' +
-                        this._verb.name + '" with noun "' + (noun.name || noun.id) + '": ' + e.message, e);
-
+                    printError(e);
                     return false;
                 }
-                suggestions = this._handleSuggestions(argName, suggestions);
+
+                const promise = suggestions instanceof Promise? suggestions: null;
+                suggestions = promise? []: this._handleSuggestions(argName, suggestions);
                 callback.otherSentences = [];
                 suggestions.callback = callback;
                 nounCache[key] = suggestions;
+
+                promise
+                    ?.then(suggs => callback(suggs))
+                    ?.catch(printError);
             }
             return suggestions.length > 0;
         },

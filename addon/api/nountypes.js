@@ -247,11 +247,7 @@ export const noun_type_tab = {
         const makeSugg = tab => cmdAPI.makeSugg(tab.title || tab.url, null, tab,
                                                 cmdAPI.matchScore(tab.__match),
                                                 selectedIndices);
-        const results = tabs.map(makeSugg);
-
-        callback(results);
-
-        return []; // normally, we should return suggestions here, but our noun type is asynchronous
+        return tabs.map(makeSugg);
     }
 };
 

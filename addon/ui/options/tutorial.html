@@ -940,16 +940,13 @@ class Memo {
     return results.slice(0, maxResults)
   },
 
+  // suggestion methods declared as async do not need to use callback
   async suggest(text, html, callback, selectedIndices) {
     const tabs = await this._searchTabs(text, 5);
     const makeSugg = tab => cmdAPI.makeSugg(tab.title || tab.url, null, tab,
                                             cmdAPI.matchScore(tab.__match),
                                             selectedIndices);
-    const results = tabs.map(makeSugg);
-
-    callback(results);
-
-    return []; // normally, we should return suggestions here, but our noun type is asynchronous
+    return tabs.map(makeSugg);
   }
 };</code></pre>
 
@@ -1078,7 +1075,7 @@ application is the only way to compile user commands in MV3 version of iShell.</
 
 <p>If you installed the helper application as a Python package, you may develop your own
 <a href="https://flask.palletsprojects.com/en/2.1.x/" target="_blank">Flask</a> handlers
-callable from user commands. There you can do anything what Python could.
+callable from user commands. There you could do anything what Python can.
 Use the <a href="API.html#helper-fetch" target="_blank">cmdAPI.helperFetch()</a>
 function to call helper application handlers.
 </p>

@@ -50,16 +50,18 @@ CmdUtils.makeSearchCommand({
 CmdUtils.makeSearchCommand({
     name: "IMDb",
     uuid: "F34E6A8C-FBBD-4DB2-9999-1B653034D985",
-    url: "http://www.imdb.com/find?q=%s",
+    //url: "http://www.imdb.com/find?q=%s",
+    url: "https://www.imdb.com/search/title/?title=%s",
     defaultUrl: "http://www.imdb.com",
     _namespace: NAMESPACE_SEARCH,
     arguments: [{role: "object", nountype: noun_arb_text, label: "query"}],
     previewDelay: 1000,
     icon: "/ui/icons/imdb.png",
     parser: {
-        container  : ".findResult",
-        title      : ".result_text",
-        thumbnail  : ".primary_photo",
+        container  : ".lister-item",
+        title      : ".lister-item-header",
+        thumbnail  : ".lister-item-image img",
+        body       : ".text-muted",
         maxResults : maxSearchResults,
     },
 });

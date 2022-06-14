@@ -119,10 +119,10 @@ export class CommandPreprocessor {
     }
 
     extractAnnotatedFunctions(script) {
-        const rxFun = /\/\*\*(.*?)\*\/\s*^\s*(?:export\s*)?function\s*(\w+)(.*?){/gsm
+        const rxFun = /\/\*\*(.*?)\*\/\s*^\s*(?:export\s*)?(async\s*)?function\s*(\w+)(.*?){/gsm
         const matches = [...script.matchAll(rxFun)];
 
-        return matches.map(m => ({name: m[2], comment: m[1], args: m[3], all: m[0], index: m.index}));
+        return matches.map(m => ({async_: m[2], name: m[3], comment: m[1], args: m[4], all: m[0], index: m.index}));
     }
 
     processMarkdown(text) {
@@ -411,7 +411,7 @@ export class CommandPreprocessor {
             definition += `\n    label: ${this.generateProperty(properties.label)},`
 
         definition += `
-    suggest: function ${object.args.trim()} {
+    suggest: ${object.async_ || ""} function ${object.args.trim()} {
     ${object.fullDefinition.replace(object.all, "")}
 };`
 
