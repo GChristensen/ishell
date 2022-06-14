@@ -4,6 +4,7 @@ import {cmdManager} from "../cmdmanager.js";
 import {contextMenuManager} from "../ui/contextmenu.js";
 import {delegate} from "../utils.js";
 import {executeScript, nativeEval} from "../utils_browser.js";
+import {ContextUtils} from "./legacy/contextutils.js";
 
 export const cmdAPI = {
     DEBUG: settings.debug_mode(),
@@ -24,7 +25,7 @@ export const cmdAPI = {
     },
 
     get activeTab() {
-        return CmdUtils.getActiveTab();
+        return ContextUtils.activeTab;
     },
 
     evaluate(javaScript) {
@@ -64,26 +65,6 @@ cmdAPI.parseHtml = delegate(Utils, Utils.parseHtml);
 cmdAPI.escapeHtml = delegate(Utils, Utils.escapeHtml);
 cmdAPI.makeBin = delegate(Utils, Utils.makeBin);
 cmdAPI.getActiveTab = delegate(CmdUtils, CmdUtils.getActiveTab);
-
-// called when the popup is shown or a context menu command is selected
-cmdAPI.__updateActiveTab = async function () {
-    CmdUtils.activeTab = null;
-    ContextUtils.clearSelection();
-
-    try {
-        let tabs = await browser.tabs.query({active: true, currentWindow: true})
-        if (tabs.length) {
-            let tab = tabs[0];
-            if (tab.url.match('^blob://') || tab.url.match('^https?://') || tab.url.match('^file://')) {
-                CmdUtils.activeTab = tab;
-                await ContextUtils.getSelection(tab.id);
-            }
-        }
-    }
-    catch (e) {
-        console.error(e);
-    }
-};
 
 cmdAPI.previewFetch = async function(pblock, resource, init) {
     const controller = new AbortController();
@@ -153,75 +134,8 @@ cmdAPI.helperFetch = async function(pblock, path, init) {
 cmdAPI.executeScript = async function(tabId, options) {
     if (typeof tabId === "object") {
         options = tabId;
-        tabId = this.activeTab.id;
+        tabId = this.activeTab?.id;
     }
-
-    const cmdAPIInjected = await executeScript(tabId, {func: () => !!window.cmdAPI});
-
-    if (!cmdAPIInjected[0].result)
-        await injectCMDAPI(tabId);
 
     return executeScript(tabId, options);
 };
-
-cmdAPI.onMessage = function(messageId, handler) {
-    const listener = (message, sender) => {
-        if (message.__cmdAPIType !== messageId)
-            return ;
-
-        browser.runtime.onMessage.removeListener(listener);
-        handler(message.payload, sender);
-    };
-
-    browser.runtime.onMessage.addListener(listener);
-};
-
-cmdAPI.sendMessage = function(tabId, messageId, payload) {
-    let _tabId = tabId, _messageId = messageId, _payload = payload;
-
-    if (arguments.length === 2) {
-        _tabId = this.activeTab.id;
-        _messageId = tabId;
-        _payload = messageId;
-    }
-
-    if (_tabId)
-        browser.tabs.sendMessage(_tabId, {__cmdAPIType: _messageId, payload: _payload});
-    else
-        browser.runtime.sendMessage({__cmdAPIType: _messageId, payload: _payload});
-};
-
-async function injectCMDAPI(tabId) {
-    await executeScript(tabId, {func: injectOnMessage});
-    await executeScript(tabId, {func: injectSendMessage});
-}
-
-function injectOnMessage() {
-    if (window.cmdAPI?.onMessage)
-        return;
-
-    window.cmdAPI = window.cmdAPI || {};
-
-    window.cmdAPI.onMessage = function(messageId, handler) {
-        const listener = (message, sender) => {
-            if (message.__cmdAPIType !== messageId)
-                return ;
-
-            browser.runtime.onMessage.removeListener(listener);
-            handler(message.payload, sender);
-        };
-
-        browser.runtime.onMessage.addListener(listener);
-    };
-}
-
-function injectSendMessage() {
-    if (window.cmdAPI?.sendMessage)
-        return;
-
-    window.cmdAPI = window.cmdAPI || {};
-
-    window.cmdAPI.sendMessage = function(messageId, payload) {
-        browser.runtime.sendMessage({__cmdAPIType: messageId, payload: payload});
-    };
-}

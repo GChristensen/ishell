@@ -4,6 +4,20 @@ import {CommandList} from "./command_list.js";
 import {SelectionList} from "./selection_list.js";
 import {cmdManager, contextMenuManager as contextMenu} from "../ishell.js";
 
+let popup;
+
+$(initPopup);
+
+async function initPopup() {
+    await settings.load();
+    await cmdManager.initializeCommandsOnPopup(document);
+    await ContextUtils.updateActiveTab();
+
+    popup = new PopupWindow();
+
+    cmdAPI.dbglog("iShell popup initialized");
+}
+
 class PopupWindow {
     constructor() {
         this._lastInput = "";
@@ -150,13 +164,15 @@ class PopupWindow {
 
         if (previewSelection)
             this.executePreviewItem(previewSelection, true)
-        else
-            await this.executeSuggestion();
+        else {
+            this.addCurrentInputToHistory();
+            await this.executeCurrentCommand();
+        }
 
         window.close();
     }
 
-    async executeSuggestion() {
+    async executeCurrentCommand() {
         await cmdManager.commandHistoryPush(this.getInput());
         await this._commandList.executeSelection();
     }
@@ -298,21 +314,3 @@ class PopupWindow {
         this.displaySuggestions();
     }
 }
-
-let popup;
-
-async function initPopup() {
-    await settings.load();
-    await cmdManager.initializeCommandsOnPopup(document);
-    await cmdAPI.__updateActiveTab();
-
-    popup = new PopupWindow();
-
-    cmdAPI.dbglog("iShell popup initialized");
-}
-
-$(document).ready(initPopup);
-
-$(window).on('beforeunload', function() {
-    popup.addCurrentInputToHistory();
-});

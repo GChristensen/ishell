@@ -928,52 +928,47 @@ function noun_type_foo(text, html, callback, selectedIndices) {
 
 <h1 class="section-heading"><span id="Using_Browser_APIs">Executing Content Scripts</span></h1>
 <p>Content scripts allow to modify or retrieve items of the live document loaded into a browser
-    tab. Use the <a href="API.html#user-content-executescript" target="_blank">cmdAPI.executeScript()</a>,
-    <a href="API.html#user-content-sendmessage" target="_blank">cmdAPI.sendMessage()</a>, and
-    <a href="API.html#user-content-onmessage" target="_blank">cmdAPI.onMessage()</a>
-    functions to run JavaScript code in the context of the tab document. For an
+    tab. Use the <a href="API.html#user-content-executescript" target="_blank">cmdAPI.executeScript()</a>
+    function to run JavaScript code in the context of the tab document. For an
     example, let's create a command that changes the color of the heading tags
     (for example, H1 or H2) and prints the text of each heading in the preview area.</p>
 
 <pre><code data-language="javascript">/**
- Content script example
+ Executes content scripts in the active tab
+
+ # Examples
+ - change-color **of** *H2* **to** *red*
 
  @command
+ @markdown
  @description Changes the color of the given heading tags.
- @uuid E4AF2528-384C-4B08-B794-4306682866D4
 */
 class ChangeColor {
     constructor(args) {
         args[OF] = {nountype: ["H1", "H2", "H3", "H4", "H5"], label: "selector"};
         args[TO] = {nountype: ["red", "green", "blue"], label: "color"};
     }
-    
-    async preview({OF}, display) {
-        // a message handler that receives the list of headings from the tab document
-        cmdAPI.onMessage("headingsExtracted", message => {
-            const headingList = `<ul>${
-                R(message.headings, h => (`<li>${h}</li>`))
-            }</ul>`;
-            display.set(headingList)
-        });
 
+    async preview({OF}, display) {
         await this.injectJQuery();
-        // a function should be passed to executeScript, this works both in MV2 and MV3
+
+        // a function with its arguments should be passed to executeScript
+        // this works both in MV2 and MV3
         // do not pass references to class methods
-        await cmdAPI.executeScript({func: extractHeadings});
-        // the only way we can pass the heading selector to the tab is through a message
-        cmdAPI.sendMessage("extractHeadings", {selector: OF.text});
+        const [{result}] = await cmdAPI.executeScript({func: extractHeadings, args: [OF.text]});
+        const headingList = `<ul>${
+            R(result, h => (`<li>${h}</li>`))
+        }</ul>`;
+
+        display.set(headingList)
     }
 
     async execute({OF, TO}) {
         await this.injectJQuery();
-        await cmdAPI.executeScript({func: colorHeadings});
-        cmdAPI.sendMessage("colorHeadings", {selector: OF.text, color: TO.text});
+        await cmdAPI.executeScript({func: colorHeadings, args: [OF.text, TO.text]});
     }
 
     async injectJQuery() {
-        // because there is nothing to pass into the function
-        // we can obtain the result of script evaluation directly
         const hasJQuery = await cmdAPI.executeScript({func: () => !!window.$});
 
         // inject jQuery bundled with the add-on
@@ -984,19 +979,13 @@ class ChangeColor {
 
 // these functions are executed as content scripts in the context of the tab document
 
-function extractHeadings() {
-    // cmdAPI.onMessage and cmdAPI.sendMessage could be used inside scripts
-    // executed with cmdAPI.executeScript()
-    cmdAPI.onMessage("extractHeadings", message => {
-        const headings = $(message.selector).map((_, element) => element.textContent);
-        cmdAPI.sendMessage("headingsExtracted", {headings: Array.from(headings)});
-    });
+function extractHeadings(selector) {
+    const headings = $(selector).map((_, element) => element.textContent);
+    return Array.from(headings);
 }
 
-function colorHeadings() {
-    cmdAPI.onMessage("colorHeadings", message => {
-        $(message.selector).css("color", message.color);
-    });
+function colorHeadings(selector, color) {
+    $(selector).css("color", color);
 }</code></pre>
 
 <h1 class="section-heading"><span id="Persistent_Storage">Persistent Storage</span></h1>

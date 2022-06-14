@@ -22,12 +22,19 @@ async function executeScriptMV3(tabId, options) {
 
 async function executeScriptMV2(tabId, options) {
     if (options.func) {
-        options.code = options.func.toString().trim();
+        let args = [];
 
-        if (!options.code.startsWith("function") && !options.code.startsWith("("))
-            options.code = "function " + options.code;
+        if (options.args) {
+            args = JSON.stringify(options.args);
+            delete options.args;
+        }
 
-        options.code = `(${options.code})()`;
+        let functionCode = options.func.toString().trim();
+
+        if (!functionCode.startsWith("function") && !functionCode.startsWith("("))
+            functionCode = "function " + functionCode;
+
+        options.code = `(${functionCode}).apply(null, ${args})`;
         delete options.func;
     }
 

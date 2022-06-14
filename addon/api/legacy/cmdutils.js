@@ -1,14 +1,13 @@
-// Sealed for backwards compatibility. Any new functionality should be added to cmdapi.js
+// Sealed for backwards compatibility. Add any new functionality to cmdapi.js
 
 import {cmdManager} from "../../cmdmanager.js";
+import {ContextUtils} from "./contextutils.js";
 
 export var CmdUtils = {
     NounType: NounUtils.NounType,
     matchScore: NounUtils.matchScore,
     makeSugg: NounUtils.makeSugg,
-    grepSuggs: NounUtils.grepSuggs,
-
-    activeTab: null   // tab that is currently active, updated via _updateActiveTab
+    grepSuggs: NounUtils.grepSuggs
 };
 
 export const _ = function(x) {
@@ -17,7 +16,6 @@ export const _ = function(x) {
 
 export const H = Utils.escapeHtml;
 
-// a stub without the original Ubiquity string formatter functionality
 export function L(pattern) {
     for (let sub of Array.prototype.slice.call(arguments, 1)) {
         pattern = pattern.replace("%S", sub);
@@ -48,12 +46,13 @@ CmdUtils.getHtmlSelection = () => ContextUtils.selectedHtml;
 
 // replaces current selection with string provided
 CmdUtils.setSelection = function setSelection(replacementText) {
-    if (typeof replacementText !== 'string') replacementText = replacementText + '';
-    replacementText = replacementText.replace(/(['"])/g, "\\$1");
-    replacementText = replacementText.replace(/\\\\/g, "\\");
+    if (ContextUtils.activeTab) {
+        if (typeof replacementText !== 'string') replacementText = replacementText + '';
+        replacementText = replacementText.replace(/(['"])/g, "\\$1");
+        replacementText = replacementText.replace(/\\\\/g, "\\");
 
-    if (CmdUtils.activeTab?.id)
-        return ContextUtils.setSelection(CmdUtils.activeTab.id, replacementText);
+        return ContextUtils.setSelection(ContextUtils.activeTab.id, replacementText);
+    }
 };
 
 // sets clipboard
@@ -86,15 +85,10 @@ CmdUtils.notify = function (message, title) {
 
 export const displayMessage = CmdUtils.notify;
 
-// returns active tabs URL if available
-CmdUtils.getLocation = function getLocation() {
-    if (CmdUtils.activeTab?.url)
-        return CmdUtils.activeTab.url;
-    else 
-        return ""; 
-};
+CmdUtils.getLocation = () => ContextUtils.activeTab?.url || "";
 
-// opens a new tab with the provided url
+CmdUtils.getActiveTab = () => ContextUtils.activeTab;
+
 Utils.openUrlInBrowser = CmdUtils.addTab = function addTab(url, callback) {
     let result = browser.tabs.create({ "url": url });
 
@@ -102,10 +96,6 @@ Utils.openUrlInBrowser = CmdUtils.addTab = function addTab(url, callback) {
         result.then(callback)
 
     return result;
-};
-
-CmdUtils.getActiveTab = function () {
-    return CmdUtils.activeTab;
 };
 
 // === {{{ CmdUtils.absUrl(data, baseUrl) }}} ===
