@@ -1,7 +1,6 @@
-import "../api/background.js";
 import {settings} from "../settings.js";
 import {CommandList} from "./command_list.js";
-import {SelectionList} from "./selection_list.js";
+import {PreviewList} from "./preview_list.js";
 import {cmdManager, contextMenuManager as contextMenu} from "../ishell.js";
 
 let popup;
@@ -30,7 +29,7 @@ class PopupWindow {
         this._commandList = new CommandList(this, settings.max_suggestions());
 
         this.loadInput()
-        this.displaySuggestions();
+        this.generateSuggestions();
 
         cmdAPI.getCommandLine = () => this.getInput();
         cmdAPI.setCommandLine = text => this.setCommand(text);
@@ -125,15 +124,15 @@ class PopupWindow {
     setCommand(text) {
         this.setInput(text);
         this.persistInput();
-        this.displaySuggestions();
+        this.generateSuggestions();
     }
 
     setSuggestionsContent(html) {
         this.sblock.innerHTML = html;
     }
 
-    displaySuggestions() {
-        this._commandList.displaySuggestions(this.getInput());
+    generateSuggestions() {
+        this._commandList.generateSuggestions(this.getInput());
     }
 
     // called when command has changed preview by setting innerHTMl
@@ -157,7 +156,7 @@ class PopupWindow {
     }
 
     async execute() {
-        const selectionList = new SelectionList(this.pblock);
+        const selectionList = new PreviewList(this.pblock);
         const previewSelection = selectionList.getSelectedElement();
 
         if (previewSelection)
@@ -199,7 +198,7 @@ class PopupWindow {
     }
 
     advancePreviewSelection(direction) {
-        const selectionList = new SelectionList(this.pblock);
+        const selectionList = new PreviewList(this.pblock);
         selectionList.advanceSelection(direction);
     }
 
@@ -309,6 +308,6 @@ class PopupWindow {
         }
 
         this.persistInput();
-        this.displaySuggestions();
+        this.generateSuggestions();
     }
 }

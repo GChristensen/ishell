@@ -1,5 +1,6 @@
 
-export class SelectionList {
+// used to select items with ctrl+arrows in preview lists
+export class PreviewList {
     #container;
 
     constructor(container) {

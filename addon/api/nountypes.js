@@ -174,13 +174,13 @@ export const noun_type_email = {
     }
 };
 
-export const __STORED_EMAIL_UUID = "--stored-email-items";
 export const noun_type_contact = {
     label: "email",
     noExternalCalls: true,
     cacheTime: -1,
+    BIN_UUID: "--stored-email-items",
     suggest: function (text, html, cb, selectionIndices) {
-        Utils.makeBin(__STORED_EMAIL_UUID).then(bin => {
+        Utils.makeBin(this.BIN_UUID).then(bin => {
             let contacts = bin.contacts();
             if (!contacts)
                 contacts = [];

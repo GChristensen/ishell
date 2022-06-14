@@ -38,7 +38,7 @@ export class CommandList {
         }
     }
 
-    displaySuggestions(input) {
+    generateSuggestions(input) {
         if (input)
             this._populateSuggestionList(input); // will also show command preview
         else

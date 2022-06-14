@@ -9,6 +9,14 @@
     {                       // the helper app in the MV3 version of the add-on, but do not support metaclasses
       "path": "history.js",
       "syntax": "module"
+    },
+    {
+      "path": "mail.js",
+      "syntax": "module"
+    },
+    {
+      "path": "resurrect.js",
+      "syntax": "module"
     }
   ]
 }

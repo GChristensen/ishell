@@ -1,227 +1,197 @@
 import {NAMESPACE_MAIL} from "./namespaces.js";
 
-CmdUtils.CreateCommand({
-    name: "email",
-    uuid: "65947074-CF99-4114-827E-0FC7CB348CE1",
-    arguments: [{role: "object", nountype: noun_arb_text, label: "body"},
-                {role: "goal",   nountype: noun_type_contact, label: "contact"},
-                {role: "time",   nountype: {default: 0, secondary: 1}, label: "account"}
-    ],
-    description: "Compose an email with the current selection as body using <a href='http://gmail.com'>Gmail</a>.",
-    help: `<span class="syntax">Syntax</span>
-            <ul class="syntax">
-                <li><b>email</b> <b>this</b> <b>to</b> <i>email address</i> [<b>at</b> <i>account</i>]</li>
-            </ul>
-            <span class="arguments">Arguments</span><br>
-            <ul class="syntax">
-                <li>- <b>this</b> - mandatory keyword used as substitution for the selection, an arbitrary text may be used
-                    instead<br></li>
-                <li>- <i>email address</i> - recipient's address: a valid email address<br></li>
-                <li>- <i>account</i> - gmail account: {<b>default</b>, <b>secondary</b>}<br></li>
-            </ul>
-            <span class="arguments">Example</span>
-            <ul class="syntax">
-                <li><b>email</b> <b>this</b> <b>to</b> <i>user@example.com</i> <b>at</b> <i>secondary</i></li>
-            </ul>`,
-    _namespace: NAMESPACE_MAIL,
-    author: "g/christensen",
-    icon: "/ui/icons/email.png",
-    preview: function(pblock, args) {
-        let desc = "Send ";
+class MailBase {
+    _namespace = NAMESPACE_MAIL;
 
-        if (args.object && args.object.text)
-            desc += "\"" + args.object.summary + "\" ";
-        else
-            desc += "empty message ";
-
-        if (args.goal && args.goal.text)
-            desc += "to &lt;" + args.goal.text + "&gt; ";
-
-        if (args.time && args.time.text)
-            desc += "from the " + args.source.text + " account.";
-        else
-            desc += "from the default account.";
-
-        pblock.text(desc);
-    },
-    execute: async function(args) {
-        let gmail = "https://mail.google.com/mail/u/"
-        let gmail_compose = "?ui=2&view=cm";
-
-        let user = args.source && args.source.data? args.source.data: "0";
-
-        let url = gmail + user + "/" + gmail_compose;
-
-        // if (args.instrument && args.instrument.text)
-        //     url += "&su=" + encodeURIComponent(args.object.text);
-
-        if (args.object.text)
-             url += "&body=" + encodeURIComponent(args.object.text);
-
-        if (args.goal && args.goal.text) {
-            url += "&to=" + encodeURIComponent(args.goal.text);
-            const bin = await Utils.makeBin(__STORED_EMAIL_UUID);
-
-            let contacts = bin.contacts();
-            if (!contacts)
-                contacts = [];
-
-            if (!contacts.find(c => c.toLowerCase() === args.goal.text.toLowerCase())) {
-                contacts.push(args.goal.text);
-                bin.contacts(contacts);
-            }
-        }
-
-        CmdUtils.addTab(url);
+    constructor(args) {
+        args[OBJECT] = {nountype: noun_arb_text, label: "body"}; // object
+        //args[FOR]    = {nountype: noun_arb_text, label: "text"}; // subject
+        args[TO]     = {nountype: noun_type_contact, label: "contact"}; // goal
+        //args[FROM]   = {nountype: noun_arb_text, label: "text"}; // source
+        //args[NEAR]   = {nountype: noun_arb_text, label: "text"}; // location
+        args[AT]     = {nountype: {default: 0, secondary: 1}, label: "account"}; // time
+        //args[WITH]   = {nountype: noun_arb_text, label: "text"}; // instrument
+        //args[IN]     = {nountype: noun_arb_text, label: "text"}; // format
+        //args[OF]     = {nountype: noun_arb_text, label: "text"}; // modifier
+        //args[AS]     = {nountype: noun_arb_text, label: "text"}; // alias
+        //args[BY]     = {nountype: noun_arb_text, label: "text"}; // cause
+        //args[ON]     = {nountype: noun_arb_text, label: "text"}; // dependency
     }
-});
 
-CmdUtils.CreateCommand({
-    name: "compose",
-    uuid: "2C25DC63-66E0-493D-B750-D33B55999EDB",
-    arguments: [{role: "object", nountype: noun_arb_text, label: "subject"},
-                {role: "goal", nountype: noun_type_contact, label: "contact"},
-                {role: "time",   nountype: {default: 0, secondary: 1}, label: "account"}
-    ],
-    description: "Compose an empty email with the given subject using <a href='http://gmail.com'>Gmail</a>.",
-    help: `<span class="syntax">Syntax</span>
-            <ul class="syntax">
-                <li><b>compose</b> <i>message subject</i> <b>to</b> <i>email address</i> [<b>at</b> <i>account</i>]</li>
-            </ul>
-            <span class="arguments">Arguments</span><br>
-            <ul class="syntax">
-                <li>- <i>email address</i> - recipient's address: a valid email address</li>
-                <li>- <i>account</i> - gmail account: {<b>default</b>, <b>secondary</b>}<br></li>
-            </ul>
-            <span class="arguments">Example</span>
-            <ul class="syntax">
-                <li><b>compose</b> <i>shopping list</i> <b>to</b> <i>user@example.com</i> <b>at</b> <i>secondary</i>`,
-    _namespace: NAMESPACE_MAIL,
-    author: "g/christensen",
-    icon: "/ui/icons/email.png",
-    preview: function(pblock, args) {
-        let desc = "Compose email to ";
+    preview({OBJECT, TO: {text: addr}, AT: {text: account}}, display) {
+        let desc = this._desc(OBJECT);
 
-        if (args.goal && args.goal.text)
-            desc += "&lt;" + args.goal.text + "&gt; ";
-        else
-            desc += "nobody ";
+        if (addr)
+            desc += "to &lt;<b>" + addr + "</b>&gt; ";
 
-        if (args.object && args.object.text)
-            desc += "with subject: \"" + args.object.summary + "\" ";
-
-        if (args.time && args.time.text)
-            desc += "at the " + args.time.text + " account.";
+        if (account)
+            desc += "at the " + account + " account.";
         else
             desc += "at the default account.";
 
-        pblock.text(desc);
-    },
-    execute: async function(args) {
+        display.text(desc);
+    }
+
+    async execute({OBJECT, TO: {text: addr}, AT}) {
         let gmail = "https://mail.google.com/mail/u/"
-        let gmail_compose = "?ui=2&view=cm";
+        let gmailCompose = "?ui=2&view=cm";
 
-        let user = args.time && args.time.data? args.time.data: "0";
+        let user = AT?.data? AT.data: "0";
+        let url = gmail + user + "/" + gmailCompose;
 
-        let url = gmail + user + "/" + gmail_compose;
+        url += this._url(OBJECT);
 
-        if (args.object && args.object.text)
-             url += "&su=" + encodeURIComponent(args.object.text);
+        if (addr) {
+            url += "&to=" + encodeURIComponent(addr);
+            const bin = await Utils.makeBin(noun_type_contact.BIN_UUID);
 
-        //if (args.object.text)
-        //    url += "&body=" + encodeURIComponent(args.object.text);
+            let contacts = bin.contacts() || [];
 
-        if (args.goal && args.goal.text) {
-            url += "&to=" + encodeURIComponent(args.goal.text);
-            const bin = await Utils.makeBin(__STORED_EMAIL_UUID)
-            let contacts = bin.contacts();
-            if (!contacts)
-                contacts = [];
-
-            if (!contacts.find(c => c.toLowerCase() === args.goal.text.toLowerCase())) {
-                contacts.push(args.goal.text);
+            if (!contacts.find(c => c.toLowerCase() === addr.toLowerCase())) {
+                contacts.push(addr);
                 bin.contacts(contacts);
             }
         }
 
         CmdUtils.addTab(url);
     }
-});
+}
 
-CmdUtils.CreateCommand({
-    name: "forget-email",
-    uuid: "C1B5C976-2BBE-4DD6-95E9-A65CC84E1B51",
-    arguments: [{role: "object", nountype: noun_type_contact, label: "email"}],
-    description: "Do not show the specified email in suggestions anymore.",
-    _namespace: NAMESPACE_MAIL,
-    author: "g/christensen",
-    icon: "/ui/icons/forget-email.png",
-    preview: function(pblock, args) {
-        if (args.object.text) {
-            pblock.text("Forget " + args.object.text + ".");
-        }
+/**
+ # Syntax
+ - **email** **this** **to** *email address* [**at** *account*]
+
+ # Arguments
+ - **this** - mandatory keyword used as substitution for the selection, an arbitrary text may be used instead
+ - *email address* - recipient's address: a valid email address
+ - *account* - gmail account: {**default**, **secondary**}
+
+ # Example
+ - **email** **this** **to** *user&#64;example.com **at** *secondary*
+
+ @command
+ @markdown
+ @author g/christensen
+ @icon /ui/icons/email.png
+ @description Compose an email with the current selection as the body using <a href='http://gmail.com'>Gmail</a>.
+ @uuid 65947074-CF99-4114-827E-0FC7CB348CE1
+ */
+export class Email extends MailBase {
+    _desc(OBJECT) {
+        let desc = "Send ";
+
+        if (OBJECT.text)
+            desc += "\"" + OBJECT.summary + "\" ";
         else
-            pblock.text(this.description);
-    },
-    execute: async function(args) {
-        if (args.object.text) {
-            const bin = await Utils.makeBin(__STORED_EMAIL_UUID);
+            desc += "empty message ";
 
-            let contacts = bin.contacts();
-            if (!contacts)
-                contacts = [];
-
-            let em;
-            if (em = contacts.find(c => {
-                return c.toLowerCase() === args.object.text.toLowerCase()
-            })) {
-                contacts.splice(contacts.indexOf(em), 1);
-                bin.contacts(contacts);
-            }
-        }
+        return desc;
     }
-});
 
-CmdUtils.CreateCommand({
-    name: "forget-emails",
-    uuid: "8CF164B7-1505-47BE-8DDD-7D1E3781ABF1",
-    arguments: [{role: "object", nountype: noun_arb_text, label: "pattern"}],
-    description: "Forget multiple emails at once.",
-    help: `<span class="syntax">Syntax</span>
-        <ul class="syntax">
-            <li><b>forget-emails</b> {<b>all</b> | <i>pattern</i>}</li>
-        </ul>
-        <span class="arguments">Arguments</span><br>
-        <ul class="syntax">
-            <li>- <b>all</b> - forget all emails</li>
-            <li>- <i>pattern</i> - forget emails containing this string (may be a regular expression)</li>
-        </ul>`,
-    _namespace: NAMESPACE_MAIL,
-    author: "g/christensen",
-    icon: "/ui/icons/forget-email.png",
-    preview: function(pblock, args) {
-        if (args.object.text) {
-            if (args.object.text.toLowerCase() === "all")
-                pblock.text("Forget all emails.");
+    _url({text: body}) {
+        if (body)
+            return "&body=" + encodeURIComponent(body);
+        return "";
+    }
+}
+
+/**
+ # Syntax
+ - **compose** *message subject* **to** *email address* [**at** *account*]
+
+ # Arguments
+ - *email address* - recipient's address: a valid email address
+ - *account* - gmail account: {**default**, **secondary**}
+
+ # Example
+ - **compose** *shopping list* **to** *user&#64;example.com* **at** *secondary*
+ 
+ @command
+ @markdown
+ @author g/christensen
+ @icon /ui/icons/email.png
+ @description Compose an empty email with the given subject using <a href='http://gmail.com'>Gmail</a>.
+ @uuid 2C25DC63-66E0-493D-B750-D33B55999EDB
+ */
+export class Compose extends MailBase {
+    _desc(OBJECT) {
+        let desc = "Compose email ";
+
+        if (OBJECT.text)
+            desc += "with subject: \"" + OBJECT.summary + "\" ";
+
+        return desc;
+    }
+
+    _url({text: subject}) {
+        if (subject)
+            return "&su=" + encodeURIComponent(subject);
+        return "";
+    }
+}
+
+/**
+ # Syntax
+ - **forget-email** [**all** | *email address*] [**with** *regex*]
+
+ # Arguments
+ - *email address* - recipient's address: a valid email address. All email are forgotten in the keyword **all** is used.
+ - *regex* - forget emails that match the specified regex.
+
+ # Examples
+ - **forget-email** *user&#64;example.com*
+ - **forget-email** **with** users?
+ - **forget-email** **all**
+
+ @command
+ @markdown
+ @author g/christensen
+ @icon /ui/icons/email.png
+ @description Compose an empty email with the given subject using <a href='http://gmail.com'>Gmail</a>.
+ @uuid C1B5C976-2BBE-4DD6-95E9-A65CC84E1B51
+ */
+export class ForgetEmail {
+    _namespace = NAMESPACE_MAIL;
+
+    constructor(args) {
+        args[OBJECT] = {nountype: noun_type_contact, label: "contact"}; // object
+        args[WITH]   = {nountype: noun_arb_text, label: "regex"}; // instrument
+    }
+
+    preview({OBJECT: {text: addr}, WITH: {text: regex}}, display) {
+        if (addr) {
+            if (addr.toLowerCase() === "all")
+                display.text("Forget all emails.");
             else
-                pblock.text("Forget all emails containing \"" + args.object.text + "\".");
+                display.text(`Forget &lt;<b>${addr}</b>&gt;.`);
+        }
+        else if (regex) {
+            display.text("Forget all emails containing \"" + regex + "\".");
         }
         else
-            pblock.text(this.description);
-    },
-    execute: async function(args) {
-        if (args.object.text) {
-            const bin = await Utils.makeBin(__STORED_EMAIL_UUID);
-            let contacts = bin.contacts();
-            if (!contacts)
-                contacts = [];
+            display.text(this.description);
+    }
 
-            if (args.object.text.toLowerCase() === "all")
+    async execute({OBJECT: {text: addr}, WITH: {text: regex}}) {
+        const bin = await Utils.makeBin(noun_type_contact.BIN_UUID);
+        const contacts = bin.contacts() || [];
+
+        if (addr) {
+            if (addr.toLowerCase() === "all")
                 bin.contacts([]);
             else {
-                let matcher = RegExp(args.object.text, "i");
-                bin.contacts(contacts.filter(c => !c.match(matcher)));
+                let em;
+                if (em = contacts.find(c => {
+                    return c.toLowerCase() === addr.toLowerCase()
+                })) {
+                    contacts.splice(contacts.indexOf(em), 1);
+                    bin.contacts(contacts);
+                }
             }
         }
+        else if (regex) {
+            let matcher = RegExp(regex, "i");
+            bin.contacts(contacts.filter(c => !c.match(matcher)));
+        }
     }
-});
+}

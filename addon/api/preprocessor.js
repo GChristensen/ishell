@@ -172,6 +172,7 @@ export class CommandPreprocessor {
         let hidden = comment.match(/@hidden/i);
         let metaclass = comment.match(/@metaclass/i);
         let markdown = comment.match(/@markdown/i);
+        let dbgprint = comment.match(/@dbgprint/i);
 
         let require;
         let requirePopup;
@@ -224,6 +225,7 @@ export class CommandPreprocessor {
             help: help_content,
             require: require,
             requirePopup: requirePopup,
+            dbgprint: !!dbgprint
         }
     }
 
@@ -476,7 +478,8 @@ export class CommandPreprocessor {
         for (let object of classMatches)
             if (!object.skip) {
                 script = this.preprocessCommand(script, object);
-                console.log(script);
+                if (object.properties.dbgprint)
+                    console.log(script);
             }
 
         return script;
@@ -495,17 +498,23 @@ export class CommandPreprocessor {
         const functions = this.extractFunctions(file.content);
 
         for (const funMeta of functions) {
-            const fun = Object.entries(module).find(e => e[0] === funMeta.name)[1];
-            this.instantiateNounType(fun, funMeta);
+            if (!funMeta.skip) {
+                const fun = Object.entries(module).find(e => e[0] === funMeta.name)?.[1];
+                if (fun)
+                    this.instantiateNounType(fun, funMeta);
+            }
         }
 
         const classes = this.extractClasses(file.content);
 
         for (const classMeta of classes) {
-            const classDef = Object.entries(module).find(e => e[0] === classMeta.name)[1];
-            const command = this.instantiateCommand(classDef, classMeta);
-
-            cmdAPI.createCommand(command);
+            if (!classMeta.skip) {
+                const classDef = Object.entries(module).find(e => e[0] === classMeta.name)?.[1];
+                if (classDef) {
+                    const command = this.instantiateCommand(classDef, classMeta);
+                    cmdAPI.createCommand(command);
+                }
+            }
         }
     }
 }

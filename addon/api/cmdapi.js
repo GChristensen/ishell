@@ -109,7 +109,7 @@ cmdAPI.fetchAborted = function(error) {
 cmdAPI.helperFetch = async function(pblock, path, init) {
     let _pblock = pblock, _path = path, _init = init;
 
-    let preview = true;
+    let preview = !!pblock;
     if (typeof pblock === "string") {
         _path = pblock;
         _init = path;
