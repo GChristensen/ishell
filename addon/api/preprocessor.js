@@ -248,16 +248,28 @@ export class CommandPreprocessor {
         return _arguments;
     }
 
-    static assignCommandPreview(command) {
+    static transformCommandArguments(args) {
+        for (let role of PREPROCESSOR_PREPOSITION_MAP.keys())
+            if (args[role])
+                args[PREPROCESSOR_PREPOSITION_MAP.get(role)] = args[role];
+    }
+
+    static assignCommandHandlers(command) {
         if (command.preview && typeof command.preview === "function") {
             command.__oo_preview = command.preview;
 
             command.preview = function (pblock, args, storage) {
-                for (let role of PREPROCESSOR_PREPOSITION_MAP.keys())
-                    if (args[role])
-                        args[PREPROCESSOR_PREPOSITION_MAP.get(role)] = args[role];
-
+                CommandPreprocessor.transformCommandArguments(args);
                 this.__oo_preview(args, pblock, storage);
+            }
+        }
+
+        if (command.execute) {
+            command.__oo_execute = command.execute;
+
+            command.execute = function (args, storage) {
+                CommandPreprocessor.transformCommandArguments(args);
+                this.__oo_execute(args, storage);
             }
         }
     }
@@ -339,7 +351,7 @@ export class CommandPreprocessor {
     const command = new ${object.name}(args);
     command.arguments = CommandPreprocessor.assignCommandArguments(args);
     
-    CommandPreprocessor.assignCommandPreview(command);\n\n`
+    CommandPreprocessor.assignCommandHandlers(command);\n\n`
 
         block += this.generateCommandPropertyBlock(object.properties, "command.");
         block += `\n    cmdAPI.createCommand(command);\n}\n`;
@@ -353,7 +365,7 @@ export class CommandPreprocessor {
 
         command.arguments = CommandPreprocessor.assignCommandArguments(args);
         this.assignCommandProperties(command, classMeta.properties);
-        CommandPreprocessor.assignCommandPreview(command);
+        CommandPreprocessor.assignCommandHandlers(command);
 
         return command;
     }
@@ -371,7 +383,7 @@ export class CommandPreprocessor {
         let args = {};
         super(args);
         this.arguments = CommandPreprocessor.assignCommandArguments(args);
-        CommandPreprocessor.assignCommandPreview(this); 
+        CommandPreprocessor.assignCommandHandlers(this); 
         
         ${this.generateCommandPropertyBlock(object.properties, "this.")}        
         
