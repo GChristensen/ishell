@@ -378,9 +378,10 @@
         <li><strong>options</strong> - an object with the following properties:
             <ul>
                 <li><strong>func</strong> - a function to execute. Because the function is cloned, all local context is lost.</li>
+                <li><strong>args</strong> - an array of function arguments, optional. Must be JSON-serializable.</li>
                 <li><strong>file</strong> - a file to execute. Only files bundled with the add-on may be used.</li>
                 <li><strong>allFrames</strong> - a boolean that indicates that the script should be executed in all frames.</li>
-                <li><strong>frameId</strong> - ID of the frame to execute the script into.</li>
+                <li><strong>frameId</strong> - ID of the frame to execute the script in.</li>
             </ul>
         </li>
     </ul>
