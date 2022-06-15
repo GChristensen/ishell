@@ -1032,6 +1032,31 @@ class SwitchTab {
     development easier for you.
 </p>
 
+<h2 id="helper"><span>Helper Application</span></h2>
+<p>The helper application that could be installed along with iShell is a local web server that
+    may be used to transcend the limits of WebExtensions. Because dynamic code execution is forbidden
+    in WebExtensions manifest v3, the helper application is the only way to compile user commands
+    in MV3 version of iShell.
+    </p>
+
+<p>If you installed the helper application as a Python package, you may develop your own
+    <a href="https://flask.palletsprojects.com/en/2.1.x/" target="_blank">Flask</a> handlers
+    callable from user commands. There you could do anything what Python can.
+    Although technically you may make requests to any
+    local web server, the lifetime of the helper application is managed automatically by the browser.
+    Use the <a href="API.html#helper-fetch" target="_blank">cmdAPI.helperFetch()</a>
+    function to call helper application handlers.
+</p>
+
+<h2><span id="Running_on_page_load.2C_iShell_load_and_startup">Running Code on iShell load and when iShell popup is shown</span></h2>
+<p>There are two additional command properties that may be set in cmdAPI.createCommand for that purposes:</p>
+<ul>
+    <li><b>load</b> - a function, called exactly once when iShell is loaded.</li>
+    <li><b>init</b> - a function, called each time iShell popup is shown with the popup document
+        as the parameter. Any document-wide CSS/script injections should be performed here.
+    </li>
+</ul>
+
 <h2><span id="Anaphora">Anaphora</span></h2>
 <p>If there is an active selection, and the value of an <i>arbitrary text argument</i> is equal to one of the
     predefined <a href="https://en.wikipedia.org/wiki/Anaphora_(linguistics)" target="_blank">anaphoric</a>
@@ -1056,29 +1081,6 @@ class SwitchTab {
     <li>her</li>
     <li>them</li>
 </ul>
-
-<h2><span id="Running_on_page_load.2C_iShell_load_and_startup">Running Code on iShell load and when iShell popup is shown</span></h2>
-<p>There are two additional command properties that may be set in cmdAPI.createCommand for that purposes:</p>
-<ul>
-    <li><b>load</b> - a function, called exactly once when iShell is loaded.</li>
-    <li><b>init</b> - a function, called each time iShell popup is shown with the popup document
-        as the parameter. Any document-wide CSS/script injections should be performed here.
-    </li>
-</ul>
-
-<h2><span id="helper">Helper Application</span></h2>
-<p>The helper application that could be installed along with iShell is a local web server that
-may be used to transcend the limits of WebExtensions. Although technically you may make requests to any
-local web server, the lifetime of the helper application is managed automatically by the browser.
-Moreover, because dynamic code execution is forbidden in WebExtensions manifest v3, the helper
-application is the only way to compile user commands in MV3 version of iShell.</p>
-
-<p>If you installed the helper application as a Python package, you may develop your own
-<a href="https://flask.palletsprojects.com/en/2.1.x/" target="_blank">Flask</a> handlers
-callable from user commands. There you could do anything what Python can.
-Use the <a href="API.html#helper-fetch" target="_blank">cmdAPI.helperFetch()</a>
-function to call helper application handlers.
-</p>
 
 <h2><span id="Ace_Code_Editor">Ace Code Editor</span></h2>
 <p>iShell uses <a href="https://ace.c9.io/" target="_blank">Ace</a> code editor to edit user-defined

@@ -419,9 +419,9 @@
 <h3><a id="helper-fetch" class="anchor" aria-hidden="true" href="#helper-fetch"></a>cmdAPI.helperFetch(pblock, path, init)</h3>
 <blockquote>
     <p>Does an asynchronous request to the web server being run by iShell helper application.
-        If pblock parameter is specified, <b>cmdAPI.previewFetch()</b> function is used.
+        If <b>pblock</b> parameter is specified, <b>cmdAPI.previewFetch()</b> function is used to make a request.
         Built-in JavaScript <b>fetch</b> is used otherwise. If the helper application could not be run,
-        throws "IShellNoHelperApp" exception.</p>
+        the function throws "IShellNoHelperApp" exception.</p>
     <ul>
         <li><strong>pblock</strong> - the preview block element that could be obtained through the <b>pblock</b> or
             <b>display</b> parameter of a command preview handler. Optional.</li>

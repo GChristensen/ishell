@@ -2,6 +2,45 @@ import {settings} from "../settings.js";
 import {NAMESPACE_BROWSER} from "./namespaces.js";
 
 /**
+ @nountype
+ @label day
+*/
+export function noun_type_history_date(text, html, cb, selectionIndices) {
+    let predefs = ["today", "yesterday", "week", "month"];
+    let matcher = new RegExp(text, "i");
+    let suggs;
+
+    let matchingPredefs = predefs.map(p => ({label: p})).filter(p => {
+        p.match = matcher.exec(p.label);
+        return !!p.match;
+    });
+
+    function addZero(text) {
+        return (("" + text).length === 1? "0": "") + text;
+    }
+
+    suggs = matchingPredefs.map(p =>
+        NounUtils.makeSugg(p.label, p.label, null, NounUtils.matchScore(p.match), selectionIndices));
+
+    if (/\d{4}-d{1,2}-d{1,2}/.test(text)) {
+        suggs.push(NounUtils.makeSugg(text, text, null, NounUtils.matchScore(p.match), selectionIndices));
+    }
+    else if (/\d{1,2}-\d{1,2}/.test(text)) {
+        let now = new Date();
+        let [month, day] = text.split("-");
+        let date = now.getFullYear() + "-" + addZero(month) + "-" + addZero(day);
+        suggs.push(NounUtils.makeSugg(date, date, null, 1, selectionIndices));
+    }
+    else if (/\d{1,2}/.test(text)) {
+        let now = new Date();
+        let date = now.getFullYear() + "-" + addZero(now.getMonth() + 1) + "-" + addZero(text);
+        suggs.push(NounUtils.makeSugg(date, date, null, 1, selectionIndices));
+    }
+
+    return suggs;
+}
+
+/**
     # Syntax
     **history** [*filter*] [**for** *domain*] [**of** *day*] [**from** *day*] [**to** *day*] [**by** *amount*]
  

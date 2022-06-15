@@ -148,21 +148,21 @@ export const noun_type_date_time = {
 // http://blog.livedoor.jp/dankogai/archives/51190099.html
 // * {{{text, html}}} : email address
 
-const __EMAIL_ATOM = "[\\w!#$%&'*+/=?^`{}~|-]+";
-const __EMAIL_ADDRESS = RegExp("^(?:" + __EMAIL_ATOM + "(?:\\." + __EMAIL_ATOM +
+const EMAIL_ATOM = "[\\w!#$%&'*+/=?^`{}~|-]+";
+const EMAIL_ADDRESS = RegExp("^(?:" + EMAIL_ATOM + "(?:\\." + EMAIL_ATOM +
                             ')*|(?:\\"(?:\\\\[^\\r\\n]|[^\\\\\\"])*\\"))@(' +
-                            __EMAIL_ATOM + "(?:\\." + __EMAIL_ATOM + ")*)$");
-const __EMAIL_USER =  RegExp("^(?:" + __EMAIL_ATOM + "(?:\\." + __EMAIL_ATOM +
+                            EMAIL_ATOM + "(?:\\." + EMAIL_ATOM + ")*)$");
+const EMAIL_USER =  RegExp("^(?:" + EMAIL_ATOM + "(?:\\." + EMAIL_ATOM +
                              ')*|(?:\\"(?:\\\\[^\\r\\n]|[^\\\\\\"])*\\"))$');
 export const noun_type_email = {
     label: "email",
     noExternalCalls: true,
     cacheTime: -1,
     suggest: function nt_email_suggest(text, html, cb, selectionIndices) {
-        if (__EMAIL_USER.test(text))
+        if (EMAIL_USER.test(text))
             return [NounUtils.makeSugg(text, html, null, 0.3, selectionIndices)];
 
-        var match = text.match(__EMAIL_ADDRESS);
+        var match = text.match(EMAIL_ADDRESS);
         if (!match) return [];
 
         var domain = match[1];
@@ -201,11 +201,11 @@ export const noun_type_contact = {
             let contactSuggs = matchingItems.map(c =>
                 NounUtils.makeSugg(c.email, c.email, null, NounUtils.matchScore(c.match), selectionIndices));
 
-            if (__EMAIL_USER.test(text)) {
+            if (EMAIL_USER.test(text)) {
                 textSugg = NounUtils.makeSugg(text, html, null, 0.3, selectionIndices);
             }
             else {
-                var match = text.match(__EMAIL_ADDRESS);
+                var match = text.match(EMAIL_ADDRESS);
                 if (match) {
                     var domain = match[1];
                     var score = /\.(?:\d+|[a-z]{2,})$/i.test(domain) ? 1 : 0.8;
@@ -524,83 +524,82 @@ for (let ntl of [noun_type_lang_google, noun_type_lang_wikipedia]) {
 
 export let noun_type_lang_microsoft;
 
-{
-    const MS_LANGS = {}
-        , MS_LANGS_REV =
-        {
-            af: "Afrikaans"
-            ,ar: "Arabic"
-            ,bg: "Bulgarian"
-            ,bn: "Bangla"
-            ,bs: "Bosnian"
-            ,ca: "Catalan"
-            ,cs: "Czech"
-            ,cy: "Welsh"
-            ,da: "Danish"
-            ,de: "German"
-            ,el: "Greek"
-            ,en: "English"
-            ,es: "Spanish"
-            ,et: "Estonian"
-            ,fa: "Persian"
-            ,fi: "Finnish"
-            ,fil: "Filipino"
-            ,fj: "Fijian"
-            ,fr: "French"
-            ,he: "Hebrew"
-            ,hi: "Hindi"
-            ,hr: "Croatian"
-            ,ht: "Haitian Creole"
-            ,hu: "Hungarian"
-            ,id: "Indonesian"
-            ,is: "Icelandic"
-            ,it: "Italian"
-            ,ja: "Japanese"
-            ,ko: "Korean"
-            ,lt: "Lithuanian"
-            ,lv: "Latvian"
-            ,mg: "Malagasy"
-            ,ms: "Malay"
-            ,mt: "Maltese"
-            ,mww: "Hmong Daw"
-            ,nb: "Norwegian"
-            ,nl: "Dutch"
-            ,otq: "Querétaro Otom"
-            ,pl: "Polish"
-            ,pt: "Portuguese"
-            ,ro: "Romanian"
-            ,ru: "Russian"
-            ,sk: "Slovak"
-            ,sl: "Slovenian"
-            ,sm: "Samoan"
-            ,"sr-Cyrl": "Serbian (Cyrillic)"
-            ,"sr-Latn": "Serbian (Latin)"
-            ,sv: "Swedish"
-            ,sw: "Kiswahili"
-            ,ta: "Tamil"
-            ,te: "Telugu"
-            ,th: "Thai"
-            ,tlh: "Klingon"
-            ,to: "Tongan"
-            ,tr: "Turkish"
-            ,ty: "Tahitian"
-            ,uk: "Ukrainian"
-            ,ur: "Urdu"
-            ,vi: "Vietnamese"
-            ,yua: "Yucatec Maya"
-            ,yue: "Cantonese (Traditional)"
-            ,"zh-Hans": "Chinese Simplified"
-            ,"zh-Hant": "Chinese Traditional"
-        };
+const MS_LANGS = {}
+    , MS_LANGS_REV =
+    {
+        af: "Afrikaans"
+        ,ar: "Arabic"
+        ,bg: "Bulgarian"
+        ,bn: "Bangla"
+        ,bs: "Bosnian"
+        ,ca: "Catalan"
+        ,cs: "Czech"
+        ,cy: "Welsh"
+        ,da: "Danish"
+        ,de: "German"
+        ,el: "Greek"
+        ,en: "English"
+        ,es: "Spanish"
+        ,et: "Estonian"
+        ,fa: "Persian"
+        ,fi: "Finnish"
+        ,fil: "Filipino"
+        ,fj: "Fijian"
+        ,fr: "French"
+        ,he: "Hebrew"
+        ,hi: "Hindi"
+        ,hr: "Croatian"
+        ,ht: "Haitian Creole"
+        ,hu: "Hungarian"
+        ,id: "Indonesian"
+        ,is: "Icelandic"
+        ,it: "Italian"
+        ,ja: "Japanese"
+        ,ko: "Korean"
+        ,lt: "Lithuanian"
+        ,lv: "Latvian"
+        ,mg: "Malagasy"
+        ,ms: "Malay"
+        ,mt: "Maltese"
+        ,mww: "Hmong Daw"
+        ,nb: "Norwegian"
+        ,nl: "Dutch"
+        ,otq: "Querétaro Otom"
+        ,pl: "Polish"
+        ,pt: "Portuguese"
+        ,ro: "Romanian"
+        ,ru: "Russian"
+        ,sk: "Slovak"
+        ,sl: "Slovenian"
+        ,sm: "Samoan"
+        ,"sr-Cyrl": "Serbian (Cyrillic)"
+        ,"sr-Latn": "Serbian (Latin)"
+        ,sv: "Swedish"
+        ,sw: "Kiswahili"
+        ,ta: "Tamil"
+        ,te: "Telugu"
+        ,th: "Thai"
+        ,tlh: "Klingon"
+        ,to: "Tongan"
+        ,tr: "Turkish"
+        ,ty: "Tahitian"
+        ,uk: "Ukrainian"
+        ,ur: "Urdu"
+        ,vi: "Vietnamese"
+        ,yua: "Yucatec Maya"
+        ,yue: "Cantonese (Traditional)"
+        ,"zh-Hans": "Chinese Simplified"
+        ,"zh-Hant": "Chinese Traditional"
+    };
 
-    // all ms is in google except hebrew (ms:he vs goog:iw)
-    for (let [code, name] of Object.entries(MS_LANGS_REV)) {
-        MS_LANGS[name] = code;
-    }
-
-    noun_type_lang_microsoft = NounUtils.NounType("language", MS_LANGS);
-    noun_type_lang_microsoft.MS_LANGS_REV = MS_LANGS_REV;
+// all ms is in google except hebrew (ms:he vs goog:iw)
+for (let [code, name] of Object.entries(MS_LANGS_REV)) {
+    MS_LANGS[name] = code;
 }
+
+noun_type_lang_microsoft = NounUtils.NounType("language", MS_LANGS);
+noun_type_lang_microsoft.MS_LANGS_REV = MS_LANGS_REV;
+
 
 export const noun_type_lang_lingvo = NounUtils.NounType("language", {
     "Chinese": [1028, "zh"],
@@ -624,43 +623,3 @@ export const noun_type_lang_lingvo = NounUtils.NounType("language", {
     "Turkish": [1055, "tr"],
     "Ukrainian": [1058, "uk"]
 });
-
-export const noun_type_history_date = {
-    label: "day",
-    noExternalCalls: true,
-    cacheTime: -1,
-    suggest: function (text, html, cb, selectionIndices) {
-        let predefs = ["today", "yesterday", "week", "month"];
-        let matcher = new RegExp(text, "i");
-        let suggs;
-
-        let matchingPredefs = predefs.map(p => ({label: p})).filter(p => {
-            p.match = matcher.exec(p.label);
-            return !!p.match;
-        });
-
-        function addZero(text) {
-            return (("" + text).length === 1? "0": "") + text;
-        }
-
-        suggs = matchingPredefs.map(p =>
-            NounUtils.makeSugg(p.label, p.label, null, NounUtils.matchScore(p.match), selectionIndices));
-
-        if (/\d{4}-d{1,2}-d{1,2}/.test(text)) {
-            suggs.push(NounUtils.makeSugg(text, text, null, NounUtils.matchScore(p.match), selectionIndices));
-        }
-        else if (/\d{1,2}-\d{1,2}/.test(text)) {
-            let now = new Date();
-            let [month, day] = text.split("-");
-            let date = now.getFullYear() + "-" + addZero(month) + "-" + addZero(day);
-            suggs.push(NounUtils.makeSugg(date, date, null, 1, selectionIndices));
-        }
-        else if (/\d{1,2}/.test(text)) {
-            let now = new Date();
-            let date = now.getFullYear() + "-" + addZero(now.getMonth() + 1) + "-" + addZero(text);
-            suggs.push(NounUtils.makeSugg(date, date, null, 1, selectionIndices));
-        }
-
-        return suggs;
-    }
-};

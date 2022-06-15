@@ -209,6 +209,7 @@ async function loadHelperAppLinks() {
     let latestHelperAppVersion;
 
     function setDownloadLinks(link1, link2) {
+        console.log(link1, link2)
         const app = link1.endsWith(".exe")? link1: link2;
         const archive = link1.endsWith(".zip")? link1: link2;
         $("#helper-windows").attr("href", app);
@@ -224,7 +225,7 @@ async function loadHelperAppLinks() {
             setDownloadLinks(release.assets[0].browser_download_url, release.assets[1].browser_download_url);
 
             latestHelperAppVersion = release.name.split(" ");
-            latestHelperAppVersion = version[version.length - 1];
+            latestHelperAppVersion = latestHelperAppVersion.at(-1);
         }
         else
             throw new Error();
