@@ -173,8 +173,7 @@ class CommandManager {
 
     // adds a storage bin obtained from the command uuid as the last argument of the called function
     async callPersistent(cmd, obj, f) {
-        let args = arguments;
-        let newArgs = Array.prototype.slice.call(args, 3);
+        let newArgs = Array.prototype.slice.call(arguments, 3);
 
         const bin = await Utils.makeBin(cmd.uuid);
         newArgs.push(bin);

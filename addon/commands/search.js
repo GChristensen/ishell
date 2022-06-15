@@ -59,9 +59,29 @@ CmdUtils.makeSearchCommand({
     icon: "/ui/icons/imdb.png",
     parser: {
         container  : ".lister-item",
-        title      : ".lister-item-header",
-        thumbnail  : ".lister-item-image img",
-        body       : ".text-muted",
+        title      : container => {
+            const header = container.find(".lister-item-header");
+            header.find(".lister-item-index").remove();
+            return header;
+        },
+        thumbnail  : container => {
+            const thumb = container.find("img.loadlate").first().attr("loadlate");
+            return $(`<img src="${thumb}"/>`);
+        },
+        body       : container => {
+            const synopsis = container.find(".ratings-bar").next();
+            const rating = container.find("[name='ir'] strong");
+            const runtime = container.find(".runtime");
+            const genre = container.find(".genre");
+            synopsis.prepend(" | ");
+            synopsis.prepend(genre);
+            synopsis.prepend(" | ");
+            synopsis.prepend(runtime);
+            synopsis.prepend(" | ");
+            synopsis.prepend(rating);
+            synopsis.prepend("Rating: ");
+            return synopsis;
+        },
         maxResults : maxSearchResults,
     },
 });
@@ -251,7 +271,7 @@ function fetchWikipediaArticle(previewBlock, articleTitle, langCode) {
             var parse = jQuery(("<div>" + responseData.parse.text["*"])
                 .replace(/<img src="\/[^>]+>/g, ""));
             //take only the text from summary because links won't work either way
-            var articleSummary = parse.find("p:first").text();
+            var articleSummary = parse.find("p").not(".mw-empty-elt").first().text();
             //remove citations [3], [citation needed], etc.
             articleSummary = articleSummary.replace(/\[.+?\]/g, "");
             //TODO: also remove audio links (.audiolink & .audiolinkinfo)

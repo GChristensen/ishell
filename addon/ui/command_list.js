@@ -146,9 +146,9 @@ export class CommandList {
     }
 
     _decorateIcon(icon) {
-        if (!icon || icon === "http://example.com/favicon.ico") {
+        if (!icon || icon === "http://example.com/favicon.ico")
             icon = '/ui/icons/logo.svg';
-        }
+
         icon = '<img class="suggestion-icon" src="' + icon + '" alt=""> ';
         return icon;
     }

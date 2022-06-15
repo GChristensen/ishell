@@ -72,11 +72,13 @@ export class PreviewList {
 
         if (searchListDL.length) {
             const items = $("dt", searchListDL);
+            const descriptions = $("dd", searchListDL.element);
             result = {
                 element: searchListDL,
                 type: this.#LIST_TYPE_SEARCH,
-                length:items.length,
-                descriptions: $("dd", searchListDL.element),
+                length: items.length,
+                descriptions,
+                desclength: descriptions.length,
                 items
             }
         }
@@ -106,7 +108,9 @@ export class PreviewList {
         if (list.type === this.#LIST_TYPE_SEARCH) {
             return {
                 element: list.items.eq(index),
-                bottom: list.descriptions.eq(index),
+                bottom: list.desclength !== list.length
+                    ? list.descriptions.eq(index * 2)
+                    : list.descriptions.eq(index),
                 type: list.type
             }
         }
