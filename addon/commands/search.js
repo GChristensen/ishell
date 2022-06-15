@@ -699,3 +699,25 @@ CmdUtils.CreateCommand({
         }
     }
 });
+
+cmdAPI.makeSearchCommand({
+    name: "stackoverflow",
+    uuid: "84628A1F-EE72-4429-B16B-E1A4E9AEE50A",
+    _namespace: NAMESPACE_SEARCH,
+    url: "https://api.stackexchange.com/2.3/search?order=desc&sort=activity&site=stackoverflow&intitle=%s",
+    defaultUrl: "https://stackoverflow.com",
+    arguments: [{role: "object", nountype: noun_arb_text, label: "query"}],
+    icon: "https://stackoverflow.com/favicon.ico",
+    description: `Search for answers on <a href="https://stackoverflow.com">stackoverflow.com</a>`,
+    previewDelay: 1000,
+    parser: {
+    type       : "json",
+        container  : "items",
+        title      : "title",
+        href       : "link",
+        body       : item => {
+        return item.tags.join(", ")
+    },
+    display: "objectPreviewList"
+}
+});

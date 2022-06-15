@@ -383,17 +383,21 @@ CmdUtils.makeSearchCommand.preview = function searchPreview(pblock, {object: {te
                     "</span>"));
         }
         else {
-            if (results.length)
+            if (results.length) {
+                console.log(ContextUtils.activateTab);
+                console.log(ContextUtils.activateTab);
                 CmdUtils.previewList2(pblock, results.slice(0, max), {
                     text: (r) => r.title,
                     subtext: (r) => r.body,
-                    thumb: parser.thumbnail ? ((r) => r.thumbnail) : undefined,
-                    action: (r) => chrome.tabs.create({"url": r.href, active: false})
+                    thumb: parser.thumbnail? ((r) => r.thumbnail): undefined,
+                    action: (r) => chrome.tabs.create({"url": r.href, active: ContextUtils.activateTab})
                 });
-            else
+            }
+            else {
                 put("<span class='empty'>" +
                     L("No results for %S.", queryHtml) +
                     "</span>");
+            }
         }
         CmdUtils.absUrl(pblock, parser.baseUrl);
     }

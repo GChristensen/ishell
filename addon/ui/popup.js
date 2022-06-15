@@ -159,8 +159,10 @@ class PopupWindow {
         const selectionList = new PreviewList(this.pblock);
         const previewSelection = selectionList.getSelectedElement();
 
-        if (previewSelection)
+        if (previewSelection) {
+            ContextUtils.activateTab = true;
             this.executePreviewItem(previewSelection, true)
+        }
         else {
             this.addCurrentInputToHistory();
             await this.executeCurrentCommand();

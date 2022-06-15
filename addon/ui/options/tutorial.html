@@ -852,12 +852,11 @@ class ChangeColor {
   }
 
   async preview({OF}, display) {
-    await this.injectJQuery();
-
     // a function with its arguments should be passed to executeScript
-    // this works both in MV2 and MV3
-    // do not pass references to class methods
-    const [{result}] = await cmdAPI.executeScript({func: extractHeadings, args: [OF.text]});
+    // this works both in MV2 and MV3, do not pass references to class methods
+    // jQuery option allows the use of jQuery in content scripts
+    const options = {func: extractHeadings, args: [OF.text], jQuery: true};
+    const [{result}] = await cmdAPI.executeScript(options);
     const headingList = `<ul>${
       R(result, h => (`<li>${h}</li>`))
     }</ul>`;
@@ -866,16 +865,8 @@ class ChangeColor {
   }
 
   async execute({OF, TO}) {
-    await this.injectJQuery();
-    await cmdAPI.executeScript({func: colorHeadings, args: [OF.text, TO.text]});
-  }
-
-  async injectJQuery() {
-    const hasJQuery = await cmdAPI.executeScript({func: () => !!window.$});
-
-    // inject jQuery bundled with the add-on
-    if (!hasJQuery[0]?.result)
-      await cmdAPI.executeScript({file: "/lib/jquery.js"});
+    const options = {func: extractHeadings, args: [OF.text, TO.text], jQuery: true};
+    await cmdAPI.executeScript(options);
   }
 }
 
