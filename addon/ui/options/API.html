@@ -121,7 +121,7 @@
 </blockquote>
 
 
-<h3><a id="user-content-cmdutilsmakesearchcommandoptions" class="anchor" aria-hidden="true"
+<h3><a id="make-search-command" class="anchor" aria-hidden="true"
        href="#cmdutilsmakesearchcommandoptions"></a>cmdAPI.makeSearchCommand(options)</h3>
 <p class="legacy-name">Legacy name: CmdUtils.makeSearchCommand</p>
 <blockquote>
@@ -164,7 +164,7 @@
         <li>
             <strong>parser</strong> - generates keyboard navigatable previews by parsing the search
             results. It is passed as an object containing the following properties. The ones marked as
-            <em>path</em> expect either a jQuery selector string, or a JSON path string (like <strong>"items.url"</strong>).
+            <em>path</em> expect either a jQuery selector string, or a JSON path string (like <strong>"object1.object2.property"</strong>).
             Each of them can also be a filter function that receives a parent context and returns a
             result of the same type.
             <ul>
@@ -184,7 +184,7 @@
                 </li>
                 <li><strong>parser.href</strong> / <strong>parser.thumbnail</strong> - <em>path</em>s
                     to the link/thumbnail URL of each result. Should point to an
-                    <strong>&lt;a&gt;</strong>/<strong>&lt;img&gt;</strong> if jQuery mode.
+                    <strong>&lt;a&gt;</strong>/<strong>&lt;img&gt;</strong> in HTML mode.
                 </li>
                 <li><strong>parser.url</strong> / <strong>parser.postData</strong> - specifies
                     another version of

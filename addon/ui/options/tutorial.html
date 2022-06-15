@@ -600,6 +600,38 @@ arguments: [{role: "object",
     earlier through the commands mentioned above.
 </p>
 
+<h1 class="section-heading"><span id="Search_Commands">Creating Search Commands</span></h1>
+    <p>Because Web is volatile, iShell contains search commands only for the essential sites and
+        services, but you can easily make your own with the <a href="API.html#make-search-command"
+                                                               target="_blank">cmdAPI.makeSearchCommand()</a>
+        function. It can automatically parse both HTML and JSON content and also accepts custom
+        filter functions to process DOM of the requested page with jQuery. Let's make a function that
+        performs search at <a href="http://urbandictionary.org">urbandictionalry.org</a>:</p>
+
+<pre><code data-language="javascript">cmdAPI.makeSearchCommand({
+    name: "urban",
+    uuid: "261DF55D-5E22-4E5F-8A81-6ED31B81AE3E",
+    url: "https://www.urbandictionary.com/define.php?term=%s",
+    defaultUrl: "https://www.urbandictionary.com",
+    arguments: [{role: "object", nountype: noun_arb_text, label: "query"}],
+    icon: "https://www.urbandictionary.com/favicon.ico",
+    previewDelay: 1000,
+    parser: {
+        type      : "html",
+        container : ".definition",
+        title     : "h1 a",
+        href      : "h1 a",
+        body      : container => {
+            const meaning = container.find(".meaning");
+            meaning.css("border-bottom", "1px solid white");
+            meaning.css("margin-bottom", "5px");
+            const example = container.find(".example");
+            example.css("font-style", "italic");
+            return $("&lt;div&gt;").append(meaning).append(example);
+        }
+    }
+});</code></pre>
+
 
 <!--h3><span id="Shorter_Argument_Declarations">Shorter Argument Declarations</span></h3>
 
