@@ -201,10 +201,7 @@ CmdUtils.CreateCommand({
     icon: "/ui/icons/print.gif",
     preview: "Print the current page.",
     execute: function (directObj) {
-        if (_MANIFEST_V3)
-            browser.scripting.executeScript({func: () => window.print(), target: {tabId: CmdUtils.activeTab.id}});
-        else
-            chrome.tabs.executeScript( { code: "window.print();" } );
+        cmdAPI.executeScript({func: () => window.print()});
     }
 });
 
@@ -214,8 +211,9 @@ CmdUtils.CreateCommand({
     _namespace: NAMESPACE_BROWSER,
     description: "Inverts all colors on current page. Based on <a target=_blank href=https://stackoverflow.com/questions/4766201/javascript-invert-color-on-all-elements-of-a-page>this</a>.",
     icon: "/ui/icons/invert.png",
-    execute: function execute(){
-        executeScript(CmdUtils.activeTab.id, {file: "/scripts/content_invert.js"});
+    execute: async function execute(){
+        await cmdAPI.executeScript({file: "/lib/jquery.js"});
+        cmdAPI.executeScript({file: "/scripts/content_invert.js"});
     },
 });
 

@@ -209,7 +209,6 @@ async function loadHelperAppLinks() {
     let latestHelperAppVersion;
 
     function setDownloadLinks(link1, link2) {
-        console.log(link1, link2)
         const app = link1.endsWith(".exe")? link1: link2;
         const archive = link1.endsWith(".zip")? link1: link2;
         $("#helper-windows").attr("href", app);
@@ -248,7 +247,8 @@ async function loadHelperAppLinks() {
     if (installedHelperAppVersion)
         $("#helper-version").text(`v${installedHelperAppVersion}`);
     else
-        $("#helper-version").text(`is not installed`);
+        $("#helper-version").html(`is not installed <a href="tutorial.html#helper" title="About the helper application"
+                                                             target="_blank">&#x1F6C8;</a>`);
 
     if (update)
         $("#helper-update").show();
