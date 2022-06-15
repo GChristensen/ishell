@@ -31,6 +31,12 @@ export function injectModule(namespace) {
         globalThis[key] = namespace[key];
 }
 
+export async function fetchText(url, init) {
+    const response = await fetch(url, init);
+    if (response.ok)
+        return response.text();
+}
+
 export async function fetchWithTimeout(resource, options = {}) {
     const { timeout = 10000 } = options;
 

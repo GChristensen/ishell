@@ -66,7 +66,7 @@ li {
   list-style-image:none;
   list-style-position:outside;
   list-style-type:none;
-  width: 144px;
+  width: 124px;
 }
 
 #nav a {
@@ -97,7 +97,7 @@ li {
 }
 
 .col-four {
-  width: 270px;
+  width: 275px;
   float: left;
 }
 

@@ -23,6 +23,10 @@ export const cmdAPI = {
         return cmdManager.createCommand(options);
     },
 
+    objectPreviewList(block, items, fs, css) {
+        return CmdUtils.previewList2(block, items, fs, css);
+    },
+
     get settings() {
         return settings.dynamic_settings();
     },
