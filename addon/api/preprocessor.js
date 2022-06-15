@@ -111,18 +111,30 @@ export class CommandPreprocessor {
         return script.substring(object.index, object.index + object.all.length + ctr);
     }
 
-    extractAnnotatedClasses(script) {
-        const rxClassCommand = /\/\*\*(.*?)\*\/\s*^\s*(?:export\s*)?class\s+(\w+).*?{/gsm
-        const matches = [...script.matchAll(rxClassCommand)];
+    extractAnnotatedEntities(script) {
+        // the regex only allows to extract the last annotated definition in the script
+        const rx = /\/\*\*(?!.*\/\*\*)(.*?)\*\/\s*^\s*(?:export\s*)?(async\s*)?(class|function)\s*(\w+)(.*?)?{/gsm
+        const matches = [];
 
-        return matches.map(m => ({name: m[2], comment: m[1], all: m[0], index: m.index}));
-    }
+        let match;
+        do {
+            match = rx.exec(script);
+            if (match) {
+                matches.push(match);
+                script = script.substring(0, match.index);
+                rx.lastIndex = 0;
+            }
+        } while (match);
 
-    extractAnnotatedFunctions(script) {
-        const rxFun = /\/\*\*(.*?)\*\/\s*^\s*(?:export\s*)?(async\s*)?function\s*(\w+)(.*?){/gsm
-        const matches = [...script.matchAll(rxFun)];
-
-        return matches.map(m => ({async_: m[2], name: m[3], comment: m[1], args: m[4], all: m[0], index: m.index}));
+        return matches.map(m => ({
+            all: m[0],
+            comment: m[1],
+            async: m[2],
+            type: m[3],
+            name: m[4],
+            args: m[5],
+            index: m.index
+        }));
     }
 
     processMarkdown(text) {
@@ -423,8 +435,8 @@ export class CommandPreprocessor {
         fun.suggest = (...args) => fun(...args);
     }
 
-    extractFunctions(script) {
-        const functionMatches = this.extractAnnotatedFunctions(script);
+    extractFunctions(script, entities) {
+        const functionMatches = entities.filter(e => e.type === "function");
 
         for (let object of functionMatches) {
             let properties = this.extractNounTypeProperties(object.comment);
@@ -441,8 +453,8 @@ export class CommandPreprocessor {
         return functionMatches;
     }
 
-    preprocessNounTypes(script) {
-        const functionMatches = this.extractFunctions(script);
+    preprocessNounTypes(script, entities) {
+        const functionMatches = this.extractFunctions(script, entities);
 
         for (let object of functionMatches)
             if (!object.skip)
@@ -451,8 +463,8 @@ export class CommandPreprocessor {
         return script;
     }
 
-    extractClasses(script) {
-        const classMatches = this.extractAnnotatedClasses(script);
+    extractClasses(script, entities) {
+        const classMatches = entities.filter(e => e.type === "class")
 
         for (let object of classMatches) {
             let properties = {name: this.camelToKebab(object.name)}
@@ -472,13 +484,13 @@ export class CommandPreprocessor {
         return classMatches;
     }
 
-    preprocessCommands(script) {
-        const classMatches = this.extractClasses(script);
+    preprocessCommands(script, entities) {
+        const classMatches = this.extractClasses(script, entities);
 
         for (let object of classMatches)
             if (!object.skip) {
                 script = this.preprocessCommand(script, object);
-                if (object.properties.dbgprint)
+                //if (object.properties.dbgprint)
                     console.log(script);
             }
 
@@ -486,16 +498,19 @@ export class CommandPreprocessor {
     }
 
     transform(text) {
-        text = this.preprocessNounTypes(text);
-        text = this.preprocessCommands(text);
+        const entities = this.extractAnnotatedEntities(text);
+        text = this.preprocessNounTypes(text, entities);
+        text = this.preprocessCommands(text, entities);
 
         return text;
     }
 
     async load(file) {
+        const entities =this.extractAnnotatedEntities(file.content)
+
         const module = await import(`..${file.path}`);
 
-        const functions = this.extractFunctions(file.content);
+        const functions = this.extractFunctions(file.content, entities);
 
         for (const funMeta of functions) {
             if (!funMeta.skip) {
@@ -505,7 +520,7 @@ export class CommandPreprocessor {
             }
         }
 
-        const classes = this.extractClasses(file.content);
+        const classes = this.extractClasses(file.content, entities);
 
         for (const classMeta of classes) {
             if (!classMeta.skip) {

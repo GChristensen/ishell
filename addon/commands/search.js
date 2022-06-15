@@ -547,12 +547,12 @@ CmdUtils.CreateCommand({
         {role: "instrument", nountype: ["asc", "desc"], label: "sort mode"}, // with
         {role: "modifier",   nountype: ["year", "title", "author"], label: "order"}, // of
         {role: "cause",      nountype: ["25", "50", "100"], label: "amount"}, // by
-        {role: "time",       nountype: ["libgen.is", "libgen.io"], label: "server"}, // at
+       // {role: "time",       nountype: ["libgen.is", "libgen.io"], label: "server"}, // at
     ],
     description: "Search Library Genesis",
     help:  `<span class="syntax">Syntax</span>
         <ul class="syntax">
-            <li><b>libgen</b> [<i>filter</i>] [<b>of</b> <i>order</i>] [<b>with</b> <i>sort mode</i>] [<b>at</b> <i>server</i>] [<b>by</b> <i>amount</i>]</li>
+            <li><b>libgen</b> [<i>filter</i>] [<b>of</b> <i>order</i>] [<b>with</b> <i>sort mode</i>] <!--[<b>at</b> <i>server</i>]--> [<b>by</b> <i>amount</i>]</li>
         </ul>
         <span class="arguments">Arguments</span><br>
         <ul class="syntax">
@@ -564,15 +564,15 @@ CmdUtils.CreateCommand({
         <ul class="syntax">
             <li>- <i>sort mode</i> - {<b>asc</b> | <b>desc</b>}, specifies sort mode.</li>
         </ul>
-        <ul class="syntax">
+        <!--ul class="syntax">
             <li>- <i>server</i> - {<b>libgen.is</b> | <b>libgen.io</b>}.</li>
-        </ul>
+        </ul-->
         <ul class="syntax">
             <li>- <i>amount</i> - {<b>25</b> | <b>50</b> | <b>100</b> }, specifies the maximum amount of listed items.</li>
         </ul>
         <span class="arguments">Examples</span>
         <ul class="syntax">
-            <li><b>libgen</b> <i>philosophical investigations</i> <b>of</b> <i>year</i> <b>by</b> <i>50</i> <b>at</b> <i>.io</i></li>
+            <li><b>libgen</b> <i>philosophical investigations</i> <b>of</b> <i>year</i> <b>by</b> <i>50</i> <!--b>at</b> <i>.io</i--></li>
         </ul>`,
     author: "g/christensen",
     icon: "/ui/icons/libgen.ico",
