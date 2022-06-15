@@ -1,13 +1,17 @@
 // Sealed for backwards compatibility. Add any new functionality to cmdapi.js
 
 import {cmdManager} from "../../cmdmanager.js";
-import {ContextUtils} from "./contextutils.js";
+import {settings} from "../../settings.js";
 
 export var CmdUtils = {
     NounType: NounUtils.NounType,
     matchScore: NounUtils.matchScore,
     makeSugg: NounUtils.makeSugg,
-    grepSuggs: NounUtils.grepSuggs
+    grepSuggs: NounUtils.grepSuggs,
+
+    get activeTab() {
+        return ContextUtils.activeTab;
+    }
 };
 
 export const _ = function(x) {
@@ -353,7 +357,7 @@ CmdUtils.makeSearchCommand.preview = function searchPreview(pblock, {object: {te
         for (let k of parser.plain || [])
             for (let r of results)
                 r[k] = r[k] && Utils.escapeHtml(r[k]);
-        let max = parser.maxResults || 10;
+        let max = parser.maxResults || settings.max_search_results() || 10;
         if (!parser.display || parser.display === "previewList") {
             var list = "", i = 0;
             for (let {title, href, body, thumbnail} of results)

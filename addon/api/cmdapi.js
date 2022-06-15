@@ -19,6 +19,10 @@ export const cmdAPI = {
         if (cmdAPI.DEBUG) console.log(...args);
     },
 
+    createCommand(options) {
+        return cmdManager.createCommand(options);
+    },
+
     get settings() {
         return settings.dynamic_settings();
     },
@@ -37,33 +41,6 @@ export const cmdAPI = {
 };
 
 export const R = cmdAPI.reduceTemplate;
-
-cmdAPI.makeSugg = delegate(NounUtils, NounUtils.makeSugg);
-cmdAPI.matchScore = delegate(NounUtils, NounUtils.matchScore);
-cmdAPI.grepSuggs = delegate(NounUtils, NounUtils.grepSuggs);
-cmdAPI.createCommand = delegate(CmdUtils, CmdUtils.CreateCommand);
-cmdAPI.makeSearchCommand = delegate(CmdUtils, CmdUtils.makeSearchCommand);
-cmdAPI.previewAjax = delegate(CmdUtils, CmdUtils.previewAjax);
-cmdAPI.previewGet = delegate(CmdUtils, CmdUtils.previewGet);
-cmdAPI.previewPost = delegate(CmdUtils, CmdUtils.previewPost);
-cmdAPI.previewList = delegate(CmdUtils, CmdUtils.previewList);
-cmdAPI.htmlPreviewList = delegate(CmdUtils, CmdUtils.previewList);
-cmdAPI.objectPreviewList = delegate(CmdUtils, CmdUtils.previewList2);
-cmdAPI.renderTemplate = delegate(CmdUtils, CmdUtils.renderTemplate);
-cmdAPI.absUrl = delegate(CmdUtils, CmdUtils.absUrl);
-cmdAPI.copyToClipboard = delegate(CmdUtils, CmdUtils.copyToClipboard);
-cmdAPI.notify = delegate(CmdUtils, CmdUtils.notify);
-cmdAPI.getLocation = delegate(CmdUtils, CmdUtils.getLocation);
-cmdAPI.getSelection = delegate(CmdUtils, CmdUtils.getSelection);
-cmdAPI.getHtmlSelection = delegate(CmdUtils, CmdUtils.getHtmlSelection);
-cmdAPI.setSelection = delegate(CmdUtils, CmdUtils.setSelection);
-cmdAPI.addTab = delegate(CmdUtils, CmdUtils.addTab);
-cmdAPI.paramsToString = delegate(Utils, Utils.paramsToString);
-cmdAPI.urlToParams = delegate(Utils, Utils.urlToParams);
-cmdAPI.parseHtml = delegate(Utils, Utils.parseHtml);
-cmdAPI.escapeHtml = delegate(Utils, Utils.escapeHtml);
-cmdAPI.makeBin = delegate(Utils, Utils.makeBin);
-cmdAPI.getActiveTab = delegate(CmdUtils, CmdUtils.getActiveTab);
 
 cmdAPI.previewFetch = async function(pblock, resource, init) {
     const controller = new AbortController();
@@ -140,3 +117,18 @@ cmdAPI.executeScript = async function(tabId, options) {
 
     return executeScript(tabId, options);
 };
+
+// add everything from Utils
+for (const prop of Object.keys(Utils))
+    if (!cmdAPI.hasOwnProperty(prop) && typeof Utils[prop] === "function")
+        cmdAPI[prop] = delegate(Utils, Utils[prop]);
+
+// add everything from CmdUtils
+for (const prop of Object.keys(CmdUtils))
+    if (!cmdAPI.hasOwnProperty(prop) && typeof CmdUtils[prop] === "function")
+        cmdAPI[prop] = delegate(CmdUtils, CmdUtils[prop]);
+
+// add missing properties back to CmdUtils
+for (const prop of Object.keys(cmdAPI))
+    if (!CmdUtils.hasOwnProperty(prop) && typeof cmdAPI[prop] === "function")
+        CmdUtils[prop] = delegate(cmdAPI, cmdAPI[prop]);

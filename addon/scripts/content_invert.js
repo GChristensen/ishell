@@ -1,11 +1,4 @@
 (function () {
-    function load_script(src, callback) {
-        var s = document.createElement('script');
-        s.src = src;
-        s.onload = callback;
-        document.getElementsByTagName('head')[0].appendChild(s);
-    }
-
     function invertElement() {
         var colorProperties = ['color', 'background-color'];
         var color = null;
