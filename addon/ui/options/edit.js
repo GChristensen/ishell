@@ -2,8 +2,10 @@ import {cmdManager, helperApp} from "../../ishell.js";
 import {settings} from "../../settings.js";
 import {repository} from "../../storage.js";
 import {CommandPreprocessor} from "../../api/preprocessor.js";
+import {sleep} from "../../utils.js";
 
 const SHELL_SETTINGS = "shell-settings";
+const CHANGE_DELAY = 2000;
 
 const preprocessor = new CommandPreprocessor(CommandPreprocessor.CONTEXT_CUSTOM);
 
@@ -87,10 +89,7 @@ async function initEditor() {
     let timeout;
     editor.on("change", e => {
         clearTimeout(timeout);
-
-        timeout = setTimeout(() => {
-            saveScript();
-        }, 2000);
+        timeout = setTimeout(saveScript, CHANGE_DELAY);
     });
 
     editor.focus();
@@ -170,7 +169,7 @@ async function createNamespace() {
 async function deleteNamespace() {
     if (scriptNamespace !== "default" && scriptNamespace !== SHELL_SETTINGS) {
         if (confirm("Do you really want to delete \"" + scriptNamespace + "\"?")) {
-            await repository.deleteUserScript(scriptNamespace);
+            const deletedNamespace = scriptNamespace;
             $('option:selected', $("#script-namespaces")).remove();
 
             scriptNamespace = $("#script-namespaces").val();
@@ -178,6 +177,8 @@ async function deleteNamespace() {
 
             let record = await repository.fetchUserScripts(scriptNamespace);
             setEditorContent(record?.script);
+
+            await repository.deleteUserScript(deletedNamespace);
         }
     }
 }
@@ -321,10 +322,11 @@ async function evalMV3(customcode) {
     const code = preprocessor.transform(customcode);
     const result = await cmdAPI.evaluate(code);
 
-    result.error.then(() => {
-        $("#info").html("Evaluated!");
-        cmdManager.loadUserScripts(scriptNamespace);
-    })
+    result.error
+        .then(() => {
+            $("#info").html("Evaluated!");
+            cmdManager.loadUserScripts(scriptNamespace);
+        })
         .catch(error => {
             displayError(error.message);
         });

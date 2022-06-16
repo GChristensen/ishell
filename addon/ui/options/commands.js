@@ -37,9 +37,11 @@ async function buildTable() {
 
     insertNamespace("default", userCommands, makeEditorLink("default"));
 
-    const userNamespaces = await repository.fetchUserScriptNamespaces();
+    let userNamespaces = await repository.fetchUserScriptNamespaces();
+    userNamespaces = userNamespaces.filter(n => !!n && n !== "default");
+    userNamespaces = userNamespaces.sort((a, b) => a.localeCompare(b, undefined, {sensitivity: 'base'}));
 
-    for (const n of userNamespaces.filter(n => !!n && n !== "default").sort(compareByName))
+    for (const n of userNamespaces)
         insertNamespace(n, userCommands, makeEditorLink(n));
 
     jQuery("#num-cats").text(commandCategoryCount);

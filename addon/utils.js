@@ -1,3 +1,7 @@
+export function sleep(ms) {
+    return new Promise(resolve => setTimeout(resolve,  ms))
+}
+
 export function delegate (object, method) {
     return function () {
         return method.apply(object, arguments);
@@ -35,6 +39,12 @@ export async function fetchText(url, init) {
     const response = await fetch(url, init);
     if (response.ok)
         return response.text();
+}
+
+export async function fetchJSON(url, init) {
+    const response = await fetch(url, init);
+    if (response.ok)
+        return response.json();
 }
 
 export async function fetchWithTimeout(resource, options = {}) {

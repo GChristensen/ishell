@@ -6,8 +6,7 @@ import {loadModules} from "../../utils.js";
 await loadModules([
     "./commands/more/nyaa.js",
     "./commands/more/kpop.js",
-    "./commands/more/javlib.js",
-    "./commands/more/dark-flow.js"
+    "./commands/more/javlib.js"
 ]);
 
 if (settings.enable_more_commands()) {

@@ -1,0 +1,90 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml" class="blacklist" style="cursor: auto ! important;" hasBrowserHandlers="true">
+<head xmlns="http://www.w3.org/1999/xhtml">
+<meta content="application/xhtml+xml; charset=UTF-8" http-equiv="Content-Type" />
+
+  <title>iShell Command from Untrusted Source</title>
+
+  <link rel="icon" type="image/png" id="favicon" href="icons/blacklist_favicon.png" />
+  <link rel="stylesheet" href="install.css" type="text/css" media="all" />
+
+  <link rel="stylesheet" type="text/css" media="all" href="/ui/rainbow/themes/tricolore.css"/>
+
+  <script src="/global.js"></script>
+  <script src="/lib/jquery.js"></script>
+  <script src="/ui/rainbow/rainbow.js"></script>
+  <script src="/ui/rainbow/languages/generic.js"></script>
+  <script src="/ui/rainbow/languages/javascript.js"></script>
+  <script src="install.js" type="module"></script>
+</head>
+<body xmlns="http://www.w3.org/1999/xhtml" dir="ltr">
+
+<div id="errorPageContainer">
+  <!-- Error Title -->
+  <div id="errorTitle">
+    <h1>iShell Command from Untrusted Source</h1>
+  </div>
+
+  <div id="errorLongContent">
+
+    <div id="errorShortDesc">
+      <p>You are about to install an iShell command from an unknown, untrusted third-party source located at <a id="targetLink" target="_blank"></a>. If you install, this command could do <em>anything it wants</em> to your browser.
+    </div>
+
+    <div id="errorLongDesc" style="padding-inline-end: 0px;">
+      <div id="editorCategoryName">
+        Command editor category name: &nbsp;&nbsp;&nbsp;<input id="editorCategoryInput" type="text"/>
+      </div>
+
+      <p>Here is the JavaScript source code to the command:</p>
+
+      <div id="sourceCode">
+        <em>Loading code, please wait...</em>
+      </div>
+
+      <p>If you understand JavaScript, you should read this and use your best judgement to decide whether the command is something that's safe to execute or not. Proceed at your own risk!</p>
+      <p>If you don't understand JavaScript, you should not subscribe to the command unless the link was given to you by someone you know and trust.</p>
+
+      <!-- TODO: Show code fingerprint (hash+size) too. -->
+
+      <!--div class="todo" style="border-style: solid; border-width: 2px; width: 80%; padding: 10px; border-color: rgb(255, 255, 0);">
+        <p>In the future, we plan to have a widget here displaying what we call a “social trust network”.You'll be able to see whether any of your friends have tried out this command.They can either vouch for the command's safety or leave a warning about the command's dangers.We hope this will help people make informed decisions about whether to subscribe to commands or not. This feature should be coming in a future release of Ubiquity.</p>
+      </div-->
+
+    </div>
+
+    <div id="buttons">
+      <!--p id="autoupdate-widget">
+
+        <input id="autoupdate" type="checkbox" />
+        <label for="autoupdate" style="font-size: larger;">Auto-update this feed.</label>
+
+        <ul id="autoupdate-warning" style="display: none;">
+          <p>This means that the feed will constantly be checked for functionality updates and automatically pushed to your computer. If you check this, make sure that you trust the people who have access to change this code on the server that it's hosted on.</p>
+          <p id="mitm-warning" style="display: none;">Note that this feed is served using an insecure protocol, and is therefore subject to <a href="http://blog.johnath.com/2008/08/05/ssl-question-corner/">man-in-the-middle attacks</a>. Please only auto-update this feed if you are sure about the implications of what you're doing.</p>
+        </ul>
+
+      </p-->
+
+      <p id="buttonContainer">
+        <input id="getOutButton" value="Get me outta here!" type="submit" />
+            
+        <input id="installButton" value="I know what I'm doing. Install it!" type="submit" />
+      </p>
+    </div>
+  </div>
+</div>
+
+<!--div id="confirmationContainer" style="display: none;">
+  <div id="confirmationShortDesc">
+    <p>You are now subscribing to the command feed and can use its functionality.</p>
+  </div>
+
+  <div id="confirmationLongDesc">
+    <p>If you ever want to unsubscribe, you can use the “list” Ubiquity command at any time to get to the <a href="about:ubiquity?cmdlist">command management page</a> where you can see all commands which you are subscribed to, and cancel any that you no longer want.</p>
+    <p>You may now close this window.</p>
+  </div>
+</div-->
+
+</body>
+</html>

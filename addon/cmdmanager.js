@@ -181,7 +181,7 @@ class CommandManager {
         try {
             f.apply(obj, newArgs); // sic!
         } catch (e) {
-            console.error(e.toString() + "\n" + e.stack);
+            console.error(`iShell command: ${cmd.name}\n${e.toString()}\n${e.stack}`);
         }
     }
 
@@ -261,12 +261,12 @@ class CommandManager {
         this.unloadUserScripts(namespace);
 
         let preprocessor = new CommandPreprocessor(CommandPreprocessor.CONTEXT_CUSTOM);
-        let customscripts = await repository.fetchUserScripts(namespace);
+        let userscripts = await repository.fetchUserScripts(namespace);
 
         if (namespace)
-            customscripts = [customscripts];
+            userscripts = [userscripts];
 
-        for (let record of customscripts) {
+        for (let record of userscripts) {
             try {
                 if (record.script) {
                     let script = preprocessor.transform(record.script);

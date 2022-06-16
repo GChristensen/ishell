@@ -116,7 +116,7 @@ class HelperApp {
         return `${this._host}${path.startsWith("/")? "": "/"}${path}`;
     }
 
-    _injectAuth(init) {
+    injectAuth(init) {
         init = init || {};
         init.headers = init.headers || {};
         init.headers["Authorization"] = "Basic " + btoa("default:" + this.auth);
@@ -124,7 +124,7 @@ class HelperApp {
     }
 
     fetch(path, init) {
-        init = this._injectAuth(init);
+        init = this.injectAuth(init);
         return window.fetch(this.url(path), init);
     }
 
@@ -134,7 +134,7 @@ class HelperApp {
         for (const [k, v] of Object.entries(fields))
             form.append(k, v + "");
 
-        const init = this._injectAuth({method: "POST", body: form});
+        const init = this.injectAuth({method: "POST", body: form});
 
         return this.fetch(path, init);
     }

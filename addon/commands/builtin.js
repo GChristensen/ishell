@@ -118,7 +118,6 @@ cmdAPI.createCommand({
     uuid: "C6D50448-A345-4FDC-8F4D-F724FAA2D7C2",
     icon: "/ui/icons/properties.png",
     _namespace: NAMESPACE_ISHELL,
-
     description: "Adds a new dynamic setting.",
     help: `<span class="syntax">Syntax</span>
             <ul class="syntax">
@@ -138,6 +137,25 @@ cmdAPI.createCommand({
             settings.dynamic_settings(dynamic_settings);
             browser.runtime.sendMessage({type: "ADDED_DYNAMIC_SETTING"});
         }
+    }
+});
+
+cmdAPI.createCommand({
+    name: "install",
+    uuid: "DD4AACBD-E042-4F69-81C8-AD4A698F39BC",
+    _namespace: NAMESPACE_ISHELL,
+    arguments: [{role: "object", nountype: noun_arb_text, label: "URL"}],
+    description: "Installs a command from GitHub gist.",
+    preview: function(display, args) {
+        const url = this.getURL(args);
+        display.text(`Install commands from <b>${url}</b>`);
+    },
+    execute: function(args) {
+        const url = this.getURL(args);
+        cmdAPI.addTab(`/ui/install.html?${encodeURIComponent(url)}`);
+    },
+    getURL(args) {
+        return args.OBJECT?.text || cmdAPI.getLocation();
     }
 });
 
@@ -212,8 +230,7 @@ CmdUtils.CreateCommand({
     description: "Inverts all colors on current page. Based on <a target=_blank href=https://stackoverflow.com/questions/4766201/javascript-invert-color-on-all-elements-of-a-page>this</a>.",
     icon: "/ui/icons/invert.png",
     execute: async function execute(){
-        await cmdAPI.executeScript({file: "/lib/jquery.js"});
-        cmdAPI.executeScript({file: "/scripts/content_invert.js"});
+        cmdAPI.executeScript({file: "/scripts/content_invert.js", jQuery: true});
     },
 });
 

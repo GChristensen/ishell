@@ -111,7 +111,7 @@ cmdAPI.helperFetch = async function(pblock, path, init) {
     }
 
     const url = helperApp.url(_path);
-    _init = helperApp._injectAuth(_init);
+    _init = helperApp.injectAuth(_init);
 
     if (preview)
         return this.previewFetch(_pblock, url, _init);

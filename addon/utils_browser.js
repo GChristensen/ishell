@@ -1,5 +1,10 @@
 import {helperApp} from "./helper_app.js";
 
+export async function getActiveTab() {
+    const tabs = await browser.tabs.query({lastFocusedWindow: true, active: true});
+    return tabs && tabs.length? tabs[0]: null;
+}
+
 async function executeScriptMV3(tabId, options) {
     const target = {tabId};
 
