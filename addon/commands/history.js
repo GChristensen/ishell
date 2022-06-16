@@ -10,34 +10,66 @@ export function noun_type_history_date(text, html, cb, selectionIndices) {
     let matcher = new RegExp(text, "i");
     let suggs;
 
-    let matchingPredefs = predefs.map(p => ({label: p})).filter(p => {
-        p.match = matcher.exec(p.label);
-        return !!p.match;
-    });
+    let matchingPredefs = predefs.map(p => ({label: p}))
+        .filter(p => {
+            p.match = matcher.exec(p.label);
+            return !!p.match;
+        });
 
     function addZero(text) {
         return (("" + text).length === 1? "0": "") + text;
     }
 
     suggs = matchingPredefs.map(p =>
-        NounUtils.makeSugg(p.label, p.label, null, NounUtils.matchScore(p.match), selectionIndices));
+        NounUtils.makeSugg(p.label, p.label, dayToDate(p.label), NounUtils.matchScore(p.match), selectionIndices));
 
     if (/\d{4}-d{1,2}-d{1,2}/.test(text)) {
-        suggs.push(NounUtils.makeSugg(text, text, null, NounUtils.matchScore(p.match), selectionIndices));
+        suggs.push(NounUtils.makeSugg(text, text, dayToDate(text), NounUtils.matchScore(p.match), selectionIndices));
     }
     else if (/\d{1,2}-\d{1,2}/.test(text)) {
         let now = new Date();
         let [month, day] = text.split("-");
         let date = now.getFullYear() + "-" + addZero(month) + "-" + addZero(day);
-        suggs.push(NounUtils.makeSugg(date, date, null, 1, selectionIndices));
+        suggs.push(NounUtils.makeSugg(date, date, dayToDate(date), 1, selectionIndices));
     }
     else if (/\d{1,2}/.test(text)) {
         let now = new Date();
         let date = now.getFullYear() + "-" + addZero(now.getMonth() + 1) + "-" + addZero(text);
-        suggs.push(NounUtils.makeSugg(date, date, null, 1, selectionIndices));
+        suggs.push(NounUtils.makeSugg(date, date, dayToDate(date), 1, selectionIndices));
     }
 
     return suggs;
+}
+
+function dayToDate(day) {
+    let date;
+
+    switch (day) {
+        case "today":
+            date = new Date();
+            date.setHours(0,0,0,0);
+            break;
+        case "yesterday":
+            date = new Date();
+            date.setDate(date.getDate() - 1);
+            break;
+        case "week":
+            date = new Date();
+            date.setDate(date.getDate() - 7);
+            break;
+        case "month":
+            date = new Date();
+            date.setDate(date.getDate() - 30);
+            break;
+        default:
+            if (day)
+                date = new Date(day + "T00:00:00");
+            else {
+                console.log("date command: empty day");
+            }
+    }
+
+    return date;
 }
 
 /**
@@ -84,23 +116,15 @@ export class History {
         let maxResults = BY?.data || settings.max_history_items() || 20;
         let forDomain = FOR?.text;
 
-        let startDate = this.#dayToDate(OF?.text);
+        let startDate = OF?.data || this.#monthAgo;
 
-        if (FROM?.text)
-            startDate = this.#dayToDate(FROM?.text);
+        if (FROM?.data)
+            startDate = FROM?.data;
 
-        let endDate;
-        if (startDate) {
-            if (OF?.text === "yesterday") {
-                endDate = new Date(startDate);
-                endDate.setDate(endDate.getDate() + 1);
-            }
-            else
-                endDate = new Date();
-        }
+        let endDate = new Date();
 
-        if (TO?.text)
-            endDate = this.#dayToDate(TO?.text);
+        if (TO?.data)
+            endDate = TO?.data;
 
         let historyItems = await browser.history.search({
             text: OBJECT.text,
@@ -118,12 +142,10 @@ export class History {
                 historyItems = historyItems.slice(0, maxResults);
             }
 
-            //historyItems = historyItems.slice(0, maxResults);
-
             cmdAPI.objectPreviewList(display, historyItems, {
                 text: (h => h.url && !h.title? h.url: h.title),
                 subtext: (h => h.url && !h.title? null: h.url),
-                action: h =>  browser.tabs.create({"url": h.url, active: false})
+                action: h =>  browser.tabs.create({"url": h.url, active: ContextUtils.activateTab})
             });
         }
     }
@@ -131,38 +153,10 @@ export class History {
     execute(args, storage) {
     }
 
-    #dayToDate(day) {
-        let date;
-        switch (day) {
-            case "today":
-                date = new Date();
-                date.setHours(0,0,0,0);
-                break;
-            case "yesterday":
-                date = new Date();
-                date.setHours(0,0,0,0);
-                date.setDate(date.getDate() - 1);
-                break;
-            case "week":
-                date = new Date();
-                date.setHours(0,0,0,0);
-                date.setDate(date.getDate() - 7);
-                break;
-            case "month":
-                date = new Date();
-                date.setHours(0,0,0,0);
-                date.setDate(date.getDate() - 30);
-                break;
-            default:
-                if (day)
-                    date = new Date(day + "T00:00:00");
-                else {
-                    date = new Date();
-                    date.setHours(0,0,0,0);
-                    date.setDate(date.getDate() - 30);
-                }
-        }
-
+    get #monthAgo() {
+        const date = new Date();
+        date.setHours(0,0,0,0);
+        date.setDate(date.getDate() - 30);
         return date;
     }
 }

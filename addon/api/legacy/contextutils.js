@@ -4,7 +4,7 @@ export class ContextUtils {
     static activeTab;
     static selectedText = "";
     static selectedHtml = "";
-    static #activateTab = false; // set to true before preview list item selected with ctrl+arrows is executed
+    static #activateTab = false;
 
     static async getSelection(tabId) {
         let results;
@@ -60,13 +60,11 @@ export class ContextUtils {
     };
 
     static set activateTab(value) {
-        console.log("activating", value)
         this.#activateTab = value;
     }
 
     static get activateTab() {
         const result = this.#activateTab;
-        console.log("deactivating", this.#activateTab, result)
         this.#activateTab = false;
         return result;
     }

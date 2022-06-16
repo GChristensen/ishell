@@ -602,20 +602,20 @@ arguments: [{role: "object",
 </p>
 
 <h1 class="section-heading"><span id="Search_Commands">Creating Search Commands</span></h1>
-    <p>Because Web is volatile, iShell contains search commands only for the essential sites and
-        services, but you can easily make your own with the <a href="API.html#make-search-command"
-                                                               target="_blank">cmdAPI.makeSearchCommand()</a>
-        function. It can automatically parse both HTML and JSON content and also accepts custom
+    <p>Because Web is volatile, iShell provides search commands only for the essential sites and
+        services. Nevertheless, you can easily make your own search command with the
+        <a href="API.html#make-search-command" target="_blank">cmdAPI.makeSearchCommand()</a>
+        function. It can automatically parse HTML and JSON content and also accepts custom
         filter functions to process DOM of the requested page with jQuery. Let's make a function that
-        performs search at <a href="http://urbandictionary.org">urbandictionalry.org</a>:</p>
+        performs search a dictionary:</p>
 
 <pre><code data-language="javascript">cmdAPI.makeSearchCommand({
     name: "urban",
     uuid: "261DF55D-5E22-4E5F-8A81-6ED31B81AE3E",
-    url: "https://www.urbandictionary.com/define.php?term=%s",
-    defaultUrl: "https://www.urbandictionary.com",
+    url: "https://mydictionary.com/define.php?term=%s",
+    defaultUrl: "https://mydictionary.com",
     arguments: [{role: "object", nountype: noun_arb_text, label: "query"}],
-    icon: "https://www.urbandictionary.com/favicon.ico",
+    icon: "https://mydictionary.com/favicon.ico",
     previewDelay: 1000,
     parser: {
         type      : "html",
@@ -1012,7 +1012,7 @@ class Memo {
 
 <h3><span id="generating_nountypes_with_annotations">Generating Noun Types with Annotations</span></h3>
 
-<p>If your noun type needs nothing more than <code>suggest</code> function, you may apply <code>@nountype</code>
+<p>If your noun type needs nothing more than the <code>suggest</code> function, you may apply <code>@nountype</code>
     annotation to a regular function to generate the noun type with the same name:</p>
 
 <pre><code data-language="javascript">/** @nountype
