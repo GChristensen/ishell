@@ -142,7 +142,7 @@ export class CommandList {
              </li>`,
             "")
 
-        return `<div><ul>${suggestionLIs}</ul></div>`;
+        return `<ul>${suggestionLIs}</ul>`;
     }
 
     _decorateIcon(icon) {

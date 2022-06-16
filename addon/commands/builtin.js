@@ -144,6 +144,7 @@ cmdAPI.createCommand({
     name: "install",
     uuid: "DD4AACBD-E042-4F69-81C8-AD4A698F39BC",
     _namespace: NAMESPACE_ISHELL,
+    icon: "/ui/icons/install.png",
     arguments: [{role: "object", nountype: noun_arb_text, label: "URL"}],
     description: "Installs a command from GitHub gist.",
     preview: function(display, args) {

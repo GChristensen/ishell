@@ -4,7 +4,7 @@
 
 body {
   background: #FFF;
-  font-size: 13px;
+  font-size: 10.5pt;
   font-family: "Helvetica", Verdana, Arial, sans-serif;
   max-width: 900px;
   margin: 0px auto 8px auto;
@@ -436,7 +436,7 @@ div.shell-tutorial h2 {
 }
 
 .setting-table {
-    font-size: 13px;
+    font-size: 96%;
 }
 
 ul.syntax, .syntax ul {
@@ -509,4 +509,15 @@ ul.arguments {
   font-style: italic;
   font-size: 95%;
   padding-bottom: 5px
+}
+
+.since {
+  color: white;
+  background: #66bb00;
+  padding: 2px;
+  border-radius: 3px;
+  font-weight: normal;
+  font-size: 80%;
+  margin-left: 10px;
+  font-size: 90%;
 }

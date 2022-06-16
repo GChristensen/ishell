@@ -1,3 +1,4 @@
+<!DOCTYPE html>
 <html>
 <head>
     <title>iShell Tutorial</title>
@@ -16,8 +17,12 @@
             margin-top: 60px;
         }
 
-        p {
-            font-size: 14px;
+        p, a, li {
+            font-size: 12pt;
+        }
+
+        ul#nav a {
+            font-size: 10.5pt;
         }
     </style>
 
@@ -1069,7 +1074,7 @@ class SwitchTab {
     Although technically you may make requests to any
     local web server, the lifetime of the helper application is managed automatically by the browser.
     Use the <a href="API.html#helper-fetch" target="_blank">cmdAPI.helperFetch()</a>
-    function to call helper application handlers.
+    function to call helper application handlers. See also: <a href="https://gchristensen.github.io/enso-portable/" target="_blank">Enso</a>.
 </p>
 
 <h2><span id="Running_on_page_load.2C_iShell_load_and_startup">Running Code on iShell load and when iShell popup is shown</span></h2>
