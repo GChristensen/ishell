@@ -2,7 +2,7 @@ import {cmdManager} from "../../ishell.js";
 import {settings} from "../../settings.js";
 import {setupHelp} from "./utils.js";
 import {repository} from "../../storage.js";
-import {BUILTIN_NAMESPACES, NAMESPACE_SCRAPYARD} from "../../commands/namespaces.js";
+import {BUILTIN_NAMESPACES, NAMESPACE_SCRAPYARD} from "../../commands/_namespaces.js";
 
 window.escapeHtml = Utils.escapeHtml;
 

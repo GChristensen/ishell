@@ -3,20 +3,13 @@
 {
   "files": [
     {
-      "path": "lingvo.js",  // the path should be relative to the "commands" folder
+      "path": "history.js", // the path should be relative to the "commands" folder
       "syntax": "module"    // supported values of the "syntax" property are "class" and "module"
     },                      // modules should export all annotated items and could be loaded without
-    {                       // the helper app in the MV3 version of the add-on, but do not support metaclasses
-      "path": "history.js",
-      "syntax": "module"
-    },
-    {
-      "path": "mail.js",
-      "syntax": "module"
-    },
-    {
-      "path": "resurrect.js",
-      "syntax": "module"
-    }
+                            // the helper app in the MV3 version of the add-on, but do not support metaclasses
+    {"path": "mail.js", "syntax": "module"},
+    {"path": "lingvo.js", "syntax": "module"},
+    {"path": "resurrect.js", "syntax": "module"},
+    {"path": "literature.js", "syntax": "module"}
   ]
 }

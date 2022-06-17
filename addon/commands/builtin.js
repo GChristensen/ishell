@@ -1,6 +1,5 @@
 import {settings} from "../settings.js";
-import {NAMESPACE_BROWSER, NAMESPACE_ISHELL, NAMESPACE_UTILITY} from "./namespaces.js";
-import {executeScript} from "../utils_browser.js";
+import {NAMESPACE_BROWSER, NAMESPACE_ISHELL, NAMESPACE_UTILITY} from "./_namespaces.js";
 import {noun_type_tab} from "../api/nountypes.js";
 
 CmdUtils.CreateCommand({
@@ -101,17 +100,17 @@ CmdUtils.CreateCommand({
     execute: function() {CmdUtils.addTab("/ui/popup.html")}
 });
 
-CmdUtils.CreateCommand({
-    names: ["show-background-page"],
-    uuid: "42B341B1-5D12-4891-962E-4C2BF68DC7E8",
-    description: "Open extension generated background page.",
-    _namespace: NAMESPACE_ISHELL,
-    _hidden: true,
-    icon: "/ui/icons/debug.png",
-    execute: function() {
-        chrome.runtime.getBackgroundPage(p => CmdUtils.addTab(p.location.href));
-    }
-});
+// CmdUtils.CreateCommand({
+//     names: ["show-background-page"],
+//     uuid: "42B341B1-5D12-4891-962E-4C2BF68DC7E8",
+//     description: "Open extension generated background page.",
+//     _namespace: NAMESPACE_ISHELL,
+//     _hidden: true,
+//     icon: "/ui/icons/debug.png",
+//     execute: function() {
+//         chrome.runtime.getBackgroundPage(p => CmdUtils.addTab(p.location.href));
+//     }
+// });
 
 cmdAPI.createCommand({
     name: "add-setting",

@@ -1,4 +1,4 @@
-import {NAMESPACE_MAIL} from "./namespaces.js";
+import {NAMESPACE_MAIL} from "./_namespaces.js";
 
 class MailBase {
     _namespace = NAMESPACE_MAIL;

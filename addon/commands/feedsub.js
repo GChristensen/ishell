@@ -1,4 +1,4 @@
-import {NAMESPACE_SYNDICATION} from "./namespaces.js";
+import {NAMESPACE_SYNDICATION} from "./_namespaces.js";
 
 CmdUtils.CreateCommand({
     names: ["feedsub"],

@@ -1,4 +1,4 @@
-import {NAMESPACE_TRANSLATION} from "./namespaces.js";
+import {NAMESPACE_TRANSLATION} from "./_namespaces.js";
 
 /**
      # Syntax

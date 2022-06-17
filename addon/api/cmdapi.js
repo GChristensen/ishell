@@ -52,20 +52,27 @@ export const cmdAPI = {
 
 export const R = cmdAPI.reduceTemplate;
 
-cmdAPI.previewFetch = async function(pblock, resource, init) {
+cmdAPI.previewFetch = async function(display, resource, init) {
     const controller = new AbortController();
 
     init = init || {};
+
+    let displayError;
+    if (init._displayError) {
+        delete init._displayError;
+        displayError = true;
+    }
+
     init.signal = controller.signal;
 
     function onPreviewChange() {
-        pblock.removeEventListener("preview-change", onPreviewChange, false);
+        display.removeEventListener("preview-change", onPreviewChange, false);
         controller.abort();
     }
-    pblock.addEventListener("preview-change", onPreviewChange, false);
+    display.addEventListener("preview-change", onPreviewChange, false);
 
     function removePreviewListener() {
-        pblock.removeEventListener("preview-change", onPreviewChange, false);
+        display.removeEventListener("preview-change", onPreviewChange, false);
     }
 
     try {
@@ -85,6 +92,10 @@ cmdAPI.previewFetch = async function(pblock, resource, init) {
         })
     } catch (e) {
         removePreviewListener();
+
+        if (!this.fetchAborted(e) && displayError)
+            display.error(e.message);
+
         throw e;
     }
 };

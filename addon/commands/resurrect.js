@@ -1,4 +1,4 @@
-import {NAMESPACE_SEARCH} from "./namespaces.js";
+import {NAMESPACE_SEARCH} from "./_namespaces.js";
 
 const noun_type_archive = {
     "wayback machine latest": ["web.archive.org", "http://web.archive.org/web/"]

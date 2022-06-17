@@ -1,5 +1,5 @@
 import {settings} from "../settings.js";
-import {NAMESPACE_BROWSER} from "./namespaces.js";
+import {NAMESPACE_BROWSER} from "./_namespaces.js";
 
 /**
  @nountype

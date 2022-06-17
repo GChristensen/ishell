@@ -1,6 +1,6 @@
 import {settings} from "../settings.js";
 import {cmdManager} from "../cmdmanager.js";
-import {NAMESPACE_SCRAPYARD} from "./namespaces.js";
+import {NAMESPACE_SCRAPYARD} from "./_namespaces.js";
 
 const DEFAULT_OUTPUT_LIMIT = 50;
 
