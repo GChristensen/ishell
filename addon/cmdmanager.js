@@ -144,7 +144,7 @@ class CommandManager {
                     if (history.length > settings.max_history_items())
                         history.splice(history.length - 1, 1);
 
-                    settings.set("command_history", history);
+                    await settings.set("command_history", history);
                 }
         }
     }

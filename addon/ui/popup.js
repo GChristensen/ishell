@@ -16,6 +16,10 @@ async function initPopup() {
     cmdAPI.dbglog("iShell popup initialized");
 }
 
+$(window).on("unload", function() {
+    popup.addCurrentInputToHistory();
+});
+
 class PopupWindow {
     constructor() {
         this._lastInput = "";
@@ -78,7 +82,9 @@ class PopupWindow {
     }
 
     loadInput() {
+        console.log("loading input")
         if (contextMenu.selectedContextMenuCommand) {
+            console.log("contextmenu")
             this.setInput(contextMenu.selectedContextMenuCommand);
             contextMenu.selectedContextMenuCommand = null;
 
@@ -117,9 +123,9 @@ class PopupWindow {
         }
     }
 
-    addCurrentInputToHistory() {
-        cmdManager.commandHistoryPush(this.getInput());
-        this._commandList.strengthenMemory();
+    async addCurrentInputToHistory() {
+        await cmdManager.commandHistoryPush(this.getInput());
+        await this._commandList.strengthenMemory();
     }
 
     setCommand(text) {
@@ -164,10 +170,8 @@ class PopupWindow {
             ContextUtils.activateTab = true;
             this.executePreviewItem(previewSelection, true)
         }
-        else {
-            this.addCurrentInputToHistory();
+        else
             await this.executeCurrentCommand();
-        }
 
         window.close();
     }
