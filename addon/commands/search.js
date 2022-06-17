@@ -414,16 +414,17 @@ CmdUtils.CreateCommand({
             pblock.text("Show objects or routes on google maps.<p>syntax: <pre>\tmaps [place]\n\tmaps [start] to [finish]</pre>");
             return;
         }
+        const queryURL = encodeURIComponent(args.object.text);
         pblock.innerHTML = `
             <div class="mapouter">
                 <div class="gmap_canvas">
-                    <iframe width="546" height="507" id="gmap_canvas" src="https://maps.google.com/maps?q=`
-            + encodeURIComponent(args.object.text) + `&t=&z=13&ie=UTF8&iwloc=&output=embed" 
-                    frameborder="0" scrolling="no" marginheight="0" marginwidth="0"></iframe>
+                    <iframe width="546" height="507" id="gmap_canvas" src="https://maps.google.com/maps?q=${queryURL}`
+                                                                        + `&t=&z=13&ie=UTF8&iwloc=&output=embed" 
+                        frameborder="0" scrolling="no" marginheight="0" marginwidth="0"></iframe>
                 </div>
             <style>
-                .mapouter{overflow:hidden;text-align:right;height:507px;width:546px; margin-top: -3px; margin-left: -7px;}
-                .gmap_canvas {overflow:hidden;background:none!important;height:507px;width:546px;}
+                .mapouter {overflow: hidden; text-align: right; height: 507px; width: 546px; margin-top: -3px; margin-left: -7px;}
+                .gmap_canvas {overflow: hidden; background: none !important; height: 507px; width:546px;}
             </style>
             </div>`;
     },
