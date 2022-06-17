@@ -41,39 +41,44 @@ class MyCommand {
     //load(storage) {}
     //init(doc /* popup document */, storage) {}
 
-    async preview({OBJECT}, display, storage) {
-        if (!OBJECT?.text) {
-            this.previewDefault(display);
-            return;
+    async preview({OBJECT: {text: query}}, display, storage) {
+        display.text("Querying Stack Overflow...");
+
+        if (query) {
+            const queryURL = encodeURIComponent(query);
+            const stackOverflowAPI = "https://api.stackexchange.com/2.3/search";
+            const requestURL = `${stackOverflowAPI}?page=10&site=stackoverflow&intitle=${queryURL}`;
+
+            // Get some JSON from Stack Overflow
+            const response = await cmdAPI.previewFetch(display, requestURL, {_displayError: true});
+
+            if (response.ok) {
+                const questions = await response.json();
+                const html = this.#generateList(questions.items);
+                display.set(html);
+            }
         }
-
-        // display the initial html markup of the requested page
-        if (/^https?:\/\/.+/.test(OBJECT?.text))
-            try {
-                let response = await cmdAPI.previewFetch(display, OBJECT?.text);
-
-                if (response.ok) {
-                    let html = await response.text();
-
-                    if (html) {
-                        html = html.substring(0, 500);
-                        display.set(`Request response: <br>${cmdAPI.escapeHtml(html)}...`);
-                    }
-                    else
-                        display.text("<i>Response is empty.</i>");
-                }
-                else
-                    display.error("HTTP request error.");
-            }
-            catch (e) {
-                if (!cmdAPI.fetchAborted(e)) // skip preview change if previewFetch was aborted
-                    display.error("Network error.");
-            }
         else
-            display.text("Invalid URL.");
+            this.previewDefault(display);
     }
 
-    execute(args, storage) {
-        cmdAPI.notify("You loaded: " + OBJECT?.text);
+    // Generate and display a list of questions, although the use of cmdAPI.objectPreviewList()
+    // may be a better solution
+    #generateList(questions) {
+        return `<ul> 
+                ${R(questions, item => // R is a shorthand for cmdAPI.reduceTemplate()
+                 `<li><a href="${item.link}">${item.title}</a>
+                    <ul>
+                      <li>${item.tags.join(",")}</li>
+                    </ul>
+                  </li>`)}
+                </ul>`;
+    }
+
+    execute({OBJECT: {text: query}}, storage) {
+        if (query) {
+            const queryURL = encodeURIComponent(query);
+            cmdAPI.addTab(`https://stackoverflow.com/search?q=${queryURL}`);
+        }
     }
 }

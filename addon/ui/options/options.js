@@ -210,8 +210,11 @@ async function loadHelperAppLinks() {
         const app = link1.endsWith(".exe")? link1: link2;
         const archive = link1.endsWith(".zip")? link1: link2;
 
-        //$("#helper-windows").attr("href", app);
-        $("#helper-windows").on("click", () => alert("Currently not provided."))
+        if (_MANIFEST_V3)
+            $("#helper-windows").attr("href", app);
+        else
+            $("#helper-windows").on("click",
+                () => alert("Windows installer is not provided with the MV2 version of the add-on."))
 
         $("#helper-python").attr("href", archive);
     }

@@ -22,31 +22,35 @@ cmdAPI.createCommand({
     //load: function(storage) {},
     //init: function(doc /* popup document */, storage) {},
     preview: function(pblock, args, storage) {
-        if (!args.object?.text) {
-            this.previewDefault(pblock);
-            return;
-        }
+        if (args.object?.text) {
+            const url = args.object.text;
 
-        // display the initial html markup of the requested page
-        if (/^https?:\/\/.*/.test(args.object.text))
-            cmdAPI.previewAjax(pblock, {
-                url: args.object.text,
-                dataType: "html",
-                success: function(data) {
-                    if (data) {
-                        let html = data.substring(0, 500);
-                        pblock.innerHTML = "Request response: <br>" + cmdAPI.escapeHtml(html) + "...";
+            // Get some HTML from the specified URL
+            if (/^https?:\/\/.*/.test(url)) {
+                pblock.innerHTML = `Requesting ${url}...`;
+
+                cmdAPI.previewAjax(pblock, {
+                    url,
+                    dataType: "html",
+                    success: function(data) {
+                        if (data) {
+                            const html = data.substring(0, 500);
+                            // H is a shorthand for cmdAPI.escapeHtml()
+                            pblock.innerHTML = "Request response: <br>" + H(html) + "...";
+                        }
+                        else
+                            pblock.innerHTML = "Response is empty.";
+                    },
+                    error: function() {
+                        pblock.innerHTML = "HTTP request error.";
                     }
-                    else
-                        pblock.innerHTML = "Response is empty.";
-                },
-                error: function() {
-                    pblock.innerHTML = "HTTP request error.";
-                }
-            });
+                });
+            }
+            else
+                pblock.innerHTML = "Invalid URL.";
+        }
         else
-            pblock.innerHTML = "Invalid URL.";
-
+            this.previewDefault(pblock);
     },
     execute: function(args, storage) {
         cmdAPI.notify("Your input is: " + args.object.text);
