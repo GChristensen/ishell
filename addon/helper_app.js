@@ -1,16 +1,31 @@
 import {hasCSRPermission} from "./utils_browser.js";
+import {fetchWithTimeout} from "./utils.js";
 
 class HelperApp {
-    constructor() {
-        this.auth = crypto.randomUUID();
-        this.version = undefined;
+    #host;
+    #portNumber;
 
-        this._host = (_MANIFEST_V3
-            ? browser.runtime.getManifest().content_security_policy.extension_pages
-            :  browser.runtime.getManifest().content_security_policy)
+    constructor() {
+        this.auth = _BACKGROUND_PAGE? crypto.randomUUID(): "default";
+        this.version = undefined;
+    }
+
+    get host() {
+        if (!this.#host)
+            this.#host = (_MANIFEST_V3
+                            ? chrome.runtime.getManifest().content_security_policy.extension_pages
+                            : chrome.runtime.getManifest().content_security_policy)
                 .split(";")[0]
                 .split(" ").at(-1);
-        this._portNumber = parseInt(this._host.split(":").at(-1));
+
+        return this.#host;
+    }
+
+    get portNumber() {
+        if (!this.#portNumber)
+            this.#portNumber = parseInt(this.host.split(":").at(-1));
+
+        return this.#portNumber;
     }
 
     async getPort() {
@@ -42,7 +57,7 @@ class HelperApp {
                 try {
                     port.postMessage({
                         type: "INITIALIZE",
-                        port: this._portNumber,
+                        port: this.portNumber,
                         auth: this.auth
                     });
                 }
@@ -61,12 +76,28 @@ class HelperApp {
         if (!await hasCSRPermission())
             return false;
 
-        const port = await this.getPort();
+        let presents;
+        if (_BACKGROUND_PAGE)
+            presents = !!await this.getPort();
+        else
+            presents = !!await this._probeServer();
 
-        if (!port && verbose)
+        if (!presents && verbose)
             displayMessage("Can not connect to the helper application.")
 
-        return !!port;
+        return presents;
+    }
+
+    async _probeServer() {
+        try {
+            const init = {timeout: 500};
+            this.injectAuth(init);
+
+            const response = await fetchWithTimeout(this.url("/"), init);
+            return response.ok;
+        } catch (e) {
+            console.error(e);
+        }
     }
 
     getVersion() {
@@ -113,7 +144,7 @@ class HelperApp {
     }
 
     url(path) {
-        return `${this._host}${path.startsWith("/")? "": "/"}${path}`;
+        return `${this.host}${path.startsWith("/")? "": "/"}${path}`;
     }
 
     injectAuth(init) {

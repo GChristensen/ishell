@@ -211,7 +211,10 @@ async function loadHelperAppLinks() {
     function setDownloadLinks(link1, link2) {
         const app = link1.endsWith(".exe")? link1: link2;
         const archive = link1.endsWith(".zip")? link1: link2;
-        $("#helper-windows").attr("href", app);
+
+        //$("#helper-windows").attr("href", app);
+        $("#helper-windows").on("click", () => alert("Currently not provided."))
+
         $("#helper-python").attr("href", archive);
     }
 

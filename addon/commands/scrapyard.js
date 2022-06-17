@@ -795,9 +795,10 @@ chrome.management.onUninstalled.addListener(async (info) => {
     }
 });
 
-async function scrapyardPresents() {
+async function isScrapyardPresents() {
     try {
-        return !!(await browser.runtime.sendMessage(scrapyard_id, {type: "SCRAPYARD_GET_VERSION"}));
+        const response = await browser.runtime.sendMessage(scrapyard_id, {type: "SCRAPYARD_GET_VERSION"});
+        return !!response;
     }
     catch (e) {
         return false;
@@ -807,13 +808,13 @@ async function scrapyardPresents() {
 async function checkForScrapyard(retry = 1) {
     //console.log(`Checking for Scrapyard, retry ${retry}`);
 
-    let scrapyard_presents = await scrapyardPresents();
+    let scrapyardPresents = await isScrapyardPresents();
 
-    if (scrapyard_presents) {
+    if (scrapyardPresents) {
         settings.scrapyard_presents(true)
 
-        if (cmdManager.commands.indexOf(scrapyard_commands[0]) < 0)
-            cmdManager.commands = [...cmdManager.commands, ...scrapyard_commands];
+        // if (cmdManager.commands.indexOf(scrapyard_commands[0]) < 0)
+        //     cmdManager.commands = [...cmdManager.commands, ...scrapyard_commands];
     }
     else {
         if (retry < 10) {
@@ -821,6 +822,8 @@ async function checkForScrapyard(retry = 1) {
         }
         else {
             settings.scrapyard_presents(false);
+            // TODO: movie in module
+            cmdManager.commands = cmdManager.commands.filter(c => c._namespace !== NAMESPACE_SCRAPYARD);
         }
     }
 }

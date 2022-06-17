@@ -71,7 +71,6 @@ class StorageIDB {
     }
 
     async saveUserScript(namespace, script) {
-        console.log("saving ", namespace)
         const exists = await dexie.custom_scripts.where("namespace").equals(namespace).count();
 
         if (exists) {

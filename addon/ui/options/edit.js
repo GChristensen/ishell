@@ -2,7 +2,6 @@ import {cmdManager, helperApp} from "../../ishell.js";
 import {settings} from "../../settings.js";
 import {repository} from "../../storage.js";
 import {CommandPreprocessor} from "../../api/preprocessor.js";
-import {sleep} from "../../utils.js";
 
 const SHELL_SETTINGS = "shell-settings";
 const CHANGE_DELAY = 2000;

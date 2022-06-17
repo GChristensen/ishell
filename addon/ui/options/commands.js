@@ -2,7 +2,7 @@ import {cmdManager} from "../../ishell.js";
 import {settings} from "../../settings.js";
 import {setupHelp} from "./utils.js";
 import {repository} from "../../storage.js";
-import {BUILTIN_NAMESPACES} from "../../commands/namespaces.js";
+import {BUILTIN_NAMESPACES, NAMESPACE_SCRAPYARD} from "../../commands/namespaces.js";
 
 window.escapeHtml = Utils.escapeHtml;
 
@@ -27,7 +27,12 @@ async function buildTable() {
 
     jQuery("#num-commands").text(commandCount);
 
-    for (const namespace of BUILTIN_NAMESPACES)
+    let namespacesToList = [...BUILTIN_NAMESPACES];
+
+    if (!settings.scrapyard_presents())
+        namespacesToList.splice(namespacesToList.indexOf(NAMESPACE_SCRAPYARD), 1);
+
+    for (const namespace of namespacesToList)
         insertNamespace(namespace, builtinCommands);
 
     if (settings.enable_more_commands())

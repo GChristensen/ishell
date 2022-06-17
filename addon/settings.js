@@ -1,5 +1,7 @@
 import {merge} from "./utils.js";
 
+const BROWSER = window.browser || window.chrome;
+
 const ISHELL_SETTINGS_KEY = "shell_settings";
 
 class IShellSettings {
@@ -25,7 +27,7 @@ class IShellSettings {
 
     async _loadPlatform() {
         if (!this._platform) {
-            const platformInfo = await browser.runtime.getPlatformInfo();
+            const platformInfo = await BROWSER.runtime.getPlatformInfo();
             this._platform = {[platformInfo.os]: true};
             if (navigator.userAgent.indexOf("Firefox") >= 0) {
                 this._platform.firefox = true;
@@ -34,7 +36,7 @@ class IShellSettings {
     }
 
     async _loadSettings() {
-        const object = await browser.storage.local.get(this._key);
+        const object = await BROWSER.storage.local.get(this._key);
         this._bin = merge(object[this._key] || {}, this._default);
     }
 
@@ -43,13 +45,13 @@ class IShellSettings {
     }
 
     async _get(k) {
-        const v = await browser.storage.local.get(k);
+        const v = await BROWSER.storage.local.get(k);
         if (v)
             return v[k];
         return null;
     }
 
-    async _set(k, v) { return browser.storage.local.set({[k]: v}) }
+    async _set(k, v) { return BROWSER.storage.local.set({[k]: v}) }
 
     get(target, key, receiver) {
         if (key === "load")
@@ -72,7 +74,7 @@ class IShellSettings {
             }
             else bin[key] = val;
             let result = key in bin? bin[key]: old;
-            return new Promise(resolve => browser.storage.local.set({[this._key]: bin}).then(resolve(result)));
+            return new Promise(resolve => BROWSER.storage.local.set({[this._key]: bin}).then(resolve(result)));
         }
     }
 
@@ -87,7 +89,7 @@ class IShellSettings {
 
 export const settings = new Proxy({}, new IShellSettings());
 
-browser.storage.onChanged.addListener(function (changes, areaName) {
+chrome.storage.onChanged.addListener(function (changes, areaName) {
     if (changes[ISHELL_SETTINGS_KEY])
         settings.load();
 });

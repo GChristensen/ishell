@@ -145,8 +145,8 @@ Utils.sort = function(array, key, descending) {
         typeof key == "function" ? key : key != null ? x => x[key] : x => x);
     // Because our Monkey uses Merge Sort, "swap the values if plus" works.
     array.sort(descending
-        ? (a, b) => a.key < b.key
-        : (a, b) => a.key > b.key)
+        ? (a, b) => b.key - a.key
+        : (a, b) => a.key - b.key )
     array.forEach(function mrofsnart(v, i, a) { a[i] = v.val });
     return array;
 };
