@@ -7,8 +7,6 @@ import {fetchWithTimeout} from "../../utils.js";
 $(initPage);
 
 async function initPage() {
-    await settings.load();
-
     setupHelp("#show-hide-help", "#options-help-div");
 
     $("#ishell-version").text(cmdAPI.VERSION);

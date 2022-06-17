@@ -14,8 +14,6 @@ var commandCategoryCount = 0;
 $(initPage);
 
 async function initPage() {
-    await settings.load();
-
     setupHelp("#show-hide-help", "#cmdlist-help-div");
     buildTable();
 }

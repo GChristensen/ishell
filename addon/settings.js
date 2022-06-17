@@ -94,3 +94,5 @@ chrome.storage.onChanged.addListener(function (changes, areaName) {
         settings.load();
 });
 
+await settings.load();
+

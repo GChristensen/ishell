@@ -403,6 +403,12 @@
         is designed to handle command previews, which can be canceled by a user action between the
         time it is requested and the time it displays. If the preview is canceled, an "AbortError"
         exception is thrown.</p>
+    <p>The init argument may contain the following additional properties:</p>
+    <ul>
+        <li><b>_displayError</b><span class="since">since v0.5</span> - a boolean indicating that
+            the contents of the <code>message</code> property of exceptions other than "AbortError"
+        thrown by the underlying <code>fetch</code> function should be displayed in the preview area as an error.</li>
+    </ul>
 </blockquote>
 
 <h3><a id="fetch-aborted" class="anchor" aria-hidden="true" href="#preview-fetch"></a>cmdAPI.fetchAborted(error)<span class="since">since v0.2</span></h3>

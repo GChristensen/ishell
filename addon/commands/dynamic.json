@@ -10,6 +10,7 @@
     {"path": "mail.js", "syntax": "module"},
     {"path": "lingvo.js", "syntax": "module"},
     {"path": "resurrect.js", "syntax": "module"},
+    {"path": "scrapyard.js", "syntax": "module"},
     {"path": "literature.js", "syntax": "module"}
   ]
 }

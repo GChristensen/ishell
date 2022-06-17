@@ -11,13 +11,7 @@ const preprocessor = new CommandPreprocessor(CommandPreprocessor.CONTEXT_CUSTOM)
 let scriptNamespace = "default";
 let editor;
 
-$(initPage);
-
-async function initPage() {
-    await settings.load();
-
-    await initEditor();
-}
+$(initEditor);
 
 async function initEditor() {
     if (_MANIFEST_V3) {

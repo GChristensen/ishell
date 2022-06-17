@@ -6,12 +6,9 @@ import {helperApp} from "../helper_app.js";
 await loadModules([
     "./commands/more/more.js",
     "./commands/builtin.js",
-    "./commands/mail.js",
     "./commands/translate.js",
     "./commands/search.js",
-    "./commands/feedsub.js",
-    "./commands/resurrect.js",
-    "./commands/scrapyard.js"
+    "./commands/feedsub.js"
 ]);
 
 await cmdManager.loadBuiltinScripts();

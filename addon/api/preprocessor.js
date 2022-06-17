@@ -339,7 +339,7 @@ export class CommandPreprocessor {
         return block;
     }
 
-    assignCommandProperties(object, properties) {
+    static assignCommandProperties(object, properties) {
         object._hidden = properties.hidden || object._hidden;
         delete properties.hidden;
 
@@ -375,12 +375,15 @@ export class CommandPreprocessor {
         return block;
     }
 
-    instantiateCommand(classDef, classMeta) {
+    static instantiateCommand(classDef, classMeta) {
+        classDef._annotations = {};
+        CommandPreprocessor.assignCommandProperties(classDef._annotations, classMeta.properties);
+
         const args = {};
         const command = new classDef(args);
 
         command.arguments = CommandPreprocessor.assignCommandArguments(args);
-        this.assignCommandProperties(command, classMeta.properties);
+        CommandPreprocessor.assignCommandProperties(command, classMeta.properties);
         CommandPreprocessor.assignCommandHandlers(command);
 
         return command;
@@ -432,7 +435,7 @@ export class CommandPreprocessor {
         return definition;
     }
 
-    instantiateNounType(fun, funMeta) {
+    static instantiateNounType(fun, funMeta) {
         fun.label = funMeta.label;
         fun.suggest = (...args) => fun(...args);
     }
@@ -515,7 +518,7 @@ export class CommandPreprocessor {
             if (!funMeta.skip) {
                 const fun = Object.entries(module).find(e => e[0] === funMeta.name)?.[1];
                 if (fun)
-                    this.instantiateNounType(fun, funMeta);
+                    CommandPreprocessor.instantiateNounType(fun, funMeta);
             }
         }
 
@@ -525,10 +528,13 @@ export class CommandPreprocessor {
             if (!classMeta.skip) {
                 const classDef = Object.entries(module).find(e => e[0] === classMeta.name)?.[1];
                 if (classDef) {
-                    const command = this.instantiateCommand(classDef, classMeta);
+                    const command = CommandPreprocessor.instantiateCommand(classDef, classMeta);
                     cmdAPI.createCommand(command);
                 }
             }
         }
+
+        if (module._init)
+            await module._init();
     }
 }

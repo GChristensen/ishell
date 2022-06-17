@@ -86,6 +86,10 @@ class CommandManager {
         return options;
     }
 
+    removeCommand(command) {
+        this._commands = this._commands.filter(cmd => cmd.id !== command.id);
+    }
+
     static previewDefault(pb) {
         var html = "";
         if ("previewHtml" in this) html = this.previewHtml;

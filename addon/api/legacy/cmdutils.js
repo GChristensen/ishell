@@ -463,83 +463,90 @@ CmdUtils.previewList2 = function(block, items, fs, css) {
         let thumb = fs.thumb? fs.thumb(i): undefined;
 
         if (thumb)
-            html += `<img class='image' src='${thumb}'>`
+            html += `<img class='pl2-image' src='${thumb}'>`
         else
             html += "<div></div>";
 
         let text = fs.text(i);
         let subtext = fs.subtext(i);
 
-        html += `<div class='cnt'><div class='text'>${text}</div>`;
+        html += `<div class='pl2-lines'><div class='pl2-text'>${text}</div>`;
 
         if (subtext)
-            html += `<div class='subtext'>${subtext}</div>`;
+            html += `<div class='pl2-subtext'>${subtext}</div>`;
 
         html += "</div>";
 
         lines.push(html);
     }
 
-    return CmdUtils.previewList(block, lines, (i, e) => fs.action(items[i], e),
-        `
-         .preview-list-item {
-            white-space: nowrap;
-            display: flex;
-            flex-flow: row nowrap;
-            align-content: center;
-         }
-         .preview-list-item > span:nthchild(1) {
-            flex 0 1 auto;
-         }
-         .preview-list-item > span:nthchild(2) {
-            flex 1 1 auto;
-         }
-         .preview-item-key {
-            display: block;
-            ${fs.thumb? 'width: 18px;': 'width: 16px;'}
-            align-self: center;
-            flex 0 1 auto;
-         }
-         .preview-item-text {
-            color: #45BCFF;
-            white-space: nowrap;
-            overflow: hidden;
-            text-overflow: ellipsis;
-            width: 490px;
-            display: flex;
-            flex-flow: row nowrap;
-            align-content: center;
-         }
-         .image {
-            width: 32px;
-            height: 32px;
-            object-fit: contain;
-            align-self: center;
-            float: left;
-            margin-top: 5px;
-            margin-bottom: 5px;
-            margin-right: 5px;
-            display: inline-block;
-            flex: 0 1 auto;
-         }
-         .cnt {
-            flex: 1 1 auto;
-            min-width: 0;
-            align-self: center;
-         }
-         .subtext {
-            font-size: x-small;
-            padding-left: 10px;
-            white-space: nowrap;
-            overflow: hidden;
-            text-overflow: ellipsis;
-            color: #FD7221;
-         }
-         .text {
-            overflow: hidden;
-            white-space: nowrap;
-            text-overflow: ellipsis;
-         }
-         ${css? css: ""}`
-    );
+    let style = CmdUtils._previewList2CSS;
+
+    if (fs.thumb)
+        style += "\n.preview-item-key {width: 18px;}";
+
+    if (css)
+        style += "\n" + css;
+
+    return CmdUtils.previewList(block, lines, (i, e) => fs.action(items[i], e), style);
 };
+
+CmdUtils._previewList2CSS =
+ `.preview-list-item {
+    white-space: nowrap;
+    display: flex;
+    flex-flow: row nowrap;
+    align-content: center;
+ }
+ .preview-list-item > span:nthchild(1) {
+    flex 0 1 auto;
+ }
+ .preview-list-item > span:nthchild(2) {
+    flex 1 1 auto;
+ }
+ .preview-item-key {
+    display: block;
+    width: 16px;
+    align-self: center;
+    flex 0 1 auto;
+ }
+ .preview-item-text {
+    color: #45BCFF;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    width: 490px;
+    display: flex;
+    flex-flow: row nowrap;
+    align-content: center;
+ }
+ .pl2-image {
+    width: 32px;
+    height: 32px;
+    object-fit: contain;
+    align-self: center;
+    float: left;
+    margin-top: 5px;
+    margin-bottom: 5px;
+    margin-right: 5px;
+    display: inline-block;
+    flex: 0 1 auto;
+ }
+ .pl2-lines {
+    flex: 1 1 auto;
+    min-width: 0;
+    align-self: center;
+ }
+ .pl2-subtext {
+    font-size: x-small;
+    padding-left: 10px;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    color: #FD7221;
+ }
+ .pl2-text {
+    overflow: hidden;
+    white-space: nowrap;
+    text-overflow: ellipsis;
+ }`;

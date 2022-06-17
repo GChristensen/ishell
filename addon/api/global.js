@@ -1,7 +1,5 @@
 import {injectModules} from "../utils.js";
-import {settings} from "../settings.js";
-
-await settings.load();
+import "../settings.js";
 
 await injectModules([
     "../lib/math_parser.js",

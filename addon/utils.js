@@ -2,10 +2,13 @@ export function sleep(ms) {
     return new Promise(resolve => setTimeout(resolve,  ms))
 }
 
-export function delegate (object, method) {
-    return function () {
-        return method.apply(object, arguments);
-    }
+export function camelCaseToSnakeCase(str) {
+    return str.replace(/([a-z0-9]|(?=[A-Z]))([A-Z])/g, '$1_$2').toUpperCase();
+}
+
+export function snakeCaseToCamelCase(str) {
+    return str.toLowerCase()
+        .replace(/(_)([a-z])/g, (_match, _p1, p2) => p2.toUpperCase())
 }
 
 export function merge(to, from) {
@@ -14,6 +17,12 @@ export function merge(to, from) {
             to[k] = v;
     }
     return to;
+}
+
+export function delegate (object, method) {
+    return function () {
+        return method.apply(object, arguments);
+    }
 }
 
 // injects legacy API into the global namespace

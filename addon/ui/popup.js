@@ -8,7 +8,6 @@ let popup;
 $(initPopup);
 
 async function initPopup() {
-    await settings.load();
     await cmdManager.initializeCommandsOnPopup(document);
     await ContextUtils.updateActiveTab();
 
@@ -87,7 +86,9 @@ class PopupWindow {
                 this.persistInput();
         }
         else {
-            this.setInput(settings.shell_last_command() || "");
+            const lastCommand = settings.shell_last_command();
+            console.log("loaded input: " + lastCommand);
+            this.setInput(lastCommand || "");
             this.cmdline.select();
         }
     }
