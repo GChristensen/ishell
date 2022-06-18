@@ -31,7 +31,7 @@ let PREPROCESSOR_PREPOSITION_MAP = new Map([
 
 export class CommandPreprocessor {
     static CONTEXT_BUILTIN = 0;
-    static CONTEXT_CUSTOM = 1;
+    static CONTEXT_USER = 1;
 
     constructor(context) {
         this._context = context;
@@ -375,7 +375,7 @@ export class CommandPreprocessor {
         return block;
     }
 
-    static instantiateCommand(classDef, classMeta) {
+    static instantiateCommand(classDef, classMeta = {properties: {}}) {
         classDef._annotations = {};
         CommandPreprocessor.assignCommandProperties(classDef._annotations, classMeta.properties);
 
@@ -509,10 +509,12 @@ export class CommandPreprocessor {
         return text;
     }
 
-    async load(file) {
-        const module = await import(`..${file.path}`);
+    async load(path) {
+        path = `../${path}`;
+        const module = await import(path);
+        const content = await (await fetch(path)).text();
 
-        const functions = this.extractFunctions(file.content);
+        const functions = this.extractFunctions(content);
 
         for (const funMeta of functions) {
             if (!funMeta.skip) {
@@ -522,7 +524,7 @@ export class CommandPreprocessor {
             }
         }
 
-        const classes = this.extractClasses(file.content);
+        const classes = this.extractClasses(content);
 
         for (const classMeta of classes) {
             if (!classMeta.skip) {
@@ -536,5 +538,7 @@ export class CommandPreprocessor {
 
         if (module._init)
             await module._init();
+
+        return module;
     }
 }

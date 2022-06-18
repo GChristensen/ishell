@@ -122,7 +122,7 @@ class PopupWindow {
     }
 
     async addCurrentInputToHistory() {
-        await cmdManager.commandHistoryPush(this.getInput());
+        await this.commandHistoryPush(this.getInput());
         await this._commandList.strengthenMemory();
     }
 
@@ -175,7 +175,7 @@ class PopupWindow {
     }
 
     async executeCurrentCommand() {
-        await cmdManager.commandHistoryPush(this.getInput());
+        await this.commandHistoryPush(this.getInput());
         await this._commandList.executeSelection();
     }
 
@@ -189,7 +189,7 @@ class PopupWindow {
     }
 
     async showHistory() {
-        const history = await cmdManager.getCommandHistory();
+        const history = await this.getCommandHistory();
 
         this.invalidatePreview();
         cmdAPI.previewList(this.pblock, history, (i, e) => {
@@ -214,6 +214,33 @@ class PopupWindow {
 
     scrollPreview(direction) {
         this.pblock.scrollBy(0, (direction? -1: 1) * this.pblock.clientHeight - 20);
+    }
+
+    async commandHistoryPush(input) {
+        if (input) {
+            input = input.trim();
+
+            let history = await settings.get("command_history");
+
+            if (!history)
+                history = [];
+
+            ADD_ITEM: {
+                if (history.length && history[0].toUpperCase() === input.toUpperCase())
+                    break ADD_ITEM;
+
+                history = [input, ...history];
+
+                if (history.length > settings.max_history_items())
+                    history.splice(history.length - 1, 1);
+
+                await settings.set("command_history", history);
+            }
+        }
+    }
+
+    async getCommandHistory() {
+        return settings.get("command_history");
     }
 
     async onKeyDown(evt) {

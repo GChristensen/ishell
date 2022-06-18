@@ -1,6 +1,9 @@
 // These commands are hidden by default and available only through an undocumented easter switch
 
-import {MORE_COMMANDS} from "./common.js";
+import {cmdManager} from "../../cmdmanager.js";
+
+export const _namespace = cmdManager.ns.MORE;
+
 import {loadCSS} from "../../utils_browser.js";
 
 const tableTemplate =
@@ -231,7 +234,6 @@ const getReleases = async function(pblock, query, category, domain, progress) {
 CmdUtils.CreateCommand({
         names: ["nyaa"],
         uuid: "7834AFD7-1F08-443A-956D-17EFD542B34B",
-        _namespace: MORE_COMMANDS,
         _hidden: true,
         arguments: [{role: "object", nountype: noun_arb_text, label: "torrent"}],
         previewDelay: 1000,
@@ -251,7 +253,6 @@ CmdUtils.CreateCommand({
 CmdUtils.CreateCommand({
     names: ["sukebei"],
     uuid: "8C6B98D8-FDF6-40DB-891E-B6F44B00ADD1",
-    _namespace: MORE_COMMANDS,
     _hidden: true,
     arguments: [{role: "object", nountype: noun_arb_text, label: "torrent"}],
     previewDelay: 1000,

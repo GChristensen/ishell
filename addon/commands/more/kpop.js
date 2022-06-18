@@ -1,6 +1,8 @@
 // These commands are hidden by default and available only through an undocumented easter switch
 
-import {MORE_COMMANDS} from "./common.js";
+import {cmdManager} from "../../cmdmanager.js";
+
+export const _namespace = cmdManager.ns.MORE;
 
 // TODO: https://kpoptap.com/
 // CmdUtils.makeSearchCommand({
@@ -12,7 +14,6 @@ import {MORE_COMMANDS} from "./common.js";
 //     description: "Search for K-Pop releases.",
 //     icon: "/commands/more/kpop.png",
 //     _hidden: true,
-//     _namespace: NS_MORE_COMMANDS,
 //     previewDelay: 1000,
 //     parser: {
 //         type: "html",

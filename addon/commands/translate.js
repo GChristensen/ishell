@@ -1,4 +1,6 @@
-import {NAMESPACE_TRANSLATION} from "./_namespaces.js";
+import {cmdManager} from "../cmdmanager.js";
+
+export const _namespace = cmdManager.ns.TRANSLATION;
 
 const MS_TRANSLATOR_LIMIT = 1e4;
 
@@ -79,7 +81,6 @@ CmdUtils.CreateCommand({
     name: "translate",
     uuid: "43599939-571E-4EBF-AF64-8AD6F39C7B79",
     description: "Translates from one language to another using <a href='https://www.bing.com/translator'>Bing Translator</a>.",
-    _namespace: NAMESPACE_TRANSLATION,
     icon: "/ui/icons/translate_bing.ico",
     arguments: {
         object: noun_arb_text,
@@ -153,7 +154,6 @@ CmdUtils.CreateCommand({
 CmdUtils.CreateCommand({
     names: ["translate-page"],
     uuid: "9A6DFBFE-3BB6-4131-996A-25FB0E9B7A26",
-    _namespace: NAMESPACE_TRANSLATION,
     description: `Translates a whole page to the specified language using 
                     <a href="http://translate.google.com">Google Translate</a>.`,
     icon: "/ui/icons/translate_google.ico",

@@ -2,7 +2,6 @@ import {cmdManager} from "../../ishell.js";
 import {settings} from "../../settings.js";
 import {setupHelp} from "./utils.js";
 import {repository} from "../../storage.js";
-import {BUILTIN_NAMESPACES, NAMESPACE_SCRAPYARD} from "../../commands/_namespaces.js";
 
 window.escapeHtml = Utils.escapeHtml;
 
@@ -25,16 +24,16 @@ async function buildTable() {
 
     jQuery("#num-commands").text(commandCount);
 
-    let namespacesToList = [...BUILTIN_NAMESPACES];
+    let namespacesToList = Object.values(cmdManager.ns);
 
     if (!settings.scrapyard_presents())
-        namespacesToList.splice(namespacesToList.indexOf(NAMESPACE_SCRAPYARD), 1);
+        namespacesToList.splice(namespacesToList.indexOf(cmdManager.ns.SCRAPYARD), 1);
+
+    if (!settings.enable_more_commands())
+        namespacesToList.splice(namespacesToList.indexOf(cmdManager.ns.MORE), 1);
 
     for (const namespace of namespacesToList)
         insertNamespace(namespace, builtinCommands);
-
-    if (settings.enable_more_commands())
-        insertNamespace("More Commands", builtinCommands);
 
     const makeEditorLink = n => `<a href="edit.html?${encodeURI(n)}" target="_blank">Open in editor</a>`;
 
@@ -157,13 +156,7 @@ function formatUrl(url) {
     return hu.link(hu);
 }
 
-function compareByName(a, b) {
-    if (a.name < b.name)
-        return -1;
-    if (a.name > b.name)
-        return 1;
-    return 0;
-}
+const compareByName = (a, b) => a.name.localeCompare(b.name, undefined, {sensitivity: 'base'});
 
 function fillTableRowForCmd(row, cmd, className) {
     var {name, names} = cmd;

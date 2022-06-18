@@ -1,4 +1,6 @@
-import {NAMESPACE_SEARCH} from "./_namespaces.js";
+import {cmdManager} from "../cmdmanager.js";
+
+export const _namespace = {name: cmdManager.ns.SEARCH, annotated: true};
 
 const LIBGEN_HOST = "http://libgen.is/";
 
@@ -23,7 +25,6 @@ const LIBGEN_HOST = "http://libgen.is/";
  @uuid 25DB48B1-0FB6-49FC-8F38-728A1BAF7265
  */
 export class Libgen {
-    _namespace = NAMESPACE_SEARCH;
     #libgenHost;
 
     constructor(args) {
@@ -97,7 +98,6 @@ export class Libgen {
     }
 
     _parseTable(table) {
-        let self = this;
         let data = [];
         let rows = table.children("tbody").children("tr").not(":first");
 
@@ -183,8 +183,6 @@ export class Libgen {
  @uuid DC18FEB8-882E-4030-B1B9-F50721877779
  */
 export class Scihub {
-    _namespace = NAMESPACE_SEARCH;
-
     constructor(args) {
         args[OBJECT] = {nountype: noun_arb_text, label: "body"};
     }

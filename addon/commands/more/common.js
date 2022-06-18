@@ -1,1 +1,0 @@
-export const MORE_COMMANDS = "More Commands";

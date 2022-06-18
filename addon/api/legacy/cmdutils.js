@@ -32,6 +32,21 @@ CmdUtils.CreateCommand = function CreateCommand(options) {
     return cmdManager.createCommand(options);
 };
 
+CmdUtils.CreateCommand.previewDefault = function(pb) {
+    let html = "";
+
+    if ("description" in this)
+        html += '<div class="description">' + this.description + '</div>';
+    else if ("help" in this)
+        html += '<p class="help">' + this.help + '</p>';
+    if (!html) html = L(
+        "Execute the %S command.",
+        '<strong class="name">' + H(this.name) + "</strong>");
+    html = '<div class="default">' + html + '</div>';
+
+    return (pb || 0).innerHTML = html;
+};
+
 // returns a command with the given name
 CmdUtils.findCommand = function(name) {
     for (let c in cmdManager.commands)

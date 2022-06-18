@@ -1,8 +1,8 @@
-import {NAMESPACE_MAIL} from "./_namespaces.js";
+import {cmdManager} from "../cmdmanager.js";
+
+export const _namespace = {name: cmdManager.ns.MAIL, annotated: true};
 
 class MailBase {
-    _namespace = NAMESPACE_MAIL;
-
     constructor(args) {
         args[OBJECT] = {nountype: noun_arb_text, label: "body"}; // object
         //args[FOR]    = {nountype: noun_arb_text, label: "text"}; // subject
@@ -151,8 +151,6 @@ export class Compose extends MailBase {
  @uuid C1B5C976-2BBE-4DD6-95E9-A65CC84E1B51
  */
 export class ForgetEmail {
-    _namespace = NAMESPACE_MAIL;
-
     constructor(args) {
         args[OBJECT] = {nountype: noun_type_contact, label: "contact"}; // object
         args[WITH]   = {nountype: noun_arb_text, label: "regex"}; // instrument

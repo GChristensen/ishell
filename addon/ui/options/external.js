@@ -3,7 +3,7 @@ if (location.href.includes("github")) {
     function loadScript(file, onload) {
         let head = document.getElementsByTagName('head')[0];
         let script = document.createElement('script');
-        script.src = '/ishell/' + file;
+        script.src = '/ishell/addon/' + file;
         script.onload = onload;
         head.appendChild(script);
     }

@@ -6,7 +6,7 @@ import {CommandPreprocessor} from "../../api/preprocessor.js";
 const SHELL_SETTINGS = "shell-settings";
 const CHANGE_DELAY = 2000;
 
-const preprocessor = new CommandPreprocessor(CommandPreprocessor.CONTEXT_CUSTOM);
+const preprocessor = new CommandPreprocessor(CommandPreprocessor.CONTEXT_USER);
 
 let scriptNamespace = "default";
 let editor;
@@ -305,7 +305,7 @@ async function evalMV2(customcode) {
 
         $("#info").html("Evaluated!");
 
-        await cmdManager.loadUserScripts(scriptNamespace);
+        await cmdManager.loadUserCommands(scriptNamespace);
     } catch (e) {
         displayError(e.message);
     }
@@ -318,7 +318,7 @@ async function evalMV3(customcode) {
     result.error
         .then(() => {
             $("#info").html("Evaluated!");
-            cmdManager.loadUserScripts(scriptNamespace);
+            cmdManager.loadUserCommands(scriptNamespace);
         })
         .catch(error => {
             displayError(error.message);

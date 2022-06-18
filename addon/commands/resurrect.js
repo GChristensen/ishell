@@ -1,4 +1,6 @@
-import {NAMESPACE_SEARCH} from "./_namespaces.js";
+import {cmdManager} from "../cmdmanager.js";
+
+export const _namespace = {name: cmdManager.ns.UTILITY, annotated: true};
 
 const noun_type_archive = {
     "wayback machine latest": ["web.archive.org", "http://web.archive.org/web/"]
@@ -29,8 +31,6 @@ const noun_type_archive = {
  @uuid 39324f28-48b0-47f5-a22e-fabeb3305705
  */
 export class Resurrect {
-    _namespace = NAMESPACE_SEARCH;
-
     constructor(args) {
         args[OBJECT] = {nountype: noun_arb_text, label: "url"}; // object
         args[WITH]   = {nountype: noun_type_archive, label: "archiving service"}; // instrument

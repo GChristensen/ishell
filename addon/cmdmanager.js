@@ -1,11 +1,49 @@
 import {settings} from "./settings.js";
 import {repository} from "./storage.js";
+import {helperApp} from "./helper_app.js";
+import {CmdUtils} from "./api/legacy/cmdutils.js";
 
 class CommandManager {
+    ns = { // command namespaces
+        ISHELL: "iShell",
+        BROWSER: "Browser",
+        UTILITY: "Utility",
+        SEARCH: "Search",
+        SYNDICATION: "Syndication",
+        MAIL: "Mail",
+        TRANSLATION: "Translation",
+        SCRAPYARD: "Scrapyard",
+        MORE: "More Commands"
+    };
+
+    _builtinModules = [
+        "./commands/more/kpop.js",
+        "./commands/more/javlib.js",
+        "./commands/more/nyaa.js",
+        "./commands/more/more.js",
+        "./commands/browser.js",
+        "./commands/feedsub.js",
+        "./commands/ishell.js",
+        "./commands/search.js",
+        "./commands/translate.js",
+        "./commands/utility.js",
+        // annotated
+        "./commands/history.js",
+        "./commands/lingvo.js",
+        "./commands/literature.js",
+        "./commands/mail.js",
+        "./commands/resurrect.js",
+        "./commands/scrapyard.js",
+    ];
+    
     constructor() {
         this._commands = [];
-        this._disabled_commands = [];
+        this._disabledCommands = [];
     }
+
+    makeParser() {
+        return NLParser.makeParserForLanguage("en", this._commands);
+    };
 
     createCommand(options) {
         if (Array.isArray(options.name)) {
@@ -79,32 +117,20 @@ class CommandManager {
             }
         }
 
-        options.previewDefault = CommandManager.previewDefault;
+        options.previewDefault = CmdUtils.CreateCommand.previewDefault;
 
         this._commands.push(options);
 
         return options;
     }
 
+    getCommandByUUID(uuid) {
+        return this._commands.find(c => c.uuid.toUpperCase() === uuid.toUpperCase());
+    };
+
     removeCommand(command) {
         this._commands = this._commands.filter(cmd => cmd.id !== command.id);
     }
-
-    static previewDefault(pb) {
-        var html = "";
-        if ("previewHtml" in this) html = this.previewHtml;
-        else {
-            if ("description" in this)
-                html += '<div class="description">' + this.description + '</div>';
-            else if ("help" in this)
-                html += '<p class="help">' + this.help + '</p>';
-            if (!html) html = L(
-                "Execute the %S command.",
-                '<strong class="name">' + Utils.escapeHtml(this.name) + "</strong>");
-            html = '<div class="default">' + html + '</div>';
-        }
-        return (pb || 0).innerHTML = html;
-    };
 
     get commands() {
         return this._commands;
@@ -115,68 +141,33 @@ class CommandManager {
     }
 
     get builtinCommands() {
-        return this._commands.filter(c => !!c._builtin)
+        return this._commands.filter(c => c._builtin)
     }
 
     get userCommands() {
         return this._commands.filter(c => !c._builtin)
     }
 
-    getCommandByUUID(uuid) {
-        return this._commands.find(c => c.uuid.toUpperCase() === uuid.toUpperCase());
-    };
-
-    async commandHistoryPush(input) {
-        if (input) {
-            input = input.trim();
-
-            let history = await settings.get("command_history");
-
-            if (!history)
-                history = [];
-
-                ADD_ITEM: {
-                    if (history.length && history[0].toLowerCase() === input.toLowerCase())
-                        break ADD_ITEM;
-
-                    history = [input, ...history];
-
-                    if (history.length > settings.max_history_items())
-                        history.splice(history.length - 1, 1);
-
-                    await settings.set("command_history", history);
-                }
-        }
-    }
-
-    async getCommandHistory() {
-        return settings.get("command_history");
-    }
-
     enableCommand(cmd) {
-        if (cmd.name in this._disabled_commands) {
-            delete this._disabled_commands[cmd.name];
+        if (cmd.name in this._disabledCommands) {
+            delete this._disabledCommands[cmd.name];
             settings.load().then(() => {
-                settings.disabled_commands(this._disabled_commands);
+                settings.disabled_commands(this._disabledCommands);
             });
         }
     };
 
     disableCommand(cmd) {
-        if (!(cmd.name in this._disabled_commands)) {
-            this._disabled_commands[cmd.name] = true;
+        if (!(cmd.name in this._disabledCommands)) {
+            this._disabledCommands[cmd.name] = true;
             settings.load().then(() => {
-                settings.disabled_commands(this._disabled_commands);
+                settings.disabled_commands(this._disabledCommands);
             });
         }
     };
 
-    makeParser() {
-        return NLParser.makeParserForLanguage("en", this._commands);
-    };
-
     // adds a storage bin obtained from the command uuid as the last argument of the called function
-    async callPersistent(cmd, obj, f) {
+    async _callCommandHandler(cmd, obj, f) {
         let newArgs = Array.prototype.slice.call(arguments, 3);
 
         const bin = await Utils.makeBin(cmd.uuid);
@@ -189,82 +180,57 @@ class CommandManager {
         }
     }
 
-    initCommand(cmd, f, obj) {
-        if (obj)
-            return this.callPersistent(cmd, cmd, f, obj)
-        else
-            return this.callPersistent(cmd, cmd, f)
-    }
-
     callPreview(sentence, pblock) {
-        return this.callPersistent(sentence.getCommand(), sentence, sentence.preview, pblock);
+        return this._callCommandHandler(sentence.getCommand(), sentence, sentence.preview, pblock);
     }
 
     callExecute(sentence) {
-        return this.callPersistent(sentence.getCommand(), sentence, sentence.execute)
+        return this._callCommandHandler(sentence.getCommand(), sentence, sentence.execute)
     }
 
-    unloadUserScripts(namespace) {
+    _unloadUserCommands(namespace) {
         if (namespace)
             this._commands = this._commands.filter(c => c._namespace !== namespace);
         else
             this._commands = this._commands.filter(c => !!c._builtin);
     }
 
-    async _loadDynamicManifest() {
-        let response = await fetch("/commands/dynamic.json");
-        if (response.ok) {
-            let json = await response.text();
-            json = json.replaceAll(/\/\/.*?$/gm, "")
-            return JSON.parse(json);
+    async _loadBuiltinCommandModule(path) {
+        const module = await import(path);
+
+        if (module._namespace) {
+            const name = typeof module._namespace === "string"
+                ? module._namespace
+                : module._namespace.name;
+            const annotated = typeof module._namespace === "object" && module._namespace.annotated;
+
+            if (annotated)
+                await this._loadAnnotatedCommandModule(path);
+
+            this.assignBuiltinNamespace(name);
+        }
+        else
+            console.log("module '%s' has no namespace", path);
+    }
+
+    async _loadAnnotatedCommandModule(path) {
+        const preprocessor = new CommandPreprocessor(CommandPreprocessor.CONTEXT_BUILTIN);
+        await preprocessor.load(path);
+    }
+
+    assignBuiltinNamespace(name, commands) {
+        commands = commands || this._commands.filter(c => !c._namespace);
+
+        for (let cmd of commands) {
+            cmd._namespace = name;
+            cmd._builtin = true;
         }
     }
 
-    async _loadAnnotatedDefinitions(file) {
-        if (file) {
-            if (file.startsWith("/"))
-                file = file.substring(1);
+    async loadUserCommands(namespace) {
+        this._unloadUserCommands(namespace);
 
-            const path = `/commands/${file}`;
-            const response = await fetch(path);
-            if (response.ok)
-                return {path, content: await response.text()};
-        }
-    }
-
-    async loadBuiltinScripts() {
-        try {
-            let manifest = await this._loadDynamicManifest();
-            let preprocessor = new CommandPreprocessor(CommandPreprocessor.CONTEXT_BUILTIN);
-
-            for (let file of manifest.files) {
-                if (file.path === "example.js")
-                    continue;
-
-                try {
-                    let script = await this._loadAnnotatedDefinitions(file.path);
-                    if (script) {
-                        if (file.syntax === "module")
-                            preprocessor.load(script);
-                        else {
-                            script = preprocessor.transform(script.content);
-                            if (script)
-                                await cmdAPI.evaluate(script);
-                        }
-                    }
-                } catch (e) {
-                    console.error("builtin script evaluation failed", e);
-                }
-            }
-        } catch (e) {
-            console.error("builtin scripts load failed", e);
-        }
-    }
-
-    async loadUserScripts(namespace) {
-        this.unloadUserScripts(namespace);
-
-        let preprocessor = new CommandPreprocessor(CommandPreprocessor.CONTEXT_CUSTOM);
+        let preprocessor = new CommandPreprocessor(CommandPreprocessor.CONTEXT_USER);
         let userscripts = await repository.fetchUserScripts(namespace);
 
         if (namespace)
@@ -285,8 +251,20 @@ class CommandManager {
         }
     }
 
-    async prepareCommands() {
-        this._commands = this._commands.filter(cmd => cmdAPI.DEBUG || !cmd._hidden);
+    async loadCommands() {
+        for (const path of this._builtinModules)
+            await this._loadBuiltinCommandModule(path);
+
+        const canLoadUserScripts = !_MANIFEST_V3 || _MANIFEST_V3 && await helperApp.probe();
+
+        if (canLoadUserScripts)
+            await cmdManager.loadUserCommands();
+
+        await this._prepareCommands();
+    }
+
+    async _prepareCommands() {
+        this._commands = this._commands.filter(cmd => !cmd._hidden || cmdAPI.DEBUG && cmd._debug);
 
         let disabledCommands = settings.disabled_commands();
 
@@ -296,14 +274,14 @@ class CommandManager {
                     cmd.disabled = true;
             }
 
-        return this.initializeCommands();
+        return this._initializeCommands();
     }
 
-    async initializeCommands() {
+    async _initializeCommands() {
         for (const cmd of this._commands) {
             try {
                 if (cmd.load)
-                    await this.initCommand(cmd, cmd.load);
+                    await this._callCommandHandler(cmd, cmd, cmd.load);
             }
             catch (e) {
                 console.error(e, e.stack);
@@ -315,7 +293,7 @@ class CommandManager {
         for (let cmd of this._commands) {
             try {
                 if (cmd.init) {
-                    await this.initCommand(cmd, cmd.init, doc);
+                    await this._callCommandHandler(cmd, cmd, cmd.init, doc);
                 }
             }
             catch (e) {

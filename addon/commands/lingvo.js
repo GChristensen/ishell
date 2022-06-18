@@ -1,4 +1,6 @@
-import {NAMESPACE_TRANSLATION} from "./_namespaces.js";
+import {cmdManager} from "../cmdmanager.js";
+
+export const _namespace = {name: cmdManager.ns.TRANSLATION, annotated: true};
 
 /**
      # Syntax
@@ -19,7 +21,6 @@ import {NAMESPACE_TRANSLATION} from "./_namespaces.js";
      @uuid 757A2516-9A45-4D02-8756-854B5DE5A074
  */
 export class Lingvo {
-    _namespace = NAMESPACE_TRANSLATION;
     #abbyyAPI = "https://developers.lingvolive.com/api";
 
     #lingvoAPIToken;

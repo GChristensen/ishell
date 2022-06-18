@@ -12,7 +12,7 @@ else
     await loadIShell();
 
 async function loadIShell() {
-    await import("./commands/_load.js");
+    await import("./api/global.js");
 
     const cmdmanager = await import("./cmdmanager.js");
     cmdManager = cmdmanager.cmdManager;
@@ -22,6 +22,8 @@ async function loadIShell() {
 
     const helperapp = await import("./helper_app.js");
     helperApp = helperapp.helperApp;
+
+    await cmdManager.loadCommands();
 }
 
 async function loadBackgroundAPI() {

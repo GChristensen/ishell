@@ -1,8 +1,9 @@
 import {settings} from "../settings.js";
 import {cmdManager} from "../cmdmanager.js";
-import {NAMESPACE_SCRAPYARD} from "./_namespaces.js";
 import {camelCaseToSnakeCase} from "../utils.js";
 import {CommandPreprocessor} from "../api/preprocessor.js";
+
+export const _namespace = {name: cmdManager.ns.SCRAPYARD, annotated: true};
 
 const DEFAULT_OUTPUT_LIMIT = 50;
 
@@ -220,8 +221,6 @@ function unpackArgs(cmd, args) {
  @uuid C481A44B-071E-4100-8047-6B708498B3CF
  */
 export class Shelf {
-    _namespace = NAMESPACE_SCRAPYARD;
-
     constructor(args) {
         args[OBJECT] = {nountype: noun_scrapyard_group, label: "name"};
     }
@@ -266,8 +265,6 @@ export class Shelf {
  @uuid F39C4D86-C987-4A8A-8109-8D683C25BE4E
  */
 export class Scrapyard {
-    _namespace = NAMESPACE_SCRAPYARD;
-
     constructor(args) {
         args[OBJECT] = {nountype: noun_arb_text, label: "title"}; // object
         //args[FOR]    = {nountype: noun_arb_text, label: "text"}; // subject
@@ -482,8 +479,6 @@ class BookmarkCommandBase {
  @uuid 2CFD7052-84E2-465C-A450-45BFFE3C6C80
  */
 export class Archive extends BookmarkCommandBase {
-    _namespace = NAMESPACE_SCRAPYARD;
-
     constructor(args) {
         super(args);
         this.__entity = "ARCHIVE";
@@ -501,8 +496,6 @@ export class Archive extends BookmarkCommandBase {
  @uuid 520F182C-34D0-4837-B42A-64A7E859D3D5
  */
 export class Bookmark extends BookmarkCommandBase {
-    _namespace = NAMESPACE_SCRAPYARD;
-
     constructor(args) {
         super(args);
         this.__entity = "BOOKMARK";
@@ -566,8 +559,6 @@ class CopyCommandBase {
  @uuid F21CD346-D5B0-41F1-BAC0-1E325DB9DD21
  */
 export class CopyAt extends CopyCommandBase {
-    _namespace = NAMESPACE_SCRAPYARD;
-
     constructor(args) {
         super(args);
         this.__action = "COPY";
@@ -586,8 +577,6 @@ export class CopyAt extends CopyCommandBase {
  @uuid 425CC0C9-8794-486E-AF8C-3D64F92F9AD7
  */
 export class MoveAt extends CopyCommandBase {
-    _namespace = NAMESPACE_SCRAPYARD;
-
     constructor(args) {
         super(args);
         this.__action = "MOVE";
@@ -640,36 +629,22 @@ CmdUtils.makeCaptureCommand = cmdAPI.makeCaptureCommand = function(options) {
         : "Archive";
 
     options = Object.assign(options, {
+        icon: "/ui/icons/scrapyard.svg",
         description: options.description || (action + " a web-page or selection to Scrapyard."),
         previewDelay: options.previewDelay || 1000,
         __entity: action.toUpperCase()
     });
 
-    const command = CommandPreprocessor.instantiateCommand(BookmarkCommandBase, {properties: options})
+    const command = CommandPreprocessor.instantiateCommand(BookmarkCommandBase);
+    Object.assign(command, options);
 
     cmdAPI.createCommand(command);
 };
 
-
-let SCRAPYARD_COMMANDS;
 let ISHELL_ID = browser.runtime.getManifest().applications?.gecko?.id;
 let SCRAPYARD_ID = ISHELL_ID?.includes("-we")
     ? "scrapyard-we@firefox"
     : "scrapyard@firefox";
-
-export function _init() {
-    const commandUUIDs= [
-        Shelf._annotations.uuid,
-        Scrapyard._annotations.uuid,
-        Bookmark._annotations.uuid,
-        Archive._annotations.uuid,
-        CopyAt._annotations.uuid,
-        MoveAt._annotations.uuid
-    ];
-
-    SCRAPYARD_COMMANDS = commandUUIDs.map(cmdManager.getCommandByUUID.bind(cmdManager));
-    SCRAPYARD_COMMANDS.forEach(c => cmdManager.removeCommand(c));
-}
 
 cmdAPI.scrapyard = new Proxy({}, {
     get(target, key, receiver) {
@@ -698,6 +673,25 @@ chrome.management.onUninstalled.addListener(async (info) => {
         chrome.runtime.reload()
     }
 });
+
+let SCRAPYARD_COMMANDS;
+export function _init() {
+    const commandUUIDs = [
+        Shelf._annotations.uuid,
+        Scrapyard._annotations.uuid,
+        Bookmark._annotations.uuid,
+        Archive._annotations.uuid,
+        CopyAt._annotations.uuid,
+        MoveAt._annotations.uuid
+    ];
+
+    SCRAPYARD_COMMANDS = commandUUIDs.map(cmdManager.getCommandByUUID.bind(cmdManager));
+    cmdManager.assignBuiltinNamespace(cmdManager.ns.SCRAPYARD, SCRAPYARD_COMMANDS);
+
+    SCRAPYARD_COMMANDS.forEach(c => cmdManager.removeCommand(c));
+
+    checkForScrapyard();
+}
 
 async function isScrapyardPresents() {
     try {
@@ -728,7 +722,7 @@ async function checkForScrapyard(retry = 1) {
     }
 }
 
-checkForScrapyard();
+
 
 
 

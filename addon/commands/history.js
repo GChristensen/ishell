@@ -1,5 +1,7 @@
 import {settings} from "../settings.js";
-import {NAMESPACE_BROWSER} from "./_namespaces.js";
+import {cmdManager} from "../cmdmanager.js";
+
+export const _namespace = {name: cmdManager.ns.BROWSER, annotated: true};
 
 /**
  @nountype
@@ -95,8 +97,6 @@ function dayToDate(day) {
     @uuid 128DEB45-F187-4A1F-A74D-566EDAE8DD0F
 */
 export class History {
-    _namespace = NAMESPACE_BROWSER;
-
     constructor(args) {
         args[OBJECT] = {nountype: noun_arb_text, label: "title or url"}; // object
         args[FOR]    = {nountype: /[^\s]+/, label: "url"}; // subject
