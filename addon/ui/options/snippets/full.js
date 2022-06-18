@@ -19,32 +19,17 @@ cmdAPI.createCommand({
     author: "Your Name",
     icon: "http://example.com/favicon.ico",
     previewDelay: 1000,
-    //load: function(storage) {},
-    //init: function(doc /* popup document */, storage) {},
-    preview: function(pblock, args, storage) {
+
+    //load(storage) {},
+    //init(doc /* popup document */, storage) {},
+
+    preview(pblock, args, storage) {
         if (args.object?.text) {
             const url = args.object.text;
 
-            // Get some HTML from the specified URL
             if (/^https?:\/\/.*/.test(url)) {
                 pblock.innerHTML = `Requesting ${url}...`;
-
-                cmdAPI.previewAjax(pblock, {
-                    url,
-                    dataType: "html",
-                    success: function(data) {
-                        if (data) {
-                            const html = data.substring(0, 500);
-                            // H is a shorthand for cmdAPI.escapeHtml()
-                            pblock.innerHTML = "Request response: <br>" + H(html) + "...";
-                        }
-                        else
-                            pblock.innerHTML = "Response is empty.";
-                    },
-                    error: function() {
-                        pblock.innerHTML = "HTTP request error.";
-                    }
-                });
+                this.downloadContent(pblock, url);
             }
             else
                 pblock.innerHTML = "Invalid URL.";
@@ -52,7 +37,27 @@ cmdAPI.createCommand({
         else
             this.previewDefault(pblock);
     },
-    execute: function(args, storage) {
+
+    execute(args, storage) {
         cmdAPI.notify("Your input is: " + args.object.text);
+    },
+
+    downloadContent(pblock, url) {
+        cmdAPI.previewAjax(pblock, {
+            url,
+            dataType: "html",
+            success: data => this.onContentLoaded(pblock, data),
+            error: () => pblock.innerHTML = "HTTP request error!"
+        });
+    },
+
+    onContentLoaded(pblock, data) {
+        if (data) {
+            const html = data.substring(0, 500);
+            // H is a shorthand for cmdAPI.escapeHtml()
+            pblock.innerHTML = "Request response: <br>" + H(html) + "...";
+        }
+        else
+            pblock.innerHTML = "Response is empty.";
     }
 });

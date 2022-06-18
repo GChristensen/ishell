@@ -2,15 +2,14 @@
  <!-- Example command help in Markdown -->
 
  # Syntax
- **my-command** _input_ **as** _display_
+ **my-command** _text_
 
  # Arguments
- - _input_ - description of the _input_ argument
- - _display_ - description of the _display_ argument
- - this is a nested list
+ - _text_ - description of the _text_ argument
+    - this is a nested list
 
  # Examples
- **my-command** _show me_ **as** _popup_
+ **my-command** text
 
  @command
  @markdown
@@ -42,24 +41,39 @@ class MyCommand {
     //init(doc /* popup document */, storage) {}
 
     async preview({OBJECT: {text: query}}, display, storage) {
-        display.text("Querying Stack Overflow...");
-
         if (query) {
-            const queryURL = encodeURIComponent(query);
-            const stackOverflowAPI = "https://api.stackexchange.com/2.3/search";
-            const requestURL = `${stackOverflowAPI}?page=10&site=stackoverflow&intitle=${queryURL}`;
+            display.text("Querying Stack Overflow...");
 
-            // Get some JSON from Stack Overflow
-            const response = await cmdAPI.previewFetch(display, requestURL, {_displayError: true});
+            const questions = await this.#fetchQuestions(display, query);
 
-            if (response.ok) {
-                const questions = await response.json();
+            if (questions) {
                 const html = this.#generateList(questions.items);
                 display.set(html);
             }
+            else
+                display.error("HTTP request error!");
         }
         else
             this.previewDefault(display);
+    }
+
+    execute({OBJECT: {text: query}}, storage) {
+        if (query) {
+            const queryURL = encodeURIComponent(query);
+            cmdAPI.addTab(`https://stackoverflow.com/search?q=${queryURL}`);
+        }
+    }
+
+    async #fetchQuestions(display, query) {
+        const queryURL = encodeURIComponent(query);
+        const stackOverflowAPI = "https://api.stackexchange.com/2.3/search";
+        const requestURL = `${stackOverflowAPI}?page=10&site=stackoverflow&intitle=${queryURL}`;
+
+        // Get some JSON from Stack Overflow
+        const response = await cmdAPI.previewFetch(display, requestURL, {_displayError: true});
+
+        if (response.ok)
+            return response.json();
     }
 
     // Generate and display a list of questions, although the use of cmdAPI.objectPreviewList()
@@ -73,12 +87,5 @@ class MyCommand {
                     </ul>
                   </li>`)}
                 </ul>`;
-    }
-
-    execute({OBJECT: {text: query}}, storage) {
-        if (query) {
-            const queryURL = encodeURIComponent(query);
-            cmdAPI.addTab(`https://stackoverflow.com/search?q=${queryURL}`);
-        }
     }
 }

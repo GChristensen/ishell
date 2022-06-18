@@ -9,7 +9,7 @@ export class CommandList {
     #selectedSuggestion = 0;
 
     constructor(popup, maxSuggestions) {
-        this.#maxSuggestions = maxSuggestions;
+        this.#maxSuggestions = maxSuggestions || 10;
         this.#parser = cmdManager.makeParser();
         this.#popup = new WeakRef(popup);
     }

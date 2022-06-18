@@ -26,14 +26,16 @@ class PopupWindow {
         this.cmdline = document.getElementById('shell-input');
         this.pblock = document.getElementById('shell-command-preview');
         this.sblock = document.getElementById('shell-command-suggestions');
-
+        console.log("obtained elements")
         this._enhancePBlock();
+        console.log("enhanced pblock")
 
         this._commandList = new CommandList(this, settings.max_suggestions());
-
+        console.log("created command list")
         this.loadInput()
+        console.log("loaded input")
         this.generateSuggestions();
-
+        console.log("generated suggestions");
         cmdAPI.getCommandLine = () => this.getInput();
         cmdAPI.setCommandLine = text => this.setCommand(text);
 
