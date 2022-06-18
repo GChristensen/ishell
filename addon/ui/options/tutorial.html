@@ -93,10 +93,10 @@
 <p>In the command editor type the following:</p>
 
 <pre><code data-language="javascript">cmdAPI.createCommand({
-  names: ["say-hello"],
-  execute() {
-    cmdAPI.notify("Hello, World!");
-  }
+    names: ["say-hello"],
+    execute() {
+        cmdAPI.notify("Hello, World!");
+    }
 });</code></pre>
 
 <p>Now try executing "say hello". You'll see that "Hello, World!" is immediately displayed
@@ -114,9 +114,9 @@
 
 <pre><code data-language="javascript">/** @command */
 class SayHello {
-  execute() {
-    cmdAPI.notify("Hello, World!");
-  }
+    execute() {
+        cmdAPI.notify("Hello, World!");
+    }
 }</code></pre>
 
 <p>The command name will be generated automatically. Only JavaDoc-style comments may be used to
@@ -135,8 +135,8 @@ class SayHello {
 </p>
 
 <pre><code data-language="javascript">{
-  names: ["say-hello"],
-  execute: function () { //etc }
+    names: ["say-hello"],
+    execute: function () { //etc }
 }</code></pre>
 
 <p>means "Make an object with two attributes, 'names' and 'execute'." This object is then passed as
@@ -202,11 +202,11 @@ class SayHello {
 </p>
 
 <pre><code data-language="javascript">cmdAPI.createCommand({
-  names: ["say-hello", "greet"],
-  preview: "Displays a &lt;i&gt;salutary&lt;/i&gt; greeting to the planet.",
-  execute() {
-    cmdAPI.notify("Hello, World!");
-  }
+    names: ["say-hello", "greet"],
+    preview: "Displays a &lt;i&gt;salutary&lt;/i&gt; greeting to the planet.",
+    execute() {
+        cmdAPI.notify("Hello, World!");
+    }
 })</code></pre>
 
 <p>Here the preview is an HTML-formatted string. The preview can also be a function. We'll get to
@@ -218,10 +218,10 @@ class SayHello {
 <p>Let's create a command that inserts the current date at the location of the cursor.</p>
 
 <pre><code data-language="javascript">cmdAPI.createCommand({
-  names: ["insert-date"],
-  execute() {
-    cmdAPI.setSelection(new Date().toLocaleDateString());
-  }
+    names: ["insert-date"],
+    execute() {
+        cmdAPI.setSelection(new Date().toLocaleDateString());
+    }
 })</code></pre>
 
 <p>The new function here is <code>setSelection()</code>. This inserts the passed-in text onto the
@@ -246,20 +246,20 @@ class SayHello {
 </p>
 
 <pre><code data-language="javascript">cmdAPI.createCommand({
-  names: ["insert-date"],
+    names: ["insert-date"],
 
-  _date() {
-    return new Date().toLocaleDateString();
-  },
+    _date() {
+        return new Date().toLocaleDateString();
+    },
 
-  preview(pblock) {
-    const date = this._date();
-    pblock.innerHTML = `Inserts today's date: "&lt;i&gt;${date}&lt;/i&gt;"`;
-  },
+    preview(pblock) {
+        const date = this._date();
+        pblock.innerHTML = `Inserts today's date: "&lt;i&gt;${date}&lt;/i&gt;"`;
+    },
 
-  execute() {
-    cmdAPI.setSelection(this._date());
-  }
+    execute() {
+        cmdAPI.setSelection(this._date());
+    }
 })</code></pre>
 
 <p>We've done three things here. The first was to factor out the code for getting the date into the
@@ -298,10 +298,10 @@ class SayHello {
 </p>
 
 <pre><code data-language="javascript">preview: function(pblock) {
-  pblock.innerHTML = "This will show until the AJAX request returns";
-  cmdAPI.previewAjax(pblock, {url: "http://example.com", success: function (htm) {
-    pblock.innerHTML = htm;
-  }});
+    pblock.innerHTML = "This will show until the AJAX request returns";
+    cmdAPI.previewAjax(pblock, {url: "http://example.com", success: function (htm) {
+        pblock.innerHTML = htm;
+    }});
 },</code></pre>
 
 
@@ -356,17 +356,17 @@ class SayHello {
 <p>Let's start by making a simple command to echo back whatever you type.</p>
 
 <pre><code data-language="javascript">cmdAPI.createCommand({
-  names: ["echo"],
-  arguments: [{role: "object",
-               nountype: noun_arb_text,
-               label: "your shout"}],
-  preview(pblock, args) {
-    pblock.innerHTML = "Will echo: " + args.object.text;
-  },
-  execute(args) {
-    const msg = args.object.text + "... " + args.object.text + "......";
-    cmdAPI.notify(msg);
-  },
+    names: ["echo"],
+    arguments: [{role: "object",
+                             nountype: noun_arb_text,
+                             label: "your shout"}],
+    preview(pblock, args) {
+        pblock.innerHTML = "Will echo: " + args.object.text;
+    },
+    execute(args) {
+        const msg = args.object.text + "... " + args.object.text + "......";
+        cmdAPI.notify(msg);
+    },
 });</code></pre>
 
 <p>This says that the command "echo" takes one argument which is arbitrary text. Whatever text the
@@ -594,12 +594,12 @@ arguments: [{role: "object",
 </p>
 
 <pre><code data-language="javascript">cmdAPI.createCommand({
-  name: "insert-email",
-  arguments: [{role: "modifier", nountype: noun_type_contact}],
-  preview: "Inserts someone's email address.",
-  execute(args) {
-    cmdAPI.setSelection(args.modifier.html);
-  },
+    name: "insert-email",
+    arguments: [{role: "modifier", nountype: noun_type_contact}],
+    preview: "Inserts someone's email address.",
+    execute(args) {
+        cmdAPI.setSelection(args.modifier.html);
+    },
 });</code></pre>
 
 <p>To try this out, execute "insert-email of " and then the first few letters of address someone you mailed
@@ -615,7 +615,7 @@ arguments: [{role: "object",
         performs search a dictionary:</p>
 
 <pre><code data-language="javascript">cmdAPI.makeSearchCommand({
-    name: "urban",
+    name: "mydictionary",
     uuid: "261DF55D-5E22-4E5F-8A81-6ED31B81AE3E",
     url: "https://mydictionary.com/define.php?term=%s",
     defaultUrl: "https://mydictionary.com",
@@ -683,35 +683,36 @@ arguments: [{role: "object",
     <b>show-text</b> <i>message text</i> <b>in</b> <i>destination</i>.</p>
 
 <pre><code data-language="javascript">/**
-  Displays a given message at a popup or prints it to the browser log.
+    Displays a given message at a popup or prints it to the browser log.
 
-  @command show-text, display-text
-  @description An object-oriented command with arguments.
+    @command show-text, display-text
+    @description An object-oriented command with arguments.
 */
 class ShowTextCommandClass {
-  constructor(args) {
-    args[OBJECT] = {nountype: noun_arb_text, label: "message"};
-    args[IN]     = {nountype: ["popup", "log"], label: "destination"};
-  }
-
-  preview(args, display, storage) {
-    if (args[OBJECT]?.text) {
-      const msg = `Shows &lt;i&gt;${args[OBJECT]?.text}&lt;/i&gt; in &lt;b&gt;${args[IN]?.text || "popup"}&lt;/b&gt;`;
-      display.set(msg);
+    constructor(args) {
+        args[OBJECT] = {nountype: noun_arb_text, label: "message"};
+        args[IN]     = {nountype: ["popup", "log"], label: "destination"};
     }
-    else
-      this.previewDefault(display);
-  }
 
-  execute(args, storage) {
-    const destination = args[IN]?.text;
-    const message = args[OBJECT]?.text;
+    preview(args, display, storage) {
+        const message = args[OBJECT]?.text;
+        if (message) {
+            const html = `Shows &lt;i&gt;${message}&lt;/i&gt; in &lt;b&gt;${args[IN]?.text || "popup"}&lt;/b&gt;`;
+            display.set(html);
+        }
+        else
+            this.previewDefault(display);
+    }
 
-    if (destination === "log")
-      console.log(message);
-    else
-      cmdAPI.notify(message);
-  }
+    execute(args, storage) {
+        const destination = args[IN]?.text;
+        const message = args[OBJECT]?.text;
+
+        if (destination === "log")
+            console.log(message);
+        else
+            cmdAPI.notify(message);
+    }
 }</code></pre>
 
 <p>Let's see what happens here.</p>
@@ -753,43 +754,43 @@ class ShowTextCommandClass {
 </p>
 
 <pre><code data-language="javascript">/**
-  This class does not create any commands automatically.
+    This class does not create any commands automatically.
 
-  @command
-  @metaclass
-  @description Supplies input with the "%s" suffix.
+    @command
+    @metaclass
+    @description Supplies input with the "%s" suffix.
 */
 class SuffixCommand {
-  suffix = "";
+    suffix = "";
 
-  constructor(args) {
-    args[OBJECT] = {nountype: noun_arb_text, label: "input"};
-  }
+    constructor(args) {
+        args[OBJECT] = {nountype: noun_arb_text, label: "input"};
+    }
 
-  // a method named metaconstructor is used to initialize instances
-  // of the command
-  metaconstructor(options) {
-    Object.assign(this, options);
+    // a method named metaconstructor is used to initialize instances
+    // of the command
+    metaconstructor(options) {
+        Object.assign(this, options);
 
-    // note that in the metaconstructor it is possible to process attributes
-    // placed in the comment above the command
-    this.description = this.description.replace("%s", this.suffix);
-  }
+        // note that in the metaconstructor it is possible to process attributes
+        // placed in the comment above the command
+        this.description = this.description.replace("%s", this.suffix);
+    }
 
-  preview({OBJECT}, display) {
-    if (OBJECT?.text)
-      display.text(`Processed input: ${OBJECT?.text}${this.suffix}`);
-    else
-      this.previewDefault(display);
-  }
+    preview({OBJECT}, display) {
+        if (OBJECT?.text)
+            display.text(`Processed input: ${OBJECT?.text}${this.suffix}`);
+        else
+            this.previewDefault(display);
+    }
 
-  execute() {}
+    execute() {}
 }
 
 function createSuffixCommand(options) {
-  // command constructor takes the same arguments as its
-  // metaconstructor method
-  cmdAPI.createCommand(new SuffixCommand(options));
+    // command constructor takes the same arguments as its
+    // metaconstructor method
+    cmdAPI.createCommand(new SuffixCommand(options));
 }
 
 createSuffixCommand({name: "um-suffix", suffix: "um", uuid: "uuid1"});
@@ -820,13 +821,13 @@ createSuffixCommand({name: "issa-suffix", suffix: "issa", uuid: "uuid2"});</code
     @description Replaces the selected URL with a TinyUrl.
 */
 class Tinyurl {
-  constructor(args) {
-    args[OBJECT] = {nountype: noun_arb_text, label: "url to shorten"};
-  }
-  execute({OBJECT: {text: userUrl}}) {
-    const apiUrl = "http://tinyurl.com/api-create.php";
-    jQuery.get(apiUrl, {url: userUrl}, tinyUrl => cmdAPI.setSelection(tinyUrl));
-  }
+    constructor(args) {
+        args[OBJECT] = {nountype: noun_arb_text, label: "url to shorten"};
+    }
+    execute({OBJECT: {text: userUrl}}) {
+        const apiUrl = "http://tinyurl.com/api-create.php";
+        jQuery.get(apiUrl, {url: userUrl}, tinyUrl => cmdAPI.setSelection(tinyUrl));
+    }
 }</code></pre>
 
 <p>jQuery is a powerful tool. With it, you can fairly effortlessly cherry-pick the data you need
@@ -852,39 +853,39 @@ class Tinyurl {
  @description Changes the color of the given heading tags.
 */
 class ChangeColor {
-  constructor(args) {
-    args[OF] = {nountype: ["H1", "H2", "H3", "H4", "H5"], label: "selector"};
-    args[TO] = {nountype: ["red", "green", "blue"], label: "color"};
-  }
+    constructor(args) {
+        args[OF] = {nountype: ["H1", "H2", "H3", "H4", "H5"], label: "selector"};
+        args[TO] = {nountype: ["red", "green", "blue"], label: "color"};
+    }
 
-  async preview({OF}, display) {
-    // a function with its arguments should be passed to executeScript
-    // this works both in MV2 and MV3, do not pass references to class methods
-    // jQuery option allows the use of jQuery in content scripts
-    const options = {func: extractHeadings, args: [OF.text], jQuery: true};
-    const [{result}] = await cmdAPI.executeScript(options);
-    const headingList = `<ul>${
-      R(result, h => (`<li>${h}</li>`))
-    }</ul>`;
+    async preview({OF}, display) {
+        // a function with its arguments should be passed to executeScript
+        // this works both in MV2 and MV3, do not pass references to class methods
+        // jQuery option allows the use of jQuery in content scripts
+        const options = {func: extractHeadings, args: [OF.text], jQuery: true};
+        const [{result}] = await cmdAPI.executeScript(options);
+        const headingList = `<ul>${
+            R(result, h => (`<li>${h}</li>`))
+        }</ul>`;
 
-    display.set(headingList)
-  }
+        display.set(headingList)
+    }
 
-  async execute({OF, TO}) {
-    const options = {func: extractHeadings, args: [OF.text, TO.text], jQuery: true};
-    await cmdAPI.executeScript(options);
-  }
+    async execute({OF, TO}) {
+        const options = {func: extractHeadings, args: [OF.text, TO.text], jQuery: true};
+        await cmdAPI.executeScript(options);
+    }
 }
 
 // these functions are executed as content scripts in the context of the tab document
 
 function extractHeadings(selector) {
-  const headings = $(selector).map((_, element) => element.textContent);
-  return Array.from(headings);
+    const headings = $(selector).map((_, element) => element.textContent);
+    return Array.from(headings);
 }
 
 function colorHeadings(selector, color) {
-  $(selector).css("color", color);
+    $(selector).css("color", color);
 }</code></pre>
 
 <h1 class="section-heading"><span id="Persistent_Storage">Persistent Storage</span></h1>
@@ -901,37 +902,37 @@ function colorHeadings(selector, color) {
  @uuid FA6A3460-E825-4CFA-A24F-5908131D29FD
 */
 class Memo {
-  constructor(args) {
-    args[OBJECT] = {nountype: noun_arb_text, label: "text"};
-  }
-
-  preview(_, display, Bin) {
-    const href = cmdAPI.getLocation();
-    const list = Bin[href]();
-
-    if (!list) {
-      display.text(`No memos taken for: <small><code>${href}</code></small>`);
-      return;
+    constructor(args) {
+        args[OBJECT] = {nountype: noun_arb_text, label: "text"};
     }
 
-    let ol = cmdAPI.previewList(display, list, function deleteMemo(i, ev) {
-      $(ev.target).closest("li").slideUp();
-      list.splice(i, 1);
-      Bin[href](list.length ? list : null);
-      gId = +new Date;
-    });
+    preview(_, display, Bin) {
+        const href = cmdAPI.getLocation();
+        const list = Bin[href]();
 
-    ol.setAttribute("data-id", gId);
-  }
+        if (!list) {
+            display.text(`No memos taken for: <small><code>${href}</code></small>`);
+            return;
+        }
 
-  execute({object: {html}}, Bin) {
-    const href = cmdAPI.getLocation();
-    const list = Bin[href]() || [];
+        let ol = cmdAPI.previewList(display, list, function deleteMemo(i, ev) {
+            $(ev.target).closest("li").slideUp();
+            list.splice(i, 1);
+            Bin[href](list.length ? list : null);
+            gId = +new Date;
+        });
 
-    list.push(html);
-    Bin[href](list);
-    this.ID = +new Date;
-  }
+        ol.setAttribute("data-id", gId);
+    }
+
+    execute({object: {html}}, Bin) {
+        const href = cmdAPI.getLocation();
+        const list = Bin[href]() || [];
+
+        list.push(html);
+        Bin[href](list);
+        this.ID = +new Date;
+    }
 }</code></pre>
 
 
@@ -956,27 +957,27 @@ class Memo {
 </p>
 
 <pre><code data-language="javascript">const noun_type_browser_tab = {
-  label: "tab title or URL",
+    label: "tab title or URL",
 
-  async _searchTabs(text, maxResults) {
-    const matcher = new RegExp(text, "i");
-    const tabs = await browser.tabs.query({});
-    const results = tabs.filter(tab => {
-      tab.__match = matcher.exec(tab.title) || matcher.exec(tab.url);
-      return !!tab.__match;
-    });
+    async _searchTabs(text, maxResults) {
+        const matcher = new RegExp(text, "i");
+        const tabs = await browser.tabs.query({});
+        const results = tabs.filter(tab => {
+            tab.__match = matcher.exec(tab.title) || matcher.exec(tab.url);
+            return !!tab.__match;
+        });
 
-    return results.slice(0, maxResults)
-  },
+        return results.slice(0, maxResults)
+    },
 
-  // suggestion methods declared as async do not need to use callback
-  async suggest(text, html, callback, selectedIndices) {
-    const tabs = await this._searchTabs(text, 5);
-    const makeSugg = tab => cmdAPI.makeSugg(tab.title || tab.url, null, tab,
-                                            cmdAPI.matchScore(tab.__match),
-                                            selectedIndices);
-    return tabs.map(makeSugg);
-  }
+    // suggestion methods declared as async do not need to use callback
+    async suggest(text, html, callback, selectedIndices) {
+        const tabs = await this._searchTabs(text, 5);
+        const makeSugg = tab => cmdAPI.makeSugg(tab.title || tab.url, null, tab,
+                                                cmdAPI.matchScore(tab.__match),
+                                                selectedIndices);
+        return tabs.map(makeSugg);
+    }
 };</code></pre>
 
 <p>The suggest method of a noun type always gets passed both text and html. If the input is coming
@@ -1036,21 +1037,21 @@ function noun_type_foo(text, html, callback, selectedIndices) {
 </p>
 
 <pre><code data-language="javascript">/** @command
-    @description Switches to the tab with the given title.
+        @description Switches to the tab with the given title.
 */
 class SwitchTab {
-  constructor(args) {
-    args[OBJECT] = {nountype: noun_type_browser_tab};
-  }
-  preview({OBJECT: {text: tabName}}, display) {
-    if (tabName)
-      display.text(`Changes to <strong>${tabName}</strong> tab.`);
-    else
-      display.text(`Switch to a tab by name.`);
-  }
-  execute({OBJECT: {data: tab}}) {
-    browser.tabs.update(tab?.id, {active: true});
-  }
+    constructor(args) {
+        args[OBJECT] = {nountype: noun_type_browser_tab};
+    }
+    preview({OBJECT: {text: tabName}}, display) {
+        if (tabName)
+            display.text(`Changes to <strong>${tabName}</strong> tab.`);
+        else
+            display.text(`Switch to a tab by name.`);
+    }
+    execute({OBJECT: {data: tab}}) {
+        browser.tabs.update(tab?.id, {active: true});
+    }
 }</code></pre>
 
 <h1 class="section-heading"><span id="Development_Hints">Development Hints</span></h1>
