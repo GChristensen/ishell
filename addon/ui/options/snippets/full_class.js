@@ -1,25 +1,25 @@
 /**
- <!-- Example command help in Markdown -->
+    <!-- Example command help in Markdown -->
 
- # Syntax
- **my-command** _text_
+    # Syntax
+    **my-command** _text_
 
- # Arguments
- - _text_ - description of the _text_ argument
-    - this is a nested list
+    # Arguments
+    - _text_ - description of the _text_ argument
+        - this is a nested list
 
- # Examples
- **my-command** text
+    # Examples
+    **my-command** text
 
- @command
- @markdown
- @license GPL
- @author Your Name
- @delay 1000
- @icon http://example.com/favicon.ico
- @homepage http://example.com/my-command
- @description A short description of your command.
- @uuid %%UUID%%
+    @command
+    @markdown
+    @license GPL
+    @author Your Name
+    @delay 1000
+    @icon http://example.com/favicon.ico
+    @homepage http://example.com/my-command
+    @description A short description of your command.
+    @uuid %%UUID%%
  */
 class MyCommand {
     constructor(args) {
@@ -51,7 +51,7 @@ class MyCommand {
                 display.set(html);
             }
             else
-                display.error("HTTP request error!");
+                display.error("HTTP request error.");
         }
         else
             this.previewDefault(display);
@@ -69,11 +69,15 @@ class MyCommand {
         const stackOverflowAPI = "https://api.stackexchange.com/2.3/search";
         const requestURL = `${stackOverflowAPI}?page=10&site=stackoverflow&intitle=${queryURL}`;
 
-        // Get some JSON from Stack Overflow
-        const response = await cmdAPI.previewFetch(display, requestURL, {_displayError: true});
+        try { // Get some JSON from Stack Overflow
+            const response = await cmdAPI.previewFetch(display, requestURL);
 
-        if (response.ok)
-            return response.json();
+            if (response.ok)
+                return response.json();
+        } catch (e) {
+            if (!cmdAPI.fetchAborted(e))
+                display.error("Network error.");
+        }
     }
 
     // Generate and display a list of questions, although the use of cmdAPI.objectPreviewList()
@@ -83,7 +87,7 @@ class MyCommand {
                 ${R(questions, item => // R is a shorthand for cmdAPI.reduceTemplate()
                  `<li><a href="${item.link}">${item.title}</a>
                     <ul>
-                      <li>${item.tags.join(",")}</li>
+                      <li>${item.tags.join(", ")}</li>
                     </ul>
                   </li>`)}
                 </ul>`;

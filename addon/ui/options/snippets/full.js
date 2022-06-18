@@ -47,7 +47,7 @@ cmdAPI.createCommand({
             url,
             dataType: "html",
             success: data => this.onContentLoaded(pblock, data),
-            error: () => pblock.innerHTML = "HTTP request error!"
+            error: () => pblock.innerHTML = "Request error."
         });
     },
 
