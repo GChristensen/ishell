@@ -384,8 +384,6 @@ CmdUtils.makeSearchCommand.preview = function searchPreview(pblock, {object: {te
         }
         else {
             if (results.length) {
-                console.log(ContextUtils.activateTab);
-                console.log(ContextUtils.activateTab);
                 CmdUtils.previewList2(pblock, results.slice(0, max), {
                     text: (r) => r.title,
                     subtext: (r) => r.body,

@@ -15,7 +15,7 @@ function __shell_get_sel() {
             }
         }
         catch (e) {
-            console.log(e);
+            console.error(e);
         }
 
         return {text: sel.toString(), html: div.innerHTML};

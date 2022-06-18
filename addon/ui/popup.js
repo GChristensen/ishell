@@ -27,16 +27,14 @@ class PopupWindow {
         this.cmdline = document.getElementById('shell-input');
         this.pblock = document.getElementById('shell-command-preview');
         this.sblock = document.getElementById('shell-command-suggestions');
-        console.log("obtained elements")
+
         this._enhancePBlock();
-        console.log("enhanced pblock")
 
         this._commandList = new CommandList(this, settings.max_suggestions());
-        console.log("created command list")
+
         this.loadInput()
-        console.log("loaded input")
         this.generateSuggestions();
-        console.log("generated suggestions");
+
         cmdAPI.getCommandLine = () => this.getInput();
         cmdAPI.setCommandLine = text => this.setCommand(text);
 
@@ -46,6 +44,7 @@ class PopupWindow {
 
     _enhancePBlock() {
         // add a handy set method to populate innerHTML of the preview area
+        // TODO: meddle with a proxy
         if (!this.pblock.set)
             this.pblock.set = function (html) {this.innerHTML = html};
         else
@@ -85,9 +84,7 @@ class PopupWindow {
     }
 
     loadInput() {
-        console.log("loading input")
         if (contextMenu.selectedContextMenuCommand) {
-            console.log("contextmenu")
             this.setInput(contextMenu.selectedContextMenuCommand);
             contextMenu.selectedContextMenuCommand = null;
 
@@ -96,7 +93,6 @@ class PopupWindow {
         }
         else {
             const lastCommand = settings.shell_last_command();
-            console.log("loaded input: " + lastCommand);
             this.setInput(lastCommand || "");
             this.cmdline.select();
         }

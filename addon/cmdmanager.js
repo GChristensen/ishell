@@ -306,7 +306,7 @@ class CommandManager {
                     await this.initCommand(cmd, cmd.load);
             }
             catch (e) {
-                console.log(e, e.stack);
+                console.error(e, e.stack);
             }
         }
     }
@@ -319,7 +319,7 @@ class CommandManager {
                 }
             }
             catch (e) {
-                console.log(e.message);
+                console.error(e.message);
             }
         }
     }
