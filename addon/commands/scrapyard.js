@@ -183,16 +183,16 @@ let getArgumentText = arg =>
 
 function unpackArgs(cmd, args) {
     let result = {
-        search: getArgumentText(args.object),
-        depth: getArgumentText(args.source),
-        path:  getArgumentText(args.time) || cmd.__scr_path,
-        tags:  getArgumentText(args.alias) || cmd.__scr_tags,
-        limit: getArgumentText(args.cause),
-        types: args.format && args.format.text? args.format.data: null,
-        todo_state: (args.instrument && args.instrument.text? args.instrument.data: null)
+        search: getArgumentText(args.OBJECT),
+        depth: getArgumentText(args.FROM),
+        path:  getArgumentText(args.AT) || cmd.__scr_path,
+        tags:  getArgumentText(args.AS) || cmd.__scr_tags,
+        limit: getArgumentText(args.BY),
+        types: args.IN && args.IN.text? args.IN.data: null,
+        todo_state: (args.WITH && args.WITH.text? args.WITH.data: null)
             || (cmd.__scr_todo? todo_states[cmd.__scr_todo.toUpperCase()]: undefined),
-        todo_date:  getArgumentText(args.goal) || cmd.__scr_due,
-        details:  getArgumentText(args.subject) || cmd.__scr_details,
+        todo_date:  getArgumentText(args.TO) || cmd.__scr_due,
+        details:  getArgumentText(args.FOR) || cmd.__scr_details,
         _selector: cmd.__scr_selector,
         _filter: cmd.__scr_filter,
         _style: cmd.__scr_style
@@ -595,10 +595,6 @@ export class MoveAt extends CopyCommandBase {
 }
 
 CmdUtils.makeCaptureCommand = cmdAPI.makeCaptureCommand = function(options) {
-    let action = options.type === "bookmark"
-        ? "Bookmark"
-        : "Archive";
-
     if (options.path) {
         options.__scr_path = options.path;
         delete options.path;
@@ -638,6 +634,10 @@ CmdUtils.makeCaptureCommand = cmdAPI.makeCaptureCommand = function(options) {
         options.__scr_style = options.style;
         delete options.style;
     }
+
+    let action = options.type === "bookmark"
+        ? "Bookmark"
+        : "Archive";
 
     options = Object.assign(options, {
         description: options.description || (action + " a web-page or selection to Scrapyard."),
