@@ -92,12 +92,12 @@
         </li>
         <li><strong>preview</strong> - a description of what your command will do, to be displayed
             to the user before the command is executed. Can be either a string or a function. If
-            this is a string, it will simply be displayed as-is. If preview is a function, it will
+            this is a string, it will simply be displayed as-is. If <b>preview</b> is a function, it will
             be called and passed a <strong>pblock</strong> argument, which is a reference to the
             preview display element. Your function can generate and display arbitrary HTML by
             setting the value of <strong>pblock.innerHTML</strong>. Use <strong>this.previewDefault(pblock)</strong>
             to set the default preview. If your command takes arguments (see above), your preview
-            method will be passed the dictionary as the second argument.<br>
+            method will be passed the dictionary as the second argument (as a first in the object-oriented syntax).<br>
             In iShell <strong>pblock</strong> object has three additional methods:
             <ul>
                 <li><b>set</b> - sets <strong>pblock.innerHTML</strong> verbatim.</li>
@@ -220,7 +220,7 @@
     <p>Display a popup notification with the specified <strong>message</strong> and <strong>title</strong>.</p>
 </blockquote>
 
-<h3><a id="user-content-previewlist" class="anchor"
+<h3><a id="preview-list" class="anchor"
        aria-hidden="true"></a>cmdAPI.previewList(block,
     htmls, [callback], [css])</h3>
 <p class="legacy-name">Legacy name: CmdUtils.previewList</p>
@@ -299,7 +299,7 @@
     </ul>
 </blockquote-->
 
-<h3><a id="user-content-cmdutilsreducetemplate" class="anchor" aria-hidden="true"
+<h3><a id="reduce-template" class="anchor" aria-hidden="true"
        href="#cmdutilsreducetemplatetemplate-data"></a>cmdAPI.reduceTemplate(array, func)<span class="since">since v0.5</span></h3>
 <blockquote>
     <p>Also called <strong>R</strong> in the global namespace. Reduces the given
@@ -370,7 +370,7 @@
         May return <b>null</b> for the special tabs.</p>
 </blockquote>
 
-<h3><a id="user-content-executescript" class="anchor" aria-hidden="true"></a>cmdAPI.executeScript(tabId, options)<span class="since">since v0.5</span></h3>
+<h3><a id="execute-script" class="anchor" aria-hidden="true"></a>cmdAPI.executeScript(tabId, options)<span class="since">since v0.5</span></h3>
 <blockquote>
     <p>Executes a content script in the tab with the given ID.</p>
     <ul>
@@ -388,9 +388,9 @@
     </ul>
     <p>Returns an array of objects with the following properties:</p>
     <ul>
-        <li><strong>result</strong> - result of the script evaluation.</li>
-        <li><strong>frameId</strong> - frame ID from which the result is obtained (MV3 only).</li>
-        <li><strong>error</strong> - details of the script evaluation error (MV3 only).</li>
+        <li><strong>result</strong> - the result of the script evaluation.</li>
+        <li><strong>frameId</strong> - the frame ID from which the result is obtained (MV3 only).</li>
+        <li><strong>error</strong> - the details of the script evaluation error (MV3 only).</li>
     </ul>
 </blockquote>
 
@@ -577,9 +577,9 @@
     <p>Returns an object with key/value pairs customizable through the main setting page (read-only).</p>
 </blockquote>
 
-<h3><a id="user-content-bin" class="anchor" aria-hidden="true" href="#bin"></a>Bin</h3>
+<h3><a id="bin" class="anchor" aria-hidden="true" href="#bin"></a>Bin</h3>
 <blockquote>
-    <p>A persistent data storage interface available through the last argument of any command handler function.
+    <p>A persistent data storage interface that is available through the last argument of any command handler function.
         Calling any method of this interface with an argument will persistently store the supplied value.
         Calling the same method without arguments will return the value stored by the earlier call of this method.
     </p>

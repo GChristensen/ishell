@@ -54,12 +54,11 @@ class ShowText {
 iShell will interpret as a command any class with the `@command` annotation in a JavaDoc-style comment.
 Plain JavaScript comments are ignored.
 
-Most of the arguments to the
-[CmdUtils.CreateCommand](https://gchristensen.github.io/ishell/res/API.html#create-command)
-are also specified as annotations. The command help is generated from the rest
-of the comment text (it may contain HTML or markdown if the `@markdown` annotation
-is used). Thus, the body of the class may
-provide only fields and methods related to the command purpose.
+Most of the arguments to the CmdUtils.CreateCommand are also specified as
+annotations. The command help is generated from the rest of the comment text (it
+may contain HTML or markdown if the `@markdown` annotation is used). Thus, the
+body of the class may provide only fields and methods related to the command
+purpose.
 
 In its constructor, the command above defines a nameless `object` argument
 containing arbitrary text, along with an argument named `in` which can
