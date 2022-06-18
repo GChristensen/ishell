@@ -20,7 +20,9 @@ def echo_push():
 @app.route("/pull_script/<key>", methods=['GET'])
 def echo_pull(key):
     payload = payloads[key]
+
     payload_mutex.acquire()
     del payloads[key]
     payload_mutex.release()
+
     return Response(payload, mimetype='text/javascript')

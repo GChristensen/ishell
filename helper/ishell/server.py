@@ -1,9 +1,10 @@
 import traceback
 import threading
+import socket
 import logging
 import time
 import os
-import socket
+
 from contextlib import closing
 from functools import wraps
 
@@ -11,6 +12,7 @@ import flask
 from flask import request, abort
 from werkzeug.serving import make_server
 
+# !!!!!!vvvv
 DEBUG = True
 
 app = flask.Flask(__name__)
@@ -20,8 +22,9 @@ log.disabled = True
 app.logger.disabled = not DEBUG
 
 ###
+LOG_FILE = '../.local/helper.log'
 if DEBUG:
-    logging.basicConfig(filename='../.local/helper.log', encoding='utf-8', level=logging.DEBUG)
+    logging.basicConfig(filename=LOG_FILE, encoding='utf-8', level=logging.DEBUG)
 ###
 
 auth_token = None

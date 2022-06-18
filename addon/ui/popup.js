@@ -8,6 +8,7 @@ let popup;
 $(initPopup);
 
 async function initPopup() {
+    await settings.load();
     await cmdManager.initializeCommandsOnPopup(document);
     await ContextUtils.updateActiveTab();
 
@@ -110,9 +111,8 @@ class PopupWindow {
     }
 
     persistInput() {
-        const input = this.getInput();
-        settings.shell_last_command(input);
-        this._lastInput = input;
+        this._lastInput = this.getInput();
+        return settings.shell_last_command(this._lastInput);
     }
 
     autocomplete() {
