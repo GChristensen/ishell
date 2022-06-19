@@ -37,9 +37,9 @@ function messageListener(message) {
         //    return true;
         case "replaceSelectedText":
             replaceSelectedText(message.text);
-            browser.runtime.onMessage.removeListener(messageListener);
+            chrome.runtime.onMessage.removeListener(messageListener);
             break;
     }
 }
 
-browser.runtime.onMessage.addListener(messageListener);
+chrome.runtime.onMessage.addListener(messageListener);

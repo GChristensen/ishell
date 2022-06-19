@@ -17,23 +17,23 @@ class CommandManager {
     };
 
     _builtinModules = [
-        "./commands/browser.js",
-        "./commands/ishell.js",
-        "./commands/search.js",
-        "./commands/translate.js",
-        "./commands/utility.js",
+        "/commands/browser.js",
+        "/commands/ishell.js",
+        "/commands/search.js",
+        "/commands/translate.js",
+        "/commands/utility.js",
 
-        "./commands/more/kpop.js",
-        "./commands/more/javlib.js",
-        "./commands/more/nyaa.js",
-        "./commands/more/more.js",
-        "./commands/feedsub.js",
-        "./commands/history.js",
-        "./commands/lingvo.js",
-        "./commands/literature.js",
-        "./commands/mail.js",
-        "./commands/resurrect.js",
-        "./commands/scrapyard.js",
+        "/commands/more/kpop.js",
+        "/commands/more/javlib.js",
+        "/commands/more/nyaa.js",
+        "/commands/more/more.js",
+        "/commands/feedsub.js",
+        "/commands/history.js",
+        "/commands/lingvo.js",
+        "/commands/literature.js",
+        "/commands/mail.js",
+        "/commands/resurrect.js",
+        "/commands/scrapyard.js",
     ];
     
     constructor() {
@@ -203,6 +203,7 @@ class CommandManager {
     }
 
     async _loadBuiltinCommandModule(path) {
+        console.log(path)
         const module = await import(path);
 
         if (module._namespace) {

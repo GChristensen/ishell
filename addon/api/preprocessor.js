@@ -491,7 +491,6 @@ export class CommandPreprocessor {
     }
 
     async load(path) {
-        path = `../${path}`;
         const module = await import(path);
         const content = await (await fetch(path)).text();
 
