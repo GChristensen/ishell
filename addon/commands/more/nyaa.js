@@ -40,7 +40,7 @@ class NyaaBase {
 
         const nyaaSi = fetchNyaaSi();
 
-        await Promise.all([nyaaSi])
+        await Promise.all([nyaaSi]); // nyaa.net also was here
 
         if ((await nyaaSi) === "http-error") {
             await new Promise(resolve => setTimeout(resolve,  1500));
