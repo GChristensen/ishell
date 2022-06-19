@@ -1,7 +1,6 @@
 import {settings} from "../settings.js";
-import {cmdManager} from "../cmdmanager.js";
 
-export const _namespace = cmdManager.ns.SEARCH;
+export const _namespace = CMD_NS.SEARCH;
 
 let maxSearchResults = settings.max_search_results() || 10;
 

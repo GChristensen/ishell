@@ -1,6 +1,4 @@
-import {cmdManager} from "../cmdmanager.js";
-
-export const _namespace = cmdManager.ns.UTILITY;
+export const _namespace = CMD_NS.UTILITY;
 
 CmdUtils.CreateCommand({
     names: ["base64decode","b64d","atob"],

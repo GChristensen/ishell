@@ -1,6 +1,4 @@
-import {cmdManager} from "../cmdmanager.js";
-
-export const _namespace = {name: cmdManager.ns.SEARCH, annotated: true};
+export const _namespace = {name: CMD_NS.SEARCH, annotated: true};
 
 const LIBGEN_HOST = "http://libgen.is/";
 
@@ -59,7 +57,7 @@ export class Libgen {
                 cmdAPI.objectPreviewList(display, books, {
                     text: (b) => b.title,
                     subtext: (b) => b.details,
-                    action: (b) => browser.tabs.create({"url": b.link, active: false})
+                    action: (b) => browser.tabs.create({"url": b.link, active: cmdAPI.activateTab})
                 });
             }
         }

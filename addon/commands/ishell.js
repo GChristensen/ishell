@@ -1,7 +1,6 @@
 import {settings} from "../settings.js";
-import {cmdManager} from "../cmdmanager.js";
 
-export const _namespace = cmdManager.ns.ISHELL;
+export const _namespace = CMD_NS.ISHELL;
 
 CmdUtils.CreateCommand({
     names: ["change-shell-settings", "change-shell-options"],
@@ -112,6 +111,9 @@ cmdAPI.createCommand({
     uuid: "C6D50448-A345-4FDC-8F4D-F724FAA2D7C2",
     icon: "/ui/icons/properties.png",
     description: "Adds a new dynamic setting.",
+    arguments: [{role: "object",     nountype: noun_arb_text, label: "value"},
+                {role: "alias",      nountype: noun_arb_text, label: "key"}, // as
+    ],
     help: `<span class="syntax">Syntax</span>
             <ul class="syntax">
                 <li><b>add-setting</b> <i>setting value</i> <b>as</b> <i>setting_key</i></li>

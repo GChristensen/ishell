@@ -1,6 +1,4 @@
-import {cmdManager} from "../cmdmanager.js";
-
-export const _namespace = {name: cmdManager.ns.TRANSLATION, annotated: true};
+export const _namespace = {name: CMD_NS.TRANSLATION, annotated: true};
 
 /**
      # Syntax

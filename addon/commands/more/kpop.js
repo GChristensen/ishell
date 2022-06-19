@@ -1,8 +1,6 @@
 // These commands are hidden by default and available only through an undocumented easter switch
 
-import {cmdManager} from "../../cmdmanager.js";
-
-export const _namespace = cmdManager.ns.MORE;
+export const _namespace = CMD_NS.MORE;
 
 CmdUtils.makeSearchCommand({
     name: "kpop",

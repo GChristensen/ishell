@@ -1,9 +1,8 @@
 // These commands are hidden by default and available only through an undocumented easter switch
 
 import {loadCSS} from "../../utils_browser.js";
-import {cmdManager} from "../../cmdmanager.js";
 
-export const _namespace = {name: cmdManager.ns.MORE, annotated: true};
+export const _namespace = {name: CMD_NS.MORE, annotated: true};
 
 const RESULT_TABLE =
     `<table class="nyaa-torrents" border="0" cellpadding="2" cellspacing="2" style="width: 100%">

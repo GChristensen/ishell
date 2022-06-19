@@ -14,6 +14,7 @@ async function initPage(event) {
         [source, namespace] = await getSourceFromURL(commandURL);
 
     namespace = namespace || "Unnamed";
+    source = source || "&lt;no content&gt;";
 
     $("#targetLink").text(commandURL);
     $("#targetLink").prop("href", commandURL);
@@ -38,8 +39,8 @@ async function getSourceFromGist(commandURL) {
     if (!gist)
         return [];
 
-    const fileName = Object.keys(gist.files)[0];
-    const fileContent = gist.files[fileName].content;
+    const fileName = Object.keys(gist.files)?.[0];
+    const fileContent = gist.files?.[fileName]?.content || "";
     const name = fileName.replace(/\.[^.]*$/, "");
 
     return [fileContent, name];

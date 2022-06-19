@@ -1,10 +1,8 @@
-import {cmdManager} from "../cmdmanager.js";
-
-export const _namespace = {name: cmdManager.ns.MAIL, annotated: true};
+export const _namespace = {name: CMD_NS.MAIL, annotated: true};
 
 class MailBase {
     constructor(args) {
-        args[OBJECT] = {nountype: noun_arb_text, label: "body"}; // object
+        args[OBJECT] = {nountype: noun_arb_text, label: this._objectLabel || "body"}; // object
         //args[FOR]    = {nountype: noun_arb_text, label: "text"}; // subject
         args[TO]     = {nountype: noun_type_contact, label: "contact"}; // goal
         //args[FROM]   = {nountype: noun_arb_text, label: "text"}; // source
@@ -127,6 +125,10 @@ export class Compose extends MailBase {
         if (subject)
             return "&su=" + encodeURIComponent(subject);
         return "";
+    }
+
+    get _objectLabel() {
+        return "subject";
     }
 }
 

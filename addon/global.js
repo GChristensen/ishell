@@ -1,6 +1,6 @@
 const _MANIFEST = chrome.runtime.getManifest() // chrome.runtime should be used for compatibility
 
-window._BACKGROUND_PAGE = !!_MANIFEST.applications?.gecko;
+window._BACKGROUND_PAGE = !!_MANIFEST.background?.page;
 
 window._MANIFEST_VERSION = _MANIFEST.manifest_version;
 

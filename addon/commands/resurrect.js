@@ -1,6 +1,4 @@
-import {cmdManager} from "../cmdmanager.js";
-
-export const _namespace = {name: cmdManager.ns.UTILITY, annotated: true};
+export const _namespace = {name: CMD_NS.UTILITY, annotated: true};
 
 const noun_type_archive = {
     "wayback machine latest": ["web.archive.org", "http://web.archive.org/web/"]

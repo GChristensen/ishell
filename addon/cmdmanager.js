@@ -203,7 +203,6 @@ class CommandManager {
     }
 
     async _loadBuiltinCommandModule(path) {
-        console.log(path)
         const module = await import(path);
 
         if (module._namespace) {
@@ -312,3 +311,5 @@ class CommandManager {
 }
 
 export const cmdManager = new CommandManager();
+
+globalThis.CMD_NS = {...cmdManager.ns};

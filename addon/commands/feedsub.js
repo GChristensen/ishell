@@ -1,6 +1,4 @@
-import {cmdManager} from "../cmdmanager.js";
-
-export const _namespace = {name: cmdManager.ns.SYNDICATION, annotated: true};
+export const _namespace = {name: CMD_NS.SYNDICATION, annotated: true};
 
 /**
  The command uses the URL opened in the current tab.

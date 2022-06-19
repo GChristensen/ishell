@@ -155,7 +155,6 @@ class PopupWindow {
     }
 
     reset() {
-        this._commandList.reset();
         this.displayHelp();
     }
 

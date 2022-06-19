@@ -1,6 +1,4 @@
-import {cmdManager} from "../cmdmanager.js";
-
-export const _namespace = cmdManager.ns.TRANSLATION;
+export const _namespace = CMD_NS.TRANSLATION;
 
 const MS_TRANSLATOR_LIMIT = 1e4;
 

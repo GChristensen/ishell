@@ -1,6 +1,4 @@
-import {cmdManager} from "../cmdmanager.js";
-
-export const _namespace = cmdManager.ns.BROWSER;
+export const _namespace = CMD_NS.BROWSER;
 
 CmdUtils.CreateCommand({
     name: "switch-to-tab",

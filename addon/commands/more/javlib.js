@@ -1,8 +1,6 @@
 // These commands are hidden by default and available only through an undocumented easter switch
 
-import {cmdManager} from "../../cmdmanager.js";
-
-export const _namespace = {name: cmdManager.ns.MORE, annotated: true};
+export const _namespace = {name: CMD_NS.MORE, annotated: true};
 
 const JAVLIB_SEARCH_URL = "https://www.javlibrary.com/en/vl_searchbyid.php?keyword=";
 

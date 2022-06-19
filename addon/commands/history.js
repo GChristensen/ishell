@@ -1,7 +1,6 @@
 import {settings} from "../settings.js";
-import {cmdManager} from "../cmdmanager.js";
 
-export const _namespace = {name: cmdManager.ns.BROWSER, annotated: true};
+export const _namespace = {name: CMD_NS.BROWSER, annotated: true};
 
 /**
  @nountype

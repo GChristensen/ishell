@@ -9,7 +9,7 @@
 //        "page": "background.html"
 //    },
     "content_security_policy": {
-       "extension_pages": "script-src 'self' http://localhost:41514; object-src 'self';"
+       "extension_pages": "script-src 'self' http://localhost:41514; script-src-elem 'self' 'unsafe-inline' http://localhost:41514; object-src 'self';"
     },
     "manifest_version": 3,
     "icons": {

@@ -42,7 +42,7 @@ export class CommandList {
         if (input)
             this._populateSuggestionList(input); // will also show command preview
         else
-            this._popup.reset();
+            this.reset();
     }
 
     strengthenMemory() {
@@ -60,8 +60,10 @@ export class CommandList {
     }
 
     reset() {
+        this.#suggestions = null;
         this.#selectedSuggestion = 0;
         this._popup.setSuggestionsContent("<ul/>");
+        this._popup.reset();
     }
 
     get _popup() {
@@ -105,31 +107,36 @@ export class CommandList {
         const query = this.#parser.newQuery(input, null, this.#maxSuggestions, true);
 
         query.onResults = () => {
-            this.#suggestions = query.suggestionList.slice();
+            const suggestions = query.suggestionList.slice();
 
-            if (this.#suggestions.length && this.#suggestions.length > this.#maxSuggestions)
-                this.#suggestions.splice(this.#maxSuggestions);
+            if (suggestions.length && suggestions.length > this.#maxSuggestions)
+                suggestions.splice(this.#maxSuggestions);
 
-            this._ensureSelectionInRange();
-
-            if (this.#suggestions.length > 0) {
-                const suggestionListHTML = this._generateSuggestionHtml(this.#suggestions);
-                this._popup.setSuggestionsContent(suggestionListHTML);
-
-                for (const i in this.#suggestions)
-                    $(`#suggestion-item-${i}`).click(() => this._selectCommand(i));
-
-                if (!previousSelection?.equalCommands(this.selection))
-                    this._popup.setPreviewContent(this.selection.getCommand().description, true);
-
-                this._showCommandPreview(this.selection);
-            }
-            else {
-                this._popup.reset();
-            }
+            this._processSuggestions(suggestions, previousSelection);
         };
 
         query.run(); // WARNING: callback suggestions may make several calls of onResults
+    }
+
+    _processSuggestions(suggestions, previousSelection) {
+        if (suggestions.length > 0) {
+            this.#suggestions = suggestions;
+
+            this._ensureSelectionInRange();
+
+            const suggestionListHTML = this._generateSuggestionHtml(this.#suggestions);
+            this._popup.setSuggestionsContent(suggestionListHTML);
+
+            for (const i in this.#suggestions)
+                $(`#suggestion-item-${i}`).click(() => this._selectCommand(i));
+
+            if (!previousSelection?.equalCommands(this.selection))
+                this._popup.setPreviewContent(this.selection.getCommand().description, true);
+
+            this._showCommandPreview(this.selection);
+        }
+        else
+            this.reset();
     }
 
     _generateSuggestionHtml(suggestions) {

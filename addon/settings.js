@@ -1,9 +1,9 @@
 import {injectModules, merge} from "./utils.js";
 
-if (!window.browser)
+if (!globalThis.browser)
     await injectModules(["./lib/browser-polyfill.js"]);
 
-const BROWSER = window.browser;
+const BROWSER = globalThis.browser;
 const ISHELL_SETTINGS_KEY = "shell_settings";
 
 class IShellSettings {
