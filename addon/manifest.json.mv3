@@ -1,0 +1,69 @@
+{
+    "version": "0.5",
+    "applications": {
+        "gecko": {
+            "id": "ishell@gchristensen.github.io",
+            "strict_min_version": "95.0"
+        }
+    },
+    "name": "iShell Extension",
+    "short_name": "iShell",
+    "homepage_url": "https://gchristensen.github.io/#ishell",
+    "author": "gchristnsn",
+    "description": "A text command interface for browsers",
+    "background": {
+        "page": "background.html"
+    },
+    "content_security_policy": {
+       "extension_pages": "script-src 'self' http://localhost:41514; object-src 'self';"
+    },
+    "manifest_version": 3,
+    "icons": {
+        "128": "ui/icons/logo.svg"
+    },
+    "action": {
+        "default_title": "iShell",
+        "default_popup": "ui/popup.html",
+        "default_icon": {
+            "16": "ui/icons/logo.svg",
+            "24": "ui/icons/logo.svg",
+            "32": "ui/icons/logo.svg",
+            "48": "ui/icons/logo.svg",
+            "96": "ui/icons/logo.svg"
+        }
+    },
+    "options_ui": {
+        "page": "ui/options/options.html",
+        "open_in_tab": true
+    },
+    "commands": {
+        "_execute_action": {
+            "suggested_key": {
+                "default": "Ctrl+Space",
+                "linux": "Ctrl+Space",
+                "mac": "Command+Space",
+                "windows": "Ctrl+Space"
+            }
+        }
+    },
+    "permissions": [
+        "activeTab", 
+        "tabs",
+        "tabHide",
+        "clipboardRead", 
+        "clipboardWrite", 
+        "notifications",
+        "nativeMessaging",
+        "storage",
+        "unlimitedStorage",
+        "contextMenus",
+        "history",
+        "webNavigation",
+        "management",
+        "downloads",
+        "scripting"
+    ],
+    "host_permissions": [
+        "<all_urls>"
+    ]
+}

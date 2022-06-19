@@ -1,5 +1,5 @@
 {
-    "version": "0.4.0.2",
+    "version": "0.5",
     "applications": {
         "gecko": {
             "id": "ishell@gchristensen.github.io",
@@ -11,7 +11,7 @@
     "homepage_url": "https://gchristensen.github.io/#ishell",
     "author": "gchristnsn",
     "description": "A natural language interface for browsers",
-    "content_security_policy": "script-src 'self' 'unsafe-eval'; object-src 'self';",
+    "content_security_policy": "script-src 'self' 'unsafe-eval' http://localhost:41514; object-src 'self';",
     "manifest_version": 2,
     "background": {
       "page": "background.html",
@@ -19,11 +19,11 @@
     },
     "browser_action": {
         "default_title": "iShell",
-        "default_popup": "popup.html",
-        "default_icon": "/res/icons/logo.svg"
+        "default_popup": "/ui/popup.html",
+        "default_icon": "/ui/icons/logo.svg"
     },
     "options_ui": {
-        "page": "res/options.html",
+        "page": "ui/options/options.html",
         "open_in_tab": true
     },
     "commands": {
@@ -36,7 +36,7 @@
             }
         }
     },
-    "icons": { "128" : "/res/icons/logo.svg" },
+    "icons": { "128" : "/ui/icons/logo.svg" },
     "permissions": [
         "<all_urls>",
         "activeTab", 
@@ -44,7 +44,8 @@
         "tabHide",
         "clipboardRead", 
         "clipboardWrite", 
-        "notifications", 
+        "notifications",
+        "nativeMessaging",
         "storage",
         "unlimitedStorage",
         "contextMenus",

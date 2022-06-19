@@ -1,0 +1,138 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>About iShell</title>
+    <meta charset="utf-8">
+    <link href="/ui/icons/logo.svg" rel="icon"/>
+    <link rel="stylesheet" type="text/css" media="all" href="options.css"/>
+
+    <style>
+        html, body {
+            height: 100%;
+            overflow: hidden;
+        }
+
+        body {
+            text-align: justify;
+        }
+
+        h1 {
+            color: #66bb00;
+            border-top: none;
+            margin-top: 60px;
+        }
+        h2 {
+            font-size: 18px;
+            margin-top: auto;
+            border-top: none
+        }
+
+        p {
+            font-size: 11pt;
+        }
+
+        #about-container {
+            width: 875px;
+            display: flex;
+            flex-direction: column;
+            height: 100%;
+        }
+
+        .about-link {
+            font-size: 12pt;
+        }
+
+        #about-version-panel {
+            margin-top: 15px;
+        }
+
+        #about-changes-header {
+            flex: 0;
+            width: 100%;
+            margin-top: 20px;
+            margin-bottom: 0;
+            text-align: center;
+        }
+
+        #about-changes {
+            margin: auto;
+            flex: 1;
+            width: 100%;
+            overflow-y: scroll;
+            font-size: 12pt;
+        }
+
+        #donation-links {
+            font-size: 12pt;
+            width: max-content;
+            margin: auto;
+        }
+
+        #about-changes * {
+            font-size: 12pt;
+        }
+
+        .change-date {
+            display: inline-block;
+            margin-left: 10px;
+        }
+
+        .change-info {
+            padding-left: 20px;
+        }
+
+    </style>
+
+    <script src="/lib/jquery.js"></script>
+    <script src="about.js" type="module"></script>
+</head>
+<body dir="ltr">
+<div id="about-container">
+
+<div class="head"><span class="large">iShell: </span>About</div>
+<div id="nav-container">
+    <ul id="nav">
+        <li><a href="options.html">Settings</a></li>
+        <li><a href="commands.html">Your Commands</a></li>
+        <li><a href="cmenu.html">Context Menu</a></li>
+        <li><a href="edit.html">Command Editor</a></li>
+        <li><a href="API.html">API Reference</a></li>
+        <li><a href="tutorial.html">Tutorial</a></li>
+        <li class="selected"><a href="about.html">About</a></li>
+    </ul>
+</div>
+
+<br clear="all"/>
+
+<div id="about-version-panel">
+    <div style="text-align: center">
+        <img id="scrapyard-logo" src="../icons/logo.svg" height="150px"/>
+        <h1 style="font-size: 24pt; margin: 10px">iShell</h1>
+        <h2 id="about-version">Version: </h2>
+        <div class="about-links">
+            <img width="16px" height="16px" src="../icons/logo.svg" style="margin-bottom: -2px;"/>
+            <a class="about-link" href="https://gchristensen.github.io/ishell/" target="_blank">Homepage</a>
+            | <img width="16px" height="16px" src="../icons/amo.ico" style="margin-bottom: -2px;"/>
+            <a class="about-link" href="https://addons.mozilla.org/en-US/firefox/addon/ishell/" target="_blank">AMO</a>
+            | <img width="16px" height="16px" src="../icons/github.ico" style="margin-bottom: -2px;"/>
+            <a class="about-link" href="https://github.com/GChristensen/ishell/" target="_blank">GitHub</a>
+        </div>
+        <div class="about-links" style="margin-top: 20px;">
+            <div id="donation-links">
+                Donate:
+                <img width="16px" height="16px" src="../icons/patreon.png" style="margin-bottom: -2px;"/>
+                <a class="about-link donation-link" href="https://patreon.com/gchristnsn" target="_blank">Patreon</a>
+                | <img width="16px" height="16px" src="../icons/bitcoin.png" style="margin-bottom: -2px;"/>
+                <a class="about-link donation-link" href="bitcoin:bc1qvamez2h9x4y8txkjlzz8v3yuglmh7tq5wf5afg" target="_blank">Bitcoin</a>
+            </div>
+        </div>
+    </div>
+</div>
+<div id="about-changes-header">
+    <h2>Changes</h2>
+</div>
+<div id="about-changes"></div>
+
+</div>
+</body>
+</html>

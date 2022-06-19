@@ -24,7 +24,7 @@
 		}
 	}
 
-var MathParser = (function (scope) {
+export var MathParser = (function (scope) {
 	function object(o) {
 		function F() {}
 		F.prototype = o;

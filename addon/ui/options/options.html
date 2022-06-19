@@ -1,0 +1,139 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>iShell Settings</title>
+    <meta charset="utf-8">
+    <link href="/ui/icons/logo.svg" rel="icon" />
+    <link rel="stylesheet" type="text/css" media="all" href="options.css"/>
+
+    <script src="/global.js"></script>
+    <script src="/lib/jquery.js"></script>
+    <script src="options.js" type="module"></script>
+
+    <style>
+        .section-header {
+            margin-bottom: 0;
+        }
+
+        .spacer {
+            flex: 1 0 auto;
+        }
+
+        #file-picker {
+            display: none;
+        }
+
+        #options-help-div {
+            margin-bottom: 5px;
+        }
+
+        .remove-item, .help-hint {
+            width: 1%;
+            padding-right: 4px;
+            cursor: pointer;
+        }
+
+        .help-hint {
+            cursor: help;
+            font-size: 12pt;
+        }
+
+        .item-key {
+            width: 30%;
+        }
+
+        #dynamic-settings-wrapper {
+        }
+
+        #dynamic-settings {
+            width: 100%;
+            margin-top: 10px;
+            margin-bottom: 10px;
+        }
+
+        #dynamic-settings input[type="text"] {
+            width: 100%;
+            box-sizing: border-box;
+        }
+
+        #helper-update {
+            display: none;
+        }
+
+        #last-helper-link {
+            display: flex;
+        }
+    </style>
+</head>
+<body dir="ltr">
+    <div class="head"><span class="large">iShell: </span>Settings</div>
+    <div id="nav-container">
+        <ul id="nav">
+            <li class="selected"><a href="options.html">Settings</a></li>
+            <li><a href="commands.html">Your Commands</a></li>
+            <li><a href="cmenu.html">Context Menu</a></li>
+            <li><a href="edit.html">Command Editor</a></li>
+            <li><a href="API.html">API Reference</a></li>
+            <li><a href="tutorial.html">Tutorial</a></li>
+            <li><a href="about.html">About</a></li>
+        </ul>
+    </div>
+
+    <br clear="all"/>
+
+    <div class="page-tip">
+        <p>You can get to this page at any time using the “change-shell-settings” command. | <a id="show-hide-help" onclick="">Show Help</a></p>
+    </div>
+
+    <div id="options-help-div" class="shell-tutorial" style="display:none; font-size:100%">
+        <ul>
+            <li>Add new dynamic settings with <code><b>add-setting</b> setting_value <b>as</b> setting_key</code> command.</li>
+            <li>All the dynamic settings are available through <code>cmdAPI.settings</code> property in the code.</li>
+            <li>Some settings are used by the corresponding builtin commands which behavior you can customize.</li>
+            <li>To use Google commands you need to create a <a href="https://cse.google.com/" target="_blank">custom search engine</a> with two enabled options:
+                "Search the entire web" and "Image search".</li>
+        </ul>
+    </div>
+
+    <div class="col-five">
+        <h2 class="top section-header">Dynamic Settings<sup class="help" title="You can add new custom settings and access them in the code. See the help above.">?</sup></h2>
+        <div id="dynamic-settings-wrapper"><table id="dynamic-settings"></table></div>
+    </div>
+
+    <div class="col-four">
+        <h2 class="top section-header">Version Information</h2>
+        <div class="advanced">You are using <b>iShell</b> v<span id="ishell-version"></span> (<span id="manifest-version"></span>)
+            <img id="shell-debug-mode" src="/ui/icons/debug.png" title="Debug mode"/></div>
+        <div class="advanced">Helper application <span id="helper-version">...</span>
+            <span id="helper-update">(<a href="https://github.com/GChristensen/ishell/releases" target="_blank">update</a>)</span>
+        </div>
+        <!--h2>Language Settings</h2>
+        <p>
+            Command parser language:
+            <select id="language-select">
+            </select>
+        </p-->
+
+        <h2 class="section-header">Listing Limits</h2>
+        <table cellpadding="5" class="setting-table">
+            <tr>
+                <td>Number suggestions:</td>
+                <td><input id="max-suggestions" size="5" style="text-align:center" type="text"/></td>
+            </tr>
+            <tr id="max-search-results-row">
+                <td>Number of search results<sup class="help" title="Limited by the amount of results available at your search engine page.">?</sup>:</td>
+                <td><input id="max-search-results" size="5" style="text-align:center" type="text"/></td>
+            </tr>
+        </table>
+
+        <h2 class="section-header">Helper Application</h2>
+        <div class="advanced"><a href="#" id="helper-windows">Automated Windows installer</a></div>
+        <div class="advanced" id="last-helper-link"><a href="#" id="helper-python">Python package</a></div>
+
+        <h2 class="section-header">Import/Export</h2>
+        <div class="advanced"><a href="#" id="export-settings">Export iShell settings</a></div>
+        <div class="advanced"><a href="#" id="import-settings">Import iShell settings</a></div>
+        <input type="file" id="file-picker"/>
+    </div>
+</body>
+</html>

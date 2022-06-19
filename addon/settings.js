@@ -1,69 +1,100 @@
-let SettingsBinHandler = {
-    get(target, key) {
-        if (key === "load")
-            return target.__load__;
-        else if (key === "get")
-            return target.__global_get__;
-        else if (key === "set")
-            return target.__global_set__;
+import {injectModules, merge} from "./utils.js";
 
-        return (val, handler) => {
-            let bin = target.__bin__;
-            if (val === void 0) return bin[key];
+if (!globalThis.browser)
+    await injectModules(["./lib/browser-polyfill.js"]);
+
+const BROWSER = globalThis.browser;
+const ISHELL_SETTINGS_KEY = "shell_settings";
+
+class IShellSettings {
+    constructor() {
+        this._default = {
+            max_history_items: 20,
+            max_suggestions: 5,
+            remember_context_menu_commands: false,
+            template_syntax: "class",
+            last_editor_namespace: "default",
+            dynamic_settings: {
+                lingvo_api_key: "NGNmNTVlNzUtNzg2MS00ZWE1LWIzNWItNjNlMTAyZTM5YmRlOmM3NTg3MDY2Y2MyMDQxY2E4NTQ0MDZhOTQyYTcxMTk2",
+                bing_translator_api_v3_key: "",
+                youtube_search_api_key: "",
+                google_cse_api_key: "",
+                google_cse_api_id: ""
+            }
+        };
+
+        this._bin = {};
+        this._key = ISHELL_SETTINGS_KEY;
+    }
+
+    async _loadPlatform() {
+        if (!this._platform) {
+            const platformInfo = await BROWSER.runtime.getPlatformInfo();
+            this._platform = {[platformInfo.os]: true};
+            if (navigator.userAgent.indexOf("Firefox") >= 0) {
+                this._platform.firefox = true;
+            }
+        }
+    }
+
+    async _loadSettings() {
+        const object = await BROWSER.storage.local.get(this._key);
+        this._bin = merge(object[this._key] || {}, this._default);
+    }
+
+    _load() {
+        return this._loadPlatform().then(() => this._loadSettings());
+    }
+
+    async _get(k) {
+        const v = await BROWSER.storage.local.get(k);
+        if (v)
+            return v[k];
+        return null;
+    }
+
+    async _set(k, v) { return BROWSER.storage.local.set({[k]: v}) }
+
+    get(target, key, receiver) {
+        if (key === "load")
+            return v => this._load();
+        else if (key === "default")
+            return this._default;
+        else if (key === "platform")
+            return this._platform;
+        else if (key === "get")
+            return this._get;
+        else if (key === "set")
+            return this._set;
+
+        return (val) => {
+            let bin = this._bin;
+            if (val === undefined) return bin[key];
             if (val === null) {
                 var old = bin[key];
                 delete bin[key]
             }
             else bin[key] = val;
-            chrome.storage.local.set({[target.__key__]: bin}, () => handler? handler(): null);
-            return key in bin ? bin[key] : old
+            let result = key in bin? bin[key]: old;
+            return new Promise(resolve => BROWSER.storage.local.set({[this._key]: bin}).then(resolve(result)));
         }
-    },
-    has(target, key) {
-        return key in target.__bin__;
-    },
-    * enumerate(target) {
-        for (let key in target.__bin__) yield key;
-    },
-};
-
-const SETTING_KEY = "shell_settings";
-const DEFAULT_SETTINGS = {
-    max_history_items: 20,
-    max_suggestions: 5,
-    remember_context_menu_commands: false,
-    template_syntax: "class",
-    last_editor_namespace: "default",
-    dynamic_settings: {
-        lingvo_api_key: "NGNmNTVlNzUtNzg2MS00ZWE1LWIzNWItNjNlMTAyZTM5YmRlOmM3NTg3MDY2Y2MyMDQxY2E4NTQ0MDZhOTQyYTcxMTk2",
-        bing_translator_api_v3_key: "",
-        youtube_search_api_key: "",
-        google_cse_api_key: "",
-        google_cse_api_id: ""
     }
-};
 
-shellSettings = new Proxy({
-    __proto__ : null,
-    __key__   : SETTING_KEY,
-    __bin__   : DEFAULT_SETTINGS,
-    __load__  : function(f) {
-        chrome.storage.local.get(SETTING_KEY, object => {
-            shellSettings.__bin__ = object[SETTING_KEY]? object[SETTING_KEY]: DEFAULT_SETTINGS;
-            if (f) f(this);
-        });
-    },
-    __global_get__ : async function(k) {
-        const v = await browser.storage.local.get(k);
-        if (v)
-            return v[k];
-        return null;
-    },
-    __global_set__ : async function(k, v) { return browser.storage.local.set({[k]: v}) }
-}, SettingsBinHandler);
+    has(target, key) {
+        return key in this._bin;
+    }
 
-//shellSettings.load();
+    * enumerate() {
+        for (let key in this._bin) yield key;
+    }
+}
 
-chrome.storage.onChanged.addListener(function (changes,areaName) {
-    shellSettings.load();
+export const settings = new Proxy({}, new IShellSettings());
+
+chrome.storage.onChanged.addListener(function (changes, areaName) {
+    if (changes[ISHELL_SETTINGS_KEY])
+        settings.load();
 });
+
+await settings.load();
+

@@ -1,34 +1,151 @@
-NS_MORE_COMMANDS = "More Commands";
-
 // These commands are hidden by default and available only through an undocumented easter switch
 
-{
-    const tableTemplate =
-        `<table class="nyaa-torrents" border="0" cellpadding="2" cellspacing="2" style="width: 100%">
-          <tbody>
-            <tr>
-              <td class="nyaa-results result-si">nyaa.si: Loading...</td>
-            </tr>
-            <!--tr>
-              <td class="nyaa-results result-net">nyaa.net: Loading...</td>
-            </tr-->
-          </tbody>
-        </table>`;
+import {loadCSS} from "../../utils_browser.js";
 
-    const pushTorrent = category => {
-         return e => {
-             e.preventDefault();
-             let link = e.target.parentNode;
-             chrome.runtime.sendMessage("torrent-add@firefox", {
-                 type: "ADD_TORRENT",
-                 url: link.href,
-                 folder: category
-             });
-         };
-     };
+export const _namespace = {name: CMD_NS.MORE, annotated: true};
 
-    const formatResults = (doc, domain, origin, torrentList, columnsToRemove, dlIcon, magnetIcon) => {
-        let torrentListTable = $(torrentList, doc);
+const RESULT_TABLE =
+    `<table class="nyaa-torrents" border="0" cellpadding="2" cellspacing="2" style="width: 100%">
+      <tbody>
+        <tr>
+          <td class="nyaa-results result-si">nyaa.si: Loading...</td>
+        </tr>
+      </tbody>
+    </table>`;
+
+class NyaaBase {
+    init(doc) {
+        this._popupDoc = doc;
+    }
+
+    preview({OBJECT: {text}}, display) {
+        this.getReleases(display, text, this.__category, this.__domain);
+    }
+
+    execute({OBJECT: {text}}) {
+        cmdAPI.addTab(`https://${this.__domain}.nyaa.si/?q=${encodeURIComponent(text)}`);
+    }
+
+    async getReleases(pblock, query, category, domain, progress) {
+        if (!query)
+            return;
+
+        if (pblock.id === "shell-command-preview") {
+            pblock.innerHTML = RESULT_TABLE;
+            loadCSS(this._popupDoc, "__nyaa__", "/commands/more/nyaa.css");
+        }
+
+        const fetchNyaaSi = () => this.#fetchReleases(pblock, query, category, domain, "nyaa.si", progress);
+
+        const nyaaSi = fetchNyaaSi();
+
+        await Promise.all([nyaaSi]); // nyaa.net also was here
+
+        if ((await nyaaSi) === "http-error") {
+            await new Promise(resolve => setTimeout(resolve,  1500));
+            await fetchNyaaSi();
+        }
+
+        const tables = $(".nyaa-results table", pblock);
+        const errors = $(".nyaa-torrents .nyaa-error", pblock);
+
+        if (!tables.length && !errors.length) {
+            const resultTable = $(".nyaa-torrents", pblock);
+            if (pblock.text)
+                pblock.text("None");
+            else
+                resultTable.parent().html("None");
+        }
+
+        if (progress)
+            progress($(pblock));
+    }
+
+    async #fetchReleases(pblock, query, category, domain, server) {
+        if (!query)
+            return;
+
+        let result = "ok";
+
+        let abortFetch = () => {
+            if (this[`${server}-abort-controller`]) {
+                this[`${server}-abort-controller`].abort();
+                this[`${server}-abort-controller`] = null;
+            }
+        };
+
+        abortFetch();
+
+        this[`${server}-abort-controller`] = new AbortController();
+        const timeout = setTimeout(abortFetch, 20000);
+
+        const origin = `https://${domain}.${server}`;
+
+        const search = "?q=";
+        const url = `${origin}/${search}${encodeURIComponent(query.trim())}`;
+
+        const resultCell = $(`.result-${server.split(".").pop()}`, pblock);
+
+        try {
+            const response = await fetch(url, {signal: this[`${server}-abort-controller`].signal});
+
+            if (response.ok) {
+                const doc = cmdAPI.parseHtml(await response.text());
+                this[`${server}-abort-controller`] = null;
+                clearTimeout(timeout);
+
+                let rows = this.#buildResultTable(doc, domain, origin, ".torrent-list",
+                        "thead, td:nth-child(1), td:nth-child(5), .comments",
+                        "td:nth-child(2) i.fa-download",
+                        "td:nth-child(2) i.fa-magnet");
+
+                if (rows) {
+                    rows.sort(function (a, b) {
+                        let aseeds = parseInt($(a).find("td:nth-child(4)").text()),
+                            bseeds = parseInt($(b).find("td:nth-child(4)").text());
+
+                        return bseeds - aseeds;
+                    });
+
+                    let table = rows.parent();
+                    rows.detach().appendTo(table);
+
+                    const resultingHtml = "<br>" + rows.parent().parent().parent().html();
+
+                    resultCell.html(`${server}: ${resultingHtml}`);
+
+                    const clickHandler = this.#handleAddTorrentTo(category);
+                    resultCell.find("a[data-tlink='true']", ).on("click", clickHandler);
+                }
+                else
+                    resultCell.html(`${server}: NO`);
+            }
+            else {
+                resultCell.html(`${server}: HTTP error ${response.status}`);
+                resultCell.addClass("nyaa-error");
+                result = "http-error";
+            }
+        }
+        catch (e) {
+
+            if (cmdAPI.fetchAborted(e)) {
+                resultCell.html(`${server}: timeout`);
+                result = "timeout";
+            }
+            else {
+                resultCell.html(`${server}: network error`);
+                result = "network-error";
+            }
+
+            resultCell.addClass("nyaa-error");
+            console.error(e)
+        }
+
+        return result;
+    }
+
+    #buildResultTable(doc, domain, origin, torrentList, columnsToRemove, dlIcon, magnetIcon) {
+        const torrentListTable = $(torrentList, doc);
         torrentListTable.css("width", "100%");
 
         torrentListTable.find(columnsToRemove).remove();
@@ -95,178 +212,51 @@ NS_MORE_COMMANDS = "More Commands";
 
             return rows;
         }
-    };
+    }
 
-    const fetchTorrents = async function (pblock, query, category, domain, server) {
-        if (!query)
-            return;
-
-        let result = "ok";
-
-        let abortFetch = () => {
-            if (this[`${server}-abort-controller`]) {
-                this[`${server}-abort-controller`].abort();
-                this[`${server}-abort-controller`] = null;
-            }
+    #handleAddTorrentTo(category) {
+        return e => {
+            e.preventDefault();
+            let link = e.target.parentNode;
+            browser.runtime.sendMessage("torrent-add@gchristensen.github.io", {
+                type: "ADD_TORRENT",
+                url: link.href,
+                folder: category
+            });
         };
-
-        abortFetch();
-
-        this[`${server}-abort-controller`] = new AbortController();
-        const timeout = setTimeout(abortFetch, 20000);
-
-        const origin = `https://${domain}.${server}`;
-
-        const search =
-            server === "nyaa.si"
-                ? "?f=0&c=0_0&q="
-                : "search?c=_&q=";
-
-        const url = `${origin}/${search}${encodeURIComponent(query.trim())}`
-
-        const resultCell = $(`.result-${server.split(".").pop()}`, pblock);
-
-        try {
-            const response = await fetch(url, {signal: this[`${server}-abort-controller`].signal});
-
-            if (response.ok) {
-                const doc = cmdAPI.parseHtml(await response.text());
-                this[`${server}-abort-controller`] = null;
-                clearTimeout(timeout);
-
-                let rows;
-                if (server === "nyaa.si")
-                    rows = formatResults(doc, domain, origin, ".torrent-list",
-                          "thead, td:nth-child(1), td:nth-child(5), .comments",
-                                   "td:nth-child(2) i.fa-download",
-                               "td:nth-child(2) i.fa-magnet");
-                else
-                    rows = formatResults(doc, domain, origin, ".results table",
-                        "thead, td:nth-child(1), td:nth-child(8)",
-                                 "td:nth-child(2) .icon-floppy",
-                             "td:nth-child(2) .icon-magnet");
-
-                if (rows) {
-                    rows.sort(function (a, b) {
-                        let aseeds = parseInt($(a).find("td:nth-child(4)").text()),
-                            bseeds = parseInt($(b).find("td:nth-child(4)").text());
-
-                        return bseeds - aseeds;
-                    });
-
-                    let table = rows.parent();
-                    rows.detach().appendTo(table);
-
-                    const resultingHtml = "<br>" + rows.parent().parent().parent().html();
-
-                    resultCell.html(`${server}: ${resultingHtml}`);
-
-                    const clickHandler = pushTorrent(category);
-                    resultCell.find("a[data-tlink='true']", ).on("click", clickHandler);
-                }
-                else
-                    resultCell.html(`${server}: NO`);
-            }
-            else {
-                resultCell.html(`${server}: HTTP error ${response.status}`);
-                resultCell.addClass("nyaa-error");
-                result = "http-error";
-            }
-        }
-        catch (e) {
-
-            if (cmdAPI.fetchAborted(e)) {
-                resultCell.html(`${server}: timeout`);
-                result = "timeout";
-            }
-            else {
-                resultCell.html(`${server}: network error`);
-                result = "network-error";
-            }
-
-            resultCell.addClass("nyaa-error");
-            console.error(e)
-        }
-
-        return result;
     }
+}
 
-    const getReleases = async function(pblock, query, category, domain, progress) {
-        if (!query)
-            return;
-
-        if (pblock.id === "shell-command-preview") {
-            pblock.innerHTML = tableTemplate;
-            CmdUtils.loadCSS(this._popupDoc, "__nyaa__", "/commands/more/nyaa.css");
-        }
-
-        const fetchNyaaSi = () => fetchTorrents.call(this, pblock, query, category, domain, "nyaa.si", progress);
-        //const fetchNyaaNet = () => fetchTorrents.call(this, pblock, query, category, domain, "nyaa.net", progress);
-
-        const nyaaSi = fetchNyaaSi();
-        //const nyaaNet = fetchNyaaNet();
-
-        await Promise.all([nyaaSi/*, nyaaNet*/])
-
-        if ((await nyaaSi) === "http-error") {
-            await new Promise(resolve => setTimeout(resolve,  1500));
-            await fetchNyaaSi();
-        }
-
-        const tables = $(".nyaa-results table", pblock);
-        const errors = $(".nyaa-torrents .nyaa-error", pblock);
-
-        if (!tables.length && !errors.length) {
-            const resultTable = $(".nyaa-torrents", pblock);
-            if (pblock.text)
-                pblock.text("None");
-            else
-                resultTable.parent().html("None");
-        }
-
-        if (progress)
-            progress($(pblock));
+/**
+ @command
+ @delay 1000
+ @hidden
+ @icon /commands/more/sukebei.png
+ @description Search for JAV releases.
+ @uuid 8C6B98D8-FDF6-40DB-891E-B6F44B00ADD1
+ */
+export class Sukebei extends NyaaBase {
+    constructor(args) {
+        super();
+        args[OBJECT] = {nountype: noun_arb_text, label: "release"};
+        this.__domain = "sukebei";
+        this.__category = "erotic";
     }
+}
 
-    CmdUtils.CreateCommand(
-        {
-            names: ["nyaa"],
-            uuid: "7834AFD7-1F08-443A-956D-17EFD542B34B",
-            _namespace: NS_MORE_COMMANDS,
-            _hidden: true,
-            arguments: [{role: "object", nountype: noun_arb_text, label: "torrent"}],
-            previewDelay: 1000,
-            description: "Search for anime releases.",
-            icon: "/commands/more/nyaa.png",
-            init: function (doc) {
-                this._popupDoc = doc;
-            },
-            preview: function (pblock, {object: {text}}) {
-                getReleases.call(this, pblock, text, "anime", "www");
-            },
-            execute: function ({object: {text}}) {
-                CmdUtils.addTab("https://www.nyaa.si/?f=0&c=0_0&q=" + encodeURIComponent(text));
-            }
-        });
-
-    CmdUtils.CreateCommand(
-        {
-            names: ["sukebei"],
-            uuid: "8C6B98D8-FDF6-40DB-891E-B6F44B00ADD1",
-            _namespace: NS_MORE_COMMANDS,
-            _hidden: true,
-            arguments: [{role: "object", nountype: noun_arb_text, label: "torrent"}],
-            previewDelay: 1000,
-            description: "Search for JAV releases.",
-            icon: "/commands/more/sukebei.png",
-            init: function (doc) {
-                this._popupDoc = doc;
-            },
-            preview: function (pblock, {object: {text}}) {
-                getReleases.call(this, pblock, text, "erotic", "sukebei");
-            },
-            execute: function ({object: {text}}) {
-                CmdUtils.addTab("https://sukebei.nyaa.si/?f=0&c=0_0&q=" + encodeURIComponent(text));
-            }
-        });
+/**
+ @command
+ @delay 1000
+ @hidden
+ @icon /commands/more/nyaa.png
+ @description Search for anime releases.
+ @uuid 7834AFD7-1F08-443A-956D-17EFD542B34B
+ */
+export class Nyaa extends NyaaBase {
+    constructor(args) {
+        super();
+        args[OBJECT] = {nountype: noun_arb_text, label: "release"};
+        this.__domain = "www";
+        this.__category = "anime";
+    }
 }

@@ -1,30 +1,8 @@
-CmdUtils.deblog("iShell v" + CmdUtils.VERSION + " background script says hello");
+import {contextMenuManager} from "./ishell.js";
 
-shellSettings.load(async settings => {
-    CmdUtils.DEBUG = settings.debug_mode();
+if (_MANIFEST_V3)
+    await import("./mv3_persistent.js");
 
-    await CmdManager.loadBuiltinScripts();
-    await CmdManager.loadCustomScripts();
+contextMenuManager.loadMenu();
 
-    CmdManager.commands = CmdManager.commands.filter(cmd => CmdUtils.DEBUG || !cmd._hidden);
-
-    let disabledCommands = settings.disabled_commands();
-
-    if (disabledCommands)
-        for (let cmd of CmdManager.commands) {
-            if (cmd.name in disabledCommands)
-                cmd.disabled = true;
-        }
-
-    for (let cmd of CmdManager.commands) {
-        try {
-            if (cmd.load)
-                await CmdManager.initCommand(cmd, cmd.load);
-        }
-        catch (e) {
-            console.log(e, e.stack);
-        }
-    }
-});
-
-chrome.i18n.getAcceptLanguages(ll => CmdUtils.acceptLanguages = ll);
+cmdAPI.dbglog("iShell v" + cmdAPI.VERSION + " background script loaded");

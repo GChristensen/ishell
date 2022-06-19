@@ -101,39 +101,46 @@
         <h4><a id="user-content-description" class="anchor" aria-hidden="true" href="#description">
         </a>Description
         </h4>
-        <p style="text-align: justify;">iShell is a browser add-on available by Ctrl+Space key combination
+        <p style="text-align: justify;">iShell is a browser add-on available by the Ctrl+Space key combination
             that lets you give commands to a browser by entering text into a special input box.
             Commands are shortcuts for things that you commonly do on the Web; they can eliminate
-            repetitive tasks and let you get more done, faster. Your can create your own iShell
-            commands in JavaScript.
-        </p>
-        <p style="text-align: justify;">
-            Find more information on command authoring in the <a href="https://gchristensen.github.io/ishell/res/tutorial.html" target="_blank">tutorial</a> at iShell
+            repetitive tasks and let you get more done, faster.</p>
+
+        <p style="text-align: justify;">For instance, you need to translate some text. Doing this
+            usual way, you select the text, copy it, create a new browser tab, type the address of the translation
+            service, load the page, paste the text the into box and press the "Translate" button.
+            With iShell you just select text, press Ctrl+Space, and type the first letters of the "translate"
+            command. The translation will be immediately shown in the iShell popup window.</p>
+
+        <p>You can create your own iShell commands in JavaScript.
+            Find more information on command authoring in the <a href="https://gchristensen.github.io/ishell/addon/ui/options/tutorial.html" target="_blank">tutorial</a> at iShell
             setting pages.
         </p>
         <h4><a id="history" class="anchor" aria-hidden="true" href="#history">
         </a>History
         </h4>
 
-        <p style="text-align: justify;">iShell is a descendant of the Mozilla <a href="https://wiki.mozilla.org/Labs/Ubiquity/Ubiquity_0.5_User_Tutorial" target="_blank">Ubiquity</a>
-            project that was phased out with the advent of Firefox Quantum and its restricting Web Extensions.</p>
-
-        <p style="text-align: justify;">iShell is aimed to bring back the full functionality of Ubiquity to the new Firefox and enhance it further.
-            iShell contains the advanced Ubiquity parser ported to modern ECMAScript, which allows to create commands with prepositional arguments.
-            It also implements the large portion of the original Ubiquity API that helps to migrate existing legacy Ubiquity commands
-            to Firefox Quantum almost seamlessly.
-            But the main point of iShell is to provide the new clean object-oriented command authoring syntax based on the modern language features.
+        <p style="text-align: justify;">
+            iShell is a WebExtensions revival of <a href="https://wiki.mozilla.org/Labs/Ubiquity"
+                                                    target="_blank">Mozilla Ubiquity</a>. It aims to
+            bring back the full functionality of Ubiquity to Firefox Quantum and provide a clean,
+            unified modern object-oriented command authoring API.
         </p>
 
-        <p style="text-align: justify;">Although there is no more command subscription model for security reasons (you need to manually maintain third-party commands in the iShell command editor),
-            iShell is still immensely useful if you are able to write JavaScript to automate things you have (web)APIs for or to extend the browser without much effort.</p>
+        <p style="text-align: justify;">The original ubiquity had a command subscription model, where you were supposed to
+            subscribe to third-party commands, that were updated automatically. For security reasons,
+            there is no such model in iShell. You need to manually maintain third-party commands in the iShell
+            command editor, by using the <b>install</b> command.
+            But despite that, iShell is still immensely useful if you can write JavaScript to
+            automate things you have (web)APIs for or to extend the browser functionality without much effort.</p>
 
         <h4>Some additional features not found in the original Ubiquity</h4>
         <ul>
-            <li>More argument roles and prepositions: 'by' (cause), 'for' (subject) and 'on' (dependency).</li>
-            <li>Ability to add commands to the browser context menu.</li>
-            <li>It is possible to separate user commands to multiple categories in the command editor.</li>
             <li>Modern object-oriented command syntax.</li>
+            <li>More argument roles (prepositions): 'by' (cause), 'for' (subject) and 'on' (dependency).</li>
+            <li>Ability to scroll through preview list items with Ctrl+UP/DOWN keys.</li>
+            <li>It is possible to separate user commands into multiple categories in the command editor.</li>
+            <li>Ability to add commands to the browser context menu.</li>
         </ul>
 
         <h4>Create your own commands</h4>
@@ -146,17 +153,17 @@
             command implementation <a href="https://github.com/GChristensen/ishell#modern-object-oriented-command-syntax" target="_blank">handler methods</a>
             after you enter the command in the input box.</p>
         <p style="text-align: justify;">
-            iShell commands also have full access to jQuery and browser WebExtension APIs, which give you ability to extend
+            iShell commands also have full access to jQuery and browser WebExtension APIs, which give you the ability to extend
             the browser almost effortlessly.
             See an <a href="https://gchristensen.github.io/posts/dynamic-org-capture-templates/" target="_blank">example</a>.
         </p>
 
         <p><img src="/ishell/media/command-editor.png"></p>
 
-        <h4>Known issues</h4>
-        <p style="text-align: justify;">Some builtin commands now require API keys of their corresponding services to work.
+        <h4>API keys are necessary for some built-in commands</h4>
+        <p style="text-align: justify;">Some built-in commands now require API keys of their corresponding services to work.
             If the help links at the iShell interface provide not enough guidance to obtain them, please see
-            project GitHub page.</p>
+            the project <a href="https://github.com/GChristensen/ishell#readme" target="_blank">GitHub</a> page.</p>
     </section>
     <footer>
     </footer>

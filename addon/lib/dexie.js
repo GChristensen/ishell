@@ -11,12 +11,7 @@
  * Apache License Version 2.0, January 2004, http://www.apache.org/licenses/
  */
 
-
-(function (global, factory) {
-typeof exports === 'object' && typeof module !== 'undefined' ? module.exports = factory() :
-typeof define === 'function' && define.amd ? define(factory) :
-(global.Dexie = factory());
-}(this, (function () { 'use strict';
+export default Dexie;
 
 var keys = Object.keys;
 var isArray = Array.isArray;
@@ -519,7 +514,7 @@ function hookCreatingChain(f1, f2) {
         if (res !== undefined)
             arguments[0] = res;
         var onsuccess = this.onsuccess, // In case event listener has set this.onsuccess
-        onerror = this.onerror; // In case event listener has set this.onerror
+            onerror = this.onerror; // In case event listener has set this.onerror
         this.onsuccess = null;
         this.onerror = null;
         var res2 = f2.apply(this, arguments);
@@ -536,7 +531,7 @@ function hookDeletingChain(f1, f2) {
     return function () {
         f1.apply(this, arguments);
         var onsuccess = this.onsuccess, // In case event listener has set this.onsuccess
-        onerror = this.onerror; // In case event listener has set this.onerror
+            onerror = this.onerror; // In case event listener has set this.onerror
         this.onsuccess = this.onerror = null;
         f2.apply(this, arguments);
         if (onsuccess)
@@ -552,7 +547,7 @@ function hookUpdatingChain(f1, f2) {
         var res = f1.apply(this, arguments);
         extend(modifications, res); // If f1 returns new modifications, extend caller's modifications with the result before calling next in chain.
         var onsuccess = this.onsuccess, // In case event listener has set this.onsuccess
-        onerror = this.onerror; // In case event listener has set this.onerror
+            onerror = this.onerror; // In case event listener has set this.onerror
         this.onsuccess = null;
         this.onerror = null;
         var res2 = f2.apply(this, arguments);
@@ -614,7 +609,7 @@ function promisableChain(f1, f2) {
 //   native async / await.
 // * Promise.follow() method built upon the custom zone engine, that allows user to track all promises created from current stack frame
 //   and below + all promises that those promises creates or awaits.
-// * Detect any unhandled promise in a PSD-scope (PSD.onunhandled). 
+// * Detect any unhandled promise in a PSD-scope (PSD.onunhandled).
 //
 // David Fahlander, https://github.com/dfahlander
 //
@@ -631,10 +626,10 @@ var nativePromiseInstanceAndProto = (function () {
 //        return new Function("let F=async ()=>{},p=F();return [p,Object.getPrototypeOf(p),Promise.resolve(),F.constructor];")();
 //    }
 //    catch (e) {
-        var P = _global.Promise;
-        return P ?
-            [P.resolve(), P.prototype, P.resolve()] :
-            [];
+    var P = _global.Promise;
+    return P ?
+        [P.resolve(), P.prototype, P.resolve()] :
+        [];
 //    }
 })();
 var resolvedNativePromise = nativePromiseInstanceAndProto[0];
@@ -655,23 +650,23 @@ var stack_being_generated = false;
 var schedulePhysicalTick = resolvedGlobalPromise ?
     function () { resolvedGlobalPromise.then(physicalTick); }
     :
-        _global.setImmediate ?
-            // setImmediate supported. Those modern platforms also supports Function.bind().
-            setImmediate.bind(null, physicalTick) :
-            _global.MutationObserver ?
-                // MutationObserver supported
-                function () {
-                    var hiddenDiv = document.createElement("div");
-                    (new MutationObserver(function () {
-                        physicalTick();
-                        hiddenDiv = null;
-                    })).observe(hiddenDiv, { attributes: true });
-                    hiddenDiv.setAttribute('i', '1');
-                } :
-                // No support for setImmediate or MutationObserver. No worry, setTimeout is only called
-                // once time. Every tick that follows will be our emulated micro tick.
-                // Could have uses setTimeout.bind(null, 0, physicalTick) if it wasnt for that FF13 and below has a bug 
-                function () { setTimeout(physicalTick, 0); };
+    _global.setImmediate ?
+        // setImmediate supported. Those modern platforms also supports Function.bind().
+        setImmediate.bind(null, physicalTick) :
+        _global.MutationObserver ?
+            // MutationObserver supported
+            function () {
+                var hiddenDiv = document.createElement("div");
+                (new MutationObserver(function () {
+                    physicalTick();
+                    hiddenDiv = null;
+                })).observe(hiddenDiv, { attributes: true });
+                hiddenDiv.setAttribute('i', '1');
+            } :
+            // No support for setImmediate or MutationObserver. No worry, setTimeout is only called
+            // once time. Every tick that follows will be our emulated micro tick.
+            // Could have uses setTimeout.bind(null, 0, physicalTick) if it wasnt for that FF13 and below has a bug
+            function () { setTimeout(physicalTick, 0); };
 // Configurable through Promise.scheduler.
 // Don't export because it would be unsafe to let unknown
 // code call it unless they do try..catch within their callback.
@@ -789,10 +784,10 @@ props(Promise.prototype, {
         // First argument is the Error type to catch
         var type = arguments[0], handler = arguments[1];
         return typeof type === 'function' ? this.then(null, function (err) {
-            // Catching errors by its constructor type (similar to java / c++ / c#)
-            // Sample: promise.catch(TypeError, function (e) { ... });
-            return err instanceof type ? handler(err) : PromiseReject(err);
-        })
+                // Catching errors by its constructor type (similar to java / c++ / c#)
+                // Sample: promise.catch(TypeError, function (e) { ... });
+                return err instanceof type ? handler(err) : PromiseReject(err);
+            })
             : this.then(null, function (err) {
                 // Catching errors by the error.name property. Makes sense for indexedDB where error type
                 // is always DOMError but where e.name tells the actual error type.
@@ -851,7 +846,7 @@ function Listener(onFulfilled, onRejected, resolve, reject, zone) {
 props(Promise, {
     all: function () {
         var values = getArrayOf.apply(null, arguments) // Supports iterables, implicit arguments and array-like.
-            .map(onPossibleParallellAsync); // Handle parallell async/awaits 
+            .map(onPossibleParallellAsync); // Handle parallell async/awaits
         return new Promise(function (resolve, reject) {
             if (values.length === 0)
                 resolve([]);
@@ -918,11 +913,11 @@ props(Promise, {
     }
 });
 /**
-* Take a potentially misbehaving resolver function and make sure
-* onFulfilled and onRejected are only called once.
-*
-* Makes no guarantees about asynchrony.
-*/
+ * Take a potentially misbehaving resolver function and make sure
+ * onFulfilled and onRejected are only called once.
+ *
+ * Makes no guarantees about asynchrony.
+ */
 function executePromiseTask(promise, fn) {
     // Promise Resolution Procedure:
     // https://github.com/promises-aplus/promises-spec#the-promise-resolution-procedure
@@ -1494,7 +1489,7 @@ var isIEOrEdge = typeof navigator !== 'undefined' && /(MSIE|Trident|Edge)/.test(
 var hasIEDeleteObjectStoreBug = isIEOrEdge;
 var hangsOnDeleteLargeKeyRange = isIEOrEdge;
 var dexieStackFrameFilter = function (frame) { return !/(dexie\.js|dexie\.min\.js)/.test(frame); };
-var dbNamesDB; // Global database for backing Dexie.getDatabaseNames() on browser without indexedDB.webkitGetDatabaseNames() 
+var dbNamesDB; // Global database for backing Dexie.getDatabaseNames() on browser without indexedDB.webkitGetDatabaseNames()
 // Init debug
 setDebug(debug, dexieStackFrameFilter);
 function Dexie(dbName, options) {
@@ -1683,7 +1678,7 @@ function Dexie(dbName, options) {
                 adjustToExistingIndexNames(newSchema, idbtrans);
                 globalSchema = db._dbSchema = newSchema;
                 var diff = getSchemaDiff(oldSchema, newSchema);
-                // Add tables           
+                // Add tables
                 diff.add.forEach(function (tuple) {
                     createTable(idbtrans, tuple[0], tuple[1].primKey, tuple[1].indexes);
                 });
@@ -1889,69 +1884,69 @@ function Dexie(dbName, options) {
         dbOpenError = null;
         openComplete = false;
         // Function pointers to call when the core opening process completes.
-        var resolveDbReady = dbReadyResolve, 
-        // upgradeTransaction to abort on failure.
-        upgradeTransaction = null;
+        var resolveDbReady = dbReadyResolve,
+            // upgradeTransaction to abort on failure.
+            upgradeTransaction = null;
         return Promise.race([openCanceller, new Promise(function (resolve, reject) {
-                // Multiply db.verno with 10 will be needed to workaround upgrading bug in IE:
-                // IE fails when deleting objectStore after reading from it.
-                // A future version of Dexie.js will stopover an intermediate version to workaround this.
-                // At that point, we want to be backward compatible. Could have been multiplied with 2, but by using 10, it is easier to map the number to the real version number.
-                // If no API, throw!
-                if (!indexedDB)
-                    throw new exceptions.MissingAPI("indexedDB API not found. If using IE10+, make sure to run your code on a server URL " +
-                        "(not locally). If using old Safari versions, make sure to include indexedDB polyfill.");
-                var req = autoSchema ? indexedDB.open(dbName) : indexedDB.open(dbName, Math.round(db.verno * 10));
-                if (!req)
-                    throw new exceptions.MissingAPI("IndexedDB API not available"); // May happen in Safari private mode, see https://github.com/dfahlander/Dexie.js/issues/134
-                req.onerror = eventRejectHandler(reject);
-                req.onblocked = wrap(fireOnBlocked);
-                req.onupgradeneeded = wrap(function (e) {
-                    upgradeTransaction = req.transaction;
-                    if (autoSchema && !db._allowEmptyDB) {
-                        // Caller did not specify a version or schema. Doing that is only acceptable for opening alread existing databases.
-                        // If onupgradeneeded is called it means database did not exist. Reject the open() promise and make sure that we
-                        // do not create a new database by accident here.
-                        req.onerror = preventDefault; // Prohibit onabort error from firing before we're done!
-                        upgradeTransaction.abort(); // Abort transaction (would hope that this would make DB disappear but it doesnt.)
-                        // Close database and delete it.
-                        req.result.close();
-                        var delreq = indexedDB.deleteDatabase(dbName); // The upgrade transaction is atomic, and javascript is single threaded - meaning that there is no risk that we delete someone elses database here!
-                        delreq.onsuccess = delreq.onerror = wrap(function () {
-                            reject(new exceptions.NoSuchDatabase("Database " + dbName + " doesnt exist"));
-                        });
-                    }
-                    else {
-                        upgradeTransaction.onerror = eventRejectHandler(reject);
-                        var oldVer = e.oldVersion > Math.pow(2, 62) ? 0 : e.oldVersion; // Safari 8 fix.
-                        runUpgraders(oldVer / 10, upgradeTransaction, reject, req);
-                    }
-                }, reject);
-                req.onsuccess = wrap(function () {
-                    // Core opening procedure complete. Now let's just record some stuff.
-                    upgradeTransaction = null;
-                    idbdb = req.result;
-                    connections.push(db); // Used for emulating versionchange event on IE/Edge/Safari.
-                    if (autoSchema)
-                        readGlobalSchema();
-                    else if (idbdb.objectStoreNames.length > 0) {
-                        try {
-                            adjustToExistingIndexNames(globalSchema, idbdb.transaction(safariMultiStoreFix(idbdb.objectStoreNames), READONLY));
-                        }
-                        catch (e) {
-                            // Safari may bail out if > 1 store names. However, this shouldnt be a showstopper. Issue #120.
-                        }
-                    }
-                    idbdb.onversionchange = wrap(function (ev) {
-                        db._vcFired = true; // detect implementations that not support versionchange (IE/Edge/Safari)
-                        db.on("versionchange").fire(ev);
+            // Multiply db.verno with 10 will be needed to workaround upgrading bug in IE:
+            // IE fails when deleting objectStore after reading from it.
+            // A future version of Dexie.js will stopover an intermediate version to workaround this.
+            // At that point, we want to be backward compatible. Could have been multiplied with 2, but by using 10, it is easier to map the number to the real version number.
+            // If no API, throw!
+            if (!indexedDB)
+                throw new exceptions.MissingAPI("indexedDB API not found. If using IE10+, make sure to run your code on a server URL " +
+                    "(not locally). If using old Safari versions, make sure to include indexedDB polyfill.");
+            var req = autoSchema ? indexedDB.open(dbName) : indexedDB.open(dbName, Math.round(db.verno * 10));
+            if (!req)
+                throw new exceptions.MissingAPI("IndexedDB API not available"); // May happen in Safari private mode, see https://github.com/dfahlander/Dexie.js/issues/134
+            req.onerror = eventRejectHandler(reject);
+            req.onblocked = wrap(fireOnBlocked);
+            req.onupgradeneeded = wrap(function (e) {
+                upgradeTransaction = req.transaction;
+                if (autoSchema && !db._allowEmptyDB) {
+                    // Caller did not specify a version or schema. Doing that is only acceptable for opening alread existing databases.
+                    // If onupgradeneeded is called it means database did not exist. Reject the open() promise and make sure that we
+                    // do not create a new database by accident here.
+                    req.onerror = preventDefault; // Prohibit onabort error from firing before we're done!
+                    upgradeTransaction.abort(); // Abort transaction (would hope that this would make DB disappear but it doesnt.)
+                    // Close database and delete it.
+                    req.result.close();
+                    var delreq = indexedDB.deleteDatabase(dbName); // The upgrade transaction is atomic, and javascript is single threaded - meaning that there is no risk that we delete someone elses database here!
+                    delreq.onsuccess = delreq.onerror = wrap(function () {
+                        reject(new exceptions.NoSuchDatabase("Database " + dbName + " doesnt exist"));
                     });
-                    if (!hasNativeGetDatabaseNames && dbName !== '__dbnames') {
-                        dbNamesDB.dbnames.put({ name: dbName }).catch(nop);
+                }
+                else {
+                    upgradeTransaction.onerror = eventRejectHandler(reject);
+                    var oldVer = e.oldVersion > Math.pow(2, 62) ? 0 : e.oldVersion; // Safari 8 fix.
+                    runUpgraders(oldVer / 10, upgradeTransaction, reject, req);
+                }
+            }, reject);
+            req.onsuccess = wrap(function () {
+                // Core opening procedure complete. Now let's just record some stuff.
+                upgradeTransaction = null;
+                idbdb = req.result;
+                connections.push(db); // Used for emulating versionchange event on IE/Edge/Safari.
+                if (autoSchema)
+                    readGlobalSchema();
+                else if (idbdb.objectStoreNames.length > 0) {
+                    try {
+                        adjustToExistingIndexNames(globalSchema, idbdb.transaction(safariMultiStoreFix(idbdb.objectStoreNames), READONLY));
                     }
-                    resolve();
-                }, reject);
-            })]).then(function () {
+                    catch (e) {
+                        // Safari may bail out if > 1 store names. However, this shouldnt be a showstopper. Issue #120.
+                    }
+                }
+                idbdb.onversionchange = wrap(function (ev) {
+                    db._vcFired = true; // detect implementations that not support versionchange (IE/Edge/Safari)
+                    db.on("versionchange").fire(ev);
+                });
+                if (!hasNativeGetDatabaseNames && dbName !== '__dbnames') {
+                    dbNamesDB.dbnames.put({ name: dbName }).catch(nop);
+                }
+                resolve();
+            }, reject);
+        })]).then(function () {
             // Before finally resolving the dbReadyPromise and this promise,
             // call and await all on('ready') subscribers:
             // Dexie.vip() makes subscribers able to use the database while being opened.
@@ -2074,7 +2069,7 @@ function Dexie(dbName, options) {
                     // Database already open. Call subscriber asap.
                     if (!dbOpenError)
                         Promise.resolve().then(subscriber);
-                    // bSticky: Also subscribe to future open sucesses (after close / reopen) 
+                    // bSticky: Also subscribe to future open sucesses (after close / reopen)
                     if (bSticky)
                         subscribe(subscriber);
                 }
@@ -2234,7 +2229,7 @@ function Dexie(dbName, options) {
                     Promise.resolve(returnValue).then(function (x) { return trans.active ?
                         x // Transaction still active. Continue.
                         : rejection(new exceptions.PrematureCommit("Transaction committed too early. See http://bit.ly/2kdckMn")); })
-                    // No promise returned. Wait for all outstanding promises before continuing. 
+                    // No promise returned. Wait for all outstanding promises before continuing.
                     : promiseFollowed.then(function () { return returnValue; })).then(function (x) {
                     // sub transactions don't react to idbtrans.oncomplete. We must trigger a completion:
                     if (parentTransaction)
@@ -2359,7 +2354,7 @@ function Dexie(dbName, options) {
                 return new WhereClause(this, indexOrCrit);
             if (isArray(indexOrCrit))
                 return new WhereClause(this, "[" + indexOrCrit.join('+') + "]");
-            // indexOrCrit is an object map of {[keyPath]:value} 
+            // indexOrCrit is an object map of {[keyPath]:value}
             var keyPaths = keys(indexOrCrit);
             if (keyPaths.length === 1)
                 // Only one critera. This was the easy case:
@@ -2908,8 +2903,8 @@ function Dexie(dbName, options) {
             if (this._locked()) {
                 return new Promise(function (resolve, reject) {
                     _this._blockedFuncs.push([function () {
-                            _this._promise(mode, fn, bWriteLock).then(resolve, reject);
-                        }, PSD]);
+                        _this._promise(mode, fn, bWriteLock).then(resolve, reject);
+                    }, PSD]);
                 });
             }
             else if (bWriteLock) {
@@ -3237,13 +3232,13 @@ function Dexie(dbName, options) {
                 return this.inAnyRange(ranges, { includeLowers: false, includeUppers: false });
             },
             /** Filter out values withing given set of ranges.
-            * Example, give children and elders a rebate of 50%:
-            *
-            *   db.friends.where('age').inAnyRange([[0,18],[65,Infinity]]).modify({Rebate: 1/2});
-            *
-            * @param {(string|number|Date|Array)[][]} ranges
-            * @param {{includeLowers: boolean, includeUppers: boolean}} options
-            */
+             * Example, give children and elders a rebate of 50%:
+             *
+             *   db.friends.where('age').inAnyRange([[0,18],[65,Infinity]]).modify({Rebate: 1/2});
+             *
+             * @param {(string|number|Date|Array)[][]} ranges
+             * @param {{includeLowers: boolean, includeUppers: boolean}} options
+             */
             inAnyRange: function (ranges, options) {
                 if (ranges.length === 0)
                     return emptyCollection(this);
@@ -3906,8 +3901,8 @@ function Dexie(dbName, options) {
                     // Clone collection and change its table and set a limit of CHUNKSIZE on the cloned Collection instance.
                     var collection = _this
                         .clone({
-                        keysOnly: !ctx.isMatch && !hasDeleteHook
-                    }) // load just keys (unless filter() or and() or deleteHook has subscribers)
+                            keysOnly: !ctx.isMatch && !hasDeleteHook
+                        }) // load just keys (unless filter() or and() or deleteHook has subscribers)
                         .distinct() // In case multiEntry is used, never delete same key twice because resulting count
                         .limit(CHUNKSIZE)
                         .raw(); // Don't filter through reading-hooks (like mapped classes etc)
@@ -4156,8 +4151,8 @@ function hookedEventSuccessHandler(resolve) {
     // because it is always marked with _lib = true when created using Transaction._promise().
     return wrap(function (event) {
         var req = event.target, ctx = req._hookCtx, // Contains the hook error handler. Put here instead of closure to boost performance.
-        result = ctx.value || req.result, // Pass the object value on updates. The result from IDB is the primary key.
-        hookSuccessHandler = ctx && ctx.onsuccess;
+            result = ctx.value || req.result, // Pass the object value on updates. The result from IDB is the primary key.
+            hookSuccessHandler = ctx && ctx.onsuccess;
         hookSuccessHandler && hookSuccessHandler(result);
         resolve && resolve(result);
     }, resolve);
@@ -4178,7 +4173,7 @@ function hookedEventRejectHandler(reject) {
     return wrap(function (event) {
         // See comment on hookedEventSuccessHandler() why wrap() is needed only when supporting hooks.
         var req = event.target, err = req.error, ctx = req._hookCtx, // Contains the hook error handler. Put here instead of closure to boost performance.
-        hookErrorHandler = ctx && ctx.onerror;
+            hookErrorHandler = ctx && ctx.onerror;
         hookErrorHandler && hookErrorHandler(err);
         preventDefault(event);
         reject(err);
@@ -4251,7 +4246,7 @@ function getNativeGetDatabaseNamesFn(indexedDB) {
 props(Dexie, fullNameExceptions); // Dexie.XXXError = class XXXError {...};
 //
 // Static methods and properties
-// 
+//
 props(Dexie, {
     //
     // Static delete() method.
@@ -4368,7 +4363,7 @@ props(Dexie, {
     waitFor: function (promiseOrFunction, optionalTimeout) {
         // If a function is provided, invoke it and pass the returning value to Transaction.waitFor()
         var promise = Promise.resolve(typeof promiseOrFunction === 'function' ? Dexie.ignoreTransaction(promiseOrFunction) : promiseOrFunction)
-            .timeout(optionalTimeout || 60000); // Default the timeout to one minute. Caller may specify Infinity if required.       
+            .timeout(optionalTimeout || 60000); // Default the timeout to one minute. Caller may specify Infinity if required.
         // Run given promise on current transaction. If no current transaction, just return a Dexie promise based
         // on given value.
         return PSD.trans ? PSD.trans.waitFor(promise) : promise;
@@ -4468,5 +4463,3 @@ dbNamesDB.version(1).stores({ dbnames: 'name' });
     }
     catch (_e) { }
 })();
-return Dexie;
-})));

@@ -1,56 +1,55 @@
-CmdUtils.CreateCommand({
-    names: ["feedsub"],
-    uuid: "A2910385-002A-4BBE-AA22-9E92FC06352B",
-    _namespace: "Syndication",
-    description: "Subscribe to a RSS feed in Feedly.",
-    help: `The command uses the URL opened in the current tab. 
-            Direct feed links, Instagram, Tumblr, Twitter and Youtube are supported.`,
-    icon: "/res/icons/feedly.png",
+export const _namespace = {name: CMD_NS.SYNDICATION, annotated: true};
 
-    preview: "Subscribe using Feedly",
-    execute: function () {
-      const feedlySubUrl = "https://feedly.com/i/subscription/feed/"; 
-      let url = CmdUtils.getLocation();
-      if (/twitter.com\//.test(url)) {
-        let m = url.match(/twitter.com\/([^\/]*)/);
-        let uid = m? m[1]: null;
-        if (uid) {
-          CmdUtils.addTab(feedlySubUrl
-                          + encodeURIComponent("https://twitrss.me/twitter_user_to_rss/?user=" + uid));
-        }
-      }
-	  else if (/tumblr.com/.test(url)) {
-        let m = url.match(/([^.]*.tumblr.com)/);
-        let uid = m? m[1]: null;
-        if (uid) {
-          CmdUtils.addTab(feedlySubUrl
-                          + encodeURIComponent(uid + "/rss"));
-        }
-      }
-      else if (/instagram.com\//.test(url)) {
-          let m = url.match(/instagram.com\/([^\/]*)/);
-          let uid = m? m[1]: null;
-          if (uid) {
-              CmdUtils.addTab(feedlySubUrl
-                  + encodeURIComponent("https://rsshub.app/instagram/user/" + uid));
-          }
-      }
-      else if (/youtube.com\//.test(url)) {
-        let m = url.match(/youtube.com\/channel\/([^\/]*)/);
-        let uid = m? m[1]: null;
-        if (uid) {
-          CmdUtils.addTab(feedlySubUrl
-                          + encodeURIComponent("https://www.youtube.com/feeds/videos.xml?channel_id=" + uid));
+/**
+ The command uses the URL opened in the current tab.
+ Can also subscribe to YouTube users and channels.
+
+ @command
+ @icon /ui/icons/feedly.png
+ @description Subscribe to RSS feeds in Feedly.
+ @uuid A2910385-002A-4BBE-AA22-9E92FC06352B
+ */
+export class Feedsub {
+    async execute() {
+        const feedlySubURL = "https://feedly.com/i/subscription/feed/";
+        const url = cmdAPI.getLocation();
+
+        if (/youtube.com\//.test(url)) {
+            const youTubeFeedURL = "https://www.youtube.com/feeds/videos.xml";
+            const m = url.match(/youtube.com\/(channel|user)\/([^\/]*)/);
+            const paramName = m?.[1] === "channel"? "?channel_id=": "?user=";
+            const uid = m?.[2];
+
+            if (uid) {
+                const feedURL = encodeURIComponent(`${youTubeFeedURL}${paramName}${uid}`)
+                cmdAPI.addTab(`${feedlySubURL}${feedURL}`);
+            }
         }
         else {
-            let m = url.match(/youtube.com\/user\/([^\/]*)/);
-            let uid = m? m[1]: null;
-            CmdUtils.addTab(feedlySubUrl
-                + encodeURIComponent("https://www.youtube.com/feeds/videos.xml?user=" + uid));
+            let feedURL = url;
+            try {
+                feedURL = await this.#extractFeedURL() || url;
+            } catch (e) {
+                console.error(e);
+            }
+
+            CmdUtils.addTab(feedlySubURL + encodeURIComponent(feedURL));
         }
-      }
-      else {
-          CmdUtils.addTab(feedlySubUrl + encodeURIComponent(url));
-      }
     }
-});
+
+    async #extractFeedURL() {
+        const [{result}] = await cmdAPI.executeScript({func: extractFeedURLContent});
+        return result;
+    }
+}
+
+function extractFeedURLContent() {
+    return document.querySelector(`link[type*="application/rss+xml"]
+            , link[type*="application/rdf+xml"]
+            , link[type*="application/atom+xml"]
+            , link[type*="application/xml"]
+            , link[type*="text/xml"]`)
+        .href;
+}
+
+

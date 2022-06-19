@@ -1,6 +1,4 @@
-// Use lingvolive.com online service with the Firefox iShell extension
-
-// (C) 2010-2022 g/christensen (gchristnsn@gmail.com)
+export const _namespace = {name: CMD_NS.TRANSLATION, annotated: true};
 
 /**
      # Syntax
@@ -14,14 +12,13 @@
 
      @command
      @markdown
-     @namespace Translation
      @author g/christensen
      @delay 1000
-     @icon /res/icons/lingvo.png
+     @icon /ui/icons/lingvo.png
      @description Translate words using <a href='https://www.lingvolive.com/'>Abbyy Lingvo</a> online service.
      @uuid 757A2516-9A45-4D02-8756-854B5DE5A074
  */
-class Lingvo {
+export class Lingvo {
     #abbyyAPI = "https://developers.lingvolive.com/api";
 
     #lingvoAPIToken;
@@ -89,9 +86,9 @@ class Lingvo {
 
         const wordsURI = encodeURIComponent(words);
         const fromCode = this.#getLangCode(from, isLatin ? EN: RU);
-        const toCode = this.#getLangCode(from, isLatin ? RU: EN);
+        const toCode = this.#getLangCode(to, isLatin ? RU: EN);
         const fromID = this.#getLangID(from, isLatin ? EN: RU);
-        const toID = this.#getLangID(from, isLatin ? RU: EN);
+        const toID = this.#getLangID(to, isLatin ? RU: EN);
 
         this.#articleURL = `https://www.lingvolive.com/en-us/translate/${fromID}-${toID}/${wordsURI}`;
 
