@@ -322,30 +322,30 @@ export class Scrapyard {
             let text = "";
 
             if (n.type === NODE_TYPE_GROUP) {
-                text = "<img class='pl2-image' src='/ui/icons/folder.svg'>"
-                    + "<div class='pl2-lines n-group'>" + Utils.escapeHtml(n.path) + "</div>";
+                text = "<img class='opl-image' src='/ui/icons/folder.svg'>"
+                    + "<div class='opl-lines n-group'>" + Utils.escapeHtml(n.path) + "</div>";
             }
             else {
                 if (n.icon) {
                     n.icon = n.icon.replace(/'/g, "\\'");
-                    text = "<img class='pl2-image' src='" + n.icon + "'>"
+                    text = "<img class='opl-image' src='" + n.icon + "'>"
                 }
                 else
-                    text = "<img class='pl2-image' src='/ui/icons/globe.svg'>";
+                    text = "<img class='opl-image' src='/ui/icons/globe.svg'>";
 
 
                 if (n.uri && !n.name)
-                    text += "<div class='pl2-text'>" + Utils.escapeHtml(n.uri) + "</div>";
+                    text += "<div class='opl-text'>" + Utils.escapeHtml(n.uri) + "</div>";
                 else
-                    text += "<div class='pl2-lines'><div class='pl2-text'>" + n.name + "</div>"
-                        + "<div class='pl2-subtext'>" + Utils.escapeHtml(n.uri) + "</div></div>";
+                    text += "<div class='opl-lines'><div class='opl-text'>" + n.name + "</div>"
+                        + "<div class='opl-subtext'>" + Utils.escapeHtml(n.uri) + "</div></div>";
             }
 
             items.push(text);
         }
 
         const style = `${CmdUtils._previewList2CSS}
-                     .pl2-image {
+                     .opl-image {
                         width: 16px;
                         height: 16px;
                      }

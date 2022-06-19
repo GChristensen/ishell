@@ -47,14 +47,6 @@ CmdUtils.CreateCommand.previewDefault = function(pb) {
     return (pb || 0).innerHTML = html;
 };
 
-// returns a command with the given name
-CmdUtils.findCommand = function(name) {
-    for (let c in cmdManager.commands)
-        if (cmdManager.commands[c].name === name || cmdManager.commands[c].names.indexOf(name) > -1)
-            return cmdManager.commands[c];
-    return null;
-};
-
 // deprecated
 CmdUtils.renderTemplate = function (template, data) {
     return template;
@@ -476,17 +468,17 @@ CmdUtils.previewList2 = function(block, items, fs, css) {
         let thumb = fs.thumb? fs.thumb(i): undefined;
 
         if (thumb)
-            html += `<img class='pl2-image' src='${thumb}'>`
+            html += `<img class='opl-image' src='${thumb}'>`
         else
             html += "<div></div>";
 
         let text = fs.text(i);
         let subtext = fs.subtext(i);
 
-        html += `<div class='pl2-lines'><div class='pl2-text'>${text}</div>`;
+        html += `<div class='opl-lines'><div class='opl-text'>${text}</div>`;
 
         if (subtext)
-            html += `<div class='pl2-subtext'>${subtext}</div>`;
+            html += `<div class='opl-subtext'>${subtext}</div>`;
 
         html += "</div>";
 
@@ -533,7 +525,7 @@ CmdUtils._previewList2CSS =
     flex-flow: row nowrap;
     align-content: center;
  }
- .pl2-image {
+ .opl-image {
     width: 32px;
     height: 32px;
     object-fit: contain;
@@ -545,12 +537,12 @@ CmdUtils._previewList2CSS =
     display: inline-block;
     flex: 0 1 auto;
  }
- .pl2-lines {
+ .opl-lines {
     flex: 1 1 auto;
     min-width: 0;
     align-self: center;
  }
- .pl2-subtext {
+ .opl-subtext {
     font-size: x-small;
     padding-left: 10px;
     white-space: nowrap;
@@ -558,7 +550,7 @@ CmdUtils._previewList2CSS =
     text-overflow: ellipsis;
     color: #FD7221;
  }
- .pl2-text {
+ .opl-text {
     overflow: hidden;
     white-space: nowrap;
     text-overflow: ellipsis;

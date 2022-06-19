@@ -14,6 +14,9 @@ async function initPopup() {
 
     popup = new PopupWindow();
 
+    popup.loadInput();
+    popup.generateSuggestions();
+
     cmdAPI.dbglog("iShell popup initialized");
 }
 
@@ -31,9 +34,6 @@ class PopupWindow {
         this._enhancePBlock();
 
         this._commandList = new CommandList(this, settings.max_suggestions());
-
-        this.loadInput()
-        this.generateSuggestions();
 
         cmdAPI.getCommandLine = () => this.getInput();
         cmdAPI.setCommandLine = text => this.setCommand(text);
@@ -92,8 +92,7 @@ class PopupWindow {
                 this.persistInput();
         }
         else {
-            const lastCommand = settings.shell_last_command();
-            this.setInput(lastCommand || "");
+            this.setInput(settings.shell_last_command() || "");
             this.cmdline.select();
         }
     }

@@ -128,6 +128,13 @@ class CommandManager {
         return this._commands.find(c => c.uuid.toUpperCase() === uuid.toUpperCase());
     };
 
+    getCommandByName(name) {
+        for (let c in this._commands)
+            if (this._commands[c].name === name || this._commands[c].names.indexOf(name) > -1)
+                return this._commands[c];
+        return null;
+    };
+    
     removeCommand(command) {
         this._commands = this._commands.filter(cmd => cmd.id !== command.id);
     }
