@@ -1,31 +1,29 @@
 import {hasCSRPermission} from "./utils_browser.js";
-import {fetchWithTimeout} from "./utils.js";
+import {fetchJSON, fetchWithTimeout} from "./utils.js";
 
 class HelperApp {
     #host;
-    #portNumber;
+    #hostPort;
 
     constructor() {
         this.auth = _BACKGROUND_PAGE? crypto.randomUUID(): "default";
         this.version = undefined;
     }
 
-    get host() {
-        if (!this.#host)
-            this.#host = (_MANIFEST_V3
-                            ? chrome.runtime.getManifest().content_security_policy.extension_pages
-                            : chrome.runtime.getManifest().content_security_policy)
-                .split(";")[0]
-                .split(" ").at(-1);
-
-        return this.#host;
+    async #configure() {
+        const config = await fetchJSON("/helper_app.json");
+        this.#host = config.host + ":" + config.port;
+        this.#hostPort = config.port;
     }
 
-    get portNumber() {
-        if (!this.#portNumber)
-            this.#portNumber = parseInt(this.host.split(":").at(-1));
+    get #portNumber() {
+        if (this.#hostPort)
+            return this.#hostPort;
 
-        return this.#portNumber;
+        return (async () => {
+            await this.#configure();
+            return this.#hostPort;
+        })();
     }
 
     async getPort() {
@@ -57,7 +55,7 @@ class HelperApp {
                 try {
                     port.postMessage({
                         type: "INITIALIZE",
-                        port: this.portNumber,
+                        port: await this.#portNumber,
                         auth: this.auth
                     });
                 }
@@ -145,7 +143,7 @@ class HelperApp {
     }
 
     url(path) {
-        return `${this.host}${path.startsWith("/")? "": "/"}${path}`;
+        return `${this.#host}${path.startsWith("/")? "": "/"}${path}`;
     }
 
     injectAuth(init) {

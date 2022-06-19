@@ -1,9 +1,9 @@
 {
-    "version": "0.5",
+    "version": "0.5.0.2",
     "applications": {
         "gecko": {
             "id": "ishell@gchristensen.github.io",
-            "strict_min_version": "78.0"
+            "strict_min_version": "95.0"
         }
     },
     "name": "iShell Extension",
@@ -11,7 +11,7 @@
     "homepage_url": "https://gchristensen.github.io/#ishell",
     "author": "gchristnsn",
     "description": "A natural language interface for browsers",
-    "content_security_policy": "script-src 'self' 'unsafe-eval' http://localhost:41514; object-src 'self';",
+    "content_security_policy": "script-src 'self' 'unsafe-eval'; object-src 'self';",
     "manifest_version": 2,
     "background": {
       "page": "background.html",
