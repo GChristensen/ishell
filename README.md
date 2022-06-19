@@ -73,7 +73,7 @@ purposes other than argument definition and simple field initialization, since
 iShell may create the command object multiple times for various reasons. There
 are several other functions that are used to initialize commands (please, see
 iShell API reference for
-[cmdAPI.createCommand](https://gchristensen.github.io/ishell/res/API.html#create-command)
+[cmdAPI.createCommand](https://gchristensen.github.io/ishell/addon/ui/options/API.html#create-command)
 and explore command templates in the editor).
 
 You may also have noticed that the object-oriented preview and execute methods
