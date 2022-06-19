@@ -107,10 +107,10 @@ user-provided commands. To run with MV3 rename `manifest.json.mv3` to `manifest.
 ### Running on Chrome
 
 It is possible to load iShell as an unpacked extension into Chrome in MV2 or MV3
-modes. Although all built-in commands work in MV3 mode, the evaluation of
-user-provided commands is currently impossible. This may change if MV3 will be
-supported in Chrome according to the specification. To run on Chrome, rename
-`manifest.json.mvX.chrome` to `manifest.json`.
+mode. Although all built-in commands work in MV3 mode, the evaluation of
+user-provided commands under MV3 is currently impossible. This may change if
+MV3 will be supported in Chrome according to the specification. To run on
+Chrome, rename `manifest.json.mvX.chrome` to `manifest.json`.
 
 NOTE: to use the Ctrl+Space keyboard shortcut it may be necessary to manually 
 reassign it in Chrome add-on management console and *restart* the browser.
