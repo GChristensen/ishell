@@ -17,17 +17,17 @@ class CommandManager {
     };
 
     _builtinModules = [
-        "./commands/more/kpop.js",
-        "./commands/more/javlib.js",
-        "./commands/more/nyaa.js",
-        "./commands/more/more.js",
         "./commands/browser.js",
-        "./commands/feedsub.js",
         "./commands/ishell.js",
         "./commands/search.js",
         "./commands/translate.js",
         "./commands/utility.js",
-        // annotated
+
+        "./commands/more/kpop.js",
+        "./commands/more/javlib.js",
+        "./commands/more/nyaa.js",
+        "./commands/more/more.js",
+        "./commands/feedsub.js",
         "./commands/history.js",
         "./commands/lingvo.js",
         "./commands/literature.js",

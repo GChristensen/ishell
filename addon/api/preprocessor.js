@@ -188,32 +188,13 @@ export class CommandPreprocessor {
         let markdown = comment.match(/@markdown/i);
         let dbgprint = comment.match(/@dbgprint/i);
 
-        let require;
-        let requirePopup;
+        let commandName = command ? command?.[1]?.trim() || true: false;
 
-        let require_matches = [...comment.matchAll(/@require (.+?)(?:\r?\n|$)/ig)];
-        if (require_matches.length) {
-            require = [];
-            for (let m of require_matches) {
-                require.push(m[1].trim());
-            }
-        }
-
-        require_matches = [...comment.matchAll(/@requirePopup (.+?)(?:\r?\n|$)/ig)];
-        if (require_matches.length) {
-            requirePopup = [];
-            for (let m of require_matches) {
-                requirePopup.push(m[1].trim());
-            }
-        }
-
-        let command_name = command ? command?.[1]?.trim() || true: false;
-
-        if (typeof command_name === "string")
-            if (command_name.indexOf(" ") > 0 || command_name.indexOf(",") > 0) {
-                command_name = command_name.replaceAll(",", " ");
-                command_name = command_name.replaceAll(/\s+/g, " ");
-                command_name = command_name.split(" ");
+        if (typeof commandName === "string")
+            if (commandName.indexOf(" ") > 0 || commandName.indexOf(",") > 0) {
+                commandName = commandName.replaceAll(",", " ");
+                commandName = commandName.replaceAll(/\s+/g, " ");
+                commandName = commandName.split(" ");
             }
 
         let help_content = comment.replaceAll(/@\w+.*?(?:\r?\n|$)/g, "");
@@ -224,7 +205,7 @@ export class CommandPreprocessor {
             help_content = help_content.trim();
 
         return {
-            command: command_name,
+            command: commandName,
             delay: delay && delay[1] ? parseInt(delay[1]) : undefined,
             preview: preview?.[1]?.trim(),
             license: license?.[1]?.trim(),
@@ -237,8 +218,6 @@ export class CommandPreprocessor {
             hidden: !!hidden,
             metaclass: !!metaclass,
             help: help_content,
-            require: require,
-            requirePopup: requirePopup,
             dbgprint: !!dbgprint
         }
     }
@@ -296,19 +275,19 @@ export class CommandPreprocessor {
 
     generateCommandPropertyBlock(properties, prefix = "") {
         let block = "";
-        let command_name;
+        let commandName;
 
         if (Array.isArray(properties.command))
-            command_name = JSON.stringify(properties.command)
+            commandName = JSON.stringify(properties.command)
         else
-            command_name = typeof properties.command === "string"
+            commandName = typeof properties.command === "string"
                 ? this.generateProperty(properties.command)
                 : this.generateProperty(properties.name);
 
-        if (command_name.startsWith("["))
-            block += `    ${prefix}names = ${command_name};\n`;
+        if (commandName.startsWith("["))
+            block += `    ${prefix}names = ${commandName};\n`;
         else
-            block += `    ${prefix}name = ${command_name};\n`;
+            block += `    ${prefix}name = ${commandName};\n`;
         if (properties.delay)
             block += `    ${prefix}previewDelay = ${properties.delay || "undefined"};\n`;
         if (properties.preview)
@@ -340,14 +319,16 @@ export class CommandPreprocessor {
     }
 
     static assignCommandProperties(object, properties) {
+        properties = {...properties};
+
         object._hidden = properties.hidden || object._hidden;
         delete properties.hidden;
 
-        object._namespace = properties.namespace || object._namespace;
-        delete properties.namespace;
-
         object.preview = properties.preview || object.preview;
         delete properties.preview;
+
+        object.previewDelay = properties.delay || object.previewDelay;
+        delete properties.delay;
 
         if (Array.isArray(properties.command))
             object.names = properties.command;
@@ -514,16 +495,16 @@ export class CommandPreprocessor {
         const module = await import(path);
         const content = await (await fetch(path)).text();
 
-        const functions = this.extractFunctions(content);
+        this._instantiateNounTypes(module, content);
+        this._instantiateCommands(module, content);
 
-        for (const funMeta of functions) {
-            if (!funMeta.skip) {
-                const fun = Object.entries(module).find(e => e[0] === funMeta.name)?.[1];
-                if (fun)
-                    CommandPreprocessor.instantiateNounType(fun, funMeta);
-            }
-        }
+        if (module._init)
+            await module._init();
 
+        return module;
+    }
+
+    _instantiateCommands(module, content) {
         const classes = this.extractClasses(content);
 
         for (const classMeta of classes) {
@@ -535,10 +516,17 @@ export class CommandPreprocessor {
                 }
             }
         }
+    }
 
-        if (module._init)
-            await module._init();
+    _instantiateNounTypes(module, content) {
+        const functions = this.extractFunctions(content);
 
-        return module;
+        for (const funMeta of functions) {
+            if (!funMeta.skip) {
+                const fun = Object.entries(module).find(e => e[0] === funMeta.name)?.[1];
+                if (fun)
+                    CommandPreprocessor.instantiateNounType(fun, funMeta);
+            }
+        }
     }
 }

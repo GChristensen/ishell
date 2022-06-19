@@ -8,5 +8,3 @@ if (settings.enable_more_commands()) {
         if (cmd._builtin && cmd._namespace === cmdManager.ns.MORE)
             cmd._hidden = false;
 }
-else
-    cmdManager.commands = cmdManager.commands.filter(cmd => !(cmd._builtin && cmd._namespace === cmdManager.ns.MORE));
