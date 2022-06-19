@@ -77,10 +77,24 @@ class PopupWindow {
                    <span class='keys'>&#8593;/&#8595;</span> - cycle through command suggestions<br>
                    <span class='keys'>Ctrl+&#8593;/&#8595;</span> - scroll through preview list items<br>
                    <span class='keys'>F5</span> - reload the extension
+                   ${this._formatAnnouncement()}
                 </p>
              </div>`;
 
         this.setPreviewContent(html);
+
+        $(".announcement").on("click", e => settings.pending_announcement(null))
+    }
+
+    _formatAnnouncement() {
+        const ann = settings.pending_announcement();
+        if (ann)
+            return `<div class="announcement">
+                        <span class="announcement-bell">&#x1F514;</span>
+                        <a href="${ann.href}" target="_blank">${ann.text}</a>
+                    </div>`;
+
+        return "";
     }
 
     loadInput() {

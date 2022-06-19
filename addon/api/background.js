@@ -1,3 +1,4 @@
+// It seems that the linter at AMO does not allow top-level await in assignments
 await (async function() {
     let backgroundPage = await browser.runtime.getBackgroundPage();
 

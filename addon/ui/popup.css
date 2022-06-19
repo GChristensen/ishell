@@ -222,3 +222,15 @@ kbd {
 .search-command .title {
     clear: both;
 }
+
+.announcement-bell {
+    color: transparent;
+    text-shadow: 0 0 0 white;
+    font-size: 90%;
+}
+
+.announcement {
+    position: absolute;
+    right: 20px;
+    bottom: 20px;
+}
