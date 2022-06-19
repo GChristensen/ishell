@@ -106,7 +106,7 @@ user-provided commands. To run with MV3 rename `manifest.json.mv3` to `manifest.
 
 ### Running on Chrome
 
-It is possible to load iShell as an unpacked add-on into Chrome in MV2 and MV3
+It is possible to load iShell as an unpacked extension into Chrome in MV2 or MV3
 modes. Although all built-in commands work in MV3 mode, the evaluation of
 user-provided commands is currently impossible. This may change if MV3 will be
 supported in Chrome according to the specification. To run on Chrome, rename
