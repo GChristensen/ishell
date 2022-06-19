@@ -53,6 +53,7 @@ export const cmdAPI = {
 export const R = cmdAPI.reduceTemplate;
 
 cmdAPI.previewFetch = async function(display, resource, init) {
+    const REASON_TIMEOUT = "Timeout";
     const controller = new AbortController();
 
     init = init || {};
@@ -61,6 +62,11 @@ cmdAPI.previewFetch = async function(display, resource, init) {
     if (init._displayError) {
         delete init._displayError;
         displayError = true;
+    }
+
+    if (init._timeout) {
+        delete init._timeout;
+        setTimeout(() => controller.abort(REASON_TIMEOUT), init._timeout);
     }
 
     init.signal = controller.signal;
@@ -93,7 +99,16 @@ cmdAPI.previewFetch = async function(display, resource, init) {
     } catch (e) {
         removePreviewListener();
 
-        if (!this.fetchAborted(e) && displayError)
+        const aborted = this.fetchAborted(e);
+        const timeout = controller.signal.reason === REASON_TIMEOUT;
+
+        if (aborted && timeout) {
+            const error = new Error("The request operation has timed out.")
+            if (displayError)
+                display.error(error.message);
+            throw error;
+        }
+        else if (!aborted && displayError)
             display.error(e.message);
 
         throw e;
