@@ -1,14 +1,15 @@
 Installation for Custom Flask Handler Development (any manifest)
 
 1. Make sure that Python 3.7+ is your default Python implementation.
-2. Place the contents of the archive anywhere it feels convenient.
-3. Register helper.cmd or a similar script for your shell as a Firefox
-   native messaging host. See Mozilla documentation:
+2. Install Flask: https://flask.palletsprojects.com.
+3. Place the contents of this archive anywhere it feels convenient.
+4. Register helper.cmd or a similar script for your shell as a Firefox
+   native messaging host. See the Mozilla documentation:
    https://developer.mozilla.org/en-US/docs/Mozilla/Add-ons/WebExtensions/Native_manifests
-4. See ishell/server_user.py for more details.
+5. See ishell/server_user.py for more details.
 
 
-Installation on Linux for User Commands Support (MV3)
+Installation on Linux for User Command Evaluation (MV3)
 
 MV3 version of the add-on supports user-provided commands only
 with the helper application installed.

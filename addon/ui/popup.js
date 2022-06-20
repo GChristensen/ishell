@@ -14,8 +14,8 @@ async function initPopup() {
 
     popup = new PopupWindow();
 
-    popup.loadInput();
-    popup.generateSuggestions();
+    const input = popup.loadInput();
+    popup.generateSuggestions(input);
 
     cmdAPI.dbglog("iShell popup initialized");
 }
@@ -64,17 +64,22 @@ class PopupWindow {
     }
 
     loadInput() {
-        if (contextMenu.selectedContextMenuCommand) {
-            this.setInput(contextMenu.selectedContextMenuCommand);
+        let input = contextMenu.selectedContextMenuCommand;
+
+        if (input) {
+            this.setInput(input);
             contextMenu.selectedContextMenuCommand = null;
 
             if (settings.remember_context_menu_commands())
                 this.persistInput();
         }
         else {
-            this.setInput(settings.shell_last_command() || "");
+            input = settings.shell_last_command() || "";
+            this.setInput(input);
             this.cmdline.select();
         }
+
+        return input;
     }
 
     setInput(text) {
@@ -108,15 +113,16 @@ class PopupWindow {
     setCommand(text) {
         this.setInput(text);
         this.persistInput();
-        this.generateSuggestions();
+        this.generateSuggestions(text);
     }
 
     setSuggestionsContent(html) {
         this.sblock.innerHTML = html;
     }
 
-    generateSuggestions() {
-        this._commandList.generateSuggestions(this.getInput());
+    generateSuggestions(input) {
+        input = input || this.getInput()
+        this._commandList.generateSuggestions(input);
     }
 
     // called when command has changed preview by setting innerHTMl
@@ -228,7 +234,7 @@ class PopupWindow {
                 <p>
                    <div class='help-heading'>Keyboard Shortcuts</div>
                    <span class='keys'>Tab</span> - complete the current input<br>
-                   <span class='keys'>Ctrl+C</span> - copy the preview content to clipboard<br>
+                   <span class='keys'>Ctrl+C</span> - copy the preview content to the clipboard<br>
                    <span class='keys'>Ctrl+Alt+Enter</span> - add the selected command to context menu<br>
                    <span class='keys'>Ctrl+Alt+\\</span> - show command history<br>
                    <span class='keys'>Ctrl+Alt+&ltkey&gt;</span> - select the list item prefixed with the &ltkey&gt;<br>
