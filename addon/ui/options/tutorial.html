@@ -834,9 +834,9 @@ class Tinyurl {
     animations a breeze.
 </p>
 
-<h1 class="section-heading"><span id="Using_Browser_APIs">Executing Content Scripts</span></h1>
-<p>Content scripts allow to modify or retrieve items of the live document loaded into a browser
-    tab. Use the <a href="API.html#execute-script" target="_blank">cmdAPI.executeScript()</a>
+<h1 class="section-heading"><span id="content-scripts">Executing Content Scripts</span></h1>
+<p>Content scripts allow to modify the live document loaded into a browser
+    tab or to retrieve its contents. Use the <a href="API.html#execute-script" target="_blank">cmdAPI.executeScript()</a>
     function to run JavaScript code in the context of the tab document. For
     example, let's create a command that changes the color of the heading tags
     (for example, H1 or H2) and prints the text of each heading in the preview area.</p>
@@ -859,8 +859,8 @@ class ChangeColor {
 
     async preview({OF}, display) {
         // a function with its arguments should be passed to executeScript
-        // this works both in MV2 and MV3, do not pass references to class methods
-        // jQuery option allows the use of jQuery in content scripts
+        // this works both in MV2 and MV3; do not pass references to class methods
+        // the jQuery option allows the use of jQuery in content scripts
         const options = {func: extractHeadings, args: [OF.text], jQuery: true};
         const [{result}] = await cmdAPI.executeScript(options);
         const headingList = `<ul>${

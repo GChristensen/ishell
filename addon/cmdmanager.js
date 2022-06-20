@@ -1,7 +1,6 @@
 import {settings} from "./settings.js";
 import {repository} from "./storage.js";
 import {helperApp} from "./helper_app.js";
-import {CmdUtils} from "./api/legacy/cmdutils.js";
 
 class CommandManager {
     ns = { // command namespaces
@@ -311,5 +310,3 @@ class CommandManager {
 }
 
 export const cmdManager = new CommandManager();
-
-globalThis.CMD_NS = {...cmdManager.ns};

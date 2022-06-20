@@ -1,4 +1,5 @@
 import {injectModules} from "../utils.js";
+import {cmdManager} from "../cmdmanager.js";
 
 await injectModules([
     "../lib/browser-polyfill.js",
@@ -14,3 +15,5 @@ await injectModules([
     "./api/nountypes.js",
     "./api/cmdapi.js"
 ]);
+
+globalThis.CMD_NS = {...cmdManager.ns};

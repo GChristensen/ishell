@@ -63,40 +63,6 @@ class PopupWindow {
             console.error("Preview element has an 'error' property:", this.pblock.error);
     }
 
-    displayHelp() {
-        const html = 
-            `<div class='description'>Type the name of a command and press Enter to execute it.
-                Use the <b>help</b> command for assistance.
-                <p>
-                   <div class='help-heading'>Keyboard Shortcuts</div>
-                   <span class='keys'>Tab</span> - complete the current input<br>
-                   <span class='keys'>Ctrl+C</span> - copy the preview content to clipboard<br>
-                   <span class='keys'>Ctrl+Alt+Enter</span> - add the selected command to context menu<br>
-                   <span class='keys'>Ctrl+Alt+\\</span> - show command history<br>
-                   <span class='keys'>Ctrl+Alt+&ltkey&gt;</span> - select the list item prefixed with the &ltkey&gt;<br>
-                   <span class='keys'>&#8593;/&#8595;</span> - cycle through command suggestions<br>
-                   <span class='keys'>Ctrl+&#8593;/&#8595;</span> - scroll through preview list items<br>
-                   <span class='keys'>F5</span> - reload the extension
-                   ${this._formatAnnouncement()}
-                </p>
-             </div>`;
-
-        this.setPreviewContent(html);
-
-        $(".announcement").on("click", e => settings.pending_announcement(null))
-    }
-
-    _formatAnnouncement() {
-        const ann = settings.pending_announcement();
-        if (ann)
-            return `<div class="announcement">
-                        <span class="announcement-bell">&#x1F514;</span>
-                        <a href="${ann.href}" target="_blank">${ann.text}</a>
-                    </div>`;
-
-        return "";
-    }
-
     loadInput() {
         if (contextMenu.selectedContextMenuCommand) {
             this.setInput(contextMenu.selectedContextMenuCommand);
@@ -253,6 +219,45 @@ class PopupWindow {
 
     async getCommandHistory() {
         return settings.get("command_history");
+    }
+
+    displayHelp() {
+        const html =
+            `<div class='description'>Type the name of a command and press Enter to execute it.
+                Use the <b>help</b> command for assistance.
+                <p>
+                   <div class='help-heading'>Keyboard Shortcuts</div>
+                   <span class='keys'>Tab</span> - complete the current input<br>
+                   <span class='keys'>Ctrl+C</span> - copy the preview content to clipboard<br>
+                   <span class='keys'>Ctrl+Alt+Enter</span> - add the selected command to context menu<br>
+                   <span class='keys'>Ctrl+Alt+\\</span> - show command history<br>
+                   <span class='keys'>Ctrl+Alt+&ltkey&gt;</span> - select the list item prefixed with the &ltkey&gt;<br>
+                   <span class='keys'>&#8593;/&#8595;</span> - cycle through command suggestions<br>
+                   <span class='keys'>Ctrl+&#8593;/&#8595;</span> - scroll through preview list items<br>
+                   <span class='keys'>F5</span> - reload the extension
+                   ${this._formatAnnouncement()}
+                </p>
+             </div>`;
+
+        this.setPreviewContent(html);
+
+        $(".announcement").on("click", PopupWindow._handleAnnouncementClick);
+    }
+
+    _formatAnnouncement() {
+        const ann = settings.pending_announcement();
+        if (ann)
+            return `<div class="announcement">
+                        <span class="announcement-bell">&#x1F514;</span>
+                        <a href="${ann.href}" target="_blank">${ann.text}</a>
+                    </div>`;
+
+        return "";
+    }
+
+    static _handleAnnouncementClick() {
+        settings.pending_announcement(null);
+        setTimeout(() => window.close(), 500);
     }
 
     async onKeyDown(evt) {

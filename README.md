@@ -54,7 +54,7 @@ class ShowText {
 iShell will interpret as a command any class with the `@command` annotation in a JavaDoc-style comment.
 Plain JavaScript comments are ignored.
 
-Most of the arguments to the CmdUtils.CreateCommand are also specified as
+Most of the arguments to the CmdUtils.CreateCommand is also specified as
 annotations. The command help is generated from the rest of the comment text (it
 may contain HTML or markdown if the `@markdown` annotation is used). Thus, the
 body of the class may provide only fields and methods related to the command
@@ -77,7 +77,7 @@ iShell API reference for
 and explore command templates in the editor).
 
 You may also have noticed that the object-oriented preview and execute methods
-have the `args` argument always in the first position, and `pblock` argument is
+have the `args` argument always in the first position, and the `pblock` argument is
 now called `display`. It still contains a reference to the same `div` element of
 iShell preview area (so you can pass it to `CmdUtils.previewAjax`, for example),
 but has a new set of methods: `set`, `text`, and `error` method which modify
@@ -113,7 +113,7 @@ MV3 will be supported in Chrome according to the specification. To run on
 Chrome, rename `manifest.json.mvX.chrome` to `manifest.json`.
 
 NOTE: to use the Ctrl+Space keyboard shortcut it may be necessary to manually 
-reassign it in Chrome add-on management console and *restart* the browser.
+reassign it in the Chrome add-on management console and *restart* the browser.
 
 ### Credits
 
