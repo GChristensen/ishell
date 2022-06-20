@@ -32,7 +32,7 @@ class HelperApp {
         }
         else {
             this.port = new Promise(async (resolve, reject) => {
-                let port = browser.runtime.connectNative("ishell_helper");
+                const port = browser.runtime.connectNative("ishell_helper");
 
                 port.onDisconnect.addListener(error => {
                     resolve(null);
