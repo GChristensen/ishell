@@ -46,6 +46,10 @@ class IShellSettings {
         return this._loadPlatform().then(() => this._loadSettings());
     }
 
+    async _save() {
+        return BROWSER.storage.local.set({[this._key]: this._bin});
+    }
+
     async _get(k) {
         const v = await BROWSER.storage.local.get(k);
         if (v)
@@ -81,16 +85,22 @@ class IShellSettings {
         else if (key === "isAddonUpdated")
             return this._isAddonUpdated;
 
-        return (val) => {
+        return val => {
             let bin = this._bin;
-            if (val === undefined) return bin[key];
+
+            if (val === undefined)
+                return bin[key];
+
+            let deleted;
             if (val === null) {
-                var old = bin[key];
+                deleted = bin[key];
                 delete bin[key]
             }
-            else bin[key] = val;
-            let result = key in bin? bin[key]: old;
-            return new Promise(resolve => BROWSER.storage.local.set({[this._key]: bin}).then(resolve(result)));
+            else
+                bin[key] = val;
+
+            let result = key in bin? bin[key]: deleted;
+            return this._save().then(() => result);
         }
     }
 
