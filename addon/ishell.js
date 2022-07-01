@@ -29,7 +29,7 @@ async function loadIShell() {
 async function loadBackgroundAPI() {
     await import("./api/background.js");
 
-    cmdManager = _BACKGROUND_API.cmdAPI.__cmdManager;
-    contextMenuManager = _BACKGROUND_API.cmdAPI.__contextMenuManager;
-    helperApp = _BACKGROUND_API.cmdAPI.__helperApp;
+    cmdManager = globalThis._BACKGROUND_API.__cmdManager;
+    contextMenuManager = globalThis._BACKGROUND_API.__contextMenuManager;
+    helperApp = globalThis._BACKGROUND_API.__helperApp;
 }

@@ -1,5 +1,7 @@
 import {injectModules} from "../utils.js";
 import {cmdManager} from "../cmdmanager.js";
+import {contextMenuManager} from "../ui/contextmenu.js";
+import {helperApp} from "../helper_app.js";
 
 await injectModules([
     "../lib/browser-polyfill.js",
@@ -17,3 +19,9 @@ await injectModules([
 ]);
 
 globalThis.CMD_NS = {...cmdManager.ns};
+
+globalThis._BACKGROUND_API = {
+    __cmdManager: cmdManager,
+    __contextMenuManager: contextMenuManager,
+    __helperApp: helperApp
+};

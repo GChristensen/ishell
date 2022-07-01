@@ -2,7 +2,7 @@
 await (async function() {
     let backgroundPage = await browser.runtime.getBackgroundPage();
 
-    globalThis._BACKGROUND_API = {};
+    globalThis._BACKGROUND_API = backgroundPage._BACKGROUND_API;
 
     globalThis.Utils = globalThis._BACKGROUND_API.Utils = backgroundPage.Utils;
     globalThis.ContextUtils = globalThis._BACKGROUND_API.ContextUtils = backgroundPage.ContextUtils;

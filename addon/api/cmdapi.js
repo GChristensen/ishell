@@ -1,19 +1,12 @@
 import {settings} from "../settings.js";
 import {helperApp} from "../helper_app.js";
 import {cmdManager} from "../cmdmanager.js";
-import {contextMenuManager} from "../ui/contextmenu.js";
 import {delegate} from "../utils.js";
 import {executeScript, nativeEval} from "../utils_browser.js";
 
 export const cmdAPI = {
     DEBUG: settings.debug_mode(),
     VERSION: chrome.runtime.getManifest().version,
-
-    // these classes are not part of the original Ubiquity API and are not exposed into the global namespace,
-    // although it is nice to get them in the popup through the background page
-    __cmdManager: cmdManager,
-    __contextMenuManager: contextMenuManager,
-    __helperApp: helperApp,
 
     dbglog(...args) {
         if (cmdAPI.DEBUG) console.log(...args);
