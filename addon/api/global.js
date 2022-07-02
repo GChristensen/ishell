@@ -21,7 +21,12 @@ await injectModules([
 globalThis.CMD_NS = {...cmdManager.ns};
 
 globalThis._BACKGROUND_API = {
-    __cmdManager: cmdManager,
-    __contextMenuManager: contextMenuManager,
-    __helperApp: helperApp
+    Utils,
+    ContextUtils,
+    CmdUtils,
+    NounUtils,
+    cmdAPI,
+    cmdManager,
+    contextMenuManager,
+    helperApp
 };

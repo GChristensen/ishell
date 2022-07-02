@@ -27,9 +27,17 @@ async function loadIShell() {
 }
 
 async function loadBackgroundAPI() {
-    await import("./api/background.js");
+    let backgroundPage = await browser.runtime.getBackgroundPage();
 
-    cmdManager = globalThis._BACKGROUND_API.__cmdManager;
-    contextMenuManager = globalThis._BACKGROUND_API.__contextMenuManager;
-    helperApp = globalThis._BACKGROUND_API.__helperApp;
+    globalThis._BACKGROUND_API = backgroundPage._BACKGROUND_API;
+
+    globalThis.Utils = globalThis._BACKGROUND_API.Utils;
+    globalThis.ContextUtils = globalThis._BACKGROUND_API.ContextUtils;
+    globalThis.CmdUtils = globalThis._BACKGROUND_API.CmdUtils;
+    globalThis.NounUtils = globalThis._BACKGROUND_API.NounUtils;
+    globalThis.cmdAPI = globalThis._BACKGROUND_API.cmdAPI;
+
+    cmdManager = globalThis._BACKGROUND_API.cmdManager;
+    contextMenuManager = globalThis._BACKGROUND_API.contextMenuManager;
+    helperApp = globalThis._BACKGROUND_API.helperApp;
 }
