@@ -78,8 +78,8 @@ class HelperApp {
         if (_BACKGROUND_PAGE)
             presents = !!await this.getPort();
         else
-            return false;
-            //presents = !!await this._probeServer();
+            //return false;
+            presents = !!await this._probeServer();
 
         if (!presents && verbose)
             displayMessage("Can not connect to the helper application.")
@@ -89,6 +89,7 @@ class HelperApp {
 
     async _probeServer() {
         try {
+            await this.#portNumber;
             const init = {timeout: 500};
             this.injectAuth(init);
 

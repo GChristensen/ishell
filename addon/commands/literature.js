@@ -4,10 +4,10 @@ const LIBGEN_HOST = "http://libgen.is/";
 
 /**
  # Syntax
-  **libgen** [*filter*] [**of** *order*] [**with** *sort mode*] [**by** *amount*]
+  **libgen** [*query*] [**of** *order*] [**with** *sort mode*] [**by** *amount*]
  
  # Arguments
- - *filter* - arbitrary text, filters books by title or authors.
+ - *query* - arbitrary text, queries books by title or author.
  - *order* - {**title** | **author** | **year** }, specifies the column to order by.
  - *sort mode* - {**asc** | **desc**}, specifies sort mode.
  - *amount* - {**25** | **50** | **100** }, specifies the maximum amount of listed items.
@@ -155,19 +155,159 @@ export class Libgen {
 
             entry.details = "";
 
+            if (entry.authors)
+                entry.details += entry.authors + ", ";
+
             if (entry.year)
                 entry.details += entry.year + ", ";
 
             if (entry.extension)
-                entry.details += entry.extension + ", ";
-
-            if (entry.authors)
-                entry.details += entry.authors;
+                entry.details += entry.extension;
 
             data.push(entry);
         });
 
         return data;
+    }
+}
+
+
+/**
+ # Syntax
+ Same as **libgen**.
+
+ @command
+ @markdown
+ @delay 1000
+ @icon https://zlibrary.org/favicon.ico
+ @description Search books on <a href="https://zlibrary.org">zlibrary.org</a>.
+ @uuid A07F394B-7D54-468E-A264-19581EB28A5C
+ */
+export class Zlibrary {
+    constructor(args) {
+        args[OBJECT] = {nountype: noun_arb_text, label: "query"}; // object
+        //args[FOR]    = {nountype: noun_arb_text, label: "text"}; // subject
+        //args[TO]     = {nountype: noun_arb_text, label: "text"}; // goal
+        //args[FROM]   = {nountype: noun_arb_text, label: "text"}; // source
+        //args[NEAR]   = {nountype: noun_arb_text, label: "text"}; // location
+        //args[AT]     = {nountype: noun_arb_text, label: "text"}; // time
+        args[WITH]   = {nountype: ["asc", "desc"], label: "sort mode"}; // instrument
+        //args[IN]     = {nountype: noun_arb_text, label: "text"}; // format
+        args[OF]     = {nountype: ["year", "title", "author"], label: "order"}; // modifier
+        //args[AS]     = {nountype: noun_arb_text, label: "text"}; // alias
+        //args[BY]     = {nountype: noun_arb_text, label: "text"}; // cause
+        //args[ON]     = {nountype: noun_arb_text, label: "text"}; // dependency
+    }
+
+    #ZLIBRARY_URL = "https://zlibrary.org";
+
+    async preview({OBJECT: {text: query}, OF: {text: sortBy}, WITH: {text: order}}, display, storage) {
+        if (query) {
+            display.text("Querying zlibrary...");
+
+            let results = await this.#fetchBooks(display, query);
+
+            if (results) {
+                results = this.#sortResults(results, sortBy, order);
+                this.#generateList(display, results);
+            }
+            else
+                display.error("HTTP request error.");
+        }
+        else
+            this.previewDefault(display);
+    }
+
+    execute({OBJECT: {text: query}}, storage) {
+        if (query) {
+            const queryURL = encodeURIComponent(query);
+            cmdAPI.addTab(`${this.#ZLIBRARY_URL}/s/${queryURL}`);
+        }
+    }
+
+    async #fetchBooks(display, query) {
+        const queryURL = encodeURIComponent(query);
+        const requestURL = `${this.#ZLIBRARY_URL}/s/${queryURL}`;
+
+        try {
+            const response = await cmdAPI.previewFetch(display, requestURL);
+
+            if (response.ok) {
+                const html = await response.text();
+                return this.#parseResults(html);
+            }
+        } catch (e) {
+            if (!cmdAPI.fetchAborted(e))
+                display.error("Network error.");
+            throw e;
+        }
+    }
+
+    #parseResults(html) {
+        const doc = $($.parseHTML(html));
+        const bookRows = doc.find(".bookRow");
+        const cmd = this;
+        const books = bookRows.map(function() {
+            const bookRow = $(this);
+            return {
+                title: bookRow.find("h3[itemprop='name'] a").text(),
+                author: bookRow.find("a[itemprop='author']").text(),
+                link: cmd.#ZLIBRARY_URL + bookRow.find("h3[itemprop='name'] a").attr("href"),
+                cover: bookRow.find("img.cover").attr("data-src"),
+                year: bookRow.find(".property_year .property_value").text(),
+                file: bookRow.find(".property__file .property_value").text(),
+            };
+        }).get();
+
+        return books;
+    }
+
+    #sortResults(results, sortBy, order) {
+        let sorted = results;
+        let sorter, attr;
+
+        if (sortBy === "title") {
+            sorter = order === "desc"? this.#sortStringsDesc: this.#sortStringsAsc;
+            attr = "title";
+        }
+        else if (sortBy === "author") {
+            sorter = order === "desc"? this.#sortStringsDesc: this.#sortStringsAsc;
+            attr = "author";
+        }
+        else if (sortBy === "year") {
+            sorter = order === "desc"? this.#sortNumDesc: this.#sortNumAsc;
+            attr = "year";
+        }
+
+        if (sorter)
+            sorted = results.sort((a, b) => sorter(a, b, attr));
+
+        return sorted;
+    }
+
+    #sortStringsAsc(a, b, attr) {
+        return a[attr].localeCompare(b[attr], undefined, {sensitivity: 'base'});
+    }
+
+    #sortStringsDesc(a, b, attr) {
+        return b[attr].localeCompare(a[attr], undefined, {sensitivity: 'base'});
+    }
+
+    #sortNumAsc(a, b, attr) {
+        return parseInt(a[attr]) - parseInt(b[attr]);
+    }
+
+    #sortNumDesc(a, b, attr) {
+        return parseInt(b[attr]) - parseInt(a[attr]);
+    }
+
+    #generateList(display, results) {
+        cmdAPI.objectPreviewList(display, results, {
+            text: i => i.title,
+            subtext: i => [i.author, i.year, i.file].join(", "),
+            thumb: i => i.cover,
+            action: i => cmdAPI.addTab(i.link)
+        });
     }
 }
 

@@ -262,9 +262,11 @@ CmdUtils.makeSearchCommand.execute = function searchExecute({object: {text}}) {
             CmdUtils.makeSearchCommand.query(this.url, text, this.charset),
             CmdUtils.makeSearchCommand.query(this.postData, text, this.charset))
 };
-CmdUtils.makeSearchCommand.preview = function searchPreview(pblock, {object: {text}}) {
+CmdUtils.makeSearchCommand.preview = function searchPreview(pblock, args) {
+    if (this._argsHook)
+        args = this._argsHook(args);
+    const text = args.object?.text;
     if (!text) return void this.previewDefault(pblock);
-
     function put() {
         pblock.innerHTML =
             "<div class='search-command'>" + Array.prototype.join.call(arguments, "") + "</div>";
@@ -528,6 +530,8 @@ CmdUtils._previewList2CSS =
  .opl-image {
     width: 32px;
     height: 32px;
+    min-width: 32px;
+    min-height: 32px;
     object-fit: contain;
     align-self: center;
     float: left;

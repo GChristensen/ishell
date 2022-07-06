@@ -11,10 +11,10 @@ CmdUtils.makeSearchCommand({
         + `&cx=${cmdAPI.settings.google_cse_api_id}&q=%s`,
     icon: "/ui/icons/google.png",
     description: "Searches Google for your words.",
-    arguments: [{role: "object", nountype: noun_arb_text, label: "query"}],
+    arguments: [{role: "object", nountype: noun_arb_text, label: "query"},
+                {role: "alias",  nountype: ["quoted", "define", "site"], label: "type"}],
     previewDelay: 1000,
-    help: "You can use the keyboard shortcut ctrl + alt + number to open one " +
-          "of the Google results shown in the preview.",
+    help: `It is possible to use the <b>as</b> argument with the following values: <i>quoted</i>, <i>site</i>, <i>define</i>.`,
     parser: {
         type       : "json",
         container  : "items",
@@ -23,7 +23,21 @@ CmdUtils.makeSearchCommand({
         body       : "htmlSnippet",
         maxResults : maxSearchResults,
     },
-    execute: function({object: {text}}) {
+    _argsHook(args) {
+        const alias = args.alias?.text;
+
+        if (alias === "quoted")
+            args.object.text = `"${args.object.text}"`;
+        else if (alias === "site")
+            args.object.text = `${args.object.text} site:${cmdAPI.getLocation()}`;
+        else if (alias === "define")
+            args.object.text = `define:${args.object.text}`;
+
+        return args;
+    } ,
+    execute(args) {
+        args = this._argsHook(args);
+        const text = args.object?.text;
         if (text)
             CmdUtils.addTab(`http://www.google.com/search?q=${encodeURIComponent(text)}`);
     }

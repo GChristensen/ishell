@@ -15,7 +15,7 @@ def main():
 
 def start_server():
     port = sys.argv[1].split(":")
-    params = dict(port=port[1], auth="default")
+    params = dict(port=int(port[1]), auth="default")
     server.start(params)
 
 

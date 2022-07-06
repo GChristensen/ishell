@@ -29,7 +29,7 @@
        href="#shell-api-reference"></a>iShell API Reference</h2>
 
 <p>iShell supports the modern <code>cmdAPI</code> namespace and the legacy
-    functions from the <code>CmdUtils</code> Ubiquity API. The use of native JavaScript and WebExtension APIs
+    <code>CmdUtils</code> namespace from Ubiquity API. The use of native JavaScript and WebExtensions API
     is suggested whenever appropriate.</p>
 
 <h3><a id="create-command" class="anchor" aria-hidden="true"
@@ -162,8 +162,8 @@
             implemented in iShell).
         </li>
         <li>
-            <strong>parser</strong> - generates keyboard navigatable previews by parsing the search
-            results. It is passed as an object containing the following properties. The ones marked as
+            <strong>parser</strong> - generates keyboard-navigable previews by parsing the search
+            results. It is passed as an object containing the properties listed below. The ones marked as
             <em>path</em> expect either a jQuery selector string, or a JSON path string (like <strong>"object1.object2.property"</strong>).
             Each of them can also be a filter function that receives a parent context and returns a
             result of the same type.

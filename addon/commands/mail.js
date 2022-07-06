@@ -60,7 +60,7 @@ class MailBase {
  - **email** **this** **to** *email address* [**at** *account*]
 
  # Arguments
- - **this** - mandatory keyword used as substitution for the selection, an arbitrary text may be used instead
+ - **this** - the mandatory keyword used as a substitution for the selection, an arbitrary text may be used instead
  - *email address* - recipient's address: a valid email address
  - *account* - gmail account: {**default**, **secondary**}
 

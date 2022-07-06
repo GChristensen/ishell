@@ -77,6 +77,7 @@ class MyCommand {
         } catch (e) {
             if (!cmdAPI.fetchAborted(e))
                 display.error("Network error.");
+            throw e;
         }
     }
 
