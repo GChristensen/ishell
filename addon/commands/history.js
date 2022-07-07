@@ -127,8 +127,8 @@ export class History {
 
         let historyItems = await browser.history.search({
             text: OBJECT.text,
-            startTime: startDate,
-            endTime: endDate,
+            startTime: startDate.getTime(),
+            endTime: endDate.getTime(),
             maxResults: forDomain? undefined: maxResults
         });
 

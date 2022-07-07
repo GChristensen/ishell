@@ -1,7 +1,7 @@
+import {CommandPreprocessor} from "../../api/preprocessor.js";
 import {cmdManager, helperApp} from "../../ishell.js";
 import {settings} from "../../settings.js";
 import {repository} from "../../storage.js";
-import {CommandPreprocessor} from "../../api/preprocessor.js";
 
 const SHELL_SETTINGS = "shell-settings";
 const CHANGE_DELAY = 2000;
@@ -14,7 +14,7 @@ let editor;
 $(initEditor);
 
 async function initEditor() {
-    if (_MANIFEST_V3) {
+    if (_MANIFEST_V3 && _BACKGROUND_PAGE) {
         if (!await helperApp.probe())
             CmdUtils.notify("Please, install the helper applications to execute custom commands");
     }

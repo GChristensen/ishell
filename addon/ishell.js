@@ -22,6 +22,7 @@ async function loadIShell() {
 
     const helperapp = await import("./helper_app.js");
     helperApp = helperapp.helperApp;
+    await helperApp.configure();
 
     await cmdManager.loadCommands();
 }

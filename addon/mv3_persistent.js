@@ -1,6 +1,11 @@
 // permanently keeps the background page in memory
 // adapted from https://stackoverflow.com/questions/66618136/persistent-service-worker-in-chrome-extension
 
+const BACKGROUND_PAGE = !!chrome.runtime.getManifest().background?.page;
+
+if (!BACKGROUND_PAGE)
+    globalThis.browser = chrome;
+
 let lifeline;
 
 keepAlive();

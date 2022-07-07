@@ -105,14 +105,17 @@ export async function loadScript(doc, id, file) {
 }
 
 export async function nativeEval(text, global = false, wnd = window) {
-    const doc = wnd.document;
-    const key = crypto.randomUUID();
-    const pullURL = helperApp.url(`/pull_script/${key}`);
-
     if (!global)
         text = `{\n${text}\n}`;
 
-    await helperApp.post("/push_script", {text, key});
+    const doc = wnd.document;
+    const key = crypto.randomUUID();
+    let pullURL = helperApp.url(`/pull_script/${key}`);
+
+    if (_BACKGROUND_PAGE)
+        await helperApp.post("/push_script", {text, key});
+    else
+        pullURL = `/pull_script/${encodeURIComponent(text)}`;
 
     const scriptElement = doc.createElement("script");
     scriptElement.setAttribute("crossorigin", "anonymous");
@@ -120,7 +123,7 @@ export async function nativeEval(text, global = false, wnd = window) {
 
     let rejectOnError;
     const errorListener = error => {
-        if (error.filename?.startsWith(pullURL)) {
+        if (error.filename?.includes("/pull_script")) {
             wnd.removeEventListener("error", errorListener);
             rejectOnError(error.error)
         }

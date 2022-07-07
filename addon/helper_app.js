@@ -4,13 +4,14 @@ import {fetchJSON, fetchWithTimeout} from "./utils.js";
 class HelperApp {
     #host;
     #hostPort;
+    #serverOnline;
 
     constructor() {
-        this.auth = _BACKGROUND_PAGE? crypto.randomUUID(): "default";
+        this.auth = globalThis._BACKGROUND_PAGE? crypto.randomUUID(): "default";
         this.version = undefined;
     }
 
-    async #configure() {
+    async configure() {
         const config = await fetchJSON("/helper_app.json");
         this.#host = config.host + ":" + config.port;
         this.#hostPort = config.port;
@@ -21,7 +22,7 @@ class HelperApp {
             return this.#hostPort;
 
         return (async () => {
-            await this.#configure();
+            await this.configure();
             return this.#hostPort;
         })();
     }
@@ -75,11 +76,10 @@ class HelperApp {
             return false;
 
         let presents;
-        if (_BACKGROUND_PAGE)
+        if (globalThis._BACKGROUND_PAGE)
             presents = !!await this.getPort();
         else
-            //return false;
-            presents = !!await this._probeServer();
+            presents = this.#serverOnline || !!await this._probeServer();
 
         if (!presents && verbose)
             displayMessage("Can not connect to the helper application.")
@@ -94,7 +94,8 @@ class HelperApp {
             this.injectAuth(init);
 
             const response = await fetchWithTimeout(this.url("/"), init);
-            return response.ok;
+            this.#serverOnline = response.ok;
+            return this.#serverOnline;
         } catch (e) {
             console.error(e);
         }

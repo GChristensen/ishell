@@ -4,7 +4,7 @@
     "short_name": "iShell",
     "homepage_url": "https://gchristensen.github.io/#ishell",
     "author": "gchristnsn",
-    "description": "A natural language interface for browsers",
+    "description": "A linguistic interface for browsers",
     "content_security_policy": "script-src 'self' 'unsafe-eval'; object-src 'self';",
     "manifest_version": 2,
 //    "background": {

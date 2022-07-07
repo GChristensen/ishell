@@ -263,7 +263,8 @@ class CommandManager {
         for (const path of this._builtinModules)
             await this._loadBuiltinCommandModule(path);
 
-        const canLoadUserScripts = !_MANIFEST_V3 || _MANIFEST_V3 && await helperApp.probe();
+        const canLoadUserScripts = !_MANIFEST_V3 || _MANIFEST_V3 && !_BACKGROUND_PAGE
+            || _MANIFEST_V3 && _BACKGROUND_PAGE && await helperApp.probe();
 
         if (canLoadUserScripts)
             await cmdManager.loadUserCommands();

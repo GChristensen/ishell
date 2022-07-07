@@ -5,10 +5,10 @@ test-nightly:
 	cd addon; start web-ext run -p "$(HOME)/../firefox/debug.ishell.nightly" --firefox=nightly --keep-profile-changes
 
 sign:
-	cd addon; web-ext sign -i web-ext-artifacts .web-extension-id *.mv2* *.mv3* `cat $(HOME)/.amo/creds`
+	cd addon; web-ext sign -i web-ext-artifacts .web-extension-id *.mv2* *.mv3* background_worker.js mv3_scripts.js `cat $(HOME)/.amo/creds`
 
 build:
-	cd addon; web-ext build -i web-ext-artifacts .web-extension-id *.mv2* *.mv3*
+	cd addon; web-ext build -i web-ext-artifacts .web-extension-id *.mv2* *.mv3* background_worker.js mv3_scripts.js
 
 .PHONY: helper
 helper:
