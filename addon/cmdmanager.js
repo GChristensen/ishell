@@ -34,6 +34,7 @@ class CommandManager {
         "/commands/mail.js",
         "/commands/resurrect.js",
         "/commands/scrapyard.js",
+        "/commands/unicode.js",
     ];
     
     constructor() {

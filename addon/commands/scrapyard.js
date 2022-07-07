@@ -237,25 +237,25 @@ export class Shelf {
 
 /**
  # Syntax
- **scrapyard** [**filter**] [**at** **path**] [**from** **depth**] [**in** **type**] [**as** **tags**] [**by** **amount**]
+ **scrapyard** [**filter**] [**at** *path*] [**from** *depth*] [**in** *type*] [**as** *tags*] [**by** *amount*]
 
  # Arguments
- - **filter** - arbitrary text, filters bookmarks by title, URL or content, depending on **type** parameter.
- - **path** - limits the scope of search to the specified path. The default shelf is designated by '~' character.
- - **depth**
+ - *filter* - arbitrary text, filters bookmarks by title, URL or content, depending on **type** parameter.
+ - *path* - limits the scope of search to the specified path. The default shelf is designated by '~' character.
+ - *depth*
      - **folder** - return only bookmarks found in the specified path.
      - **subtree** - search in subfolders (default).
- - **type**
-     - **bookmark** - return only bookmarks.
-     - **archive** - return only archives.
-     - **content** - search by content.
-     - **folder** - search for folders.
- - **tags** - filter bookmarks by comma-separated list of tags.
- - **amount** - number, specifies the maximum amount of listed items.
+ - *type*
+     - *bookmark* - return only bookmarks.
+     - *archive* - return only archives.
+     - *content* - search by content.
+     - *folder* - search for folders.
+ - *tags* - filter bookmarks by comma-separated list of tags.
+ - *amount* - number, specifies the maximum amount of listed items.
 
  # Examples
- - **scrapyard** **important** **at** **~/papers** **as** **news**
- - **scrapyard** **notes** **at** **clips/misc** **from** **group** **in** **content**
+ - **scrapyard** *important* **at** *~/papers* **as** *news*
+ - **scrapyard** *notes* **at** *clips/misc* **from** *group* **in** *content*
  
  @command
  @markdown
@@ -348,6 +348,8 @@ export class Scrapyard {
                      .opl-image {
                         width: 16px;
                         height: 16px;
+                        min-width: 16px;
+                        min-height: 16px;
                      }
                      .n-group {
                         color: #FD7221;
@@ -357,7 +359,7 @@ export class Scrapyard {
                         text-overflow: ellipsis;
                         width: 490px;
                         flex: 1 1 auto;
-                     }`
+                     }`;
 
         let list = cmdAPI.previewList(display, items, (i, _) => {
             if (nodes[i].type === NODE_TYPE_GROUP) {
@@ -721,8 +723,3 @@ async function checkForScrapyard(retry = 1) {
             settings.scrapyard_presents(false);
     }
 }
-
-
-
-
-
