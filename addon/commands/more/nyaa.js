@@ -14,10 +14,6 @@ const RESULT_TABLE =
     </table>`;
 
 class NyaaBase {
-    init(doc) {
-        this._popupDoc = doc;
-    }
-
     preview({OBJECT: {text}}, display) {
         this.getReleases(display, text, this.__category, this.__domain);
     }
@@ -32,7 +28,7 @@ class NyaaBase {
 
         if (pblock.id === "shell-command-preview") {
             pblock.innerHTML = RESULT_TABLE;
-            loadCSS(this._popupDoc, "__nyaa__", "/commands/more/nyaa.css");
+            loadCSS(pblock.ownerDocument, "__nyaa__", "/commands/more/nyaa.css");
         }
 
         const fetchNyaaSi = () => this.#fetchReleases(pblock, query, category, domain, "nyaa.si", progress);

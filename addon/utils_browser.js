@@ -77,13 +77,30 @@ export async function hasCSRPermission(verbose = true) {
 
 export function loadCSS(doc, id, file) {
     if (!doc.getElementById(id)) {
-        let link = doc.createElement('link');
+        const link = doc.createElement('link');
         link.id = id;
         link.rel = 'stylesheet';
         link.type = 'text/css';
         link.href = file;
         link.media = 'all';
         doc.head.appendChild(link);
+    }
+}
+
+export async function loadScript(doc, id, file) {
+    if (!doc.getElementById(id)) {
+        let resolver;
+
+        const script = doc.createElement('script');
+        script.id = id;
+        script.type = 'text/javascript';
+        script.src = file;
+        script.onload = () => resolver(true);
+
+        const result = new Promise(resolve => resolver = resolve);
+        doc.head.appendChild(script);
+
+        return result;
     }
 }
 

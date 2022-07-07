@@ -59,13 +59,3 @@ CmdUtils.CreateCommand({
         cmdAPI.executeScript({func: () => window.print()});
     }
 });
-
-CmdUtils.CreateCommand({
-    name: "invert",
-    uuid: "D962E2B8-8ECD-41F9-BC28-ED77594C6A75",
-    description: "Inverts all colors on current page. Based on <a target=_blank href=https://stackoverflow.com/questions/4766201/javascript-invert-color-on-all-elements-of-a-page>this</a>.",
-    icon: "/ui/icons/invert.png",
-    execute: async function execute(){
-        cmdAPI.executeScript({file: "/scripts/content_invert.js", jQuery: true});
-    },
-});

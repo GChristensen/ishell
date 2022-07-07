@@ -28,6 +28,7 @@ class CommandManager {
         "/commands/more/more.js",
         "/commands/feedsub.js",
         "/commands/history.js",
+        "/commands/color-picker.js",
         "/commands/lingvo.js",
         "/commands/literature.js",
         "/commands/mail.js",

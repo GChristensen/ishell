@@ -9,7 +9,7 @@ contextMenuManager.loadMenu();
 $(init);
 
 function init() {
-    showAnnouncementLink();
+    //showAnnouncementLink();
 
     cmdAPI.dbglog("iShell v" + cmdAPI.VERSION + " background script loaded");
 }
