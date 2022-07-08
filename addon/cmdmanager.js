@@ -289,7 +289,7 @@ class CommandManager {
     async _initializeCommands() {
         for (const cmd of this._commands) {
             try {
-                if (cmd.load)
+                if (cmd.load && !cmd.disabled)
                     await this._callCommandHandler(cmd, cmd, cmd.load);
             }
             catch (e) {
@@ -301,7 +301,7 @@ class CommandManager {
     async initializeCommandsOnPopup(doc) {
         for (let cmd of this._commands) {
             try {
-                if (cmd.init) {
+                if (cmd.init && !cmd.disabled) {
                     await this._callCommandHandler(cmd, cmd, cmd.init, doc);
                 }
             }
