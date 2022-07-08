@@ -22,6 +22,9 @@ async function executeScriptMV3(tabId, options) {
     if (options.func)
         scriptingOptions.func = options.func;
 
+    if (options.args)
+        scriptingOptions.args = options.args;
+
     return browser.scripting.executeScript(scriptingOptions);
 }
 
@@ -130,10 +133,7 @@ export async function nativeEval(text, global = false, wnd = window) {
     }
     wnd.addEventListener("error", errorListener);
 
-    doc.head.appendChild(scriptElement);
-    scriptElement.parentElement.removeChild(scriptElement);
-
-    return {
+    const errorContainer = {
         error: new Promise((resolve, reject) => {
             rejectOnError = reject;
 
@@ -143,4 +143,13 @@ export async function nativeEval(text, global = false, wnd = window) {
             }, 1000);
         })
     };
+
+    let resolveOnLoad;
+    const result = new Promise(resolve => resolveOnLoad = resolve);
+    scriptElement.onload = () => resolveOnLoad(errorContainer);
+
+    doc.head.appendChild(scriptElement);
+    scriptElement.parentElement.removeChild(scriptElement);
+
+    return result;
 }

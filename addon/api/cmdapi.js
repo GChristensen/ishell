@@ -147,10 +147,10 @@ cmdAPI.executeScript = async function(tabId, options) {
     if (options.jQuery) {
         delete options.jQuery;
 
-        const hasJQuery = await cmdAPI.executeScript(tabId,{func: () => !!window.$});
+        const hasJQuery = await executeScript(tabId,{func: () => !!window.$});
 
         if (!hasJQuery[0]?.result)
-            await cmdAPI.executeScript(tabId, {file: "/lib/jquery.js"});
+            await executeScript(tabId, {file: "/lib/jquery.js"});
     }
 
     return executeScript(tabId, options);

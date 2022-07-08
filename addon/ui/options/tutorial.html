@@ -872,7 +872,7 @@ class ChangeColor {
     }
 
     async execute({OF, TO}) {
-        const options = {func: extractHeadings, args: [OF.text, TO.text], jQuery: true};
+        const options = {func: colorHeadings, args: [OF.text, TO.text], jQuery: true};
         await cmdAPI.executeScript(options);
     }
 }
