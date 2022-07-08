@@ -36,8 +36,8 @@ message_mutex = threading.Lock()
 
 class Httpd(threading.Thread):
 
-    def __init__(self, app, port):
-        threading.Thread.__init__(self)
+    def __init__(self, app, port, daemon):
+        threading.Thread.__init__(self, daemon=daemon)
         self.srv = make_server(host, port, app, True)
         self.ctx = app.app_context()
         self.ctx.push()
@@ -60,8 +60,8 @@ def start(options):
     except Exception as e:
         logging.debug(e)
 
-    httpd = Httpd(app, port)
-    #httpd.setDaemon(True)
+    daemon = not options.get("server", None)
+    httpd = Httpd(app, port, daemon)
     httpd.start()
 
 

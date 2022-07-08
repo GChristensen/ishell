@@ -8,20 +8,24 @@ VERSION = "0.1"
 
 def main():
     if len(sys.argv) > 1 and sys.argv[1].startswith("--server"):
-        start_server()
+        run_as_server()
     else:
-        init_helper()
+        run_as_cli()
 
 
-def start_server():
+def run_as_server():
     port = sys.argv[1].split(":")
-    params = dict(port=int(port[1]), auth="default")
+    params = dict(port=int(port[1]), auth="default", server=True)
     server.start(params)
 
 
-def init_helper():
-    msg = browser.get_message()
+def run_as_cli():
+    while True:
+        msg = browser.get_message()
+        process_message(msg)
 
+
+def process_message(msg):
     if msg["type"] == "INITIALIZE":
         server.start(msg)
         browser.send_message(json.dumps({"type": "INITIALIZED", "version": VERSION}))
