@@ -129,28 +129,22 @@ export class TabGroup {
     }
 
     async #onTabCreated(tab) {
-        const windowTabGroup = await this.#getTabWindowTabGroup(tab);
-        const tabGroup = this.#tabGroups[windowTabGroup];
-
-        if (windowTabGroup !== DEFAULT_TAB_GROUP && tabGroup.container) {
-            const cookieStoreId = tabGroup.container.cookieStoreId;
-            if (tab.cookieStoreId !== cookieStoreId)
-                browser.tabs.hide(tab);
-        }
-
         return this.#addToActiveTabGroup(tab);
     }
 
     #onTabAttached(tabId, attachInfo) {
-        this.#addToActiveTabGroup({id: tabId});
+        return this.#addToActiveTabGroup({id: tabId});
     }
 
-    async #onBeforeTabCreated({tabId, url, cookieStoreId, originUrl, requestId, frameId}) {
-        if (frameId !== 0 || tabId === -1) {
+    #seenWebRequests = new Set();
+    async #onBeforeTabCreated(request) {
+        if (request.frameId !== 0 || request.tabId === -1 || this.#seenWebRequests.has(request.requestId))
             return {};
-        }
 
-        const tab = await browser.tabs.get(tabId);
+        this.#seenWebRequests.add(request.requestId);
+        setTimeout(() => this.#seenWebRequests.delete(request.requestId), 2000);
+
+        const tab = await browser.tabs.get(request.tabId);
 
         if (tab) {
             const windowTabGroup = await this.#getTabWindowTabGroup(tab);
@@ -158,9 +152,9 @@ export class TabGroup {
 
             if (windowTabGroup !== DEFAULT_TAB_GROUP && tabGroup.container) {
                 const cookieStoreId = tabGroup.container.cookieStoreId;
-                if (tab.cookieStoreId !== cookieStoreId) {
+                if (request.cookieStoreId !== cookieStoreId) {
                     browser.tabs.remove(tab.id);
-                    browser.tabs.create({url, cookieStoreId});
+                    browser.tabs.create({url: request.url, cookieStoreId});
                     return {cancel: true};
                 }
             }
@@ -329,11 +323,12 @@ export class TabGroup {
         const tabs = await this.#getGroupTabs(name);
 
         const cfg = {
-            text: i => i.title,
-            icon: i => i.favIconUrl || "/ui/icons/globe.svg",
+            text: t => t.title,
+            subtext: t => t.url,
+            icon: t => t.favIconUrl || "/ui/icons/globe.svg",
             iconSize: 16,
-            action: i => {
-                this.#switchToTabGroup(name, i);
+            action: t => {
+                this.#switchToTabGroup(name, t);
                 cmdAPI.closeCommandLine();
             }
         };
@@ -352,24 +347,35 @@ export class TabGroup {
         let groups = Object.values(this.#tabGroups);
         groups = this.#sortTabGroups(groups);
 
-        for (const group of groups)
+        let hasContainers = false;
+        for (const group of groups) {
+            if (group.container)
+                hasContainers = true;
+
             groupTabs[group.name] = {
                 windowTabs: await this.#getGroupTabs(group.name),
                 allTabs: await this.#getGroupTabs(group.name, false)
             };
+        }
 
-        const fs = {
-            text: i => this.#formatTabGroup(i.name, groupTabs[i.name], i.name === windowTabGroup),
-            action: i => {
-                this.#switchToTabGroup(i.name);
+        const cfg = {
+            text: tg => this.#formatTabGroup(tg.name, groupTabs[tg.name], tg.name === windowTabGroup),
+            icon: tg => "data:image/gif;base64,R0lGODlhAQABAIAAAP///wAAACH5BAEAAAAALAAAAAABAAEAAAICRAEAOw== ", // transparent 1px gif
+            iconStyle: tg => this.#getTabGroupContainerStyle(tg),
+            iconSize: 16,
+            action: tg => {
+                this.#switchToTabGroup(tg.name);
                 cmdAPI.closeCommandLine();
             }
         };
 
+        if (!hasContainers)
+            delete cfg.icon;
+
         const headingStyle = "width: calc(100% - 5px); border-bottom: 1px solid var(--shell-font-color);";
         const heading = `<div style="${headingStyle}">Tab groups</div>`
 
-        display.objectList(heading, groups, fs);
+        display.objectList(heading, groups, cfg);
     }
 
     #sortTabGroups(groups) {
@@ -379,6 +385,21 @@ export class TabGroup {
         groups.sort((a, b) =>
             a.name.localeCompare(b.name, undefined, {sensitivity: 'base'}))
         return [defaultGroup, ...groups];
+    }
+
+    #getTabGroupContainerStyle(tabGroup) {
+        let container;
+        let iconUrl = "resource://usercontext-content/circle.svg";
+        let iconColor = "gray";
+
+        if (tabGroup.container) {
+            container = CONTAINERS.find(c => c.cookieStoreId === tabGroup.container.cookieStoreId);
+            iconUrl = container.iconUrl;
+            iconColor = container.colorCode;
+        }
+
+        return `mask-image: url('${iconUrl}'); mask-size: 16px 16px; `
+             + `mask-repeat: no-repeat; mask-position: center; background-color: ${iconColor};`
     }
 
     #formatTabGroup(name, tabs, active) {

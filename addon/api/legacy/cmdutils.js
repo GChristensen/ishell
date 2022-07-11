@@ -490,8 +490,10 @@ CmdUtils.previewList2 = function(prefix, block, items, cfg, css) {
                    }`;
         }
 
-        if (icon)
-            html += `<img class='opl-icon' src='${icon}'>`
+        if (icon) {
+            const iconStyle = cfg.iconStyle? cfg.iconStyle(i): "";
+            html += `<img class='opl-icon' style="${iconStyle}" src='${icon}'>`
+        }
         else
             html += "<div></div>";
 
