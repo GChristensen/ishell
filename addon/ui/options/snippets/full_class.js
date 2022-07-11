@@ -14,7 +14,7 @@
     @command
     @markdown
     @license GPL
-    @author Your Name
+    @author Your Name <user@example.com>
     @delay 1000
     @icon http://example.com/favicon.ico
     @homepage http://example.com/my-command

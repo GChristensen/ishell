@@ -177,7 +177,7 @@ export class CommandPreprocessor {
         let delay = comment.match(/@delay (\d+)/i);
         let preview = comment.match(/@preview (.*?)(?:\r?\n|$)/i);
         let license = comment.match(/@license (.*?)(?:\r?\n|$)/i);
-        let author = comment.match(/@author (.*?)(?:\r?\n|$)/i);
+        let author = comment.match(/@author (.*)(?:\r?\n|$)/i);
         let icon = comment.match(/@icon (.*?)(?:\r?\n|$)/i);
         let homepage = comment.match(/@homepage (.*?)(?:\r?\n|$)/i);
         let description = comment.match(/@description (.*?)(?:\r?\n|$)/i);
@@ -197,6 +197,16 @@ export class CommandPreprocessor {
                 commandName = commandName.split(" ");
             }
 
+        if (author) {
+            const email = author[1].match(/<([^>]+)>/);
+            const name = author[1].match(/([^<]+)/)
+
+            if (email)
+                author = {name: name[1].trim(), email: email[1]?.trim()};
+            else
+                author = author[1]?.trim();
+        }
+
         let help_content = comment.replaceAll(/@\w+.*?(?:\r?\n|$)/g, "");
 
         if (markdown)
@@ -209,7 +219,7 @@ export class CommandPreprocessor {
             delay: delay && delay[1] ? parseInt(delay[1]) : undefined,
             preview: preview?.[1]?.trim(),
             license: license?.[1]?.trim(),
-            author: author?.[1]?.trim(),
+            author: author,
             icon: icon?.[1]?.trim(),
             homepage: homepage?.[1]?.trim(),
             description: description?.[1]?.trim(),
@@ -270,7 +280,14 @@ export class CommandPreprocessor {
     }
 
     generateProperty(property) {
-        return property ? ("\`" + property.replaceAll(/`/g, "\\`") + "\`") : "undefined";
+        let result = "undefined";
+
+        if (typeof property === "string")
+            result =  "\`" + property.replaceAll(/`/g, "\\`") + "\`";
+        else if (typeof property === "object")
+            result = JSON.stringify(property);
+
+        return result;
     }
 
     generateCommandPropertyBlock(properties, prefix = "") {
