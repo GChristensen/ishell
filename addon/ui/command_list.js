@@ -7,6 +7,7 @@ export class CommandList {
     #maxSuggestions;
     #previousSelection;
     #selectedSuggestion = 0;
+    #displayProxy;
 
     constructor(popup, maxSuggestions) {
         this.#maxSuggestions = maxSuggestions || 10;

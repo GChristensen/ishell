@@ -55,11 +55,11 @@ function scrapyardSend(message, payload) {
     return browser.runtime.sendMessage(SCRAPYARD_ID, msg);
 }
 
-function openListSuggestion(text, html, cb, selectionIndices) {
+function openListSuggestion(text, html, _, selectionIndices) {
     if (text) {
-        let matcher = new RegExp(text, "i");
+        const matcher = new RegExp(text, "i");
 
-        let suggs = this._items
+        const suggs = this._items
             .filter(i => {
                 i.match = matcher.exec(i.path || i.name);
                 return (i.path || i.name) && i.match;
@@ -74,7 +74,7 @@ function openListSuggestion(text, html, cb, selectionIndices) {
                 selectionIndices
             ));
 
-        let textSugg = cmdAPI.makeSugg(text, html, null, suggs.length ? .001 : 1, selectionIndices);
+        const textSugg = cmdAPI.makeSugg(text, html, null, suggs.length ? .001 : 1, selectionIndices);
         if (textSugg)
             suggs.push(textSugg);
 
@@ -322,16 +322,16 @@ export class Scrapyard {
             let text = "";
 
             if (n.type === NODE_TYPE_GROUP) {
-                text = "<img class='opl-image' src='/ui/icons/folder.svg'>"
+                text = "<img class='opl-icon' src='/ui/icons/folder.svg'>"
                     + "<div class='opl-lines n-group'>" + Utils.escapeHtml(n.path) + "</div>";
             }
             else {
                 if (n.icon) {
                     n.icon = n.icon.replace(/'/g, "\\'");
-                    text = "<img class='opl-image' src='" + n.icon + "'>"
+                    text = "<img class='opl-icon' src='" + n.icon + "'>"
                 }
                 else
-                    text = "<img class='opl-image' src='/ui/icons/globe.svg'>";
+                    text = "<img class='opl-icon' src='/ui/icons/globe.svg'>";
 
 
                 if (n.uri && !n.name)
@@ -345,7 +345,7 @@ export class Scrapyard {
         }
 
         const style = `${CmdUtils._previewList2CSS}
-                     .opl-image {
+                     .opl-icon {
                         width: 16px;
                         height: 16px;
                         min-width: 16px;
@@ -361,14 +361,16 @@ export class Scrapyard {
                         flex: 1 1 auto;
                      }`;
 
-        let list = cmdAPI.previewList(display, items, (i, _) => {
+        const handler = (i, _) => {
             if (nodes[i].type === NODE_TYPE_GROUP) {
                 let itemPath = path? path + "/": "";
                 cmdAPI.setCommandLine("scrapyard from folder at " + itemPath + nodes[i].path);
             }
             else
                 scrapyardSend("SCRAPYARD_BROWSE_NODE_ISHELL", {node: nodes[i]});
-        }, style);
+        };
+
+        const list = display.htmlList(items, handler, style);
 
         $(list).find("img.n-icon").on("error", e => e.target.src = "/ui/icons/globe.svg");
     }

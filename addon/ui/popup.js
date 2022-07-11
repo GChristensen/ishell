@@ -2,6 +2,7 @@ import {settings} from "../settings.js";
 import {CommandList} from "./command_list.js";
 import {PreviewList} from "./preview_list.js";
 import {cmdManager, contextMenuManager as contextMenu} from "../ishell.js";
+import {createDisplayProxy} from "./display.js";
 
 let popup;
 
@@ -28,39 +29,18 @@ class PopupWindow {
     constructor() {
         this._lastInput = "";
         this.cmdline = document.getElementById('shell-input');
-        this.pblock = document.getElementById('shell-command-preview');
         this.sblock = document.getElementById('shell-command-suggestions');
-
-        this._enhancePBlock();
+        this.pblock = document.getElementById('shell-command-preview');
+        this.pblock = createDisplayProxy(this.pblock);
 
         this._commandList = new CommandList(this, settings.max_suggestions());
 
         cmdAPI.getCommandLine = () => this.getInput();
         cmdAPI.setCommandLine = text => this.setCommand(text);
+        cmdAPI.closeCommandLine = () => window.close();
 
         document.addEventListener('keydown', this.onKeyDown.bind(this), false);
         document.addEventListener('keyup', this.onKeyUp.bind(this), false);
-    }
-
-    _enhancePBlock() {
-        // add a handy set method to populate innerHTML of the preview area
-        // TODO: meddle with a proxy
-        if (!this.pblock.set)
-            this.pblock.set = function (html) {this.innerHTML = html};
-        else
-            console.error("Preview element has a 'set' property:", this.pblock.set);
-
-        // wraps html text into a div with some margins
-        if (!this.pblock.text)
-            this.pblock.text = function (html) {this.innerHTML = `<div class="description">${html}</div>`};
-        else
-            console.error("Preview element has a 'text' property:", this.pblock.text);
-
-        // wraps html text into a div with some margins
-        if (!this.pblock.error)
-            this.pblock.error = function (html) {this.innerHTML = `<div class="description error">${html}</div>`};
-        else
-            console.error("Preview element has an 'error' property:", this.pblock.error);
     }
 
     loadInput() {
@@ -233,14 +213,14 @@ class PopupWindow {
                 Use the <b>help</b> command for assistance.
                 <p>
                    <div class='help-heading'>Keyboard Shortcuts</div>
-                   <span class='keys'>Tab</span> - complete the current input<br>
-                   <span class='keys'>Ctrl+C</span> - copy the preview content to the clipboard<br>
-                   <span class='keys'>Ctrl+Alt+Enter</span> - add the selected command to context menu<br>
-                   <span class='keys'>Ctrl+Alt+\\</span> - show command history<br>
-                   <span class='keys'>Ctrl+Alt+&ltkey&gt;</span> - select the list item prefixed with the &ltkey&gt;<br>
-                   <span class='keys'>&#8593;/&#8595;</span> - cycle through command suggestions<br>
-                   <span class='keys'>Ctrl+&#8593;/&#8595;</span> - scroll through preview list items<br>
-                   <span class='keys'>F5</span> - reload the extension
+                   <span class='keys'>Tab</span> - complete the current input.<br>
+                   <span class='keys'>Ctrl+C</span> - copy the preview content to the clipboard.<br>
+                   <span class='keys'>Ctrl+Alt+Enter</span> - add the selected command to context menu.<br>
+                   <span class='keys'>Ctrl+Alt+\\</span> - show command history.<br>
+                   <span class='keys'>Ctrl+Alt+&ltkey&gt;</span> - select the list item prefixed with the &lt;key&gt;.<br>
+                   <span class='keys'>&#8593;/&#8595;</span> - cycle through command suggestions.<br>
+                   <span class='keys'>Ctrl+&#8593;/&#8595;</span> - scroll through preview list items.<br>
+                   <span class='keys'>F5</span> - reload the extension.
                    ${this._formatAnnouncement()}
                 </p>
              </div>`;

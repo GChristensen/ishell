@@ -98,7 +98,7 @@
             setting the value of <strong>pblock.innerHTML</strong>. Use <strong>this.previewDefault(pblock)</strong>
             to set the default preview. If your command takes arguments (see above), your preview
             method will be passed the dictionary as the second argument (as a first in the object-oriented syntax).<br>
-            In iShell <strong>pblock</strong> object has three additional methods:
+            In iShell <strong>pblock</strong> object has the following additional methods:
             <ul>
                 <li><b>set</b> - sets <strong>pblock.innerHTML</strong> verbatim.</li>
                 <li><b>text</b> - sets <strong>pblock.innerHTML</strong> by adding the same margins
@@ -107,6 +107,10 @@
                 <li><b>error</b> - displays an error message in the same way as the <b>text</b> method
                     but in red color.
                 </li>
+                <li><b>htmlList</b><span class="since">since v0.8</span> - a shorthand for <a href="#preview-list">previewList</a>.
+                    Accepts the same arguments except <b>block</b>.</li>
+                <li><b>objectList</b><span class="since">since v0.8</span> - a shorthand for <a href="#object-preview-list">objectPreviewList</a>.
+                    Accepts the same arguments except <b>block</b>.</li>
             </ul>
         </li>
         <li><strong>previewDelay</strong> (<code>@delay</code>) - specifies the amount of time, in
@@ -221,37 +225,38 @@
 </blockquote>
 
 <h3><a id="preview-list" class="anchor"
-       aria-hidden="true"></a>cmdAPI.previewList(block,
-    htmls, [callback], [css])</h3>
+       aria-hidden="true"></a>cmdAPI.previewList([prefix], block, htmls, [callback], [css])</h3>
 <p class="legacy-name">Legacy name: CmdUtils.previewList</p>
 <blockquote>
     <p>Also called <strong>cmdAPI.htmlPreviewList</strong>. Creates a simple clickable list in the
         preview block and returns the list element.</p>
     <ul>
+        <li><strong>prefix</strong><span class="since">since v0.8</span> is an HTML-string to insert before the list. Optional.</li>
         <li><strong>block</strong> is the DOM element the list will be placed into.</li>
         <li><strong>htmls</strong> is the array/dictionary of HTML strings to be listed.</li>
         <li><strong>callback(id, ev)</strong> is the function called when one of the list items
-            clicked or selected.
+            clicked or selected. Optional.
             <ul>
                 <li><strong>id</strong>: one of the keys of <strong>htmls</strong></li>
                 <li><strong>ev</strong>: the event object</li>
             </ul>
         </li>
-        <li><strong>css</strong> is an optional CSS string inserted along with the list.</li>
+        <li><strong>css</strong> is an optional CSS string inserted along with the list. Optional.</li>
     </ul>
 </blockquote>
 
-<h3><a id="user-content-cmdutilspreviewlist2" class="anchor" aria-hidden="true"
-       href="#cmdutilspreviewlist2"></a>cmdAPI.objectPreviewList(block, items, fs, [css])
+<h3><a id="object-preview-list" class="anchor" aria-hidden="true"
+       href="#cmdutilspreviewlist2"></a>cmdAPI.objectPreviewList([prefix], block, items, cfg, [css])
 </h3>
 <blockquote>
-    <p>Creates an advanced clickable list in the preview block from a set of JavaScript objects and
+    <p>Creates a styled clickable list in the preview block from a set of JavaScript objects and
         returns the list element.</p>
     <ul>
+        <li><strong>prefix</strong><span class="since">since v0.8</span> is an HTML-string to insert before the list. Optional.</li>
         <li><strong>block</strong> is the DOM element the list will be placed into.</li>
         <li><strong>items</strong> is the array of objects representing list items.</li>
-        <li><strong>fs</strong> is the dictionary (e.g. {text: (i) => i.textContent, ...}) of the
-            following functions:
+        <li><strong>cfg</strong> is the dictionary (e.g. {text: i => i.textContent, ...}) of the
+            following parameters:
         </li>
         <ul>
             <li><strong>text: function(item)</strong> should return the main list item text.
@@ -265,12 +270,14 @@
                     <li><strong>item</strong>: an object from the items array.</li>
                 </ul>
             </li>
-            <li><strong>thumb: function(item)</strong> should return the url of thumbnail image
+            <li><strong>icon: function(item)</strong> should return the url of the list item icon
                 (optional).
                 <ul>
                     <li><strong>item</strong>: an object from the items array.</li>
                 </ul>
             </li>
+            <li><strong>iconSize: integer</strong><span class="since">since v0.8</span> defines the
+                icon element size in pixels.</li>
             <li><strong>action: function(item, ev)</strong> is the function called when one of the
                 list items is clicked or selected.
                 <ul>
@@ -279,7 +286,7 @@
                 </ul>
             </li>
         </ul>
-        <li><strong>css</strong> is an optional CSS string inserted along with the list.</li>
+        <li><strong>css</strong> is an optional CSS string inserted along with the list. Optional.</li>
     </ul>
 </blockquote>
 
@@ -552,12 +559,12 @@
     </ul>
 </blockquote>
 
-<h3><a id="user-content-getcommandline" class="anchor" aria-hidden="true" href="#getcommandline"></a>cmdAPI.getCommandLine()</h3>
+<h3><a id="user-content-getcommandline" class="anchor"></a>cmdAPI.getCommandLine()</h3>
 <blockquote>
     <p>Returns the current user input.</p>
 </blockquote>
 
-<h3><a id="user-content-setcommandline" class="anchor" aria-hidden="true" href="#setcommandline"></a>cmdAPI.setCommandLine(text)</h3>
+<h3><a id="user-content-setcommandline" class="anchor"></a>cmdAPI.setCommandLine(text)</h3>
 <blockquote>
     <p>Sets the content of the command line.</p>
     <ul>
@@ -565,7 +572,12 @@
     </ul>
 </blockquote>
 
-<!--h3><a id="user-content-eval" class="anchor" aria-hidden="true" href="#eval"></a>cmdAPI.eval(text)</h3>
+<h3><a id="close-window" class="anchor"></a>cmdAPI.closeCommandLine()<span class="since">since v0.8</span></h3>
+<blockquote>
+    <p>Close the iShell popup window.</p>
+</blockquote>
+
+<!--h3><a id="user-content-eval" class="anchor" aria-hidden="true" href="#eval"></a>cmdAPI.evaluate(text)</h3>
 <blockquote>
     <p>Evaluates the given JavaScript code. In the MV3 version of add-on, this function works only if the helper application is installed.</p>
     <ul>

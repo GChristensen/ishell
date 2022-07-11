@@ -3,6 +3,7 @@
     --shell-height: 565px;
     --shell-input-height: 55px;
     --shell-suggestion-width: 260px;
+    --shell-font-color: #ddd;
 }
 
 /** {*/
@@ -159,7 +160,7 @@ div.suggestion-text {
 #shell-command-preview {
     grid-column: 2 / 3;
     grid-row: 2 / 3;
-    color: #ddd;
+    color: var(--shell-font-color);
     position: relative;
     padding-top: 5px;
     overflow-y: auto;

@@ -891,7 +891,7 @@ function colorHeadings(selector, color) {
 <h1 class="section-heading"><span id="Persistent_Storage">Persistent Storage</span></h1>
 <p>Some commands may want to store data that persist even after closing Firefox.
     Meet the <a href="API.html#bin" target="_blank">Bin</a> interface. Note the use of
-    <a href="API.html#preview-list" target="_blank">cmdAPI.previewList()</a> function to create
+    <a href="API.html#preview-list" target="_blank">display.htmlList()</a> function to create
     a list with clickable items.
 </p>
 
@@ -915,7 +915,7 @@ class Memo {
             return;
         }
 
-        let ol = cmdAPI.previewList(display, list, function deleteMemo(i, ev) {
+        let ol = display.htmlList(list, (i, ev) => {
             $(ev.target).closest("li").slideUp();
             list.splice(i, 1);
             Bin[href](list.length ? list : null);
@@ -987,7 +987,9 @@ class Memo {
 <p>The callback argument is for use by nountypes that need to run asynchronously, i.e. because they
     need to do network calls to generate suggestions. The callback is a function; instead of
     returning a list of suggestions right away, an asynchronous noun type can call the callback with
-    each suggestion it generates.
+    each suggestion it generates. Note that when the <code>suggest</code> function is declared as
+    async, it <b>should not</b> use the callback. The <code>callback</code> parameter suits only for
+    old-fashioned callback-based API, such as XMLHttpRequest or jQuery.ajax.
 </p>
 <p>We use the convenience function <code>cmdAPI.makeSugg()</code> to generate an input object of the
     type that the iShell parser expects. The full signature of this function is:

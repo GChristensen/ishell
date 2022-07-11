@@ -396,7 +396,7 @@ CmdUtils.makeSearchCommand.preview = function searchPreview(pblock, args) {
                 CmdUtils.previewList2(pblock, results.slice(0, max), {
                     text: (r) => r.title,
                     subtext: (r) => r.body,
-                    thumb: parser.thumbnail? ((r) => r.thumbnail): undefined,
+                    icon: parser.thumbnail? ((r) => r.thumbnail): undefined,
                     action: (r) => chrome.tabs.create({"url": r.href, active: ContextUtils.activateTab})
                 });
             }
@@ -429,7 +429,11 @@ CmdUtils.makeSearchCommand.preview = function searchPreview(pblock, args) {
 //
 // {{{css}}} is an optional CSS string inserted along with the list.
 
-CmdUtils.previewList = function(block, htmls, callback, css) {
+CmdUtils.previewList = function(prefix, block, htmls, callback, css) {
+    if (typeof prefix !== "string") {
+        [block, htmls, callback, css] = [prefix, block, htmls, callback];
+        prefix = "";
+    }
     var {escapeHtml} = Utils, list = "", num = 0, CU = this;
     for (let key in htmls) {
         let k = ++num < 36 ? num.toString(36) : "-";
@@ -438,9 +442,10 @@ CmdUtils.previewList = function(block, htmls, callback, css) {
              + htmls[key] + '</span></li>');
     }
     block.innerHTML = (
+        prefix +
         '<ol id="preview-list">' +
         '<style>' + CmdUtils.previewList.CSS + (css || "") + '</style>' + list + '</ol>');
-    var ol = block.firstChild, start = 0;
+    var ol = $("#preview-list", block)[0], start = 0;
     function onPreviewListClick(ev) {
         ev.preventDefault();
         var {target} = ev;
@@ -462,20 +467,36 @@ CmdUtils.previewList.CSS = `\
 `;
 
 // a fancy new object-based preview list with two lines of text per entry
-CmdUtils.previewList2 = function(block, items, fs, css) {
+CmdUtils.previewList2 = function(prefix, block, items, cfg, css) {
+    if (typeof prefix !== "string") {
+        [block, items, cfg, css] = [prefix, block, items, cfg];
+        prefix = "";
+    }
+
+    const iconf = cfg.icon || cfg.thumb;
     let lines = [];
 
     for (let i of items) {
         let html = "";
-        let thumb = fs.thumb? fs.thumb(i): undefined;
+        const icon = iconf? iconf(i): undefined;
 
-        if (thumb)
-            html += `<img class='opl-image' src='${thumb}'>`
+        if (cfg.iconSize) {
+            css = css || "";
+            css += `\n.opl-icon {
+                        min-width: ${cfg.iconSize}px; 
+                        min-height: ${cfg.iconSize}px;
+                        max-width: ${cfg.iconSize}px; 
+                        max-height: ${cfg.iconSize}px;
+                   }`;
+        }
+
+        if (icon)
+            html += `<img class='opl-icon' src='${icon}'>`
         else
             html += "<div></div>";
 
-        let text = fs.text(i);
-        let subtext = fs.subtext(i);
+        let text = cfg.text(i);
+        let subtext = cfg.subtext? cfg.subtext(i): null;
 
         html += `<div class='opl-lines'><div class='opl-text'>${text}</div>`;
 
@@ -489,17 +510,21 @@ CmdUtils.previewList2 = function(block, items, fs, css) {
 
     let style = CmdUtils._previewList2CSS;
 
-    if (fs.thumb)
+    if (iconf)
         style += "\n.preview-item-key {width: 18px;}";
 
     if (css)
         style += "\n" + css;
 
-    return CmdUtils.previewList(block, lines, (i, e) => fs.action(items[i], e), style);
+    return CmdUtils.previewList(prefix, block, lines, (i, e) => cfg.action(items[i], e), style);
 };
 
 CmdUtils._previewList2CSS =
- `.preview-list-item {
+ `:root {
+   --opl-text-color: #45BCFF;
+   --opl-subtext-color: #FD7221;
+ }
+ .preview-list-item {
     white-space: nowrap;
     display: flex;
     flex-flow: row nowrap;
@@ -518,7 +543,7 @@ CmdUtils._previewList2CSS =
     flex 0 1 auto;
  }
  .preview-item-text {
-    color: #45BCFF;
+    color: var(--opl-text-color);
     white-space: nowrap;
     overflow: hidden;
     text-overflow: ellipsis;
@@ -527,7 +552,7 @@ CmdUtils._previewList2CSS =
     flex-flow: row nowrap;
     align-content: center;
  }
- .opl-image {
+ .opl-icon {
     width: 32px;
     height: 32px;
     min-width: 32px;
@@ -552,7 +577,7 @@ CmdUtils._previewList2CSS =
     white-space: nowrap;
     overflow: hidden;
     text-overflow: ellipsis;
-    color: #FD7221;
+    color: var(--opl-subtext-color);
  }
  .opl-text {
     overflow: hidden;

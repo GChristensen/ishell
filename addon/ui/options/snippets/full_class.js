@@ -44,9 +44,11 @@ class MyCommand {
         if (query) {
             display.text("Querying Stack Overflow...");
 
+            // Get some JSON from Stack Overflow
             const questions = await this.#fetchQuestions(display, query);
 
             if (questions) {
+                // The use of display.objectList() may be a better solution
                 const html = this.#generateList(questions.items);
                 display.set(html);
             }
@@ -69,7 +71,7 @@ class MyCommand {
         const stackOverflowAPI = "https://api.stackexchange.com/2.3/search";
         const requestURL = `${stackOverflowAPI}?page=10&site=stackoverflow&intitle=${queryURL}`;
 
-        try { // Get some JSON from Stack Overflow
+        try {
             const response = await cmdAPI.previewFetch(display, requestURL);
 
             if (response.ok)
@@ -81,8 +83,6 @@ class MyCommand {
         }
     }
 
-    // Generate and display a list of questions, although the use of cmdAPI.objectPreviewList()
-    // may be a better solution
     #generateList(questions) {
         return `<ul> 
                 ${R(questions, item => // R is a shorthand for cmdAPI.reduceTemplate()

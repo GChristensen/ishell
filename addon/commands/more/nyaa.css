@@ -5,6 +5,11 @@
     font-style: normal
 }
 
+:root {
+    --nyaa-link-color: #80ccff;
+    --nyaa-icon-color: white;
+}
+
 .u-link-magnet:before {
     font-family: FontAwesome;
     content: "\f076";
@@ -17,7 +22,21 @@
     content: "\f0ed"
 }
 
-:root {
-    --nyaa-link-color: #80ccff;
-    --nyaa-icon-color: white;
+.text-center {
+    text-align: center;
+}
+
+.category-image {
+    display: inline-block;
+    width: 20px;
+    background-size: auto 100%;
+    background-repeat: no-repeat;
+}
+
+.success {
+    color: #82e859;
+}
+
+.danger {
+    color: #ec5f5f;
 }

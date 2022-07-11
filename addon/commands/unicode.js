@@ -116,7 +116,7 @@ export class Unicode {
         for (let char of results) {
             let text = "";
 
-            text = `<div class='opl-image'>${char.character}</div>`;
+            text = `<div class='opl-icon'>${char.character}</div>`;
 
             const points = `<span class="codepoint" title="Copy code point">${char.codepoint}</span>`
                          + `&nbsp;<span class="htmlhex" title="Copy hexadecimal entity">${char.htmlcode[0]}</span>`
@@ -129,7 +129,7 @@ export class Unicode {
         }
 
         const style = `${CmdUtils._previewList2CSS}
-                     .opl-image {
+                     .opl-icon {
                         width: 24px;
                         height: 24px;
                         min-width: 24px;
@@ -138,11 +138,13 @@ export class Unicode {
                         text-align: center;
                      }`;
 
-        cmdAPI.previewList(display, items, (i, e) => {
+        const handler = (i, e) => {
             if (["codepoint", "htmlhex", "htmldec"].some(id => id === e.target.className))
                 cmdAPI.copyToClipboard(e.target.textContent);
             else
                 cmdAPI.copyToClipboard(results[i].character);
-        }, style);
+        };
+
+        display.htmlList(items, handler, style);
     }
 }

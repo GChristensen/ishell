@@ -110,6 +110,7 @@ NounType._fromRegExp = regexp => ({
             , "i"[regexp.ignoreCase - 1]
             , "m"[regexp.multiline - 1]
             , "y"[regexp.sticky - 1]
+            , "u"[regexp.unicode - 1]
         ].join('')),
 });
 NounType._fromRegExp.suggest = function NT_RE_suggest(text, html, cb,

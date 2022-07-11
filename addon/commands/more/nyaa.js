@@ -91,9 +91,9 @@ class NyaaBase {
                 clearTimeout(timeout);
 
                 let rows = this.#buildResultTable(doc, domain, origin, ".torrent-list",
-                        "thead, td:nth-child(1), td:nth-child(5), .comments",
-                        "td:nth-child(2) i.fa-download",
-                        "td:nth-child(2) i.fa-magnet");
+                    "thead, td:nth-child(5), .comments",
+                    "td:nth-child(2) i.fa-download",
+                    "td:nth-child(2) i.fa-magnet");
 
                 if (rows) {
                     rows.sort(function (a, b) {
@@ -106,9 +106,10 @@ class NyaaBase {
                     let table = rows.parent();
                     rows.detach().appendTo(table);
 
-                    const resultingHtml = "<br>" + rows.parent().parent().parent().html();
+                    const resultingHtml = /*"<br>" +*/ rows.parent().parent().parent().html();
 
-                    resultCell.html(`${server}: ${resultingHtml}`);
+                    //resultCell.html(`${server}: ${resultingHtml}`);
+                    resultCell.html(`${resultingHtml}`);
 
                     const clickHandler = this.#handleAddTorrentTo(category);
                     resultCell.find("a[data-tlink='true']", ).on("click", clickHandler);
@@ -143,10 +144,9 @@ class NyaaBase {
     #buildResultTable(doc, domain, origin, torrentList, columnsToRemove, dlIcon, magnetIcon) {
         const torrentListTable = $(torrentList, doc);
         torrentListTable.css("width", "100%");
-
         torrentListTable.find(columnsToRemove).remove();
 
-        torrentListTable.find("td:nth-child(4)").each((i, cell) => {
+        torrentListTable.find("td:nth-child(5)").each((i, cell) => {
             if (!/\d+/.test(cell.textContent) || cell.textContent === "0")
                 $(cell).parent().remove();
         });
@@ -158,11 +158,18 @@ class NyaaBase {
         else {
             rows.each((i, row) => {
                 row = $(row);
+                const categoryImg = row.find("td:nth-child(1) img");
+                const categoryImage = origin + "/" + categoryImg.attr("src");
+                const categoryTitle = categoryImg.attr("alt");
+
+                row.find("td:nth-child(1)").remove();
+
                 let title = row.find("td:nth-child(1) a");
-                title.text(title.text().substring(0, domain === "www"? 100: 30));
+                title.text(title.text().substring(0, domain === "www"? 80: 30));
                 title.css("color", "var(--nyaa-link-color");
+                title.css("word-wrap", "anywhere");
                 title.prop("href", `${origin}${title.prop("href")}`);
-                $(title).addClass("nyaa-torrent");
+                title.addClass("nyaa-torrent");
 
                 let downloadLinks = row.find("td:nth-child(2)");
                 if (downloadLinks.length)
@@ -199,11 +206,20 @@ class NyaaBase {
                 if (torrentSize.html() === "Unknown")
                     torrentSize.html("?");
 
+                torrentSize.addClass(row.attr("class"));
+                row.attr("class", "");
+
                 let seeds = row.find("td:nth-child(4)");
                 seeds.css("color", "green");
 
                 let peers = row.find("td:nth-child(5)");
                 peers.css("color", "red");
+
+                if (server === "www") {
+                    const cat = `<td><span class="category-image" style="background-image: url('${categoryImage}')"
+                                       title="${categoryTitle}">&nbsp;</span></td>`;
+                    title.parent().after(cat);
+                }
             });
 
             return rows;

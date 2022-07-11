@@ -34,6 +34,7 @@ class CommandManager {
         "/commands/mail.js",
         "/commands/resurrect.js",
         "/commands/scrapyard.js",
+        "/commands/tab-groups.js",
         "/commands/unicode.js",
     ];
     

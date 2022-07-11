@@ -418,7 +418,7 @@ export class CommandPreprocessor {
 
     static instantiateNounType(fun, funMeta) {
         fun.label = funMeta.label;
-        fun.suggest = (...args) => fun(...args);
+        fun.suggest = function(...args) { return fun.apply(this, args); };
     }
 
     extractFunctions(script) {

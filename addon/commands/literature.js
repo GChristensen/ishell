@@ -54,7 +54,7 @@ export class Libgen {
             if (!books.length)
                 display.text("Not found.");
             else {
-                cmdAPI.objectPreviewList(display, books, {
+                display.objectList(books, {
                     text: (b) => b.title,
                     subtext: (b) => b.details,
                     action: (b) => browser.tabs.create({"url": b.link, active: cmdAPI.activateTab})
@@ -302,10 +302,10 @@ export class Zlibrary {
     }
 
     #generateList(display, results) {
-        cmdAPI.objectPreviewList(display, results, {
+        display.objectList(results, {
             text: i => i.title,
             subtext: i => [i.author, i.year, i.file].join(", "),
-            thumb: i => i.cover,
+            icon: i => i.cover,
             action: i => cmdAPI.addTab(i.link)
         });
     }

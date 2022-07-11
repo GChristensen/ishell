@@ -3,6 +3,7 @@ import {helperApp} from "../helper_app.js";
 import {cmdManager} from "../cmdmanager.js";
 import {delegate} from "../utils.js";
 import {executeScript, nativeEval} from "../utils_browser.js";
+import {CmdUtils} from "./legacy/cmdutils.js";
 
 export const cmdAPI = {
     DEBUG: settings.debug_mode(),
@@ -16,11 +17,15 @@ export const cmdAPI = {
         return cmdManager.createCommand(options);
     },
 
-    objectPreviewList(block, items, fs, css) {
-        return CmdUtils.previewList2(block, items, fs, css);
+    htmlPreviewList(prefix, block, htmls, callback, css) {
+        return CmdUtils.previewList(prefix, block, htmls, callback, css);
     },
 
-    // EXPERIMENTAL: set to true if a user selected an item from the preview list with ctrl+arrows
+    objectPreviewList(prefix, block, items, fs, css) {
+        return CmdUtils.previewList2(prefix, block, items, fs, css);
+    },
+
+    // EXPERIMENTAL: this property is set to true if a user has selected an item from the preview list with ctrl+arrows,
     // useful in previewList/objectPreviewList click handlers
     get activateTab() {
         return ContextUtils.activateTab
