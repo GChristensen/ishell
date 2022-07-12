@@ -154,8 +154,8 @@ export class TabGroup {
             if (windowTabGroup !== DEFAULT_TAB_GROUP && tabGroup.container) {
                 const cookieStoreId = tabGroup.container.cookieStoreId;
                 if (request.cookieStoreId !== cookieStoreId) {
+                    await browser.tabs.create({url: request.url, cookieStoreId});
                     browser.tabs.remove(tab.id);
-                    browser.tabs.create({url: request.url, cookieStoreId});
                     return {cancel: true};
                 }
             }

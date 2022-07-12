@@ -245,7 +245,7 @@ export class Youtube {
                            <a style="font-size: small; font-weight:bold"
                               accessKey="${(entry_index < 35) ? (entry_index + 1).toString(36) : "-"}"
                               href="https://www.youtube.com/watch?v=${entry.id.videoId}">
-                             <img style="float:left; margin: 0 10px 5px 0; border: none"
+                             <img style="float:left; margin: 0 10px 5px 0; border: none" 
                                   src="${entry.snippet.thumbnails.default.url}" />
                              ${entry.snippet.title}
                            </a>

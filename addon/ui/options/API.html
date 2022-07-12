@@ -106,11 +106,14 @@
                 <li><b>error</b> - displays an error message in the same way as the <b>text</b> method
                     but in red color.</li>
                 <li><b>fetch</b><span class="since">since v0.8</span> - a shorthand for <a href="#preview-fetch">previewFetch</a>.
-                    Accepts the same arguments except <b>pblock</b>.</li>
+                    Accepts the same arguments except for <b>pblock</b>. This method returns a
+                    <a href="https://developer.mozilla.org/en-US/docs/Web/API/Response">Response</a> object. There are also
+                    <b>fetchText</b> and <b>fetchJSON</b> variations of it which return a string, or a parsed JSON object respectively, or
+                    <b>undefined</b> in the case of an HTTP protocol error.</li>
                 <li><b>htmlList</b><span class="since">since v0.8</span> - a shorthand for <a href="#preview-list">previewList</a>.
-                    Accepts the same arguments except <b>pblock</b>.</li>
+                    Accepts the same arguments except for <b>pblock</b>.</li>
                 <li><b>objectList</b><span class="since">since v0.8</span> - a shorthand for <a href="#object-preview-list">objectPreviewList</a>.
-                    Accepts the same arguments except <b>pblock</b>.</li>
+                    Accepts the same arguments except for <b>pblock</b>.</li>
             </ul>
         </li>
         <li><strong>previewDelay</strong> (<code>@delay</code>) - specifies the amount of time, in
@@ -295,22 +298,6 @@
         <li><strong>css</strong> is an optional CSS string inserted along with the list. Optional.</li>
     </ul>
 </blockquote>
-
-<!--h3><a id="user-content-cmdutilsrendertemplatetemplate-data" class="anchor" aria-hidden="true"
-       href="#cmdutilsrendertemplatetemplate-data"></a><strike>cmdAPI.renderTemplate(template, data)</strike></h3>
-<p class="legacy-name">Legacy names: CmdUtils.renderTemplate, _()</p>
-<blockquote>
-    <p><b>DEPRECATED: please, use JavaScript <a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Template_literals"
-                                                >template literals</a> instead.</b></p>
-    <p>Renders a <strong>template</strong> by substituting values from a dictionary. The templating
-        language used is trimpath, which is defined at <a
-                href="http://code.google.com/p/trimpath/wiki/JavaScriptTemplates" rel="nofollow">http://code.google.com/p/trimpath/wiki/JavaScriptTemplates</a>.
-    </p>
-    <ul>
-        <li><strong>template</strong> is a template string.</li>
-        <li><strong>data</strong> is a dictionary of values to be substituted.</li>
-    </ul>
-</blockquote-->
 
 <h3><a id="reduce-template" class="anchor" aria-hidden="true"
        href="#reduce-template"></a>cmdAPI.reduceTemplate(array, func)<span class="since">since v0.5</span></h3>

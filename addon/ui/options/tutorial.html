@@ -297,11 +297,23 @@ class SayHello {
     feedback.
 </p>
 
-<pre><code data-language="javascript">preview: function(pblock) {
+<pre><code data-language="javascript">preview(pblock) {
     pblock.innerHTML = "This will show until the AJAX request returns";
     cmdAPI.previewAjax(pblock, {url: "http://example.com", success: function (htm) {
         pblock.innerHTML = htm;
     }});
+},</code></pre>
+
+<p>In the command <code>preview</code> handler, networking calls should be performed with the <b>cmdAPI.preview*</b>
+family of functions to make these calls automatically interruptable by the output of other commands.
+There are also shorthands for the <a href="API.html#preview-fetch">cmdAPI.previewFetch</a>
+in the <code>pblock</code> object. For example, the handler in the previous listing could be equivalently
+written as follows:</p>
+
+<pre><code data-language="javascript">async preview(pblock) {
+    pblock.innerHTML = "This will show until the fetch request completes";
+    const htm = await pblock.fetchText("http://example.com");
+    pblock.innerHTML = htm;
 },</code></pre>
 
 <a id="commands-with-arguments"></a>
@@ -852,20 +864,16 @@ class Memo {
     preview(_, display, Bin) {
         const href = cmdAPI.getLocation();
         const list = Bin[href]();
-
-        if (!list) {
-            display.text(`No memos taken for: <small><code>${href}</code></small>`);
-            return;
-        }
-
-        let ol = display.htmlList(list, (i, ev) => {
-            $(ev.target).closest("li").slideUp();
+        const clickHandler = (i, ev) => {
             list.splice(i, 1);
+            $(ev.target).closest("li").slideUp();
             Bin[href](list.length ? list : null);
-            gId = +new Date;
-        });
+        };
 
-        ol.setAttribute("data-id", gId);
+        if (list)
+            display.htmlList(list, clickHandler);
+        else
+            display.text(`No memos taken for: <small><code>${href}</code></small>`);
     }
 
     execute({object: {html}}, Bin) {
@@ -874,7 +882,6 @@ class Memo {
 
         list.push(html);
         Bin[href](list);
-        this.ID = +new Date;
     }
 }</code></pre>
 
@@ -901,22 +908,25 @@ class Memo {
 <pre><code data-language="javascript">const noun_type_browser_tab = {
     label: "tab title or URL",
 
-    async _searchTabs(text, maxResults) {
+    async _searchTabs(text) {
+        const matches = [];
         const matcher = new RegExp(text, "i");
         const tabs = await browser.tabs.query({});
-        const results = tabs.filter(tab => {
-            tab.__match = matcher.exec(tab.title) || matcher.exec(tab.url);
-            return !!tab.__match;
+        const matchingTabs = tabs.filter(tab => {
+            const match = matcher.exec(tab.title) || matcher.exec(tab.url);
+            if (match)
+                matches[tab.id] = match;
+            return !!match;
         });
 
-        return results.slice(0, maxResults)
+        return [matchingTabs, matches];
     },
 
     // suggestion methods declared as async do not need to use callback
-    async suggest(text, html, callback, selectedIndices) {
-        const tabs = await this._searchTabs(text, 5);
+    async suggest(text, html, _, selectedIndices) {
+        const [tabs, matches] = await this._searchTabs(text);
         const makeSugg = tab => cmdAPI.makeSugg(tab.title || tab.url, null, tab,
-                                                cmdAPI.matchScore(tab.__match),
+                                                cmdAPI.matchScore(matches[tab.id]),
                                                 selectedIndices);
         return tabs.map(makeSugg);
     }
