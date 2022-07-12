@@ -204,7 +204,7 @@ for (let method of ["Get", "Post"]) {
     }
 }
 
-CmdUtils.makeSearchCommand = function(options) {
+CmdUtils.createSearchCommand = CmdUtils.makeSearchCommand = function(options) {
     if (!("url" in options)) options.url = options.parser.url;
     var [baseUrl, domain] = /^\w+:\/\/([^?#/]+)/.exec(options.url) || [""];
     var [name] = [].concat(options.names || options.name);
@@ -263,8 +263,8 @@ CmdUtils.makeSearchCommand.execute = function searchExecute({object: {text}}) {
             CmdUtils.makeSearchCommand.query(this.postData, text, this.charset))
 };
 CmdUtils.makeSearchCommand.preview = function searchPreview(pblock, args) {
-    if (this._argsHook)
-        args = this._argsHook(args);
+    if (this.beforeSearch)
+        args = this.beforeSearch(args);
     const text = args.object?.text;
     if (!text) return void this.previewDefault(pblock);
     function put() {

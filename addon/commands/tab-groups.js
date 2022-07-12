@@ -210,7 +210,7 @@ export class TabGroup {
     }
 
     async #getWindowTabGroup(window) {
-        const windowTabGroup = browser.sessions.getWindowValue(window.id, 'tabGroup');
+        const windowTabGroup = await browser.sessions.getWindowValue(window.id, 'tabGroup');
         return windowTabGroup || DEFAULT_TAB_GROUP;
     }
 

@@ -13,7 +13,7 @@ export const AS = "alias";
 export const BY = "cause";
 export const ON = "dependency"
 
-let PREPROCESSOR_PREPOSITION_MAP = new Map([
+let ROLE_TO_PREPOSITION_ARG_MAP = new Map([
     [OBJECT, "OBJECT"],
     [FOR, "FOR"],
     [TO, "TO"],
@@ -28,6 +28,20 @@ let PREPROCESSOR_PREPOSITION_MAP = new Map([
     [ON, "ON"]
 ]);
 
+let PREPOSITION_TO_ROLE_ARG_MAP = new Map([
+    ["OBJECT", OBJECT],
+    ["FOR", FOR],
+    ["TO", TO],
+    ["FROM", FROM],
+    ["NEAR", NEAR],
+    ["AT", AT],
+    ["WITH", WITH],
+    ["IN", IN],
+    ["OF", OF],
+    ["AS", AS],
+    ["BY", BY],
+    ["ON", ON]
+]);
 
 export class CommandPreprocessor {
     static CONTEXT_BUILTIN = 0;
@@ -182,11 +196,26 @@ export class CommandPreprocessor {
         let homepage = comment.match(/@homepage (.*?)(?:\r?\n|$)/i);
         let description = comment.match(/@description (.*?)(?:\r?\n|$)/i);
         let uuid = comment.match(/@uuid (.*?)(?:\r?\n|$)/i);
-        let namespace = comment.match(/@namespace (.*?)(?:\r?\n|$)/i);
         let hidden = comment.match(/@hidden/i);
         let metaclass = comment.match(/@metaclass/i);
         let markdown = comment.match(/@markdown/i);
         let dbgprint = comment.match(/@dbgprint/i);
+        let search = comment.match(/@search/i);
+        let url = search && comment.match(/@url (.*)(?:\r?\n|$)/i);
+        let post = search && comment.match(/@post (.*)(?:\r?\n|$)/i);
+        let defaultUrl = search && comment.match(/@default (.*)(?:\r?\n|$)/i);
+        let parser = search && comment.match(/@parser (.*)(?:\r?\n|$)/i);
+        let parserUrl = search && comment.match(/@parser.url (.*)(?:\r?\n|$)/i);
+        let parserPost = search && comment.match(/@parser.post (.*)(?:\r?\n|$)/i);
+        let container = search && comment.match(/@container (.*)(?:\r?\n|$)/i);
+        let title = search && comment.match(/@title (.*)(?:\r?\n|$)/i);
+        let href = search && comment.match(/@href (.*)(?:\r?\n|$)/i);
+        let thumbnail = search && comment.match(/@thumbnail (.*)(?:\r?\n|$)/i);
+        let body = search && comment.match(/@body (.*)(?:\r?\n|$)/i);
+        let base = search && comment.match(/@base (.*)(?:\r?\n|$)/i);
+        let results = search && comment.match(/@results (.*)(?:\r?\n|$)/i);
+        let plain = search && comment.match(/@plain (.*)(?:\r?\n|$)/i);
+        let display = search && comment.match(/@display (.*)(?:\r?\n|$)/i);
 
         let commandName = command ? command?.[1]?.trim() || true: false;
 
@@ -197,14 +226,10 @@ export class CommandPreprocessor {
                 commandName = commandName.split(" ");
             }
 
+        let authors;
         if (author) {
-            const email = author[1].match(/<([^>]+)>/);
-            const name = author[1].match(/([^<]+)/)
-
-            if (email)
-                author = {name: name[1].trim(), email: email[1]?.trim()};
-            else
-                author = author[1]?.trim();
+            authors = author[1].split(",");
+            authors = authors.map(a => this.parseAuthorProperty(a));
         }
 
         let help_content = comment.replaceAll(/@\w+.*?(?:\r?\n|$)/g, "");
@@ -214,22 +239,52 @@ export class CommandPreprocessor {
         else
             help_content = help_content.trim();
 
+        if (plain) {
+            plain = plain[1].split(",");
+            plain = plain.map(s => s.trim());
+        }
+
         return {
             command: commandName,
             delay: delay && delay[1] ? parseInt(delay[1]) : undefined,
             preview: preview?.[1]?.trim(),
             license: license?.[1]?.trim(),
-            author: author,
+            authors: authors,
             icon: icon?.[1]?.trim(),
             homepage: homepage?.[1]?.trim(),
             description: description?.[1]?.trim(),
             uuid: uuid?.[1]?.trim(),
-            namespace: this._context === CommandPreprocessor.CONTEXT_BUILTIN? namespace?.[1]?.trim(): undefined,
             hidden: !!hidden,
             metaclass: !!metaclass,
             help: help_content,
-            dbgprint: !!dbgprint
+            dbgprint: !!dbgprint,
+            search: !!search,
+            url: url?.[1]?.trim(),
+            post: post?.[1]?.trim(),
+            defaultUrl: defaultUrl?.[1]?.trim(),
+            parser: parser?.[1]?.trim(),
+            parserUrl: parserUrl?.[1]?.trim(),
+            parserPost: parserPost?.[1]?.trim(),
+            container: container?.[1]?.trim(),
+            title: title?.[1]?.trim(),
+            href: href?.[1]?.trim(),
+            thumbnail: thumbnail?.[1]?.trim(),
+            body: body?.[1]?.trim(),
+            base: base?.[1]?.trim(),
+            results: parseInt(results?.[1]?.trim()),
+            plain: plain,
+            display: display?.[1]?.trim()
         }
+    }
+
+    parseAuthorProperty(author) {
+        const email = author.match(/<([^>]+)>/);
+        const name = author.match(/([^<]+)/)
+
+        if (email)
+            return {name: name[1].trim(), email: email[1]?.trim()};
+        else
+            return author?.trim();
     }
 
     extractNounTypeProperties(comment) {
@@ -253,36 +308,70 @@ export class CommandPreprocessor {
         return _arguments;
     }
 
-    static transformCommandArguments(args) {
-        for (let role of PREPROCESSOR_PREPOSITION_MAP.keys())
+    static injectPrepositionBasedArguments(args) {
+        for (let role of ROLE_TO_PREPOSITION_ARG_MAP.keys())
             if (args[role])
-                args[PREPROCESSOR_PREPOSITION_MAP.get(role)] = args[role];
+                args[ROLE_TO_PREPOSITION_ARG_MAP.get(role)] = args[role];
+    }
+
+    static assignRoleBasedArgumentValues(args) {
+        for (let preposition of PREPOSITION_TO_ROLE_ARG_MAP.keys())
+            if (args[preposition])
+                args[PREPOSITION_TO_ROLE_ARG_MAP.get(preposition)] = args[preposition];
     }
 
     static assignCommandHandlers(command) {
         if (command.preview && typeof command.preview === "function") {
-            command.__oo_preview = command.preview;
+            command.__class_preview = command.preview;
 
             command.preview = function (pblock, args, storage) {
-                CommandPreprocessor.transformCommandArguments(args);
-                this.__oo_preview(args, pblock, storage);
+                CommandPreprocessor.injectPrepositionBasedArguments(args);
+                return this.__class_preview(args, pblock, storage);
             }
         }
 
         if (command.execute) {
-            command.__oo_execute = command.execute;
+            command.__class_execute = command.execute;
 
             command.execute = function (args, storage) {
-                CommandPreprocessor.transformCommandArguments(args);
-                this.__oo_execute(args, storage);
+                CommandPreprocessor.injectPrepositionBasedArguments(args);
+                return this.__class_execute(args, storage);
             }
         }
+
+        if (command.beforeSearch) {
+            command.__class_beforeSearch = command.beforeSearch;
+
+            command.beforeSearch = function (args) {
+                CommandPreprocessor.injectPrepositionBasedArguments(args);
+                const transformedArgs = this.__class_beforeSearch(args);
+                CommandPreprocessor.assignRoleBasedArgumentValues(transformedArgs);
+                return transformedArgs;
+            }
+        }
+
+        if (command.parseContainer && command.parser)
+            command.parser.container = command.parseContainer;
+
+        if (command.parseTitle && command.parser)
+            command.parser.title = command.parseTitle;
+
+        if (command.parseHref && command.parser)
+            command.parser.href = command.parseHref;
+
+        if (command.parseThumbnail && command.parser)
+            command.parser.thumbnail = command.parseThumbnail;
+
+        if (command.parseBody && command.parser)
+            command.parser.body = command.parseBody;
     }
 
     generateProperty(property) {
         let result = "undefined";
 
-        if (typeof property === "string")
+        if (typeof property === "number")
+            result = property + "";
+        else if (typeof property === "string")
             result =  "\`" + property.replaceAll(/`/g, "\\`") + "\`";
         else if (typeof property === "object")
             result = JSON.stringify(property);
@@ -311,8 +400,8 @@ export class CommandPreprocessor {
             block += `    ${prefix}preview = ${this.generateProperty(properties.preview)};\n`;
         if (properties.license)
             block += `    ${prefix}license = ${this.generateProperty(properties.license)};\n`;
-        if (properties.author)
-            block += `    ${prefix}author = ${this.generateProperty(properties.author)};\n`;
+        if (properties.authors)
+            block += `    ${prefix}authors = ${this.generateProperty(properties.authors)};\n`;
         if (properties.icon)
             block += `    ${prefix}icon = ${this.generateProperty(properties.icon)};\n`;
         if (properties.homepage)
@@ -323,14 +412,42 @@ export class CommandPreprocessor {
             block += `    ${prefix}help = ${this.generateProperty(properties.help)};\n`;
         if (properties.uuid)
             block += `    ${prefix}uuid = ${this.generateProperty(properties.uuid)};\n`;
-        if (properties.namespace)
-            block += `    ${prefix}_namespace = ${this.generateProperty(properties.namespace)};\n`;
         if (properties.hidden)
             block += `    ${prefix}_hidden = true;\n`;
-        // if (properties.require)
-        //     block += `    ${prefix}require = ${JSON.stringify(properties.require)};\n`;
-        // if (properties.requirePopup)
-        //     block += `    ${prefix}requirePopup = ${JSON.stringify(properties.requirePopup)};\n`;
+
+        if (properties.url)
+            block += `    ${prefix}url = ${this.generateProperty(properties.url)};\n`;
+        if (properties.post)
+            block += `    ${prefix}postData = ${this.generateProperty(properties.post)};\n`;
+        if (properties.defaultUrl)
+            block += `    ${prefix}defaultUrl = ${this.generateProperty(properties.defaultUrl)};\n`;
+
+        if (properties.container) {
+            block += `    ${prefix}parser = {\n`
+            if (properties.parser)
+                block += `        type: ${this.generateProperty(properties.parser)},\n`;
+            if (properties.parserUrl)
+                block += `        url: ${this.generateProperty(properties.parserUrl)},\n`;
+            if (properties.parserPost)
+                block += `        postData: ${this.generateProperty(properties.parserPost)},\n`;
+            if (properties.container)
+                block += `        container: ${this.generateProperty(properties.container)},\n`;
+            if (properties.title)
+                block += `        title: ${this.generateProperty(properties.title)},\n`;
+            if (properties.href)
+                block += `        href: ${this.generateProperty(properties.href)},\n`;
+            if (properties.thumbnail)
+                block += `        thumbnail: ${this.generateProperty(properties.thumbnail)},\n`;
+            if (properties.body)
+                block += `        body: ${this.generateProperty(properties.body)},\n`;
+            if (properties.base)
+                block += `        baseUrl: ${this.generateProperty(properties.base)},\n`;
+            if (properties.results)
+                block += `        maxResults: ${this.generateProperty(properties.results)},\n`;
+            if (properties.plain)
+                block += `        plain: ${this.generateProperty(properties.plain)},\n`;
+            block += `    };\n`
+        }
         
         return block;
     }
@@ -355,20 +472,65 @@ export class CommandPreprocessor {
                 : properties.name;
 
         delete properties.command;
+        
+        if (properties.search) {
+            delete properties.search;
+            
+            object.postData = properties.post || object.postData;
+            delete properties.post;
+
+            object.parser = {
+                type: properties.parser,
+                url: properties.parserUrl,
+                postData: properties.parserPost,
+                container: properties.container,
+                title: properties.title,
+                href: properties.href,
+                thumbnail: properties.thumbnail,
+                body: properties.body,
+                baseUrl: properties.base,
+                maxResults: properties.result,
+                plain: properties.plain
+            };
+
+            for (const k in object.parser)
+                if (object.parser[k] === null || object.parser[k] === undefined)
+                    delete object.parser[k];
+        }
+
+        delete properties.parser;
+        delete properties.parserUrl;
+        delete properties.parserPost;
+        delete properties.container;
+        delete properties.title;
+        delete properties.href;
+        delete properties.thumbnail;
+        delete properties.body;
+        delete properties.base;
+        delete properties.result;
+        delete properties.plain;
 
         Object.assign(object, properties);
+
+        for (const k in object)
+            if (object[k] === null || object[k] === undefined)
+                delete object[k];
     }
     
     generateCommandSetupBlock(object) {
+        const makerFunc = object.properties.search
+            ? "createSearchCommand"
+            : "createCommand";
+
         let block = `\n{
     const args = {};
     const command = new ${object.name}(args);
-    command.arguments = CommandPreprocessor.assignCommandArguments(args);
-    
-    CommandPreprocessor.assignCommandHandlers(command);\n\n`
+    if (Object.keys(args).length > 0)
+        command.arguments = CommandPreprocessor.assignCommandArguments(args);\n\n`
 
         block += this.generateCommandPropertyBlock(object.properties, "command.");
-        block += `\n    cmdAPI.createCommand(command);\n}\n`;
+        block += `\n    CommandPreprocessor.assignCommandHandlers(command);`
+        block += `\n    cmdAPI.${makerFunc}(command);\n}\n`;
 
         return block;
     }
@@ -380,7 +542,8 @@ export class CommandPreprocessor {
         const args = {};
         const command = new classDef(args);
 
-        command.arguments = CommandPreprocessor.assignCommandArguments(args);
+        if (Object.keys(args).length > 0)
+            command.arguments = CommandPreprocessor.assignCommandArguments(args);
         CommandPreprocessor.assignCommandProperties(command, classMeta.properties);
         CommandPreprocessor.assignCommandHandlers(command);
 
@@ -399,10 +562,12 @@ export class CommandPreprocessor {
     constructor() {
         let args = {};
         super(args);
-        this.arguments = CommandPreprocessor.assignCommandArguments(args);
-        CommandPreprocessor.assignCommandHandlers(this); 
-        
+        if (Object.keys(args).length > 0)
+            this.arguments = CommandPreprocessor.assignCommandArguments(args);
+            
         ${this.generateCommandPropertyBlock(object.properties, "this.")}        
+        
+        CommandPreprocessor.assignCommandHandlers(this); 
         
         if (this.metaconstructor)
             return this.metaconstructor.apply(this, arguments);
@@ -528,7 +693,10 @@ export class CommandPreprocessor {
                 const classDef = Object.entries(module).find(e => e[0] === classMeta.name)?.[1];
                 if (classDef) {
                     const command = CommandPreprocessor.instantiateCommand(classDef, classMeta);
-                    cmdAPI.createCommand(command);
+                    if (classMeta.properties.search)
+                        cmdAPI.createSearchCommand(command);
+                    else
+                        cmdAPI.createCommand(command);
                 }
             }
         }

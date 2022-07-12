@@ -36,7 +36,7 @@
        href="#create-command"></a>cmdAPI.createCommand(options)</h3>
 <p class="legacy-name">Legacy name: CmdUtils.CreateCommand</p>
 <blockquote>
-    <p>Creates and registers an iShell command. Equivalent annotations for the object-oriented
+    <p>Creates and registers an iShell command. Equivalent annotations for the class-based
         syntax are specified in parentheses.</p>
     <p><strong>options</strong> is a dictionary object which <strong>must have the following
         properties:</strong></p>
@@ -97,7 +97,7 @@
             preview display element. Your function can generate and display arbitrary HTML by
             setting the value of <strong>pblock.innerHTML</strong>. Use <strong>this.previewDefault(pblock)</strong>
             to set the default preview. If your command takes arguments (see above), your preview
-            method will be passed the dictionary as the second argument (as a first in the object-oriented syntax).<br>
+            method will be passed the dictionary as the second argument (as a first in the class-based syntax).<br>
             In iShell <strong>pblock</strong> object has the following additional methods:
             <ul>
                 <li><b>set</b> - sets <strong>pblock.innerHTML</strong> verbatim.</li>
@@ -125,8 +125,7 @@
 </blockquote>
 
 
-<h3><a id="make-search-command" class="anchor" aria-hidden="true"
-       href="#cmdutilsmakesearchcommandoptions"></a>cmdAPI.makeSearchCommand(options)</h3>
+<h3><a id="create-search-command" class="anchor" aria-hidden="true"></a>cmdAPI.createSearchCommand(options)</h3>
 <p class="legacy-name">Legacy name: CmdUtils.makeSearchCommand</p>
 <blockquote>
     <p>A specialized version of <strong>cmdAPI.createCommand()</strong>. This lets you make commands
@@ -138,7 +137,7 @@
         except that instead of <strong>options.arguments</strong>, <strong>options.execute</strong>,
         and <strong>options.preview</strong>, you only need a single property:</p>
     <ul>
-        <li><strong>url</strong> The URL of a search results page from the search engine of your
+        <li><strong>url</strong> (<code>@url</code>) The URL of a search results page from the search engine of your
             choice. Must contain the literal string <strong>{QUERY}</strong> or <strong>%s</strong>,
             which will be replaced with the user's search term to generate a URL that should point
             to the correct page of search results. (We're assuming that the user's search term
@@ -151,20 +150,28 @@
     <p>Other optional parameters of <strong>options</strong> are:</p>
     <ul>
         <li>
-            <strong>postData</strong> - makes the command use POST instead of GET, and the data
+            <strong>postData</strong> (<code>@post</code>, for example: <code>@post q=%s&amp;hl=en</code>)
+            - makes the command use POST instead of GET, and the data
             (key:value pairs or string) are all passed to the <strong>options.url</strong>. Instead
             of including the search params in the URL, pass it (along with any other params) like
-            so: {"q": "{QUERY}", "hl": "en"} or "q={QUERY}&amp;hl=en". When this is done, the query
-            will be substituted in as usual.
+            so: {"q": "{QUERY}", "hl": "en"} or "q={QUERY}&amp;hl=en". In the <b>url</b> or <b>postData</b>
+            substrings <i>{QUERY}</i> or <i>%s</i> are replaced for the value of the <i>object</i>
+            argument.
         </li>
         <li>
-            <strong>defaultUrl</strong> - a URL string that will be opened in the case where the
+            <strong>defaultUrl</strong> (<code>@default</code>) - a URL string that will be opened in the case where the
             user has not provided a search string.
         </li>
         <li>
+            <strong>beforeSearch</strong><span class="since">since v0.8</span> - a function that
+            allows to modify the <b>object</b> argument of the command depending on the values of other
+            arguments before the search is performed. Accepts and returns an object with the command
+            arguments.
+        </li>
+        <!--li>
             <strong>charset</strong> - a string specifying the character set of the query (currently not
             implemented in iShell).
-        </li>
+        </li-->
         <li>
             <strong>parser</strong> - generates keyboard-navigable previews by parsing the search
             results. It is passed as an object containing the properties listed below. The ones marked as
@@ -172,46 +179,46 @@
             Each of them can also be a filter function that receives a parent context and returns a
             result of the same type.
             <ul>
-                <li><strong>parser.type</strong> - a string that's passed to
+                <li><strong>parser.type</strong> (<code>@parser</code>) - a string that's passed to
                     <strong>jQuery.ajax()</strong>'s <strong>dataType</strong> parameter when
-                    requesting. If <strong>"json"</strong> is specified, the parser expects a JSON
+                    requesting. If <strong>json</strong> is specified, the parser expects a JSON
                     path in the form: "object1.object2.property". CSS selectors are expected in the
-                    case of <strong>"html"</strong>.
+                    case of <strong>html</strong>.
                 </li>
-                <li><strong>parser.title</strong> - the <em>path</em> to the title of each result.
-                    <em>Required</em>.
-                </li>
-                <li><strong>parser.container</strong> - a <em>path</em> to each container that
+                <li><strong>parser.container</strong> (<code>@container</code>) - a <em>path</em> to each container that
                     groups each of title/body/href/thumbnail result sets. <em>Recommended</em>.
                 </li>
-                <li><strong>parser.body</strong> - a <em>path</em> to the content of each result.
+                <li><strong>parser.title</strong> (<code>@title</code>) - the <em>path</em> to the title of each result.
+                    <em>Required</em>.
                 </li>
-                <li><strong>parser.href</strong> / <strong>parser.thumbnail</strong> - <em>path</em>s
+                <li><strong>parser.body</strong> (<code>@body</code>) - a <em>path</em> to the content of each result.
+                </li>
+                <li><strong>parser.href</strong> / <strong>parser.thumbnail</strong> (<code>@href</code> / <code>@thumbnail</code>) - <em>path</em>s
                     to the link/thumbnail URL of each result. Should point to an
-                    <strong>&lt;a&gt;</strong>/<strong>&lt;img&gt;</strong> in HTML mode.
+                    <strong>&lt;a&gt;</strong> / <strong>&lt;img&gt;</strong> in HTML mode.
                 </li>
-                <li><strong>parser.url</strong> / <strong>parser.postData</strong> - specifies
-                    another version of
-                    <strong>options.url</strong>/<strong>options.postData</strong>, in the case when
-                    a different request set is used for preview.
+                <li><strong>parser.url</strong> / <strong>parser.postData</strong> (<code>@parser.url</code> / <code>@parser.post</code>) - specifies
+                    a version of
+                    <strong>options.url</strong> / <strong>options.postData</strong> to use for preview.
                 </li>
-                <li><strong>parser.baseUrl</strong> - a URL string that will be the base for
+                <li><strong>parser.baseUrl</strong> (<code>@base</code>) - a URL string that will be the base for
                     relative links, such that they will still work out of context. If not passed, it
                     will be auto-generated from <strong>options.url</strong> (and thus <em>may</em>
                     be incorrect).
                 </li>
-                <li><strong>parser.maxResults</strong> - an integer specifying the max number of
+                <li><strong>parser.maxResults</strong> (<code>@results</code>) - an integer specifying the max number of
                     results. Defaults to 10.
                 </li>
-                <li><strong>parser.plain</strong> - an array of strings naming <em>path</em>s that
+                <li><strong>parser.plain</strong> (<code>@plain</code>, for example: <code>@plain title, body</code>)
+                    - an array of strings naming <em>path</em>s that
                     should be treated as plain text (and thus be HTML-escaped).
                 </li>
                 <li><strong>parser.log</strong> - a function to which the response data and parsed
                     results are logged. If non-function, <strong>makeSearchCommand.log()</strong> is
                     used.
                 </li>
-                <li><strong>parser.display</strong> - output display options. Possible values:
-                    "previewList", "objectPreviewList".
+                <li><strong>parser.display</strong> (<code>@display</code>) - output display options. Possible values:
+                    "objectPreviewList".
                 </li>
             </ul>
         </li>

@@ -105,10 +105,10 @@
 <p><img src="images/say-hello.png"></p>
 
 
-<h3><span id="oosyntax">A Glimpse to the Modern Object-Oriented Command Syntax</span></h3>
+<h3><span id="oosyntax">A Glimpse to the Modern Class-Based Command Syntax</span></h3>
 <p>iShell allows to employ the full strength of <a
         href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Classes">JavaScript
-    classes</a> in command creation. Let's rewrite the previous command in an object-oriented way.
+    classes</a> in command creation. Let's rewrite the previous command in a more object-oriented way.
     In this case, you don't need to use <code>cmdAPI.createCommand</code>. Just declare a class with
     the <code>@command</code> annotation:</p>
 
@@ -122,7 +122,7 @@ class SayHello {
 <p>The command name will be generated automatically. Only JavaDoc-style comments may be used to
     annotate classes, the regular JavaScript comments are ignored. A command class can extend any
     other classes.</p>
-<p>Object-oriented syntax also allows to significantly declutter command code, because all the noisy
+<p>Class-based syntax also allows to significantly declutter command code, because all the noisy
     attributes you pass to the <code>cmdAPI.createCommand</code> are moved to the documentation
     comment. The class may contain only fields and functions related to its purpose. Explore
     templates in the command editor for more examples.</p>
@@ -303,50 +303,6 @@ class SayHello {
         pblock.innerHTML = htm;
     }});
 },</code></pre>
-
-
-<!--h2><span id="Documentation_and_Metadata">Documentation and Metadata</span></h2>
-<p>Before you share your command with the world, you should consider adding some attributions to the code:
-</p>
-
-<pre><code data-language="javascript">cmdAPI.createCommand({
-  names: ["insert-date"],
-  homepage: "http://azarask.in/",
-  author: { name: "Aza Raskin", email: "aza@mozilla.com"},
-  contributors: ["Atul Varma"],
-  license: "MPL",
-
-  /* THE REST OF THE CODE HERE */
-})</code></pre>
-
-<p>And you should <em>definitely</em> add some documentation:</p>
-
-<pre><code data-language="javascript">cmdAPI.createCommand({
-  names: ["insert-date"],
-  homepage: "http://azarask.in/",
-  author: { name: "Aza Raskin", email: "aza@mozilla.com"},
-  contributors: ["Atul Varma"],
-  license: "MPL",
-  description: "Inserts today's date.",
-  help: "If you're in an editable text area, inserts today's date, formatted for the current locale.",
-
-  /* THE REST OF THE CODE HERE */
-})</code></pre>
-
-<p>The <code>.description</code> and <code>.help</code> attributes are both automatically displayed
-    alongside your command's name on the command-list page. (The user can get to this page at any
-    time by issuing the "list-shell-commands" command.) HTML tags can be used in both of these
-    strings.
-</p>
-<p>The description is a one-line summary of what the command does, while Help is a longer description
-    that can include examples, caveats, and so on. If your command is simple enough that all you
-    have to say about it fits in one line, it's OK to use a description alone and leave out the
-    help.
-</p>
-
-<p>In the object-oriented syntax, you put these attributes as annotations to the command
-    documentation comment, except the "help" attribute. Command help will be generated from the
-    entire comment text (which may contain HTML), annotations excluded.</p-->
 
 <a id="commands-with-arguments"></a>
 <h1 class="section-heading"><span id="Commands_with_Arguments">Commands with Arguments</span></h1>
@@ -607,21 +563,19 @@ arguments: [{role: "object",
 </p>
 
 <h1 class="section-heading"><span id="Search_Commands">Creating Search Commands</span></h1>
-    <p>Because Web is volatile, iShell provides search commands only for the essential sites and
+    <p>Because the Web is volatile, iShell provides search commands only for the essential sites and
         services. Nevertheless, you can easily make your own search command with the
-        <a href="API.html#make-search-command" target="_blank">cmdAPI.makeSearchCommand()</a>
+        <a href="API.html#create-search-command" target="_blank">cmdAPI.createSearchCommand()</a>
         function. It can automatically parse HTML and JSON content and also accepts custom
         filter functions to process DOM of the requested page with jQuery. Let's make a function that
         performs search a dictionary:</p>
 
-<pre><code data-language="javascript">cmdAPI.makeSearchCommand({
+<pre><code data-language="javascript">cmdAPI.createSearchCommand({
     name: "mydictionary",
-    uuid: "261DF55D-5E22-4E5F-8A81-6ED31B81AE3E",
-    url: "https://mydictionary.com/define.php?term=%s",
-    defaultUrl: "https://mydictionary.com",
-    arguments: [{role: "object", nountype: noun_arb_text, label: "query"}],
-    icon: "https://mydictionary.com/favicon.ico",
     previewDelay: 1000,
+    url: "https://mydictionary.com/define.php?term=%s",
+    description: "Find definitions in mydictionary.com",
+    uuid: "261DF55D-5E22-4E5F-8A81-6ED31B81AE3E",
     parser: {
         type      : "html",
         container : ".definition",
@@ -638,47 +592,36 @@ arguments: [{role: "object",
     }
 });</code></pre>
 
+<p>A class-based equivalent looks like the following:</p>
 
-<!--h3><span id="Shorter_Argument_Declarations">Shorter Argument Declarations</span></h3>
+<pre><code data-language="javascript">/**
+    @search
+    @command
+    @delay 1000
+    @url https://mydictionary.com/define.php?term=%s
+    @container .definition
+    @title h1 a
+    @href h1 a
+    @description Find definitions in mydictionary.com
+    @uuid: 261DF55D-5E22-4E5F-8A81-6ED31B81AE3E,
+*/
+class MyDictionary {
+    // container, title, href, thumbnail, and body properties could be parsed
+    // with the corresponding methods
+    parseBody(container) {
+        const meaning = container.find(".meaning");
+        meaning.css("border-bottom", "1px solid white");
+        meaning.css("margin-bottom", "5px");
+        const example = container.find(".example");
+        example.css("font-style", "italic");
+        return $("&lt;div&gt;").append(meaning).append(example);
+    }
+}</code></pre>
 
-<p>In the code above we used a shortcut for declaring the arguments. In the long-form, we would have had
-    to say:
-</p>
 
-<pre><code data-language="javascript">arguments: [{role: "modifier",
-             nountype: noun_type_contact,
-             label: "contact"}]</code></pre>
+<h1><span id="oosyntax_revisited">Class-Based Syntax Revisited</span></h1>
 
-<p>But if we don't care about specifying extra parameters for the argument, we can get away with
-    using a single object for "arguments", with the roles as the property names, and the nountypes
-    as the property values:
-</p>
-
-<pre><code data-language="javascript">arguments: {modifier: noun_type_contact}</code></pre>
-
-<p>or with label using <code>"_"</code> (or <code>" "</code>) as separator:
-</p>
-
-<pre><code data-language="javascript">arguments: {modifier_contact: noun_type_contact}</code></pre>
-
-<p>Note: in the object-oriented syntax it is not necessary to use argument roles anyway.</p>
-
-<p>If we had several arguments, we could say:</p>
-
-<pre><code data-language="javascript">arguments: {object: noun_arb_text, modifier: noun_type_contact}</code></pre>
-
-<p>Finally, if you only have "object" and don't need to specify a label...:
-</p>
-
-<pre><code data-language="javascript">argument: noun_arb_text</code></pre>
-
-<p>iShell increases the surface area of innovation for the browser many-fold, by making anyone who
-    can write simple Javascript into an agent for bettering the browser and the open Web.
-</p-->
-
-<h1><span id="oosyntax_revisited">Object-oriented Syntax Revisited</span></h1>
-
-<p>Now you know more about commands and arguments, so we can create a more complex object-oriented
+<p>Now you know more about commands and arguments, so we can create a more complex class-based
     command with arguments. Let's call it <code>show-text</code>. It has the following syntax:
     <b>show-text</b> <i>message text</i> <b>in</b> <i>destination</i>.</p>
 
@@ -686,7 +629,7 @@ arguments: [{role: "object",
     Displays a given message at a popup or prints it to the browser log.
 
     @command show-text, display-text
-    @description An object-oriented command with arguments.
+    @description A class-based command with arguments.
 */
 class ShowTextCommandClass {
     constructor(args) {
@@ -726,7 +669,7 @@ class ShowTextCommandClass {
     constructor, along with the argument named <b>in</b> that can take two values:
     <i>popup</i> and <i>log</i>. These values will be available to the autocompletion.</p>
 
-<p>With the object-oriented syntax, you do not need to remember obscure argument roles and just
+<p>With the class-based syntax, you do not need to remember obscure argument roles and just
     directly use the names of arguments when defining them in the constructor or accessing them in
     methods. It is still possible to access arguments in the old way if you prefer. Please do not use the
     command constructor for any purposes other than argument definition and simple field
@@ -735,7 +678,7 @@ class ShowTextCommandClass {
         functions</a> that are used to initialize commands.
 </p>
 
-<p>You may also notice that object-oriented methods have the <code>args</code> argument always in
+<p>You may also notice that class-based methods have the <code>args</code> argument always in
     the first position, and <code>pblock</code> argument is now called <code>display</code>. It
     still contains a reference to the same <code>div</code> element of iShell preview area but has
     a new nice <code>set</code> method that modifies innerHTML property of the element. <code>storage</code>

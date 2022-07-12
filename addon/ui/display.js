@@ -1,18 +1,56 @@
+function setBlock(html) {
+    this.innerHTML = html
+}
+
+function textBlock(block, html) {
+    this.innerHTML = `<div class="description">${html}</div>`
+}
+
+function errorBlock(block, html) {
+    this.innerHTML = `<div class="description error">${html}</div>`
+}
+
+function htmlListBlock(...args) {
+    if (typeof args[0] === "string") {
+        const prefix = args.shift();
+        args = [prefix, this, ...args];
+    }
+    else
+        args = [this, ...args];
+
+    cmdAPI.htmlPreviewList(...args);
+}
+
+function objectListBlock(...args) {
+    if (typeof args[0] === "string") {
+        const prefix = args.shift();
+        args = [prefix, this, ...args];
+    }
+    else
+        args = [this, ...args];
+
+    cmdAPI.objectPreviewList(...args);
+}
+
 class DisplayHandler {
+    getPrototypeOf(target) {
+        return Object.getPrototypeOf(target);
+    }
+
     get(target, property, receiver) {
         switch (property) {
             case "_element":
                 return target;
             case "set":
-                return v => this._set(target, v);
+                return v => setBlock.call(target, v);
             case "text":
-                return v => this._text(target, v);
+                return v => textBlock.call(target, v);
             case "error":
-                return v => this._error(target, v);
+                return v => errorBlock.call(target, v);
             case "htmlList":
-                return (...args) => this._htmlList(target, ...args);
+                return (...args) => htmlListBlock.call(target, ...args);
             case "objectList":
-                return (...args) => this._objectList(target, ...args);
+                return (...args) => objectListBlock.call(target, ...args);
             default:
                 let value = target[property];
                 if (typeof value === "function")
@@ -25,39 +63,20 @@ class DisplayHandler {
         return Reflect.set(target, property, value, target);
     }
 
-    _set(block, html) {
-        block.innerHTML = html
-    }
-
-    _text(block, html) {
-        block.innerHTML = `<div class="description">${html}</div>`
-    }
-
-    _error(block, html) {
-        block.innerHTML = `<div class="description error">${html}</div>`
-    }
-
-    _htmlList(...args) {
-        if (typeof args[1] === "string") {
-            const block = args.shift();
-            const prefix = args.shift();
-            args = [prefix, block, ...args];
-        }
-
-        cmdAPI.htmlPreviewList(...args);
-    }
-
-    _objectList(...args) {
-        if (typeof args[1] === "string") {
-            const block = args.shift();
-            const prefix = args.shift();
-            args = [prefix, block, ...args];
-        }
-
-        cmdAPI.objectPreviewList(...args);
+    has(target, key) {
+        return key in target;
     }
 }
 
 export function createDisplayProxy(block) {
-    return new Proxy(block, new DisplayHandler());
+    // a real proxy does not work nicely with some advanced jQuery features
+    //return new Proxy(block, new DisplayHandler());
+
+    block.set = setBlock;
+    block.text = textBlock;
+    block.error = textBlock;
+    block.htmlList = htmlListBlock;
+    block.objectList = objectListBlock;
+
+    return block;
 }

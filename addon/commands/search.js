@@ -23,7 +23,7 @@ CmdUtils.makeSearchCommand({
         body       : "htmlSnippet",
         maxResults : maxSearchResults,
     },
-    _argsHook(args) {
+    beforeSearch(args) {
         const alias = args.alias?.text;
 
         if (alias === "quoted")

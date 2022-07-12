@@ -118,7 +118,7 @@ function formatMetaData(md) {
     }
 
     var result = ('<div class="meta">'
-        + (authors.length > 0? 'Authors: ': '')
+        + (authors.length > 0? `Author${authors.length > 1? "s": ""}: `: '')
         + span(authors, formatAuthors, "author", "createdby")
         + (homepage? ' <a href="' + homepage + '"><img src="/ui/icons/homepage.png"></a>': '')
         + (license && (authors.length > 0 || homepage)? ' | ': '')
@@ -142,9 +142,10 @@ function formatAuthor(authorData) {
         authorMarkup += escapeHtml(authorData.name) + " ";
     }
     else if ("email" in authorData) {
+        var scheme = authorData.email.includes("@")? "mailto:": "";
         var ee = escapeHtml(authorData.email);
         authorMarkup += (
-            '<a href="mailto:' + ee + '">' +
+            `<a href="${scheme}${ee}">` +
             ("name" in authorData ? escapeHtml(authorData.name) : ee) +
             '</a>');
     }
