@@ -2,6 +2,7 @@ export const _namespace = {name: CMD_NS.BROWSER, annotated: true};
 
 const DEFAULT_TAB_GROUP = "default";
 const ALL_GROUPS_SPECIFIER = "all";
+const THIS_GROUP_SPECIFIER = "this";
 
 let CONTAINERS = [];
 const noun_type_container = {};

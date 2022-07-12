@@ -44,7 +44,7 @@ export class Libgen {
         display.text("Searching...");
         let url = this._makeQueryURL(args);
 
-        const response = await cmdAPI.previewFetch(display, url, {_displayError: true});
+        const response = await display.fetch(url, {_displayError: "Network error."});
 
         if (response.ok) {
             const doc = cmdAPI.parseHtml(await response.text());
@@ -229,18 +229,10 @@ export class Zlibrary {
         const queryURL = encodeURIComponent(query);
         const requestURL = `${this.#ZLIBRARY_URL}/s/${queryURL}`;
 
-        try {
-            const response = await cmdAPI.previewFetch(display, requestURL);
+        const html = await display.fetchText(requestURL, {_displayError: "Network error."});
 
-            if (response.ok) {
-                const html = await response.text();
-                return this.#parseResults(html);
-            }
-        } catch (e) {
-            if (!cmdAPI.fetchAborted(e))
-                display.error("Network error.");
-            throw e;
-        }
+        if (html)
+            return this.#parseResults(html);
     }
 
     #parseResults(html) {
@@ -311,7 +303,6 @@ export class Zlibrary {
     }
 }
 
-
 /**
  @command
  @markdown
@@ -329,10 +320,10 @@ export class Scihub {
         display.text("Searching...");
 
         const params = new URLSearchParams({"sci-hub-plugin-check": "", "request": OBJECT?.text});
-        const response = await cmdAPI.previewFetch(display,"https://sci-hub.se", {
+        const response = await display.fetch("https://sci-hub.se", {
             method: "post",
             body: params,
-            _displayError: true
+            _displayError: "Network error."
         });
 
         if (response.ok) {

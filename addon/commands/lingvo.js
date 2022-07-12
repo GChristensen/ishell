@@ -51,22 +51,16 @@ export class Lingvo {
     }
 
     async #authorize(display) {
-        try {
-            let response = await cmdAPI.previewFetch(display, `${this.#abbyyAPI}/v1.1/authenticate`, {
-                method: "post",
-                headers: {
-                    "Authorization": "Basic " + cmdAPI.settings.lingvo_api_key
-                },
-            });
+        this.#lingvoAPIToken = await display.fetchText(`${this.#abbyyAPI}/v1.1/authenticate`, {
+            method: "post",
+            headers: {
+                "Authorization": "Basic " + cmdAPI.settings.lingvo_api_key
+            },
+            _displayError: "Network error."
+        });
 
-            if (response.ok)
-                this.#lingvoAPIToken = await response.text();
-            else
-                display.error("Can not authorize Lingvo.")
-        } catch (e) {
-            if (!cmdAPI.fetchAborted(e))
-                display.error("Network error.");
-        }
+        if (!this.#lingvoAPIToken)
+            display.error("Can not authorize Lingvo.");
     }
 
     get #authorized() {
@@ -112,7 +106,7 @@ export class Lingvo {
             }
         };
 
-        CmdUtils.previewAjax(display, options);
+        cmdAPI.previewAjax(display, options);
     }
 
     #getLangCode(lang, def) {

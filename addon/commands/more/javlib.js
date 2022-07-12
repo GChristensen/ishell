@@ -34,7 +34,7 @@ export class Javlib {
     }
 
     async #requestPage(display, url) {
-        const response = await cmdAPI.previewFetch(display, url, {_displayError: true})
+        const response = await display.fetch(url, {_displayError: "Network error."})
         if (response.ok) {
             this.#cloudflare = false;
             this.#constructView(display, url, await response.text());

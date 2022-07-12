@@ -42,7 +42,7 @@
         properties:</strong></p>
     <ul>
         <li><strong>name</strong>/<strong>names</strong> (<code>@command</code>) - the string/array
-            of strings which will be the name or names of your command the user will type into the
+            of strings that will be the name or names of your command the user will type into the
             command line, or choose from the context menu, to activate it.
         </li>
         <li><strong>execute</strong> - the function which gets run when the user executes your
@@ -102,15 +102,15 @@
             <ul>
                 <li><b>set</b> - sets <strong>pblock.innerHTML</strong> verbatim.</li>
                 <li><b>text</b> - sets <strong>pblock.innerHTML</strong> by adding the same margins
-                    as the displayed description of the command has.
-                </li>
+                    as the displayed description of the command has.</li>
                 <li><b>error</b> - displays an error message in the same way as the <b>text</b> method
-                    but in red color.
-                </li>
+                    but in red color.</li>
+                <li><b>fetch</b><span class="since">since v0.8</span> - a shorthand for <a href="#preview-fetch">previewFetch</a>.
+                    Accepts the same arguments except <b>pblock</b>.</li>
                 <li><b>htmlList</b><span class="since">since v0.8</span> - a shorthand for <a href="#preview-list">previewList</a>.
-                    Accepts the same arguments except <b>block</b>.</li>
+                    Accepts the same arguments except <b>pblock</b>.</li>
                 <li><b>objectList</b><span class="since">since v0.8</span> - a shorthand for <a href="#object-preview-list">objectPreviewList</a>.
-                    Accepts the same arguments except <b>block</b>.</li>
+                    Accepts the same arguments except <b>pblock</b>.</li>
             </ul>
         </li>
         <li><strong>previewDelay</strong> (<code>@delay</code>) - specifies the amount of time, in
@@ -129,9 +129,8 @@
 <p class="legacy-name">Legacy name: CmdUtils.makeSearchCommand</p>
 <blockquote>
     <p>A specialized version of <strong>cmdAPI.createCommand()</strong>. This lets you make commands
-        that interface with search engines, without having to write so much boilerplate code. See also
-        <a href="https://wiki.mozilla.org/Labs/Ubiquity/Writing_A_Search_Command"
-               rel="nofollow">https://wiki.mozilla.org/Labs/Ubiquity/Writing_A_Search_Command</a>.
+        that interface with search engines, without having to write so much boilerplate code.
+        Use the <code>@search</code> annotation to mark class-based search commands.
     </p>
     <p><strong>options</strong> is same as the argument of <strong>cmdAPI.createCommand()</strong>,
         except that instead of <strong>options.arguments</strong>, <strong>options.execute</strong>,
@@ -232,7 +231,7 @@
 </blockquote>
 
 <h3><a id="preview-list" class="anchor"
-       aria-hidden="true"></a>cmdAPI.previewList([prefix], block, htmls, [callback], [css])</h3>
+       aria-hidden="true"></a>cmdAPI.previewList([prefix], pblock, htmls, [callback], [css])</h3>
 <p class="legacy-name">Legacy name: CmdUtils.previewList</p>
 <blockquote>
     <p>Also called <strong>cmdAPI.htmlPreviewList</strong>. Creates a simple clickable list in the
@@ -253,7 +252,7 @@
 </blockquote>
 
 <h3><a id="object-preview-list" class="anchor" aria-hidden="true"
-       href="#cmdutilspreviewlist2"></a>cmdAPI.objectPreviewList([prefix], block, items, cfg, [css])
+       href="#cmdutilspreviewlist2"></a>cmdAPI.objectPreviewList([prefix], pblock, items, cfg, [css])
 </h3>
 <blockquote>
     <p>Creates a styled clickable list in the preview block from a set of JavaScript objects and
@@ -272,19 +271,19 @@
                 </ul>
             </li>
             <li><strong>subtext: function(item)</strong> should return the secondary list item text
-                displayed in small font.
+                displayed in small font. Optional.
                 <ul>
                     <li><strong>item</strong>: an object from the items array.</li>
                 </ul>
             </li>
-            <li><strong>icon: function(item)</strong> should return the url of the list item icon
-                (optional).
+            <li><strong>icon: function(item)</strong> should return the url of the list item icon.
+                May also return a jQuery object which will be used in place of the icon. Optional.
                 <ul>
                     <li><strong>item</strong>: an object from the items array.</li>
                 </ul>
             </li>
             <li><strong>iconSize: integer</strong><span class="since">since v0.8</span> defines the
-                icon element size in pixels.</li>
+                icon element size in pixels. Optional.</li>
             <li><strong>action: function(item, ev)</strong> is the function called when one of the
                 list items is clicked or selected.
                 <ul>
@@ -420,9 +419,10 @@
     <p>The init argument may contain the following additional properties:</p>
     <ul>
         <li><b>_timeout</b><span class="since">since v0.5</span> - request timeout in milliseconds.</li>
-        <li><b>_displayError</b><span class="since">since v0.5</span> - a boolean indicating that
-            the contents of the <code>message</code> property of exceptions other than "AbortError"
-        thrown by the underlying <code>fetch</code> function should be displayed in the preview area as an error.</li>
+        <li><b>_displayError</b><span class="since">since v0.5</span> - a boolean or string that will be displayed
+            in the case of exceptions other than "AbortError" thrown by the underlying <code>fetch</code> function.
+            Exception message will be displayed in the case of the boolean value.
+        </li>
     </ul>
 </blockquote>
 

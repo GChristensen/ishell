@@ -65,19 +65,12 @@ class MyCommand {
 
     async #fetchQuestions(display, query) {
         const queryURL = encodeURIComponent(query);
-        const stackOverflowAPI = "https://api.stackexchange.com/2.3/search";
-        const requestURL = `${stackOverflowAPI}?page=10&site=stackoverflow&intitle=${queryURL}`;
+        const apiURL = "https://api.stackexchange.com/2.3/search";
+        const requestURL = `${apiURL}?page=10&site=stackoverflow&intitle=${queryURL}`;
+        const response = await display.fetch(requestURL, {_displayError: "Network error."});
 
-        try {
-            const response = await cmdAPI.previewFetch(display, requestURL);
-
-            if (response.ok)
-                return response.json();
-        } catch (e) {
-            if (!cmdAPI.fetchAborted(e))
-                display.error("Network error.");
-            throw e;
-        }
+        if (response.ok)
+            return response.json();
     }
 
     #generateList(display, questions) {

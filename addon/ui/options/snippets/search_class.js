@@ -1,20 +1,20 @@
 /**
- @search
- @command
- @delay 1000
- @url http://www.example.com/find?q=%s
- @container .css > .selector
- @title .css > .selector
- @href .css > .selector
- @thumbnail .css > .selector
- @results 10
- @description A short description of your command.
- @uuid: %%UUID%%
+    @search
+    @command
+    @delay 1000
+    @url http://www.example.com/find?q=%s
+    @container .css > .selector
+    @title .css > .selector
+    @href .css > .selector
+    @thumbnail .css > .selector
+    @results 10
+    @description A short description of your command.
+    @uuid: %%UUID%%
  */
 class MySearchCommand {
     constructor(args) {
         args[OBJECT] = {nountype: noun_arb_text, label: "query"};
-        args[AS] = {nountype: ["quoted"], label: "modifier"};
+        args[AS] = {nountype: ["quoted"], label: "type"};
     }
 
     beforeSearch(args) {

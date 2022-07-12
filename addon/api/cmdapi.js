@@ -60,8 +60,8 @@ cmdAPI.previewFetch = async function(display, resource, init) {
 
     let displayError;
     if (init._displayError) {
+        displayError = init._displayError;
         delete init._displayError;
-        displayError = true;
     }
 
     if (init._timeout) {
@@ -108,8 +108,12 @@ cmdAPI.previewFetch = async function(display, resource, init) {
                 display.error(error.message);
             throw error;
         }
-        else if (!aborted && displayError)
-            display.error(e.message);
+        else if (!aborted && displayError) {
+            if (typeof displayError === "boolean")
+                display.error(e.message);
+            else
+                display.error(displayError);
+        }
 
         throw e;
     }

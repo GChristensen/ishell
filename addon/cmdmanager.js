@@ -27,6 +27,7 @@ class CommandManager {
         "/commands/more/nyaa.js",
         "/commands/more/more.js",
         "/commands/feedsub.js",
+        "/commands/google.js",
         "/commands/history.js",
         "/commands/color-picker.js",
         "/commands/lingvo.js",
@@ -263,6 +264,13 @@ class CommandManager {
     async loadCommands() {
         for (const path of this._builtinModules)
             await this._loadBuiltinCommandModule(path);
+
+        // _tm()
+        // const modules = [];
+        // for (const path of this._builtinModules)
+        //     modules.push(this._loadBuiltinCommandModule(path));
+        // await Promise.all(modules)
+        // _te()
 
         const canLoadUserScripts = !_MANIFEST_V3 || _MANIFEST_V3 && !_BACKGROUND_PAGE
             || _MANIFEST_V3 && _BACKGROUND_PAGE && await helperApp.probe();

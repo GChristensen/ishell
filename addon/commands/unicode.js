@@ -48,20 +48,11 @@ export class Unicode {
     }
 
     async #fetchUnicode(display, query, partial) {
-       const requestURL = this.#makeURL(query, partial);
+        const requestURL = this.#makeURL(query, partial);
+        const html = await display.fetchText(requestURL, {_displayError: "Network error."});
 
-        try {
-            const response = await cmdAPI.previewFetch(display, requestURL);
-
-            if (response.ok) {
-                const html = await response.text();
-                return this.#parseResults(html);
-            }
-        } catch (e) {
-            if (!cmdAPI.fetchAborted(e))
-                display.error("Network error.");
-            throw e;
-        }
+        if (html)
+            return this.#parseResults(html);
     }
 
     #makeURL(query, partial) {

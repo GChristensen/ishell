@@ -1,9 +1,9 @@
 /**
- Command help text
+    Command help text
 
- @command
- @description A short description of your command.
- @uuid %%UUID%%
+    @command
+    @description A short description of your command.
+    @uuid %%UUID%%
  */
 class MySimpleCommand {
     constructor(args) {

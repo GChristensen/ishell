@@ -271,7 +271,7 @@ export class CommandPreprocessor {
             thumbnail: thumbnail?.[1]?.trim(),
             body: body?.[1]?.trim(),
             base: base?.[1]?.trim(),
-            results: parseInt(results?.[1]?.trim()),
+            results: results?.[1]? parseInt(results?.[1]?.trim()): null,
             plain: plain,
             display: display?.[1]?.trim()
         }
@@ -493,9 +493,7 @@ export class CommandPreprocessor {
                 plain: properties.plain
             };
 
-            for (const k in object.parser)
-                if (object.parser[k] === null || object.parser[k] === undefined)
-                    delete object.parser[k];
+            this.removeEmptyProperties(object.parser);
         }
 
         delete properties.parser;
@@ -510,8 +508,14 @@ export class CommandPreprocessor {
         delete properties.result;
         delete properties.plain;
 
+        this.removeEmptyProperties(properties);
+
         Object.assign(object, properties);
 
+        this.removeEmptyProperties(object);
+    }
+
+    static removeEmptyProperties(object) {
         for (const k in object)
             if (object[k] === null || object[k] === undefined)
                 delete object[k];

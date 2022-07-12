@@ -1,4 +1,19 @@
-import {cmdAPI} from "../api/cmdapi.js";
+export function createDisplayProxy(block) {
+    // a real proxy does not work nicely with some advanced jQuery features
+    // probably because jQuery expects a reference to a node that presents in the document
+    //return new Proxy(block, new DisplayHandler());
+
+    block.set = setBlock;
+    block.text = textBlock;
+    block.error = errorBlock;
+    block.fetch = fetchBlock;
+    block.fetchText = fetchTextBlock;
+    block.fetchJSON = fetchJSONBlock;
+    block.htmlList = htmlListBlock;
+    block.objectList = objectListBlock;
+
+    return block;
+}
 
 function setBlock(html) {
     this.innerHTML = html
@@ -10,6 +25,30 @@ function textBlock(html) {
 
 function errorBlock(html) {
     this.innerHTML = `<div class="description error">${html}</div>`
+}
+
+function fetchBlock(...args) {
+    args = [this, ...args];
+
+    return cmdAPI.previewFetch(...args);
+}
+
+async function fetchTextBlock(...args) {
+    args = [this, ...args];
+
+    const response = await cmdAPI.previewFetch(...args);
+
+    if (response.ok)
+        return response.text();
+}
+
+async function fetchJSONBlock(...args) {
+    args = [this, ...args];
+
+    const response = await cmdAPI.previewFetch(...args);
+
+    if (response.ok)
+        return response.json();
 }
 
 function htmlListBlock(...args) {
@@ -49,6 +88,12 @@ class DisplayHandler {
                 return v => textBlock.call(target, v);
             case "error":
                 return v => errorBlock.call(target, v);
+            case "fetch":
+                return (...args) => fetchBlock.call(target, ...args);
+            case "fetchText":
+                return (...args) => fetchTextBlock.call(target, ...args);
+            case "fetchJSON":
+                return (...args) => fetchJSONBlock.call(target, ...args);
             case "htmlList":
                 return (...args) => htmlListBlock.call(target, ...args);
             case "objectList":
@@ -68,18 +113,4 @@ class DisplayHandler {
     has(target, key) {
         return key in target;
     }
-}
-
-export function createDisplayProxy(block) {
-    // a real proxy does not work nicely with some advanced jQuery features
-    // probably because jQuery expects a reference to a node that presents in the document
-    //return new Proxy(block, new DisplayHandler());
-
-    block.set = setBlock;
-    block.text = textBlock;
-    block.error = textBlock;
-    block.htmlList = htmlListBlock;
-    block.objectList = objectListBlock;
-
-    return block;
 }
