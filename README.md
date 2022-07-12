@@ -8,7 +8,7 @@ iShell is a WebExtensions revival of [Mozilla Ubiquity](https://wiki.mozilla.org
 It aims to bring back the full functionality of Ubiquity to Firefox Quantum and provide a clean, 
 unified modern object-oriented command authoring API.
 
-### Modern object-oriented command syntax
+### Modern class-based command syntax
 
 Although iShell supports a portion of the command authoring API of the original Ubiquity, 
 it offers a new modern object-oriented way to create commands. Let's create a command
@@ -16,7 +16,7 @@ named `show-text` with the following syntax:
 
 **show-text** *message text* **in** *destination*
 
-The snippet below shows the object-oriented command implementation in iShell: 
+The snippet below shows the class-based command implementation in iShell: 
 
 ```js
 /**
@@ -63,7 +63,7 @@ purpose.
 In its constructor, the command above defines a nameless `object` argument
 containing arbitrary text, along with an argument named `in` which can
 take two values: *popup* and *log*. These values will be available for
-autocompletion. With the object-oriented syntax, you do not need to remember
+autocompletion. With the class-based syntax, you do not need to remember
 obscure argument roles and just directly use the names of arguments when
 defining them or accessing them in methods (although you may access arguments in
 the old way if you prefer). 
@@ -76,7 +76,7 @@ iShell API reference for
 [cmdAPI.createCommand](https://gchristensen.github.io/ishell/addon/ui/options/API.html#create-command)
 and explore command templates in the editor).
 
-You may also have noticed that the object-oriented preview and execute methods
+You may also have noticed that the class preview and execute methods
 have the `args` argument always in the first position, and the `pblock` argument is
 now called `display`. It still contains a reference to the same `div` element of
 iShell preview area (so you can pass it to `CmdUtils.previewAjax`, for example),

@@ -111,40 +111,23 @@ export class Unicode {
     }
 
     #generateList(display, results) {
-        let items = [];
-
-        for (let char of results) {
-            let text = "";
-
-            text = `<div class='opl-icon'>${char.character}</div>`;
-
-            const points = `<span class="codepoint" title="Copy code point">${char.codepoint}</span>`
-                         + `&nbsp;<span class="htmlhex" title="Copy hexadecimal entity">${char.htmlcode[0]}</span>`
-                         + `&nbsp;<span class="htmldec" title="Copy decimal entity">${char.htmlcode[1]}</span>`
-
-            text += `<div class='opl-lines'><div class='opl-text'>${points}</div>`
-                  + `<div class='opl-subtext'>${char.name}</div></div>`;
-
-            items.push(text);
-        }
-
-        const style = `${CmdUtils._previewList2CSS}
-                     .opl-icon {
-                        width: 24px;
-                        height: 24px;
-                        min-width: 24px;
-                        min-height: 24px;
-                        color: #ddd;
-                        text-align: center;
-                     }`;
-
-        const handler = (i, e) => {
-            if (["codepoint", "htmlhex", "htmldec"].some(id => id === e.target.className))
-                cmdAPI.copyToClipboard(e.target.textContent);
-            else
-                cmdAPI.copyToClipboard(results[i].character);
+        const cfg = {
+            text: c => {
+                return `<span class="codepoint" title="Copy code point">${c.codepoint}</span>`
+                     + `&nbsp;<span class="htmlhex" title="Copy hexadecimal entity">${c.htmlcode[0]}</span>`
+                     + `&nbsp;<span class="htmldec" title="Copy decimal entity">${c.htmlcode[1]}</span>`
+            },
+            subtext: c => c.name,
+            icon: c => $(`<div style="color: var(--shell-font-color); text-align: center;">${c.character}</div>`),
+            iconSize: 24,
+            action: (c, e) => {
+                if (["codepoint", "htmlhex", "htmldec"].some(id => id === e.target.className))
+                    cmdAPI.copyToClipboard(e.target.textContent);
+                else
+                    cmdAPI.copyToClipboard(c.character);
+            }
         };
 
-        display.htmlList(items, handler, style);
+        display.objectList(results, cfg);
     }
 }

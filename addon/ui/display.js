@@ -1,3 +1,5 @@
+import {cmdAPI} from "../api/cmdapi.js";
+
 function setBlock(html) {
     this.innerHTML = html
 }
@@ -18,7 +20,7 @@ function htmlListBlock(...args) {
     else
         args = [this, ...args];
 
-    cmdAPI.htmlPreviewList(...args);
+    return cmdAPI.htmlPreviewList(...args);
 }
 
 function objectListBlock(...args) {
@@ -29,7 +31,7 @@ function objectListBlock(...args) {
     else
         args = [this, ...args];
 
-    cmdAPI.objectPreviewList(...args);
+    return cmdAPI.objectPreviewList(...args);
 }
 
 class DisplayHandler {

@@ -360,8 +360,7 @@ export class TabGroup {
 
         const cfg = {
             text: tg => this.#formatTabGroup(tg.name, groupTabs[tg.name], tg.name === windowTabGroup),
-            icon: tg => "data:image/gif;base64,R0lGODlhAQABAIAAAP///wAAACH5BAEAAAAALAAAAAABAAEAAAICRAEAOw== ", // transparent 1px gif
-            iconStyle: tg => this.#getTabGroupContainerStyle(tg),
+            icon: tg => this.#getTabGroupContainerIcon(tg),
             iconSize: 16,
             action: tg => {
                 this.#switchToTabGroup(tg.name);
@@ -387,19 +386,21 @@ export class TabGroup {
         return [defaultGroup, ...groups];
     }
 
-    #getTabGroupContainerStyle(tabGroup) {
+    #getTabGroupContainerIcon(tabGroup) {
         let container;
         let iconUrl = "resource://usercontext-content/circle.svg";
         let iconColor = "gray";
+        let iconStyle = "";
 
         if (tabGroup.container) {
             container = CONTAINERS.find(c => c.cookieStoreId === tabGroup.container.cookieStoreId);
             iconUrl = container.iconUrl;
             iconColor = container.colorCode;
+            iconStyle = `mask-image: url('${iconUrl}'); mask-size: 16px 16px; `
+                      + `mask-repeat: no-repeat; mask-position: center; background-color: ${iconColor};`
         }
 
-        return `mask-image: url('${iconUrl}'); mask-size: 16px 16px; `
-             + `mask-repeat: no-repeat; mask-position: center; background-color: ${iconColor};`
+        return $(`<div style="${iconStyle}"></div>`);
     }
 
     #formatTabGroup(name, tabs, active) {

@@ -466,7 +466,7 @@ CmdUtils.previewList.CSS = `\
   #preview-list > li:hover {outline: 1px solid;}
 `;
 
-// a fancy new object-based preview list with two lines of text per entry
+// a fancy new styled preview list with two lines of text per entry
 CmdUtils.previewList2 = function(prefix, block, items, cfg, css) {
     if (typeof prefix !== "string") {
         [block, items, cfg, css] = [prefix, block, items, cfg];
@@ -477,22 +477,17 @@ CmdUtils.previewList2 = function(prefix, block, items, cfg, css) {
     let lines = [];
 
     for (let i of items) {
-        let html = "";
+        const oplItemClass = cfg.className? cfg.className(i): ""; // ! undocumented
+        let html = `<div class="opl-item ${oplItemClass}">`;
+
         const icon = iconf? iconf(i): undefined;
-
-        if (cfg.iconSize) {
-            css = css || "";
-            css += `\n.opl-icon {
-                        min-width: ${cfg.iconSize}px; 
-                        min-height: ${cfg.iconSize}px;
-                        max-width: ${cfg.iconSize}px; 
-                        max-height: ${cfg.iconSize}px;
-                   }`;
-        }
-
         if (icon) {
-            const iconStyle = cfg.iconStyle? cfg.iconStyle(i): "";
-            html += `<img class='opl-icon' style="${iconStyle}" src='${icon}'>`
+            if (typeof icon === "string")
+                html += `<img class="opl-icon" src="${icon}">`
+            else {
+                icon.addClass("opl-icon");
+                html += icon.prop("outerHTML");
+            }
         }
         else
             html += "<div></div>";
@@ -500,28 +495,39 @@ CmdUtils.previewList2 = function(prefix, block, items, cfg, css) {
         let text = cfg.text(i);
         let subtext = cfg.subtext? cfg.subtext(i): null;
 
-        html += `<div class='opl-lines'><div class='opl-text'>${text}</div>`;
+        html += `<div class="opl-lines"><div class="opl-text">${text}</div>`;
 
         if (subtext)
-            html += `<div class='opl-subtext'>${subtext}</div>`;
+            html += `<div class="opl-subtext">${subtext}</div>`;
 
+        html += "</div>";
         html += "</div>";
 
         lines.push(html);
     }
 
-    let style = CmdUtils._previewList2CSS;
+    if (cfg.iconSize) {
+        css = css || "";
+        css += `\n.opl-icon {
+                        min-width: ${cfg.iconSize}px; 
+                        min-height: ${cfg.iconSize}px;
+                        max-width: ${cfg.iconSize}px; 
+                        max-height: ${cfg.iconSize}px;
+                   }`;
+    }
+
+    let oplCSS = CmdUtils.previewList2.CSS;
 
     if (iconf)
-        style += "\n.preview-item-key {width: 18px;}";
+        oplCSS += "\n.preview-item-key {width: 18px;}";
 
     if (css)
-        style += "\n" + css;
+        oplCSS += "\n" + css;
 
-    return CmdUtils.previewList(prefix, block, lines, (i, e) => cfg.action(items[i], e), style);
+    return CmdUtils.previewList(prefix, block, lines, (i, e) => cfg.action(items[i], e), oplCSS);
 };
 
-CmdUtils._previewList2CSS =
+CmdUtils.previewList2.CSS =
  `:root {
    --opl-text-color: #45BCFF;
    --opl-subtext-color: #FD7221;
@@ -550,6 +556,9 @@ CmdUtils._previewList2CSS =
     overflow: hidden;
     text-overflow: ellipsis;
     width: 490px;
+ }
+ .opl-item {
+    width: 100%;
     display: flex;
     flex-flow: row nowrap;
     align-content: center;

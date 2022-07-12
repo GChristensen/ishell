@@ -50,6 +50,8 @@ export const cmdAPI = {
 
 export const R = cmdAPI.reduceTemplate;
 
+cmdAPI.objectPreviewList.CSS = CmdUtils.previewList2.CSS;
+
 cmdAPI.previewFetch = async function(display, resource, init) {
     const REASON_TIMEOUT = "Timeout";
     const controller = new AbortController();

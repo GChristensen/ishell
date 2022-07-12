@@ -316,61 +316,48 @@ export class Scrapyard {
     }
 
     #createBookmarkList(nodes, display, path) {
-        let items = [];
-
-        for (let n of nodes) {
-            let text = "";
-
-            if (n.type === NODE_TYPE_GROUP) {
-                text = "<img class='opl-icon' src='/ui/icons/folder.svg'>"
-                    + "<div class='opl-lines n-group'>" + Utils.escapeHtml(n.path) + "</div>";
-            }
-            else {
-                if (n.icon) {
-                    n.icon = n.icon.replace(/'/g, "\\'");
-                    text = "<img class='opl-icon' src='" + n.icon + "'>"
+        const cfg = {
+            text: n => {
+                if (n.type === NODE_TYPE_GROUP)
+                    return H(n.path)
+                else {
+                    if (n.uri && !n.name)
+                        return H(n.uri);
+                    else
+                        return n.name;
+                }
+            },
+            subtext: n => n.uri && H(n.uri),
+            icon: n => {
+                if (n.type === NODE_TYPE_GROUP)
+                    return "/ui/icons/folder.svg";
+                else if (n.icon)
+                    return n.icon;
+                else
+                    return "/ui/icons/globe.svg";
+            },
+            iconSize: 16,
+            className: n => n.type === NODE_TYPE_GROUP? "n-group": "",
+            action: n => {
+                if (n.type === NODE_TYPE_GROUP) {
+                    let itemPath = path? path + "/": "";
+                    cmdAPI.setCommandLine("scrapyard from folder at " + itemPath + n.path);
                 }
                 else
-                    text = "<img class='opl-icon' src='/ui/icons/globe.svg'>";
-
-
-                if (n.uri && !n.name)
-                    text += "<div class='opl-text'>" + Utils.escapeHtml(n.uri) + "</div>";
-                else
-                    text += "<div class='opl-lines'><div class='opl-text'>" + n.name + "</div>"
-                        + "<div class='opl-subtext'>" + Utils.escapeHtml(n.uri) + "</div></div>";
+                    scrapyardSend("SCRAPYARD_BROWSE_NODE_ISHELL", {node: n});
             }
+        };
 
-            items.push(text);
-        }
-
-        const style = `${CmdUtils._previewList2CSS}
-                     .opl-icon {
-                        width: 16px;
-                        height: 16px;
-                        min-width: 16px;
-                        min-height: 16px;
-                     }
-                     .n-group {
+        const style = `.n-group .opl-lines {
                         color: #FD7221;
                         font-weight: 500;
                         white-space: nowrap;
                         overflow: hidden;
                         text-overflow: ellipsis;
-                        width: 490px;
                         flex: 1 1 auto;
                      }`;
 
-        const handler = (i, _) => {
-            if (nodes[i].type === NODE_TYPE_GROUP) {
-                let itemPath = path? path + "/": "";
-                cmdAPI.setCommandLine("scrapyard from folder at " + itemPath + nodes[i].path);
-            }
-            else
-                scrapyardSend("SCRAPYARD_BROWSE_NODE_ISHELL", {node: nodes[i]});
-        };
-
-        const list = display.htmlList(items, handler, style);
+        const list = display.objectList(nodes, cfg, style);
 
         $(list).find("img.n-icon").on("error", e => e.target.src = "/ui/icons/globe.svg");
     }
