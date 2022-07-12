@@ -3,7 +3,7 @@ import {cmdManager} from "../cmdmanager.js";
 import {camelCaseToSnakeCase} from "../utils.js";
 import {CommandPreprocessor} from "../api/preprocessor.js";
 
-export const _namespace = {name: CMD_NS.SCRAPYARD, annotated: true};
+export const namespace = new CommandNamespace(CommandNamespace.SCRAPYARD, true);
 
 const DEFAULT_OUTPUT_LIMIT = 50;
 
@@ -668,7 +668,7 @@ chrome.management.onUninstalled.addListener(async (info) => {
 });
 
 let SCRAPYARD_COMMANDS;
-export function _init() {
+namespace.onModuleCommandsLoaded = function() {
     const commandUUIDs = [
         Shelf._annotations.uuid,
         Scrapyard._annotations.uuid,
@@ -679,12 +679,10 @@ export function _init() {
     ];
 
     SCRAPYARD_COMMANDS = commandUUIDs.map(cmdManager.getCommandByUUID.bind(cmdManager));
-    cmdManager.assignBuiltinNamespace(CMD_NS.SCRAPYARD, SCRAPYARD_COMMANDS);
-
     SCRAPYARD_COMMANDS.forEach(c => cmdManager.removeCommand(c));
 
     checkForScrapyard();
-}
+};
 
 async function isScrapyardPresents() {
     try {

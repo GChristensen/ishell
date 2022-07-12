@@ -1,4 +1,4 @@
-export const _namespace = {name: CMD_NS.SYNDICATION, annotated: true};
+export const namespace = new CommandNamespace(CommandNamespace.SYNDICATION, true);
 
 /**
  The command uses the URL opened in the current tab.

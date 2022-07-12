@@ -2,6 +2,38 @@ import {settings} from "./settings.js";
 import {repository} from "./storage.js";
 import {helperApp} from "./helper_app.js";
 
+class CommandNamespace {
+    name;
+    annotated;
+    commands = [];
+    onModuleCommandsLoaded; // triggered when all module commands are loaded
+    onBuiltinCommandsLoaded; // triggered when all builtin commands are loaded
+
+    constructor(name, annotated) {
+        this.name = name;
+        this.annotated = annotated;
+    }
+
+    createCommand(options) {
+        const command = cmdAPI.createCommand(options);
+        this.commands.push(command);
+        return command;
+    }
+
+    createSearchCommand(options) {
+        const command = cmdAPI.createSearchCommand(options);
+        this.commands.push(command);
+        return command;
+    }
+
+    assignNamespaceToCommands(builtin) {
+        this.commands.forEach(c => {
+            c._namespace = this.name;
+            c._builtin = builtin;
+        })
+    }
+}
+
 class CommandManager {
     ns = { // command namespaces
         ISHELL: "iShell",
@@ -198,26 +230,45 @@ class CommandManager {
         return this._callCommandHandler(sentence.getCommand(), sentence, sentence.execute)
     }
 
-    _unloadUserCommands(namespace) {
-        if (namespace)
-            this._commands = this._commands.filter(c => c._namespace !== namespace);
-        else
-            this._commands = this._commands.filter(c => !!c._builtin);
+    async loadBuiltinCommands() {
+        const modules = [];
+        for (const path of this._builtinModules) {
+            try {
+                modules.push(this._loadBuiltinCommandModule(path));
+            } catch (e) {
+                console.error(e);
+            }
+        }
+        await Promise.all(modules);
+
+        for (let module of modules) {
+            module = await module;
+            if (module.namespace.onBuiltinCommandsLoaded)
+                try {
+                    module.namespace.onBuiltinCommandsLoaded();
+                } catch (e) {
+                    console.error(e);
+                }
+        }
     }
 
     async _loadBuiltinCommandModule(path) {
         const module = await import(path);
 
-        if (module._namespace) {
-            const name = typeof module._namespace === "string"
-                ? module._namespace
-                : module._namespace.name;
-            const annotated = typeof module._namespace === "object" && module._namespace.annotated;
-
-            if (annotated)
+        if (module.namespace) {
+            if (module.namespace.annotated)
                 await this._loadAnnotatedCommandModule(path);
 
-            this.assignBuiltinNamespace(name);
+            module.namespace.assignNamespaceToCommands(true);
+
+            if (module.namespace.onModuleCommandsLoaded)
+               try {
+                   module.namespace.onModuleCommandsLoaded();
+               } catch (e) {
+                   console.error(e);
+               }
+
+            return module;
         }
         else
             console.log("module '%s' has no namespace", path);
@@ -226,15 +277,6 @@ class CommandManager {
     async _loadAnnotatedCommandModule(path) {
         const preprocessor = new CommandPreprocessor(CommandPreprocessor.CONTEXT_BUILTIN);
         await preprocessor.load(path);
-    }
-
-    assignBuiltinNamespace(name, commands) {
-        commands = commands || this._commands.filter(c => !c._namespace);
-
-        for (let cmd of commands) {
-            cmd._namespace = name;
-            cmd._builtin = true;
-        }
     }
 
     async loadUserCommands(namespace) {
@@ -261,16 +303,15 @@ class CommandManager {
         }
     }
 
-    async loadCommands() {
-        for (const path of this._builtinModules)
-            await this._loadBuiltinCommandModule(path);
+    _unloadUserCommands(namespace) {
+        if (namespace)
+            this._commands = this._commands.filter(c => c._namespace !== namespace);
+        else
+            this._commands = this._commands.filter(c => !!c._builtin);
+    }
 
-        // _tm()
-        // const modules = [];
-        // for (const path of this._builtinModules)
-        //     modules.push(this._loadBuiltinCommandModule(path));
-        // await Promise.all(modules)
-        // _te()
+    async loadCommands() {
+        await this.loadBuiltinCommands();
 
         const canLoadUserScripts = !_MANIFEST_V3 || _MANIFEST_V3 && !_BACKGROUND_PAGE
             || _MANIFEST_V3 && _BACKGROUND_PAGE && await helperApp.probe();
@@ -322,3 +363,8 @@ class CommandManager {
 }
 
 export const cmdManager = new CommandManager();
+
+for (const ns in cmdManager.ns)
+    CommandNamespace[ns] = cmdManager.ns[ns];
+
+globalThis.CommandNamespace = CommandNamespace;

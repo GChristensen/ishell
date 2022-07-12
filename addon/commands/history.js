@@ -1,6 +1,6 @@
 import {settings} from "../settings.js";
 
-export const _namespace = {name: CMD_NS.BROWSER, annotated: true};
+export const namespace = new CommandNamespace(CommandNamespace.BROWSER, true);
 
 /**
  @nountype

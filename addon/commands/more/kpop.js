@@ -1,8 +1,8 @@
 // These commands are hidden by default and available only through an undocumented easter switch
 
-export const _namespace = CMD_NS.MORE;
+export const namespace = new CommandNamespace(CommandNamespace.MORE);
 
-CmdUtils.makeSearchCommand({
+namespace.createSearchCommand({
     name: "kpop",
     uuid: "479E0CB6-981C-4485-AA7B-8296AB383EA7",
     url: "http://hulkpop.com/?s=%s",

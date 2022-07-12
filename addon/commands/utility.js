@@ -1,6 +1,6 @@
-export const _namespace = CMD_NS.UTILITY;
+export const namespace = new CommandNamespace(CommandNamespace.UTILITY);
 
-CmdUtils.CreateCommand({
+namespace.createCommand({
     names: ["base64decode","b64d","atob"],
     uuid: "E5C587CB-5733-463E-80DD-A6D4C085EE53",
     description: "base64decode",
@@ -18,7 +18,7 @@ CmdUtils.CreateCommand({
     },
 });
 
-CmdUtils.CreateCommand({
+namespace.createCommand({
     names: ["base64encode","b64e", "btoa"],
     uuid: "A7337919-93A1-48AC-AE1F-B9C322B7169E",
     description: "base64encode",
@@ -36,7 +36,7 @@ CmdUtils.CreateCommand({
     },
 });
 
-CmdUtils.CreateCommand({
+namespace.createCommand({
     names: ["urldecode"],
     uuid: "C042DDB6-FD05-4CD5-9356-1725C0533568",
     description: "Decode an URL using decodeURIComponent",
@@ -70,7 +70,7 @@ CmdUtils.CreateCommand({
     },
 });
 
-CmdUtils.CreateCommand({
+namespace.createCommand({
     names: ["urlencode"],
     uuid: "80F43371-F330-4685-A153-9A493B07A553",
     description: "Encode an URL using encodeURIComponent",
@@ -104,7 +104,7 @@ const noun_calc = {
     _mathlike: /^[\w.+\-*\/^%(, )|]+$/,
 };
 
-CmdUtils.CreateCommand({
+namespace.createCommand({
     name: "calculate",
     uuid: "53E7B63A-4084-449F-B142-9D62D82B9772",
     description:
@@ -124,7 +124,7 @@ CmdUtils.CreateCommand({
 
 var bitly_api_user = "ubiquityopera";
 var bitly_api_key = "R_59da9e09c96797371d258f102a690eab";
-CmdUtils.CreateCommand({
+namespace.createCommand({
     names: ["shorten-url", "bitly"],
     uuid: "6475BAAA-4547-4FF0-BCA7-EE4236F20386",
     icon: "/ui/icons/bitly.png",
@@ -169,7 +169,7 @@ CmdUtils.CreateCommand({
     }
 });
 
-// CmdUtils.CreateCommand({
+// namespace.createCommand({
 //     name: "isdown",
 //     uuid: "48449987-B873-49F5-99B4-7F99662BCA99",
 //     arguments: [{role: "object", nountype: noun_arb_text, label: "URL"}],

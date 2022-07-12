@@ -1,4 +1,4 @@
-export const _namespace = CMD_NS.TRANSLATION;
+export const namespace = new CommandNamespace(CommandNamespace.TRANSLATION);
 
 const MS_TRANSLATOR_LIMIT = 1e4;
 
@@ -75,7 +75,7 @@ function msTranslator(method, params, back) {
     })
 }
 
-CmdUtils.CreateCommand({
+namespace.createCommand({
     name: "translate",
     uuid: "43599939-571E-4EBF-AF64-8AD6F39C7B79",
     description: "Translates from one language to another using <a href='https://www.bing.com/translator'>Bing Translator</a>.",
@@ -149,7 +149,7 @@ CmdUtils.CreateCommand({
 });
 
 
-CmdUtils.CreateCommand({
+namespace.createCommand({
     names: ["translate-page"],
     uuid: "9A6DFBFE-3BB6-4131-996A-25FB0E9B7A26",
     description: `Translates a whole page to the specified language using 

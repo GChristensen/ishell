@@ -1,4 +1,4 @@
-export const _namespace = {name: CMD_NS.BROWSER, annotated: true};
+export const namespace = new CommandNamespace(CommandNamespace.BROWSER, true);
 
 const DEFAULT_TAB_GROUP = "default";
 const ALL_GROUPS_SPECIFIER = "all";

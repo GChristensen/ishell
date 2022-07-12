@@ -1,4 +1,4 @@
-export const _namespace = {name: CMD_NS.SEARCH, annotated: true};
+export const namespace = new CommandNamespace(CommandNamespace.SEARCH, true);
 
 const LIBGEN_HOST = "http://libgen.is/";
 

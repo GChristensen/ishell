@@ -1,10 +1,10 @@
 import {settings} from "../settings.js";
 
-export const _namespace = CMD_NS.SEARCH;
+export const namespace = new CommandNamespace(CommandNamespace.SEARCH);
 
 let maxSearchResults = settings.max_search_results() || 10;
 
-CmdUtils.makeSearchCommand({
+namespace.createSearchCommand({
     name: "IMDb",
     uuid: "F34E6A8C-FBBD-4DB2-9999-1B653034D985",
     //url: "http://www.imdb.com/find?q=%s",
@@ -83,7 +83,7 @@ function fetchWikipediaArticle(previewBlock, articleTitle, langCode) {
     });
 }
 
-CmdUtils.CreateCommand({
+namespace.createCommand({
     names: ["wikipedia"],
     uuid: "2622CD51-A5D8-4116-8907-06965CFAD53B",
     argument: [
@@ -194,7 +194,7 @@ CmdUtils.CreateCommand({
     }
 });
 
-cmdAPI.makeSearchCommand({
+namespace.createSearchCommand({
     name: "stackoverflow",
     uuid: "84628A1F-EE72-4429-B16B-E1A4E9AEE50A",
     url: "https://api.stackexchange.com/2.3/search?order=desc&sort=activity&site=stackoverflow&intitle=%s",

@@ -1,6 +1,6 @@
 // These commands are hidden by default and available only through an undocumented easter switch
 
-export const _namespace = {name: CMD_NS.MORE, annotated: true};
+export const namespace = new CommandNamespace(CommandNamespace.MORE, true);
 
 const JAVLIB_SEARCH_URL = "https://www.javlibrary.com/en/vl_searchbyid.php?keyword=";
 

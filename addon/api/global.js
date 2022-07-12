@@ -18,8 +18,6 @@ await injectModules([
     "./api/cmdapi.js"
 ]);
 
-globalThis.CMD_NS = {...cmdManager.ns};
-
 globalThis._BACKGROUND_API = {
     Utils,
     ContextUtils,

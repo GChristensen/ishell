@@ -1,4 +1,4 @@
-export const _namespace = {name: CMD_NS.MAIL, annotated: true};
+export const namespace = new CommandNamespace(CommandNamespace.MAIL, true);
 
 class MailBase {
     constructor(args) {

@@ -683,9 +683,6 @@ export class CommandPreprocessor {
         this._instantiateNounTypes(module, content);
         this._instantiateCommands(module, content);
 
-        if (module._init)
-            await module._init();
-
         return module;
     }
 
@@ -698,9 +695,9 @@ export class CommandPreprocessor {
                 if (classDef) {
                     const command = CommandPreprocessor.instantiateCommand(classDef, classMeta);
                     if (classMeta.properties.search)
-                        cmdAPI.createSearchCommand(command);
+                        module.namespace.createSearchCommand(command);
                     else
-                        cmdAPI.createCommand(command);
+                        module.namespace.createCommand(command);
                 }
             }
         }

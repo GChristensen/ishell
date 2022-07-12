@@ -1,4 +1,4 @@
-export const _namespace = {name: CMD_NS.UTILITY, annotated: true};
+export const namespace = new CommandNamespace(CommandNamespace.UTILITY, true);
 
 /**
     Allows to copy the character or its code representations to clipboard.

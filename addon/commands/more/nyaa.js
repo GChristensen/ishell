@@ -2,7 +2,7 @@
 
 import {loadCSS} from "../../utils_browser.js";
 
-export const _namespace = {name: CMD_NS.MORE, annotated: true};
+export const namespace = new CommandNamespace(CommandNamespace.MORE, true);
 
 const RESULT_TABLE =
     `<table class="nyaa-torrents" border="0" cellpadding="2" cellspacing="2" style="width: 100%">

@@ -1,4 +1,4 @@
-export const _namespace = {name: CMD_NS.TRANSLATION, annotated: true};
+export const namespace = new CommandNamespace(CommandNamespace.TRANSLATION, true);
 
 /**
      # Syntax

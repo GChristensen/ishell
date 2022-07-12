@@ -1,6 +1,6 @@
-export const _namespace = CMD_NS.BROWSER;
+export const namespace = new CommandNamespace(CommandNamespace.BROWSER);
 
-CmdUtils.CreateCommand({
+namespace.createCommand({
     name: "switch-to-tab",
     uuid: "24616A75-C995-439B-B6F4-F3ED72662C89",
     argument: [{role: "object", nountype: noun_type_tab, label: "tab title or URL"}],
@@ -13,7 +13,7 @@ CmdUtils.CreateCommand({
     }
 });
 
-CmdUtils.CreateCommand({
+namespace.createCommand({
     name: "close-tab",
     uuid: "26CCB2AC-053B-4C33-91AF-5C1C669901B5",
     argument: [{role: "object", nountype: noun_type_tab, label: "tab title or URL"}],
@@ -34,7 +34,7 @@ CmdUtils.CreateCommand({
     }
 });
 
-CmdUtils.CreateCommand({
+namespace.createCommand({
     name: "close-all-tabs-with",
     uuid: "FA80916D-08ED-4E97-AF35-5BE34A9ECA00",
     argument: [{role: "object", nountype: noun_arb_text, label: "tab title or URL"}],
@@ -49,7 +49,7 @@ CmdUtils.CreateCommand({
     }
 });
 
-CmdUtils.CreateCommand({
+namespace.createCommand({
     name: "print",
     uuid: "2909878D-DF99-4FD8-8DA6-FD2B5B7D0756",
     description: "Print the current page.",
