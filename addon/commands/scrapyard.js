@@ -587,7 +587,9 @@ export class MoveAt extends CopyCommandBase {
     }
 }
 
-CmdUtils.makeCaptureCommand = cmdAPI.makeCaptureCommand = function(options) {
+CmdUtils.makeCaptureCommand =
+cmdAPI.makeCaptureCommand =
+cmdAPI.createCaptureCommand = function(options) {
     if (options.path) {
         options.__scr_path = options.path;
         delete options.path;

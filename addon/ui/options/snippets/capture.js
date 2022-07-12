@@ -1,4 +1,4 @@
-cmdAPI.makeCaptureCommand({  // Capture the current tab to Scrapyard
+cmdAPI.createCaptureCommand({  // Capture the current tab to Scrapyard
     name: "my-capture-command",
     uuid: "%%UUID%%",
     type: "archive",  // also "bookmark"

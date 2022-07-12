@@ -2,9 +2,8 @@ cmdAPI.makeSearchCommand({
     name: "my-search-command",
     uuid: "%%UUID%%",
     url: "http://www.example.com/find?q=%s",
-    defaultUrl: "http://www.example.com",
     arguments: [{role: "object", nountype: noun_arb_text, label: "query"}],
-    icon: "http://example.com/favicon.ico",
+    description: "A short description of your command.",
     previewDelay: 1000,
     parser: {      // see iShell API Reference for more details
         type       : "html", // result type (also: "json", "xml")

@@ -47,11 +47,8 @@ class MyCommand {
             // Get some JSON from Stack Overflow
             const questions = await this.#fetchQuestions(display, query);
 
-            if (questions) {
-                // The use of display.objectList() may be a better solution
-                const html = this.#generateList(questions.items);
-                display.set(html);
-            }
+            if (questions)
+                this.#generateList(display, questions.items);
             else
                 display.error("HTTP request error.");
         }
@@ -83,14 +80,13 @@ class MyCommand {
         }
     }
 
-    #generateList(questions) {
-        return `<ul> 
-                ${R(questions, item => // R is a shorthand for cmdAPI.reduceTemplate()
-                 `<li><a href="${item.link}">${item.title}</a>
-                    <ul>
-                      <li>${item.tags.join(", ")}</li>
-                    </ul>
-                  </li>`)}
-                </ul>`;
+    #generateList(display, questions) {
+        const cfg = {
+            text: q => q.title,
+            subtext: q => q.tags.join(", "),
+            action: q => cmdAPI.addTab(q.link)
+        };
+
+        display.objectList(questions, cfg);
     }
 }

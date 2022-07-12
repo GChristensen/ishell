@@ -2,11 +2,11 @@ function setBlock(html) {
     this.innerHTML = html
 }
 
-function textBlock(block, html) {
+function textBlock(html) {
     this.innerHTML = `<div class="description">${html}</div>`
 }
 
-function errorBlock(block, html) {
+function errorBlock(html) {
     this.innerHTML = `<div class="description error">${html}</div>`
 }
 
@@ -70,6 +70,7 @@ class DisplayHandler {
 
 export function createDisplayProxy(block) {
     // a real proxy does not work nicely with some advanced jQuery features
+    // probably because jQuery expects a reference to a node that presents in the document
     //return new Proxy(block, new DisplayHandler());
 
     block.set = setBlock;

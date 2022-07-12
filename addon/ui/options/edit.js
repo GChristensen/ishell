@@ -61,10 +61,9 @@ async function initEditor() {
 
     $("#expand-editor").click(expandEditor);
 
-    $("#simple").click(insertSnippet);
-    $("#full").click(insertSnippet);
-    $("#search").click(insertSnippet);
-    $("#capture").click(insertSnippet);
+    $("#command-template").click(insertSnippet);
+    $("#search-template").click(insertSnippet);
+    $("#capture-template").click(insertSnippet);
 
     $("#syntax-types").val(settings.template_syntax() || "class");
 
@@ -73,7 +72,7 @@ async function initEditor() {
     });
 
     if (settings.scrapyard_presents())
-        $("#capture-stub").show();
+        $("#capture-link").show();
 
     await loadScripts();
 
@@ -242,22 +241,20 @@ async function insertSnippet() {
     if (scriptNamespace === SHELL_SETTINGS)
         return;
 
-    let templateId = this.id;
+    let templateId = this.id.replace("-template", "");
+    const simple = settings.template_syntax().includes("simple");
+    const syntax = settings.template_syntax().replace("-simple", "");
 
-    if (settings.template_syntax() === "class") {
-        if (this.id === "simple")
-            templateId = "simple_class";
-        else if (this.id === "full")
-            templateId = "full_class";
-    }
+    if (syntax === "class" && templateId !== "capture")
+        templateId += "_class";
+
+    if (simple && templateId !== "capture")
+        templateId += "_simple";
+
+    if (templateId === "search_simple")
+        templateId = "search";
 
     let snippet = await (await fetch(browser.runtime.getURL(`/ui/options/snippets/${templateId}.js`))).text();
-
-    if (settings.template_syntax() === "CmdUtils") {
-        snippet = snippet.replace("cmdAPI.createCommand", "CmdUtils.CreateCommand");
-        snippet = snippet.replace("cmdAPI.escapeHtml", "Utils.escapeHtml");
-        snippet = snippet.replace(/cmdAPI/g, "CmdUtils");
-    }
 
     //editor.replaceRange(stub, editor.getCursor());
     editor.session.insert(editor.getCursorPosition(), snippet.replace("%%UUID%%", crypto.randomUUID().toUpperCase()));
