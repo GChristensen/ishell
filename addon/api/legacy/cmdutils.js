@@ -466,7 +466,7 @@ CmdUtils.previewList.CSS = `\
   #preview-list > li:hover {outline: 1px solid;}
 `;
 
-// a fancy new styled preview list with two lines of text per entry
+// a fancy styled preview list with two lines of text per entry
 CmdUtils.previewList2 = function(prefix, block, items, cfg, css) {
     if (typeof prefix !== "string") {
         [block, items, cfg, css] = [prefix, block, items, cfg];

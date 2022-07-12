@@ -446,6 +446,8 @@ export class CommandPreprocessor {
                 block += `        maxResults: ${this.generateProperty(properties.results)},\n`;
             if (properties.plain)
                 block += `        plain: ${this.generateProperty(properties.plain)},\n`;
+            if (properties.display)
+                block += `    ${prefix}display = ${this.generateProperty(properties.display)};\n`;
             block += `    };\n`
         }
         
@@ -490,7 +492,8 @@ export class CommandPreprocessor {
                 body: properties.body,
                 baseUrl: properties.base,
                 maxResults: properties.result,
-                plain: properties.plain
+                plain: properties.plain,
+                display: properties.display
             };
 
             this.removeEmptyProperties(object.parser);
@@ -507,6 +510,7 @@ export class CommandPreprocessor {
         delete properties.base;
         delete properties.result;
         delete properties.plain;
+        delete properties.display;
 
         this.removeEmptyProperties(properties);
 

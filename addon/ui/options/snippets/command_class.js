@@ -67,10 +67,7 @@ class MyCommand {
         const queryURL = encodeURIComponent(query);
         const apiURL = "https://api.stackexchange.com/2.3/search";
         const requestURL = `${apiURL}?page=10&site=stackoverflow&intitle=${queryURL}`;
-        const response = await display.fetch(requestURL, {_displayError: "Network error."});
-
-        if (response.ok)
-            return response.json();
+        return display.fetchJSON(requestURL, {_displayError: "Network error."});
     }
 
     #generateList(display, questions) {

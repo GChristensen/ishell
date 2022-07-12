@@ -50,7 +50,6 @@ class CommandManager {
     _builtinModules = [
         "/commands/browser.js",
         "/commands/ishell.js",
-        "/commands/search.js",
         "/commands/translate.js",
         "/commands/utility.js",
 
@@ -58,15 +57,16 @@ class CommandManager {
         "/commands/more/javlib.js",
         "/commands/more/nyaa.js",
         "/commands/more/more.js",
+        "/commands/color-picker.js",
         "/commands/feedsub.js",
         "/commands/google.js",
         "/commands/history.js",
-        "/commands/color-picker.js",
         "/commands/lingvo.js",
         "/commands/literature.js",
         "/commands/mail.js",
         "/commands/resurrect.js",
         "/commands/scrapyard.js",
+        "/commands/search.js",
         "/commands/tab-groups.js",
         "/commands/unicode.js",
     ];
