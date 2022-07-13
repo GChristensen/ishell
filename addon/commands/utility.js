@@ -168,40 +168,61 @@ namespace.createCommand({
     }
 });
 
-// namespace.createCommand({
-//     name: "isdown",
-//     uuid: "48449987-B873-49F5-99B4-7F99662BCA99",
-//     arguments: [{role: "object", nountype: noun_arb_text, label: "URL"}],
-//     previewDelay: 1000,
-//     icon: "/ui/icons/isdown.ico",
-//     description: "Check if selected/typed URL is down.",
-//     preview: function (pblock, {object: {text}}) {
-//         if (!text)
-//             text = CmdUtils.getLocation();
-//
-//         if (!text)
-//             return;
-//
-//         pblock.text("Checking <b>" + text + "</b>");
-//         var urlString = "https://isitdown.site/api/v3/" + encodeURIComponent(text);
-//
-//         CmdUtils.previewGet(pblock, urlString, (resp) => {
-//
-//             if (!resp) return;
-//             if (resp.isitdown) {
-//                 pblock.text('It\'s <b>not</b> just you. The site is <b>down!</b>');
-//             } else {
-//                 pblock.text('It\'s just you. The site is <b>up!</b>');
-//             }
-//         }, "json");
-//     },
-//     execute: async function ({object: {text}}) {
-//         if (!text)
-//             text = CmdUtils.getLocation();
-//
-//         if (!text)
-//             return;
-//
-//         CmdUtils.addTab("http://downforeveryoneorjustme.com/" + encodeURIComponent(text));
-//     }
-// });
+namespace.createCommand({
+    name: "isdown",
+    arguments: [{role: "object", nountype: noun_arb_text, label: "URL"}],
+    previewDelay: 1000,
+    icon: "/ui/icons/isdown.ico",
+    description: "Check if selected/typed URL is down.",
+    uuid: "48449987-B873-49F5-99B4-7F99662BCA99",
+    async preview(pblock, {object: {text}}) {
+        text = text || cmdAPI.getLocation();
+
+        if (text) {
+            pblock.text("Checking <b>" + text + "</b>");
+            const requestURL = "https://api-prod.downfor.cloud/httpcheck/" + encodeURIComponent(text);
+            const json = await pblock.fetchJSON(requestURL);
+
+            if (json) {
+                if (json.isDown)
+                    pblock.text('It\'s <b>not</b> just you. The site is <b>down!</b>');
+                else
+                    pblock.text('It\'s just you. The site is <b>up!</b>');
+            }
+            else
+                pblock.text('Press enter to check online.');
+        }
+    },
+    execute({object: {text}}) {
+        if (!text)
+            text = cmdAPI.getLocation();
+
+        if (!text)
+            return;
+
+        cmdAPI.addTab("http://downforeveryoneorjustme.com/" + encodeURIComponent(text));
+    }
+});
+
+namespace.createCommand({
+    name: "current-ip",
+    icon: "/ui/icons/current-ip.png",
+    description: "Displays your current IP address.",
+    uuid: "03F608A8-FB85-46BE-B2B2-B7B817104BCC",
+    async preview(pblock, args) {
+        pblock.text("Fetching IP information...")
+        const json = await pblock.fetchJSON("https://ipapi.co/json/");
+
+        if (json) {
+            const flag = `https://ipapi.co/static/images/flags/${json.country_code.toLowerCase()}.png`;
+            const flagHTML = `<img src="${flag}" style="width: 16px; height: 16px; vertical-align: middle;"/>`;
+            const location = `${json.city}, ${json.region}, ${json.country_name} ${flagHTML}`
+            pblock.text(`Current IP address: <b>${json.ip}</b> (${location})`);
+        }
+        else
+            pblock.error("HTTP request error.")
+    },
+    execute(args) {
+        cmdAPI.addTab("https://ipapi.co/");
+    }
+});

@@ -1,7 +1,7 @@
 export const namespace = new CommandNamespace(CommandNamespace.UTILITY, true);
 
 /**
-    Allows to copy the character or its code representations to clipboard.
+    Allows to copy the character or its code representations to the clipboard.
 
     # Syntax
     **unicode** *description* [**with** *match*]

@@ -60,7 +60,7 @@ export function noun_type_tab_group(text, html, _, selectionIndices) {
         - *close* - close all tabs in the tab group.
         - *delete* - delete the specified tab group.
         - *window* - open all tabs of the tab group in a new window.
-        - *move* - move the selected tabs to the tab group.
+        - *move* - move the tabs selected in the browser UI to the tab group.
     - *container* - the account container to use in the tab group.
 
     # Examples

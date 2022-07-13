@@ -83,11 +83,11 @@ function configureDynamicSettings() {
 
 function populateDynamicSettings() {
     const helpHints = {
-        lingvo_api_key: "API key used by lingvo command",
-        bing_translator_api_v3_key: "API key used by translate command",
-        youtube_search_api_key: "API key used by youtube command",
-        google_cse_api_key: "API key used by google and images commands",
-        google_cse_api_id: "Custom search configuration id used by google and images commands",
+        lingvo_api_key: "API key used by the lingvo command",
+        bing_translator_api_v3_key: "API key used by the translate command",
+        youtube_search_api_key: "API key used by the youtube command",
+        google_cse_api_key: "API key used by the google and images commands",
+        google_cse_api_id: "Custom search configuration id used by the google and images commands"
     };
 
     const helpLinks = {
@@ -95,23 +95,24 @@ function populateDynamicSettings() {
         bing_translator_api_v3_key: "https://www.microsoft.com/en-us/translator/business/trial/",
         youtube_search_api_key: "https://developers.google.com/youtube/v3/getting-started",
         google_cse_api_key: "https://developers.google.com/custom-search/v1/introduction",
-        google_cse_api_id: "https://support.google.com/programmable-search/answer/2649143",
+        google_cse_api_id: "https://support.google.com/programmable-search/answer/2649143"
     };
 
     const builtinKeys = Object.keys(helpLinks);
+    const dynamicSettings = settings.dynamic_settings();
 
-    let html = cmdAPI.reduceTemplate(Object.entries(settings.dynamic_settings()),
+    let html = cmdAPI.reduceTemplate(builtinKeys,
         item =>
-            `<tr id="${item[0]}">
-                ${(builtinKeys.some(k => k === item[0]))
-                    ? '<td class="help-hint" title="' + helpHints[item[0]] + '">&#8505;</td>'
+            `<tr id="${item}">
+                ${(builtinKeys.some(k => k === item))
+                    ? '<td class="help-hint" title="' + helpHints[item] + '">&#8505;</td>'
                     : '<td class="remove-item" title="Remove item">&#xD7;</td>'
                  }
-                <td class="item-key"><input type="text" name="key" title="Key" value="${Utils.escapeHtml(item[0])}" disabled/></td>
-                <td class="item-value"><input type="text" name="value" title="Value" value="${Utils.escapeHtml(item[1])}"
-                                              ${builtinKeys.some(k => k === item[0]) ? 'style="margin-right: -20px"' : ""}/>
-                    ${builtinKeys.some(k => k === item[0])
-                        ? ('<span className="key-help" title="Get a personal API key">&nbsp;<a href="' + helpLinks[item[0]] 
+                <td class="item-key"><input type="text" name="key" title="Key" value="${Utils.escapeHtml(item)}" disabled/></td>
+                <td class="item-value"><input type="text" name="value" title="Value" value="${Utils.escapeHtml(dynamicSettings[item] || "")}"
+                                              ${builtinKeys.some(k => k === item) ? 'style="margin-right: -20px"' : ""}/>
+                    ${builtinKeys.some(k => k === item)
+                        ? ('<span className="key-help" title="Get a personal API key">&nbsp;<a href="' + helpLinks[item] 
                              + '" target="_blank">?</a></span>')
                         : ""
                      }
