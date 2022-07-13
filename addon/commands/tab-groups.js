@@ -115,12 +115,13 @@ export class TabGroup {
             browser.tabs.onCreated.addListener(this.#onTabCreated.bind(this));
             browser.tabs.onAttached.addListener(this.#onTabAttached.bind(this));
 
-            browser.webRequest.onBeforeRequest.addListener(this.#onBeforeTabCreated.bind(this), {
-                    urls: ['<all_urls>'],
-                    types: [browser.webRequest.ResourceType.MAIN_FRAME],
-                },
-                [browser.webRequest.OnBeforeRequestOptions.BLOCKING]
-            );
+            if (_BACKGROUND_WINDOW)
+                browser.webRequest.onBeforeRequest.addListener(this.#onBeforeTabCreated.bind(this), {
+                        urls: ['<all_urls>'],
+                        types: [browser.webRequest.ResourceType.MAIN_FRAME],
+                    },
+                    [browser.webRequest.OnBeforeRequestOptions.BLOCKING]
+                );
         }
     }
 

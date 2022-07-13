@@ -203,7 +203,7 @@ export class Zlibrary {
 
     async preview({OBJECT: {text: query}, OF: {text: sortBy}, WITH: {text: order}}, display, storage) {
         if (query) {
-            display.text("Querying zlibrary...");
+            display.text("Searching...");
 
             let results = await this.#fetchBooks(display, query);
 

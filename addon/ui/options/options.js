@@ -101,7 +101,7 @@ function populateDynamicSettings() {
     const builtinKeys = Object.keys(helpLinks);
     const dynamicSettings = settings.dynamic_settings();
 
-    let html = cmdAPI.reduceTemplate(builtinKeys,
+    let html = cmdAPI.reduceTemplate(Object.keys(dynamicSettings),
         item =>
             `<tr id="${item}">
                 ${(builtinKeys.some(k => k === item))

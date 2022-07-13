@@ -326,8 +326,8 @@ written as follows:</p>
 <pre><code data-language="javascript">cmdAPI.createCommand({
     names: ["echo"],
     arguments: [{role: "object",
-                             nountype: noun_arb_text,
-                             label: "your shout"}],
+                 nountype: noun_arb_text,
+                 label: "your shout"}],
     preview(pblock, args) {
         pblock.innerHTML = "Will echo: " + args.object.text;
     },
@@ -914,8 +914,7 @@ class Memo {
         const tabs = await browser.tabs.query({});
         const matchingTabs = tabs.filter(tab => {
             const match = matcher.exec(tab.title) || matcher.exec(tab.url);
-            if (match)
-                matches[tab.id] = match;
+            match && (matches[tab.id] = match);
             return !!match;
         });
 

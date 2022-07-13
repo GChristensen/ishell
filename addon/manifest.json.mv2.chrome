@@ -60,6 +60,10 @@
         "history",
         "webNavigation",
         "management",
-        "downloads"
+        "downloads",
+        "sessions",
+        "cookies",
+        "webRequest",
+        "webRequestBlocking"
     ]
 }

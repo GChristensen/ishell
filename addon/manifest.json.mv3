@@ -61,7 +61,11 @@
         "webNavigation",
         "management",
         "downloads",
-        "scripting"
+        "scripting",
+        "sessions",
+        "contextualIdentities",
+        "cookies",
+        "webRequest"
     ],
     "host_permissions": [
         "<all_urls>"

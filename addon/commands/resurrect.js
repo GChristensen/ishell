@@ -55,10 +55,10 @@ export class Resurrect {
         else if (OBJECT.html) {
             const html = $.parseHTML(OBJECT.html);
             const link = $("a", $("<div>").append(html)).attr("href");
-            const url = new URL(link, cmdAPI.activeTab.url).toString();
+            const url = new URL(link, cmdAPI.activeTab?.url).toString();
             return [url, this.#makeSummary(url)];
         }
-        else
+        else if (cmdAPI.activeTab)
             return [cmdAPI.activeTab.url, this.#makeSummary(cmdAPI.activeTab.url)];
     }
 

@@ -62,7 +62,9 @@
         "webNavigation",
         "management",
         "downloads",
-        "scripting"
+        "scripting",
+        "sessions",
+        "cookies"
     ],
     "host_permissions": [
         "<all_urls>"

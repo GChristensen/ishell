@@ -40,6 +40,7 @@ class IShellSettings {
     async _loadSettings() {
         const object = await BROWSER.storage.local.get(this._key);
         this._bin = merge(object?.[this._key] || {}, this._default);
+        this._bin.dynamic_settings = merge(this._bin.dynamic_settings, this._default.dynamic_settings);
     }
 
     _load() {

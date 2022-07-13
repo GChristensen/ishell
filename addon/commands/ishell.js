@@ -120,7 +120,7 @@ namespace.createCommand({
             </ul>`,
     previewDelay: 1000,
     preview: function(pblock, args, storage) {
-        if (args.alias && args.alias.text && args.object && args.object.text)
+        if (args.alias?.text && args.object?.text)
             pblock.text(`Inserts a new dynamic setting <code>${args.alias.text}</code> 
                                 with the value: "${args.object.text}".`);
     },
@@ -129,7 +129,7 @@ namespace.createCommand({
             await settings.load();
             let dynamic_settings = settings.dynamic_settings();
             dynamic_settings[args.alias.text] = args.object.text;
-            settings.dynamic_settings(dynamic_settings);
+            await settings.dynamic_settings(dynamic_settings);
             browser.runtime.sendMessage({type: "ADDED_DYNAMIC_SETTING"});
         }
     }

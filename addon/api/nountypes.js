@@ -228,25 +228,25 @@ export const noun_type_contact = {
 export const noun_type_tab = {
     label: "tab title or URL",
 
-    async _searchTabs(text, maxResults) {
+    async _searchTabs(text) {
+        const matches = [];
         const matcher = new RegExp(text, "i");
         const tabs = await browser.tabs.query({});
-        const results = tabs.filter(tab => {
-            tab.__match = matcher.exec(tab.title) || matcher.exec(tab.url);
-            return !!tab.__match;
+        const matchingTabs = tabs.filter(tab => {
+            const match = matcher.exec(tab.title) || matcher.exec(tab.url);
+            match && (matches[tab.id] = match);
+            return !!match;
         });
 
-        if (maxResults)
-            return results.slice(0, maxResults)
-        else
-            return results;
+        return [matchingTabs, matches];
     },
 
-    async suggest(text, html, callback, selectedIndices) {
-        const tabs = await this._searchTabs(text, 5);
+    // suggestion methods declared as async do not need to use callback
+    async suggest(text, html, _, selectedIndices) {
+        const [tabs, matches] = await this._searchTabs(text);
         const makeSugg = tab => cmdAPI.makeSugg(tab.title || tab.url, null, tab,
-                                                cmdAPI.matchScore(tab.__match),
-                                                selectedIndices);
+            cmdAPI.matchScore(matches[tab.id]),
+            selectedIndices);
         return tabs.map(makeSugg);
     }
 };
