@@ -130,6 +130,7 @@ namespace.createCommand({
     icon: "/ui/icons/bitly.png",
     description: "Shorten your URLs with the least possible keystrokes",
     homepage: "http://bit.ly",
+    previewDelay: 1000,
     author: {
         name: "Cosimo Streppone",
         email: "cosimo@cpan.org"
@@ -153,15 +154,13 @@ namespace.createCommand({
             var err_msg = ajax.errorMessage;
             // Received an error from bit.ly API?
             if (err_code > 0 || err_msg) {
-                pblock.innerHTML = '<br/><p style="font-size: 18px; color:orange">'
-                    + 'Bit.ly API error ' + err_code + ': ' + err_msg + '</p>';
+                pblock.error('Bit.ly API error ' + err_code + ': ' + err_msg);
                 return;
             }
 
             this._short_url = ajax.results[query].shortUrl;
-            pblock.text(`Shortened <b>${query}</b> to: 
-                                <span style="color: #45BCFF">${this._short_url}</span>. <br><br>
-                                Press 'Enter' to copy the result to clipboard.<br>`);
+            pblock.text(`Shortened <b>${query}</b> to: <span style="color: #45BCFF">${this._short_url}</span>.
+                                <br><br>Press 'Enter' to copy the result to clipboard.<br>`);
         }, "json");
     },
     execute: async function ({object: {text}}) {
