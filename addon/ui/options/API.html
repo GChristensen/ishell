@@ -166,8 +166,8 @@
         </li>
         <li>
             <strong>beforeSearch</strong><span class="since">since v0.8</span> - a function that
-            allows to modify the <b>object</b> argument of the command depending on the values of other
-            arguments before the search is performed. Accepts and returns an object with the command
+            allows to modify arguments of the command before the search is
+            performed. Accepts and returns an object with the command
             arguments.
         </li>
         <!--li>
@@ -227,7 +227,7 @@
     </ul>
 </blockquote>
 
-<h3><a id="user-content-cmdutilsnotifymessage-title" class="anchor" aria-hidden="true" href="#cmdutilsnotifymessage-title"></a>cmdAPI.notify(message, title)</h3>
+<h3><a id="user-content-cmdutilsnotifymessage-title" class="anchor" href="#cmdutilsnotifymessage-title"></a>cmdAPI.notify(message, title)</h3>
 <p class="legacy-name">Legacy names: CmdUtils.notify, displayMessage</p>
 <blockquote>
     <p>Display a popup notification with the specified <strong>message</strong> and <strong>title</strong>.</p>
@@ -315,27 +315,27 @@
     </ul>
 </blockquote>
 
-<h3><a id="user-content-contextutilsgetselection" class="anchor" aria-hidden="true" href="#contextutilsgetselection"></a>cmdAPI.getSelection()</h3>
+<h3><a id="user-content-contextutilsgetselection" class="anchor" href="#contextutilsgetselection"></a>cmdAPI.getSelection()</h3>
 <p class="legacy-name">Legacy name: CmdUtils.getSelection</p>
 <blockquote>
     <p>Returns a string containing the text and just the text of the user's
       current selection, i.e. with HTML tags stripped out.</p>
 </blockquote>
 
-<h3><a id="user-content-contextutilsgethtmlselection" class="anchor" aria-hidden="true" href="#contextutilsgethtmlselection"></a>cmdAPI.getHtmlSelection()</h3>
+<h3><a id="user-content-contextutilsgethtmlselection" class="anchor" href="#contextutilsgethtmlselection"></a>cmdAPI.getHtmlSelection()</h3>
 <p class="legacy-name">Legacy name: CmdUtils.getHtmlSelection</p>
 <blockquote>
     <p>Returns a string containing the HTML representation of the
       user's current selection, i.e. text including tags.</p>
   </blockquote>
 
-<h3><a id="user-content-contextutilssetselectioncontent" class="anchor" aria-hidden="true" href="#contextutilssetselectioncontent"></a>cmdAPI.setSelection(content)</h3>
+<h3><a id="user-content-contextutilssetselectioncontent" class="anchor" href="#contextutilssetselectioncontent"></a>cmdAPI.setSelection(content)</h3>
 <p class="legacy-name">Legacy name: CmdUtils.setSelection</p>
 <blockquote>
     <p>Replaces the current selection with <strong>content</strong>.</p>
 </blockquote>
 
-<h3><a id="user-content-cmdutilscopytoclipboardtext" class="anchor" aria-hidden="true" href="#cmdutilscopytoclipboardtext"></a>cmdAPI.copyToClipboard(text)</h3>
+<h3><a id="user-content-cmdutilscopytoclipboardtext" class="anchor" href="#cmdutilscopytoclipboardtext"></a>cmdAPI.copyToClipboard(text)</h3>
 <p class="legacy-name">Legacy name: CmdUtils.copyToClipboard</p>
 <blockquote>
     <p>This function places the passed-in text into the OS's clipboard.
@@ -345,13 +345,13 @@
     </ul>
 </blockquote>
 
-<h3><a id="user-content-cmdutilsgetlocation" class="anchor" aria-hidden="true" href="#cmdutilsgetlocation"></a>cmdAPI.getLocation()</h3>
+<h3><a id="user-content-cmdutilsgetlocation" class="anchor" href="#cmdutilsgetlocation"></a>cmdAPI.getLocation()</h3>
 <p class="legacy-name">Legacy name: CmdUtils.getLocation</p>
 <blockquote>
     <p>Returns the location URL of the active tab, if available.</p>
 </blockquote>
 
-<h3><a id="user-content-utilsopenurlinbrowserurlstring" class="anchor" aria-hidden="true" href="#utilsopenurlinbrowserurlstring"></a>cmdAPI.addTab(url, callback)</h3>
+<h3><a id="user-content-utilsopenurlinbrowserurlstring" class="anchor" href="#utilsopenurlinbrowserurlstring"></a>cmdAPI.addTab(url, callback)</h3>
 <p class="legacy-name">Legacy names: Utils.openUrlInBrowser</p>
 <blockquote>
     <p>
@@ -394,7 +394,7 @@
     </ul>
 </blockquote>
 
-<h3><a id="preview-fetch" class="anchor" aria-hidden="true" href="#preview-fetch"></a>cmdAPI.previewFetch(pblock,
+<h3><a id="preview-fetch" class="anchor" href="#preview-fetch"></a>cmdAPI.previewFetch(pblock,
     resource, init)<span class="since">since v0.2</span></h3>
 <blockquote>
     <p>Does an asynchronous request to a remote web service. It is a wrapper around the standard <a
@@ -407,13 +407,13 @@
     <ul>
         <li><b>_timeout</b><span class="since">since v0.5</span> - request timeout in milliseconds.</li>
         <li><b>_displayError</b><span class="since">since v0.5</span> - a boolean or string that will be displayed
-            in the case of exceptions other than "AbortError" thrown by the underlying <code>fetch</code> function.
-            Exception message will be displayed in the case of the boolean value.
+            in the case of exceptions other than "AbortError" thrown by the underlying <b>fetch</b> function.
+            Exception message will be displayed if a boolean value is used.
         </li>
     </ul>
 </blockquote>
 
-<h3><a id="fetch-aborted" class="anchor" aria-hidden="true" href="#fetch-aborted"></a>cmdAPI.fetchAborted(error)<span class="since">since v0.2</span></h3>
+<h3><a id="fetch-aborted" class="anchor" href="#fetch-aborted"></a>cmdAPI.fetchAborted(error)<span class="since">since v0.2</span></h3>
 <blockquote>
     <p>Determines if the call to <b>cmdAPI.previewFetch</b> was aborted by a user action.</p>
     <ul>
@@ -424,9 +424,9 @@
     </ul>
 </blockquote>
 
-<h3><a id="helper-fetch" class="anchor" aria-hidden="true" href="#helper-fetch"></a>cmdAPI.helperFetch(pblock, path, init)<span class="since">since v0.5</span></h3>
+<h3><a id="helper-fetch" class="anchor" href="#helper-fetch"></a>cmdAPI.helperFetch(pblock, path, init)<span class="since">since v0.5</span></h3>
 <blockquote>
-    <p>Does an asynchronous request to the web server being run by iShell helper application.
+    <p>Does an asynchronous request to the web server being run by the iShell helper application.
         If <b>pblock</b> parameter is specified, <b>cmdAPI.previewFetch()</b> function is used to make a request.
         Built-in JavaScript <b>fetch</b> is used otherwise. If the helper application could not be run,
         the function throws "IShellNoHelperApp" exception.</p>
@@ -482,7 +482,7 @@
     </ul>
 </blockquote>
 
-<h3><a id="user-content-utilsparamstostringparams-prefix--" class="anchor" aria-hidden="true" href="#utilsparamstostringparams-prefix--"></a>cmdAPI.paramsToString(params, prefix = "?")</h3>
+<h3><a id="user-content-utilsparamstostringparams-prefix--" class="anchor" href="#utilsparamstostringparams-prefix--"></a>cmdAPI.paramsToString(params, prefix = "?")</h3>
 <p class="legacy-name">Legacy name: Utils.paramsToString</p>
 <blockquote>
     <p>Takes the given object containing keys and values into a query string
@@ -493,32 +493,32 @@
     </ul>
   </blockquote>
 
-<h3><a id="user-content-utilsurltoparamsurlstring" class="anchor" aria-hidden="true" href="#utilsurltoparamsurlstring"></a>cmdAPI.urlToParams(url)</h3>
+<h3><a id="user-content-utilsurltoparamsurlstring" class="anchor" href="#utilsurltoparamsurlstring"></a>cmdAPI.urlToParams(url)</h3>
 <p class="legacy-name">Legacy name: Utils.urlToParams</p>
 <blockquote>
     <p>Given a <strong>url</strong>, returns an object containing keys and values
       retrieved from its query-part.</p>
   </blockquote>
 
-<h3><a id="user-content-parsehtml" class="anchor" aria-hidden="true" href="#utilsparsehtmlhtmltext-callback"></a>cmdAPI.parseHtml(htmlText)</h3>
+<h3><a id="user-content-parsehtml" class="anchor" href="#utilsparsehtmlhtmltext-callback"></a>cmdAPI.parseHtml(htmlText)</h3>
 <p class="legacy-name">Legacy name: Utils.parseHtml</p>
 <blockquote>
     <p>An alternative to jQuery() which allows access to the entire document content. Returns HTML document object.</p>
   </blockquote>
 
-<h3><a id="user-content-utilsescapehtmlstring" class="anchor" aria-hidden="true" href="#utilsescapehtmlstring"></a>cmdAPI.escapeHtml(string)</h3>
+<h3><a id="user-content-utilsescapehtmlstring" class="anchor" href="#utilsescapehtmlstring"></a>cmdAPI.escapeHtml(string)</h3>
 <p class="legacy-name">Legacy names: Utils.escapeHtml, H()</p>
 <blockquote>
     <p>Returns a version of the <strong>string</strong> safe for insertion into HTML.</p>
 </blockquote>
 
-<h3><a id="user-content-matchscore" class="anchor" aria-hidden="true" href="#matchscore"></a>cmdAPI.matchScore(match)</h3>
+<h3><a id="user-content-matchscore" class="anchor" href="#matchscore"></a>cmdAPI.matchScore(match)</h3>
 <p class="legacy-name">Legacy name: NounUtils.matchScore</p>
 <blockquote>
     <p>Calculates the score for use in suggestions from a result array (<b>match</b>) of <b>RegExp#exec</b> run against user input.</p>
 </blockquote>
 
-<h3><a id="user-content-makesugg" class="anchor" aria-hidden="true" href="#makesugg"></a>cmdAPI.makeSugg(text, html, data, score, selectionIndices)</h3>
+<h3><a id="user-content-makesugg" class="anchor" href="#makesugg"></a>cmdAPI.makeSugg(text, html, data, score, selectionIndices)</h3>
 <p class="legacy-name">Legacy name: NounUtils.makeSugg</p>
 <blockquote>
     <p>
@@ -571,7 +571,7 @@
     <p>Close the iShell popup window.</p>
 </blockquote>
 
-<!--h3><a id="user-content-eval" class="anchor" aria-hidden="true" href="#eval"></a>cmdAPI.evaluate(text)</h3>
+<!--h3><a id="user-content-eval" class="anchor" href="#eval"></a>cmdAPI.evaluate(text)</h3>
 <blockquote>
     <p>Evaluates the given JavaScript code. In the MV3 version of add-on, this function works only if the helper application is installed.</p>
     <ul>
@@ -579,12 +579,18 @@
     </ul>
 </blockquote-->
 
-<h3><a id="user-content-dynamic-settings" class="anchor" aria-hidden="true" href="#dynamic_settings"></a>cmdAPI.settings</h3>
+<h3><a id="dynamic-settings" class="anchor" href="#dynamic_settings"></a>cmdAPI.settings</h3>
 <blockquote>
     <p>Returns an object with key/value pairs customizable through the main setting page (read-only).</p>
 </blockquote>
 
-<h3><a id="bin" class="anchor" aria-hidden="true" href="#bin"></a>Bin</h3>
+<h3><a id="arrow-selection" class="anchor"></a>cmdAPI.arrowSelection<span class="since">since v0.8</span></h3>
+<blockquote>
+    <p>A boolean property that indicates whether Ctrl+ARROWS selection is active. Could be used in
+    item event handlers of <b>cmdAPI.previewList</b> and <b>cmdAPI.objectPreviewList</b>.</p>
+</blockquote>
+
+<h3><a id="bin" class="anchor" href="#bin"></a>Bin</h3>
 <blockquote>
     <p>A persistent data storage interface that is available through the last argument of any command handler function.
         Calling any method of this interface with an argument will persistently store the supplied value.
@@ -601,7 +607,7 @@
     <p>The interface offers separate storage space for each command.</p>
 </blockquote>
 
-<h3><a id="user-content-jquery" class="anchor" aria-hidden="true" href="#bin"></a>jQuery, $</h3>
+<h3><a id="user-content-jquery" class="anchor" href="#bin"></a>jQuery, $</h3>
 <blockquote>
     <p>The entry points of <a href="https://jquery.com/" target="_blank">jQuery</a> API.</p>
 </blockquote>

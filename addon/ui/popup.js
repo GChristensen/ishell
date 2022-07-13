@@ -39,6 +39,8 @@ class PopupWindow {
         cmdAPI.setCommandLine = text => this.setCommand(text);
         cmdAPI.closeCommandLine = () => window.close();
 
+        ContextUtils.arrowSelection = false;
+
         document.addEventListener('keydown', this.onKeyDown.bind(this), false);
         document.addEventListener('keyup', this.onKeyUp.bind(this), false);
     }
@@ -129,7 +131,7 @@ class PopupWindow {
         const previewSelection = selectionList.getSelectedElement();
 
         if (previewSelection) {
-            ContextUtils.activateTab = true;
+            ContextUtils.arrowSelection = true;
             this.executePreviewItem(previewSelection, true)
         }
         else

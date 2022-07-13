@@ -144,7 +144,7 @@ export class History {
             display.objectList(historyItems, {
                 text: (h => h.url && !h.title? h.url: h.title),
                 subtext: (h => h.url && !h.title? null: h.url),
-                action: h =>  browser.tabs.create({"url": h.url, active: ContextUtils.activateTab})
+                action: h =>  browser.tabs.create({"url": h.url, active: ContextUtils.arrowSelection})
             });
         }
     }

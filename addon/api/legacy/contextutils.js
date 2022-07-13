@@ -4,7 +4,7 @@ export class ContextUtils {
     static activeTab;
     static selectedText = "";
     static selectedHtml = "";
-    static #activateTab = false;
+    static #arrowSelection = false;
 
     static async getSelection(tabId) {
         let results;
@@ -59,13 +59,11 @@ export class ContextUtils {
         }
     };
 
-    static set activateTab(value) {
-        this.#activateTab = value;
+    static set arrowSelection(value) {
+        this.#arrowSelection = value;
     }
 
-    static get activateTab() {
-        const result = this.#activateTab;
-        this.#activateTab = false;
-        return result;
+    static get arrowSelection() {
+        return this.#arrowSelection;
     }
 }

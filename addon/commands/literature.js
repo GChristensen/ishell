@@ -57,7 +57,7 @@ export class Libgen {
                 display.objectList(books, {
                     text: (b) => b.title,
                     subtext: (b) => b.details,
-                    action: (b) => browser.tabs.create({"url": b.link, active: cmdAPI.activateTab})
+                    action: (b) => browser.tabs.create({"url": b.link, active: cmdAPI.arrowSelection})
                 });
             }
         }

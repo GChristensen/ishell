@@ -397,7 +397,7 @@ CmdUtils.makeSearchCommand.preview = function searchPreview(pblock, args) {
                     text: (r) => r.title,
                     subtext: (r) => r.body,
                     icon: parser.thumbnail? ((r) => r.thumbnail): undefined,
-                    action: (r) => chrome.tabs.create({"url": r.href, active: ContextUtils.activateTab})
+                    action: (r) => chrome.tabs.create({"url": r.href, active: ContextUtils.arrowSelection})
                 });
             }
             else {

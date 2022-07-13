@@ -25,10 +25,8 @@ export const cmdAPI = {
         return CmdUtils.previewList2(prefix, block, items, fs, css);
     },
 
-    // EXPERIMENTAL: this property is set to true if a user has selected an item from the preview list with ctrl+arrows,
-    // useful in previewList/objectPreviewList click handlers
-    get activateTab() {
-        return ContextUtils.activateTab
+    get arrowSelection() {
+        return ContextUtils.arrowSelection
     },
 
     get settings() {
