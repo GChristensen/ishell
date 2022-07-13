@@ -52,17 +52,19 @@ export function noun_type_tab_group(text, html, _, selectionIndices) {
     Works best if persistent sessions are enabled in the browser settings.
 
     # Syntax
-    **tab-group** [**all** | *name*] [**to** *operation*] [**in** *container*]
+    **tab-group** [**all** | *name*] [**to** *operation*] [**in** *container*] [**with** **all** | *name*]
 
     # Arguments
     - *name* - the name of a tab group to create or to operate on. The current tab group is assumed if not specified.
-        The keyword **all** designates all existing tab groups except **default**.
+        The keyword **all** designates all existing tab groups.
     - *operation* - the operation to perform on a tab group. *switch* is performed the if argument is not specified.
         - *switch* - switch to the tab group with the given name. The tab group will be created if not exists.
         - *close* - close all tabs in the tab group.
         - *delete* - delete the specified tab group.
         - *window* - open all tabs of the tab group in a new window.
         - *move* - move the tabs selected in the browser UI to the tab group.
+        - *merge* - move all tabs from the tab group specified by the **with** argument to the group specified by
+        the first argument.
     - *container* - the account container to use in the tab group.
 
     # Examples
@@ -70,6 +72,7 @@ export function noun_type_tab_group(text, html, _, selectionIndices) {
     - **tgr** *books* **in** *shopping*
     - **tgr** *books* **to** *delete*
     - **tgr** **all** **to** *close*
+    - **tgr** **to** *merge* *with* **all**
 
     @command tab-group, tgr
     @markdown
@@ -88,11 +91,11 @@ export class TabGroup {
 
         args[OBJECT] = {nountype: noun_type_tab_group, label: "name"}; // object
         //args[FOR]    = {nountype: noun_arb_text, label: "text"}; // subject
-        args[TO]     = {nountype: ["switch", "close", "delete", "window", "move"], label: "action"}; // goal
+        args[TO]     = {nountype: ["switch", "close", "delete", "window", "move", "merge"], label: "action"}; // goal
         //args[FROM]   = {nountype: noun_arb_text, label: "text"}; // source
         //args[NEAR]   = {nountype: noun_arb_text, label: "text"}; // location
         //args[AT]     = {nountype: noun_arb_text, label: "text"}; // time
-        //args[WITH]   = {nountype: noun_arb_text, label: "text"}; // instrument
+        args[WITH]   = {nountype: noun_type_tab_group, label: "name"}; // instrument
         args[IN]     = {nountype: noun_type_container, label: "container"}; // format
         //args[OF]     = {nountype: noun_arb_text, label: "text"}; // modifier
         //args[AS]     = {nountype: noun_arb_text, label: "text"}; // alias
@@ -167,7 +170,7 @@ export class TabGroup {
         return {};
     }
 
-    async preview({OBJECT: {text: name}, TO: {text: action}, IN}, display, storage) {
+    async preview({OBJECT: {text: name}, TO: {text: action}, IN, WITH: {text: nameFrom}}, display, storage) {
         if (name && !action) {
             if (this.#tabGroups[name])
                 await this.#listGroupTabs(display, name);
@@ -178,7 +181,7 @@ export class TabGroup {
             await this.#listGroups(display);
         }
         else if (action) {
-            this.#describeAction(display, name, action);
+            this.#describeAction(display, action, name, nameFrom);
         }
     }
 
@@ -265,9 +268,8 @@ export class TabGroup {
             const [tabsToHide, tabsToShow] = await this.#separateTabs(tabs, name);
 
             if (tabsToShow.length) {
-                if (activeTab) {
+                if (activeTab)
                     await browser.tabs.update(activeTab.id, {active: true});
-                }
                 else {
                     tabsToShow.sort((a, b) => b.lastAccessed - a.lastAccessed);
                     await browser.tabs.update(tabsToShow[0].id, {active: true});
@@ -429,7 +431,7 @@ export class TabGroup {
         return `Create the <b>${name}</b> tab group${container}.`;
     }
 
-    #describeAction(display, name, action) {
+    #describeAction(display, action, name, nameFrom) {
         let html = "";
 
         switch (action) {
@@ -444,6 +446,9 @@ export class TabGroup {
                 break;
             case "move":
                 html = this.#describeMove(name);
+                break;
+            case "merge":
+                html = this.#describeMerge(name, nameFrom);
                 break;
         }
 
@@ -486,7 +491,17 @@ export class TabGroup {
             return `Specify a tab group name to move to.`;
     }
 
-    async #performAction(name, action) {
+    #describeMerge(name, nameFrom) {
+        name = name? `the <b>${name}</b> tab group`: "the current tab group";
+        if (nameFrom && nameFrom !== ALL_GROUPS_SPECIFIER)
+            return `Add all tabs from the <b>${nameFrom}</b> tab group to ${name}.`;
+        else if (nameFrom === ALL_GROUPS_SPECIFIER)
+            return `Add tabs from all tab groups to the <b>${name}</b> tab group.`;
+
+        return "Specify more arguments for the merge.";
+    }
+
+    async #performAction(name, action, nameTo) {
         switch (action) {
             case "switch":
                 await this.#switchToTabGroup(name)
@@ -503,23 +518,23 @@ export class TabGroup {
             case "move":
                 await this.#moveSelectedTabsToGroup(name);
                 break;
+            case "merge":
+                await this.#mergeTabGroups(name, nameTo);
+                break;
         }
     }
 
     async #closeTabGroup(name) {
         const currentWindowTabGroup = await this.#getCurrentWindowTabGroup();
+        name = name || currentWindowTabGroup;
 
         let tabs;
-        if (name) {
-            if (name === ALL_GROUPS_SPECIFIER)
-                tabs = await browser.tabs.query({});
-            else
-                tabs = await this.#getGroupTabs(name, false);
-        }
+        if (name === ALL_GROUPS_SPECIFIER)
+            tabs = await browser.tabs.query({});
         else
-            tabs = await this.#getGroupTabs(currentWindowTabGroup, false);
+            tabs = await this.#getGroupTabs(name, false);
 
-        if (!name || currentWindowTabGroup === name || ALL_GROUPS_SPECIFIER === name)
+        if (currentWindowTabGroup === name || ALL_GROUPS_SPECIFIER === name)
             await browser.tabs.create({active: true});
 
         await browser.tabs.remove(tabs.map(t => t.id));
@@ -557,11 +572,18 @@ export class TabGroup {
         name = name || currentWindowTabGroup;
 
         const currentWindow = await browser.windows.getCurrent();
-        const tabs = await this.#getGroupTabs(name, false);
+
+        let tabs
+        if (name === ALL_GROUPS_SPECIFIER) {
+            tabs = await browser.tabs.query({});
+            name = DEFAULT_TAB_GROUP;
+        }
+        else
+            tabs = await this.#getGroupTabs(name, false);
 
         if (tabs.length) {
             const newWindow = await browser.windows.create({});
-            await browser.sessions.setWindowValue(newWindow.id, 'tabGroup', name);
+            await this.#setWindowTabGroup(newWindow, name);
 
             const windowTabs = await browser.tabs.query({windowId: newWindow.id});
             if (name === currentWindowTabGroup)
@@ -573,18 +595,49 @@ export class TabGroup {
     }
 
     async #moveSelectedTabsToGroup(name) {
-        const windowTabs = await browser.tabs.query({currentWindow: true});
-        const selectedTabs = await browser.tabs.query({highlighted: true, currentWindow: true});
         const currentWindowTabGroup = await this.#getCurrentWindowTabGroup();
+        const windowTabs = (await browser.tabs.query({currentWindow: true})).filter(t => !t.hidden);
+        const selectedTabs = await browser.tabs.query({highlighted: true, currentWindow: true});
+        const notSelectedTabs = windowTabs.filter(t => !selectedTabs.some(st => st.id === t.id));
+        notSelectedTabs.sort((a, b) => b.lastAccessed - a.lastAccessed);
 
-        if (name !== currentWindowTabGroup) {
+        if (name && name !== currentWindowTabGroup) {
             for (const tab of selectedTabs)
                 await this.#addToTabGroup(tab, name);
 
             if (windowTabs.length === selectedTabs.length)
-                browser.tabs.create({});
+                await browser.tabs.create({});
+            else
+                await browser.tabs.update(notSelectedTabs[0].id, {active: true});
 
-            browser.tabs.hide(selectedTabs.map(t => t.id));
+            await browser.tabs.hide(selectedTabs.map(t => t.id));
+        }
+    }
+
+    async #mergeTabGroups(name, nameFrom) {
+        if (!nameFrom)
+            return;
+
+        const currentWindowTabGroup = await this.#getCurrentWindowTabGroup();
+        name = name || currentWindowTabGroup;
+
+        let fromTabs;
+        if (nameFrom === ALL_GROUPS_SPECIFIER)
+            fromTabs = await browser.tabs.query({});
+        else
+            fromTabs = await this.#getGroupTabs(nameFrom, false);
+
+        for (const tab of fromTabs)
+            await this.#addToTabGroup(tab, name);
+
+        const currentWindow = await browser.windows.getCurrent();
+        const fromTabsInThisWindow = fromTabs.filter(t => t.windowId === currentWindow.id);
+
+        if (name === currentWindowTabGroup)
+            await browser.tabs.show(fromTabsInThisWindow.map(t => t.id));
+        else if (nameFrom === currentWindowTabGroup) {
+            await browser.tabs.create({});
+            await browser.tabs.hide(fromTabs.map(t => t.id));
         }
     }
 
@@ -606,7 +659,7 @@ export class TabGroup {
         }
     }
 
-    async execute({OBJECT: {text: name}, TO: {text: action}, IN}, storage) {
+    async execute({OBJECT: {text: name}, TO: {text: action}, IN, WITH: {text: nameFrom}}, storage) {
         if (name && !action) {
             if (!this.#isTabGroupExists(name))
                 this.#createTabGroup(name);
@@ -616,7 +669,7 @@ export class TabGroup {
             this.#saveState(storage);
         }
         else if (action) {
-            await this.#performAction(name, action);
+            await this.#performAction(name, action, nameFrom);
             this.#saveState(storage);
         }
     }

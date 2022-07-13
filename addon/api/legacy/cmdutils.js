@@ -284,7 +284,8 @@ CmdUtils.makeSearchCommand.preview = function searchPreview(pblock, args) {
         dataType: parser.type || "text",
         success: searchParse,
         error: function searchError(xhr) {
-            put("<em class='error'>", xhr.status, " ", xhr.statusText, "</em>");
+            if (xhr.statusText !== "abort")
+                put("<em class='error'>", xhr.status, " ", xhr.statusText, "</em>");
         },
     };
     var pdata = parser.postData || this.postData;
