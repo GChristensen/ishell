@@ -175,7 +175,7 @@ function fillTableRowForCmd(row, cmd, className) {
         [cmd.disabled ? "removeAttr" : "attr"]("checked", "checked"));
 
     var cmdElement = jQuery(
-        '<td class="command"><img class="favicon" src="'
+        `<td class="command" id="${name}"><img class="favicon" src="`
         + escapeHtml((!("icon" in cmd) || cmd["icon"] === "http://example.com/favicon.ico")? "/ui/icons/logo.svg": cmd.icon) + '"/>' +
         ('<a class="id" name="' + escapeHtml(cmd.id) + '"></a>' +
             '<span class="name">' + escapeHtml(name) + '</span>') +

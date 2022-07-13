@@ -120,7 +120,8 @@
             Ctrl+Space, and type the first letters of the "translate" command. The translation will
             be immediately shown in the iShell popup window.</p>
 
-        <p>You can create your own iShell commands in JavaScript. Find more information on command
+        <p>The complete list of the builtin commands is available <a href="docs/commands.html" target="_blank">here</a>.
+            You can create your own iShell commands in JavaScript. Find more information on command
             authoring in the <a
                     href="https://gchristensen.github.io/ishell/addon/ui/options/tutorial.html"
                     target="_blank">tutorial</a> at iShell setting pages.
@@ -135,20 +136,24 @@
             unified modern object-oriented command authoring API.
         </p>
 
-        <p style="text-align: justify;">The original Ubiquity was an experiment in
-            <a href="https://en.wikipedia.org/wiki/Natural-language_user_interface">linguistic</a>
-            ubiquitous user interfaces. Such interfaces are driven by natural-language-like
-            commands and could be instantly available anywhere. It also had a command subscription model,
-            where you were supposed to subscribe to third-party commands that were updated
-            automatically. For security reasons, there is no such model in iShell. You need to
-            manually maintain third-party code in the iShell command editor by using the
-            <b>install</b> command.</p>
+        <p style="text-align: justify;">
+        The original Ubiquity was an experiment in linguistic ubiquitous user
+        interfaces. Such interfaces are driven by natural-language commands and
+        could be instantly available anywhere. The legacy Ubiquity also had a
+        command subscription model, where you were supposed to subscribe to
+        third-party commands that were updated automatically. For security
+        reasons, there is no such model in iShell. You need to manually maintain
+        third-party code in the iShell command editor by using the
+        <b>install</b> command.
+        </p>
 
-        <p>Despite that, iShell is still immensely useful if you can
-           write JavaScript to automate things you have (web)APIs for or to extend the browser
-           functionality without much effort. You can obtain search results instantly by typing
-           just a few keystrokes. They could be filtered and sorted as you wish. By using standard JavaScript
-           and HTML you can create interactive presentations of any complexity.
+        <p style="text-align: justify;">
+        Despite that, iShell is still immensely useful if you can write
+        JavaScript to automate things you have (web)APIs for or to extend the
+        browser functionality without much effort. You can obtain search results
+        instantly by typing just a few keystrokes. They could be filtered and
+        sorted as you wish. You can create interactive presentations of any
+        complexity by using standard JavaScript and HTML.
         </p>
 
         <h4>Some additional features not found in the original Ubiquity</h4>
@@ -170,9 +175,9 @@
             iShell allows to declaratively define and automatically parse commands with
             prepositional arguments. For example, consider the command <b>show-text</b> with the
             following syntax: "<b>show-text</b> <i>text</i> <b>in</b> <i>popup</i>". It has the
-            prepositional argument named <b>in</b> and an implicit nameless first argument. iShell
+            prepositional argument named <b>in</b> and the nameless first argument. iShell
             command parser will automatically provide values (<i>text</i>, <i>popup</i>) of the
-            arguments to command implementation <a
+            arguments to the command implementation <a
                 href="https://github.com/GChristensen/ishell#modern-object-oriented-command-syntax"
                 target="_blank">handler methods</a> after you enter the command in the input box.
         </p>

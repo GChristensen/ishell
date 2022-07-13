@@ -173,7 +173,7 @@ namespace.createCommand({
     arguments: [{role: "object", nountype: noun_arb_text, label: "URL"}],
     previewDelay: 1000,
     icon: "/ui/icons/isdown.ico",
-    description: "Check if selected/typed URL is down.",
+    description: "Check if the selected/typed URL is down.",
     uuid: "48449987-B873-49F5-99B4-7F99662BCA99",
     async preview(pblock, {object: {text}}) {
         text = text || cmdAPI.getLocation();

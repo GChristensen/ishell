@@ -1,3 +1,5 @@
+import {sleep} from "../utils.js";
+
 export const namespace = new CommandNamespace(CommandNamespace.BROWSER, true);
 
 const DEFAULT_TAB_GROUP = "default";
@@ -115,7 +117,7 @@ export class TabGroup {
             browser.tabs.onCreated.addListener(this.#onTabCreated.bind(this));
             browser.tabs.onAttached.addListener(this.#onTabAttached.bind(this));
 
-            if (_BACKGROUND_WINDOW)
+            if (_BACKGROUND_PAGE)
                 browser.webRequest.onBeforeRequest.addListener(this.#onBeforeTabCreated.bind(this), {
                         urls: ['<all_urls>'],
                         types: [browser.webRequest.ResourceType.MAIN_FRAME],
@@ -517,7 +519,7 @@ export class TabGroup {
         else
             tabs = await this.#getGroupTabs(currentWindowTabGroup, false);
 
-        if (currentWindowTabGroup === name || ALL_GROUPS_SPECIFIER === name)
+        if (!name || currentWindowTabGroup === name || ALL_GROUPS_SPECIFIER === name)
             await browser.tabs.create({active: true});
 
         await browser.tabs.remove(tabs.map(t => t.id));

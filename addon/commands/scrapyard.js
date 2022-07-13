@@ -466,7 +466,7 @@ class BookmarkCommandBase {
  @command
  @markdown
  @icon /ui/icons/scrapyard.svg
- @description Archive a web-page or selection to Scrapyard.
+ @description Archive a web-page or selection to <a href="https://gchristensen.github.io/scrapyard/" target="_blank">Scrapyard</a>.
  @uuid 2CFD7052-84E2-465C-A450-45BFFE3C6C80
  */
 export class Archive extends BookmarkCommandBase {
