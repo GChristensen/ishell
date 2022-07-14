@@ -209,20 +209,59 @@ namespace.createCommand({
     icon: "/ui/icons/current-ip.png",
     description: "Displays your current IP address.",
     uuid: "03F608A8-FB85-46BE-B2B2-B7B817104BCC",
+
     async preview(pblock, args) {
         pblock.text("Fetching IP information...")
-        const json = await pblock.fetchJSON("https://ipapi.co/json/");
+        return this._requestJSON(pblock, "https://ipapi.co/json/");
+    },
 
-        if (json) {
-            const flag = `https://ipapi.co/static/images/flags/${json.country_code.toLowerCase()}.png`;
-            const flagHTML = `<img src="${flag}" style="width: 16px; height: 16px; vertical-align: middle;"/>`;
-            const location = `${json.city}, ${json.region}, ${json.country_name} ${flagHTML}`
-            pblock.text(`Current IP address: <b>${json.ip}</b> (${location})`);
+    execute(args) {
+        cmdAPI.addTab("https://ipapi.co/");
+    },
+
+    async _requestJSON(pblock, url) {
+        const response = await pblock.fetch(url, {_displayError: "Network error."})
+        if (response.ok) {
+            this._cloudflare = false;
+            this._constructView(pblock, await response.json());
+        }
+        else if (response.status === 503) {
+            if (!this._cloudflare)
+                return this._solveCloudFlare(pblock, url);
+            else
+                this._cloudflare = false;
         }
         else
             pblock.error("HTTP request error.")
     },
-    execute(args) {
-        cmdAPI.addTab("https://ipapi.co/");
+
+    _constructView(pblock, json) {
+        const flag = `https://ipapi.co/static/images/flags/${json.country_code.toLowerCase()}.png`;
+        const flagHTML = `<img src="${flag}" style="width: 16px; height: 16px; vertical-align: middle;"/>`;
+        const location = `${json.city}, ${json.region}, ${json.country_name} ${flagHTML}`
+        pblock.text(`Current IP address: <b>${json.ip}</b> (${location})`);
+    },
+
+    async _solveCloudFlare(pblock, url) {
+        this._cloudflare = true;
+
+        pblock.text("Waiting for Cloudflare...");
+        const newTab = await browser.tabs.create({active: false, url});
+
+        let listener = (id, changed, tab) => {
+            if (id === newTab.id && changed.title && changed.title.includes("ipapi")) {
+                browser.tabs.onUpdated.removeListener(listener);
+
+                this._cloudflare = false;
+                browser.tabs.remove(newTab.id);
+
+                this._requestJSON(pblock, url);
+            }
+        };
+
+        const params =  {urls: ["*://ipapi.co/*"]};
+        if (!_BACKGROUND_PAGE)
+            delete params.urls;
+        browser.tabs.onUpdated.addListener(listener, params);
     }
 });

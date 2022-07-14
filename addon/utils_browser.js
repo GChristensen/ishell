@@ -107,6 +107,13 @@ export async function loadScript(doc, id, file) {
     }
 }
 
+export function jsEval(text, global = false, wnd = window) {
+    if (!global)
+        text = `{\n${text}\n}`;
+
+    return wnd.eval(text);
+}
+
 export async function nativeEval(text, global = false, wnd = window) {
     if (!global)
         text = `{\n${text}\n}`;
@@ -139,7 +146,7 @@ export async function nativeEval(text, global = false, wnd = window) {
 
             setTimeout(() => {
                 wnd.removeEventListener("error", errorListener);
-                resolve(true);
+                resolve(null);
             }, 1000);
         })
     };

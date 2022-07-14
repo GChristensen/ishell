@@ -1,12 +1,9 @@
-import {CommandPreprocessor} from "../../api/preprocessor.js";
 import {cmdManager, helperApp} from "../../ishell.js";
 import {settings} from "../../settings.js";
 import {repository} from "../../storage.js";
 
 const SHELL_SETTINGS = "shell-settings";
 const CHANGE_DELAY = 2000;
-
-const preprocessor = new CommandPreprocessor(CommandPreprocessor.CONTEXT_USER);
 
 let scriptNamespace = "default";
 let editor;
@@ -286,44 +283,14 @@ async function saveScript() {
     else {
         // save
         await repository.saveUserScript(scriptNamespace, customcode);
+        const result = await cmdManager.evalUserScriptForErrors(scriptNamespace, customcode);
 
-        // eval
-        if (_MANIFEST_V3)
-            await evalMV3(customcode);
+        let evalMessage = "Evaluated!";
+        if (result.error)
+            evalMessage = "<span class='eval-error'>&nbsp;" + result.error.message + "&nbsp;</span>";
         else
-            await evalMV2(customcode);
+            await cmdManager.loadUserCommands(scriptNamespace);
+
+        $("#info").html(evalMessage);
     }
 }
-
-async function evalMV2(customcode) {
-    try {
-        const code = preprocessor.transform(customcode);
-        cmdAPI.evaluate(code);
-
-        $("#info").html("Evaluated!");
-
-        await cmdManager.loadUserCommands(scriptNamespace);
-    } catch (e) {
-        displayError(e.message);
-    }
-}
-
-async function evalMV3(customcode) {
-    const code = preprocessor.transform(customcode);
-    const result = await cmdAPI.evaluate(code);
-
-    result.error
-        .then(() => {
-            $("#info").html("Evaluated!");
-            cmdManager.loadUserCommands(scriptNamespace);
-        })
-        .catch(error => {
-            displayError(error.message);
-        });
-}
-
-function displayError(message) {
-    $("#info").html("<span style='background-color: red; color: white;'>&nbsp;" + message + "&nbsp;</span>");
-}
-
-

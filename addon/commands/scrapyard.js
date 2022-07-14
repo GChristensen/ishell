@@ -631,7 +631,7 @@ cmdAPI.createCaptureCommand = function(options) {
     const command = CommandPreprocessor.instantiateCommand(BookmarkCommandBase);
     Object.assign(command, options);
 
-    cmdAPI.createCommand(command);
+    return cmdAPI.createCommand(command);
 };
 
 let ISHELL_ID = browser.runtime.getManifest().applications?.gecko?.id;

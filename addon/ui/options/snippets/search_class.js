@@ -2,12 +2,15 @@
     @search
     @command
     @delay 1000
-    @url http://www.example.com/find?q=%s
-    @container .css > .selector
-    @title .css > .selector
-    @href .css > .selector
-    @thumbnail .css > .selector
-    @results 10
+    @icon http://example.com/favicon.ico
+    <!-- fetch some JSON from StackOverflow -->
+    @parser.url https://api.stackexchange.com/2.3/search?order=desc&sort=activity&site=stackoverflow&intitle=%s
+    <!-- the url annotation is used to execute the command when parser.url is specified -->
+    @url https://stackoverflow.com/search?q=%s
+    @parser json
+    @container items
+    @href link
+    @display objectPreviewList
     @description A short description of your command.
     @uuid: %%UUID%%
  */
@@ -18,15 +21,18 @@ class MySearchCommand {
     }
 
     beforeSearch(args) {
-        if (args.OBJECT && args.AS?.text === "quoted")
+        if (args.AS?.text === "quoted")
             args.OBJECT.text = `"${args.OBJECT.text}"`;
         return args;
     }
 
-    parseBody(container) {
-        const body = container.find(".css > .selector");
-        const div = $("<div>").append(body);
-        body.css("color", "green");
-        return div;
+    parseTitle(item) {
+        // automatically parsed items are HTML-escaped,
+        // so we are parsing this in a method to avoid escaping
+        return item.title;
+    }
+
+    parseBody(item) {
+        return item.tags.join(", ");
     }
 }

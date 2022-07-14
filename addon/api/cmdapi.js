@@ -2,7 +2,7 @@ import {settings} from "../settings.js";
 import {helperApp} from "../helper_app.js";
 import {cmdManager} from "../cmdmanager.js";
 import {delegate} from "../utils.js";
-import {executeScript, nativeEval} from "../utils_browser.js";
+import {executeScript, jsEval, nativeEval} from "../utils_browser.js";
 import {CmdUtils} from "./legacy/cmdutils.js";
 
 export const cmdAPI = {
@@ -38,7 +38,7 @@ export const cmdAPI = {
     },
 
     evaluate(javaScript) {
-        return (_MANIFEST_V3? nativeEval: eval)(javaScript);
+        return (_MANIFEST_V3? nativeEval: jsEval)(javaScript);
     },
 
     reduceTemplate (items, f) {

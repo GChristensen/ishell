@@ -1,10 +1,9 @@
-import {sleep} from "../utils.js";
+import {cmdManager} from "../cmdmanager.js";
 
 export const namespace = new CommandNamespace(CommandNamespace.BROWSER, true);
 
 const DEFAULT_TAB_GROUP = "default";
 const ALL_GROUPS_SPECIFIER = "all";
-const THIS_GROUP_SPECIFIER = "this";
 
 let CONTAINERS = [];
 const noun_type_container = {};
@@ -76,7 +75,7 @@ export function noun_type_tab_group(text, html, _, selectionIndices) {
 
     @command tab-group, tgr
     @markdown
-    @delay 1000
+    @delay 500
     @icon /ui/icons/tab-groups.svg
     @description Essential tab group manager.
     @uuid CC6A1FD6-5959-423F-8D77-1C6EF630B0A1
@@ -120,13 +119,13 @@ export class TabGroup {
             browser.tabs.onCreated.addListener(this.#onTabCreated.bind(this));
             browser.tabs.onAttached.addListener(this.#onTabAttached.bind(this));
 
-            if (_BACKGROUND_PAGE)
-                browser.webRequest.onBeforeRequest.addListener(this.#onBeforeTabCreated.bind(this), {
-                        urls: ['<all_urls>'],
-                        types: [browser.webRequest.ResourceType.MAIN_FRAME],
-                    },
-                    [browser.webRequest.OnBeforeRequestOptions.BLOCKING]
-                );
+
+            browser.webRequest.onBeforeRequest.addListener(this.#onBeforeTabCreated.bind(this), {
+                    urls: ['<all_urls>'],
+                    types: [browser.webRequest.ResourceType.MAIN_FRAME],
+                },
+                [browser.webRequest.OnBeforeRequestOptions.BLOCKING]
+            );
         }
     }
 
@@ -675,3 +674,10 @@ export class TabGroup {
     }
 
 }
+
+namespace.onModuleCommandsLoaded = () => {
+    if (!_BACKGROUND_PAGE) { // Chrome can't hide tabs
+        const tabGroupCommand = cmdManager.getCommandByUUID(TabGroup._annotations.uuid);
+        cmdManager.removeCommand(tabGroupCommand)
+    }
+};

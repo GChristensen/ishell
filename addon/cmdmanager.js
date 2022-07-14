@@ -16,13 +16,22 @@ class CommandNamespace {
 
     createCommand(options) {
         const command = cmdAPI.createCommand(options);
-        this.commands.push(command);
+        if (command)
+            this.commands.push(command);
         return command;
     }
 
     createSearchCommand(options) {
         const command = cmdAPI.createSearchCommand(options);
-        this.commands.push(command);
+        if (command)
+            this.commands.push(command);
+        return command;
+    }
+
+    createCaptureCommand(options) {
+        const command = cmdAPI.createCaptureCommand(options);
+        if (command)
+            this.commands.push(command);
         return command;
     }
 
@@ -31,6 +40,51 @@ class CommandNamespace {
             c._namespace = this.name;
             c._builtin = builtin;
         })
+    }
+}
+
+class APIProxyHandler {
+    #commandNamespace;
+    #nop;
+
+    constructor(commandNamespace, nop) {
+        this.#commandNamespace = commandNamespace;
+        this.#nop = nop;
+    }
+
+    creationMethod(method) {
+        if (this.#nop)
+            return () => null;
+        else
+            return (...args) => method.call(this.#commandNamespace, ...args);
+    }
+
+    get(target, property, receiver) {
+        switch (property) {
+            case "createCommand":
+            case "CreateCommand":
+                return this.creationMethod(!this.#nop && this.#commandNamespace.createCommand);
+            case "createSearchCommand":
+            case "makeSearchCommand":
+                return this.creationMethod(!this.#nop && this.#commandNamespace.createSearchCommand);
+            case "createCaptureCommand":
+            case "makeCaptureCommand":
+                return this.creationMethod(!this.#nop && this.#commandNamespace.createCaptureCommand);
+
+            default:
+                let value = target[property];
+                if (typeof value === "function")
+                    value = value.bind(target);
+                return value;
+        }
+    }
+
+    set(target, property, value, receiver) {
+        return target[property] = value;
+    }
+
+    has(target, key) {
+        return key in target;
     }
 }
 
@@ -46,6 +100,8 @@ class CommandManager {
         SCRAPYARD: "Scrapyard",
         MORE: "More Commands"
     };
+
+    #userCommandNamespaces = [];
 
     _builtinModules = [
         "/commands/browser.js",
@@ -280,34 +336,92 @@ class CommandManager {
     }
 
     async loadUserCommands(namespace) {
-        this._unloadUserCommands(namespace);
-
-        let preprocessor = new CommandPreprocessor(CommandPreprocessor.CONTEXT_USER);
+        const preprocessor = new CommandPreprocessor(CommandPreprocessor.CONTEXT_USER);
         let userscripts = await repository.fetchUserScripts(namespace);
 
         if (namespace)
             userscripts = [userscripts];
 
+        this._unloadUserCommands(namespace);
+        this.#userCommandNamespaces = [];
+
+        const loadedScripts = [];
         for (let record of userscripts) {
             try {
                 if (record.script) {
-                    let script = preprocessor.transform(record.script);
-                    await cmdAPI.evaluate(script);
+                    const script = preprocessor.transform(record.script);
+                    const preamble = this.generateUserCommandLoadPreamble(record.namespace);
+                    if (_BACKGROUND_PAGE) {
+                        const promise = cmdAPI.evaluate(preamble + script);
+                        loadedScripts.push(promise);
+                    }
+                    else // parallel evaluation of user scripts makes Chrome to crash
+                        await cmdAPI.evaluate(preamble + script);
 
-                    for (let cmd of this._commands.filter(c => !c._builtin && !c._namespace))
-                        cmd._namespace = record.namespace;
                 }
             } catch (e) {
                 console.error("custom script evaluation failed", e);
             }
         }
+
+        if (_BACKGROUND_PAGE)
+            await Promise.all(loadedScripts);
+
+        for (const namespace of this.#userCommandNamespaces)
+            namespace.assignNamespaceToCommands(false);
+        this.#userCommandNamespaces = [];
+    }
+
+    async evalUserScriptForErrors(namespace, script) {
+        const preprocessor = new CommandPreprocessor(CommandPreprocessor.CONTEXT_USER);
+        const preamble = this.generateUserCommandEvalPreamble();
+        const code = preprocessor.transform(script);
+
+        let error;
+        try {
+            const result = await cmdAPI.evaluate(preamble + code);
+
+            if (_MANIFEST_V3)
+                await result.error;
+        }
+        catch (e) {
+            error = e;
+        }
+
+        return {
+            success: !error,
+            error
+        }
+    }
+
+    generateUserCommandLoadPreamble(namespace) {
+        const namespaceEscaped = namespace.replace("\"", "\\\"");
+        return `const __namespace__ = new CommandNamespace("${namespaceEscaped}");
+_BACKGROUND_API.cmdManager.addUserCommandNamespace(__namespace__);
+const CmdUtils = _BACKGROUND_API.cmdManager.createAPIProxy(__namespace__, _BACKGROUND_API.CmdUtils);
+const cmdAPI = _BACKGROUND_API.cmdManager.createAPIProxy(__namespace__, _BACKGROUND_API.cmdAPI);
+`;
+    }
+
+    generateUserCommandEvalPreamble() {
+        return `const CmdUtils = _BACKGROUND_API.cmdManager.createAPIProxy(null, _BACKGROUND_API.CmdUtils, true);
+const cmdAPI = _BACKGROUND_API.cmdManager.createAPIProxy(null, _BACKGROUND_API.cmdAPI, true);
+`;
+    }
+
+    addUserCommandNamespace(namespace) {
+        this.#userCommandNamespaces.push(namespace);
+    }
+
+    createAPIProxy(commandNamespace, api, nop) {
+        return new Proxy(api, new APIProxyHandler(commandNamespace, nop));
     }
 
     _unloadUserCommands(namespace) {
         if (namespace)
             this._commands = this._commands.filter(c => c._namespace !== namespace);
         else
-            this._commands = this._commands.filter(c => !!c._builtin);
+            this._commands = this._commands.filter(c => c._builtin);
     }
 
     async loadCommands() {
@@ -316,8 +430,10 @@ class CommandManager {
         const canLoadUserScripts = !_MANIFEST_V3 || _MANIFEST_V3 && !_BACKGROUND_PAGE
             || _MANIFEST_V3 && _BACKGROUND_PAGE && await helperApp.probe();
 
+        _tm()
         if (canLoadUserScripts)
             await cmdManager.loadUserCommands();
+        _te()
 
         await this._prepareCommands();
     }

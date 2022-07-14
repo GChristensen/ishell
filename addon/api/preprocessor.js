@@ -447,7 +447,7 @@ export class CommandPreprocessor {
             if (properties.plain)
                 block += `        plain: ${this.generateProperty(properties.plain)},\n`;
             if (properties.display)
-                block += `    ${prefix}display = ${this.generateProperty(properties.display)};\n`;
+                block += `        display: ${this.generateProperty(properties.display)},\n`;
             block += `    };\n`
         }
         
