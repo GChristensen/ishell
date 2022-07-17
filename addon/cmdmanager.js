@@ -132,7 +132,7 @@ class CommandManager {
         this._disabledCommands = [];
     }
 
-    makeParser() {
+    async makeParser() {
         return NLParser.makeParserForLanguage("en", this._commands);
     };
 
@@ -288,18 +288,14 @@ class CommandManager {
 
     async loadBuiltinCommands() {
         const modules = [];
-        for (const path of this._builtinModules) {
-            try {
-                modules.push(this._loadBuiltinCommandModule(path));
-            } catch (e) {
-                console.error(e);
-            }
-        }
+        for (const path of this._builtinModules)
+            modules.push(this._loadBuiltinCommandModule(path));
+
         await Promise.all(modules);
 
         for (let module of modules) {
             module = await module;
-            if (module.namespace.onBuiltinCommandsLoaded)
+            if (module?.namespace?.onBuiltinCommandsLoaded)
                 try {
                     module.namespace.onBuiltinCommandsLoaded();
                 } catch (e) {
@@ -309,9 +305,15 @@ class CommandManager {
     }
 
     async _loadBuiltinCommandModule(path) {
-        const module = await import(path);
+        let module;
 
-        if (module.namespace) {
+        try {
+            module = await import(path);
+        } catch (e) {
+            console.error(`Error loading module: ${path}`, e);
+        }
+
+        if (module?.namespace) {
             if (module.namespace.annotated)
                 await this._loadAnnotatedCommandModule(path);
 
@@ -326,7 +328,7 @@ class CommandManager {
 
             return module;
         }
-        else
+        else if (module)
             console.log("module '%s' has no namespace", path);
     }
 
@@ -404,9 +406,7 @@ const cmdAPI = _BACKGROUND_API.cmdManager.createAPIProxy(__namespace__, _BACKGRO
     }
 
     generateUserCommandEvalPreamble() {
-        return `const CmdUtils = _BACKGROUND_API.cmdManager.createAPIProxy(null, _BACKGROUND_API.CmdUtils, true);
-const cmdAPI = _BACKGROUND_API.cmdManager.createAPIProxy(null, _BACKGROUND_API.cmdAPI, true);
-`;
+        return `const CmdUtils = _BACKGROUND_API.cmdManager.createAPIProxy(null, _BACKGROUND_API.CmdUtils, true); const cmdAPI = _BACKGROUND_API.cmdManager.createAPIProxy(null, _BACKGROUND_API.cmdAPI, true);`;
     }
 
     addUserCommandNamespace(namespace) {
@@ -430,10 +430,8 @@ const cmdAPI = _BACKGROUND_API.cmdManager.createAPIProxy(null, _BACKGROUND_API.c
         const canLoadUserScripts = !_MANIFEST_V3 || _MANIFEST_V3 && !_BACKGROUND_PAGE
             || _MANIFEST_V3 && _BACKGROUND_PAGE && await helperApp.probe();
 
-        _tm()
         if (canLoadUserScripts)
             await cmdManager.loadUserCommands();
-        _te()
 
         await this._prepareCommands();
     }

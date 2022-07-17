@@ -12,7 +12,7 @@
     @href link
     @display objectPreviewList
     @description A short description of your command.
-    @uuid: %%UUID%%
+    @uuid %%UUID%%
  */
 class MySearchCommand {
     constructor(args) {
@@ -27,8 +27,8 @@ class MySearchCommand {
     }
 
     parseTitle(item) {
-        // automatically parsed items are HTML-escaped,
-        // so we are parsing this in a method to avoid escaping
+        // automatically parsed items are HTML-escaped, and StackOverflow titles contain HTML,
+        // so we are parsing them in a method to avoid escaping
         return item.title;
     }
 

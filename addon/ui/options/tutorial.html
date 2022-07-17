@@ -86,7 +86,7 @@
 </p>
 
 
-<h2><span id="Hello_World:_The_First_Command">Hello World: The First Command</span></h2>
+<h2><span id="Hello_World:_The_First_Command">Hello World: The First Command (Object-Based Syntax)</span></h2>
 
 <h3><span id="Just_a_Message:_As_Simple_as_it_Gets">Just a Message: As Simple as it Gets</span></h3>
 <p>Let's start with the standard programming trope: printing "Hello, World!".</p>
@@ -615,7 +615,7 @@ arguments: [{role: "object",
     @title h1 a
     @href h1 a
     @description Find definitions in mydictionary.com
-    @uuid: 261DF55D-5E22-4E5F-8A81-6ED31B81AE3E
+    @uuid 261DF55D-5E22-4E5F-8A81-6ED31B81AE3E
 */
 class MyDictionary {
     // container, title, href, thumbnail, and body properties could be parsed
@@ -692,8 +692,8 @@ class ShowTextCommandClass {
 
 <p>You may also notice that class-based methods have the <code>args</code> argument always in
     the first position, and <code>pblock</code> argument is now called <code>display</code>. It
-    still contains a reference to the same <code>div</code> element of iShell preview area but has
-    a new nice <code>set</code> method that modifies innerHTML property of the element. <code>storage</code>
+    still contains the reference to the same <code>div</code> element of iShell preview area but has
+    the new nice <code>set</code> method that modifies innerHTML property of the element. <code>storage</code>
     argument is a reference to the <a href="API.html#bin">Bin interface</a> of the
     command.</p>
 
@@ -727,8 +727,8 @@ class SuffixCommand {
     metaconstructor(options) {
         Object.assign(this, options);
 
-        // note that in the metaconstructor it is possible to process attributes
-        // placed in the comment above the command
+        // Note that in the metaconstructor it is possible to modify the values of command
+        // properties, The following is not possible in a regular constructor:
         this.description = this.description.replace("%s", this.suffix);
     }
 
@@ -743,8 +743,7 @@ class SuffixCommand {
 }
 
 function createSuffixCommand(options) {
-    // command constructor takes the same arguments as its
-    // metaconstructor method
+    // Command constructor takes the same arguments as its metaconstructor method.
     cmdAPI.createCommand(new SuffixCommand(options));
 }
 
@@ -814,9 +813,9 @@ class ChangeColor {
     }
 
     async preview({OF}, display) {
-        // a function with its arguments should be passed to executeScript
-        // this works both in MV2 and MV3; do not pass references to class methods
-        // the jQuery option allows the use of jQuery in content scripts
+        // A function with its arguments should be passed to executeScript.
+        // This works both in MV2 and MV3; do not pass references to class methods.
+        // The jQuery option allows the use of jQuery in content scripts.
         const options = {func: extractHeadings, args: [OF.text], jQuery: true};
         const [{result}] = await cmdAPI.executeScript(options);
         const headingList = `<ul>${
@@ -832,7 +831,7 @@ class ChangeColor {
     }
 }
 
-// these functions are executed as content scripts in the context of the tab document
+// These functions are executed as content scripts in the context of the tab document:
 
 function extractHeadings(selector) {
     const headings = $(selector).map((_, element) => element.textContent);
@@ -854,7 +853,6 @@ function colorHeadings(selector, color) {
     @command
     @delay 1000
     @description Lets you jot a memo for the page.
-    @uuid FA6A3460-E825-4CFA-A24F-5908131D29FD
 */
 class Memo {
     constructor(args) {
@@ -887,7 +885,7 @@ class Memo {
 
 <h1 class="section-heading"><span id="Switching_Tabs">Switching Tabs: Creating Custom Noun Types</span></h1>
 
-<p>The last command in this tutorial is for switching between tabs. The end goal is this: type a
+<p>We can switch browser tabs with a command. The end goal is this: type a
     few characters that match the title of an open tab (in any window), hit return, and you've
     switched to that tab.
 </p>
@@ -908,26 +906,14 @@ class Memo {
 <pre><code data-language="javascript">const noun_type_browser_tab = {
     label: "tab title or URL",
 
-    async _searchTabs(text) {
-        const matches = [];
-        const matcher = new RegExp(text, "i");
+    // Suggestion methods declared as async should not use the callback argument.
+    async suggest(text, html, callback, selectedIndices) {
         const tabs = await browser.tabs.query({});
-        const matchingTabs = tabs.filter(tab => {
-            const match = matcher.exec(tab.title) || matcher.exec(tab.url);
-            match && (matches[tab.id] = match);
-            return !!match;
-        });
+        let suggs = tabs.map(tab => cmdAPI.makeSugg(tab.title || tab.url, null, tab, 1,
+                             selectedIndices));
 
-        return [matchingTabs, matches];
-    },
-
-    // suggestion methods declared as async do not need to use callback
-    async suggest(text, html, _, selectedIndices) {
-        const [tabs, matches] = await this._searchTabs(text);
-        const makeSugg = tab => cmdAPI.makeSugg(tab.title || tab.url, null, tab,
-                                                cmdAPI.matchScore(matches[tab.id]),
-                                                selectedIndices);
-        return tabs.map(makeSugg);
+        // cmdAPI.grepSuggs filters suggestions by the user input and scores them.
+        return cmdAPI.grepSuggs(text, suggs);
     }
 };</code></pre>
 
@@ -937,11 +923,11 @@ class Memo {
     noun type only cares about the plain text of the tab name, so we ignore the value of html.
 </p>
 <p>The callback argument is for use by nountypes that need to run asynchronously, i.e. because they
-    need to do network calls to generate suggestions. The callback is a function; instead of
-    returning a list of suggestions right away, an asynchronous noun type can call the callback with
-    each suggestion it generates. Note that when the <code>suggest</code> function is declared as
-    async, it <b>should not</b> use the callback. The <code>callback</code> parameter suits only for
-    old-fashioned callback-based API, such as XMLHttpRequest or jQuery.ajax.
+    need to do network calls to generate suggestions. Note that when the <code>suggest</code> function
+    is declared as async, it <b>should not</b> call this function. Please, avoid the use of
+    the callback entirely, as it is left only for backward compatibility.
+    Return promises even if you use the old-fashioned callback-based API, such as XMLHttpRequest or
+    jQuery.ajax.
 </p>
 <p>We use the convenience function <code>cmdAPI.makeSugg()</code> to generate an input object of the
     type that the iShell parser expects. The full signature of this function is:
@@ -1004,6 +990,188 @@ class SwitchTab {
     }
     execute({OBJECT: {data: tab}}) {
         browser.tabs.update(tab?.id, {active: true});
+    }
+}</code></pre>
+
+<h1 class="section-heading"><span id="Real_World_Command">A Full-Blown Command: Create Pins on Pinterest</span></h1>
+<p>The following command shows how things are generally done in iShell. It also demonstrates some
+    tricks that you would not find in the official documentation. The user would be able to
+    pin images found on the current page to a <a href="https://pinterest.com">Pinterest</a> board.
+    One of the command arguments will provide autocompletion for all user's Pinterest boards.</p>
+
+<pre><code data-language="javascript">/**
+    This noun type provides autocompletion for user's Pinterest boards.
+
+    @label board
+    @nountype
+*/
+async function noun_type_board(text, html, _, selectionIndices) {
+    let suggs = [], boards = await getPinterestBoards(this);
+
+    if (boards) {
+        // Create suggestions from all user's boards and filter them by the current input.
+        // Created suggestions contain board API objects.
+        suggs = boards.items.map(b => cmdAPI.makeSugg(b.name, b.name, b, 1, selectionIndices));
+        suggs = cmdAPI.grepSuggs(text, suggs);
+    }
+
+    // To allow the creation of new boards, add the current input as a suggestion displayed
+    // at the bottom by scoring it at .001 in the presence of other suggestions. This suggestion
+    // does not contain a board object. Note that generally the score value of 1 used here in the case
+    // if there are no boards may conflict with other arguments and produce unexpected results.
+    // Due to the conceptual limitations of the iShell parser, the text of this suggestion will also
+    // not contain spaces because we already have one argument of the arbitrary text noun type
+    // (OBJECT). All text after the first space will automatically be assigned to the OBJECT argument.
+    cmdAPI.addSugg(suggs, text, html, null, suggs.length? .001 : 1, selectionIndices);
+    return suggs;
+}
+
+async function getPinterestBoards(nounType) {
+    if (!nounType._boards) {
+        // Obtain the same storage Bin that is used by the command class.
+        const cmdDef = cmdAPI.getCommandAttributes(Pinterest);
+        const storage = await cmdAPI.createBin(cmdDef.uuid);
+        // Obtain the list of user's Pinterest boards.
+        const pinterestAPI = new PinterestAPI(storage);
+        nounType._boards = await pinterestAPI.getBoards();
+    }
+
+    return nounType._boards;
+}
+
+/**
+    Execute the command without arguments to authorize on Pinterest.
+    To create a pin, fill in the arguments and click on an image in the preview area
+    or press the corresponding Ctrl+Alt+&lt;key&gt; combination.
+
+    # Syntax
+    **pinterest** *pin title* **to** *board* [**of** *dimension*]
+
+    # Arguments
+    - *pin title* - title of the pin being created.
+    - *board* - name of the board to attach the pin to. Created if not exists.
+    - *dimension* - minimal dimension of the images displayed in the command preview.
+      500 pixels is the default.
+
+    # Examples
+    **pinterest** Nice Kitty to cats of 1000
+
+    @command
+    @markdown
+    @delay 1000
+    @icon https://pinterest.com/favicon.ico
+    @description Pin image to a board on Pinterest.
+    @uuid 06364E1A-7A38-4590-86F6-6CA7AECD971F
+ */
+class Pinterest {
+    #pinterestAPI;
+
+    constructor(args) {
+        args[OBJECT] = {nountype: noun_arb_text, label: "title"};
+        args[TO]     = {nountype: noun_type_board, label: "board"};
+        args[OF]     = {nountype: noun_type_number, label: "dimension"};
+    }
+
+    // Create the PinterestAPI object on the iShell load, here a mock object is created.
+    // The real API implementation may use storage to keep OAuth2 authentication tokens.
+    async load(storage) {
+        this.#pinterestAPI = new PinterestAPI(storage);
+    }
+
+    async preview({OBJECT: {text: title}, OF: {text: dimension}, TO}, display, storage) {
+        dimension = dimension || 500;
+        const images = await this.#extractImagesFromPage(dimension);
+
+        if (images?.length) {
+            const handler = i => this.#createPin(TO.data || TO.text, title, images[i].url);
+
+            display.imageList(images.map(i => i.url), handler);
+
+            $("img", display).each(function() {
+                const image = images.find(i => i.url === this.src);
+                const title = `${image.width}x${image.height}`;
+                this.setAttribute("title", title);
+            });
+        }
+        else
+            display.text(`No images larger than ${dimension}px found.`)
+    }
+
+    async #extractImagesFromPage(dimension) {
+        const params = {func: extractImagesUserScript, args: [dimension], jQuery: true};
+        try {
+            const [{result}] = await cmdAPI.executeScript(params);
+            return result;
+        } catch (e) {
+            console.error(e);
+        }
+    }
+
+    async #createPin(board, title, imageURL) {
+        if (!board) {
+            cmdAPI.notify("No board is selected.");
+            return;
+        }
+
+        if (typeof board === "string") {
+            board = await this.#pinterestAPI.createBoard(board);
+            if (!board) {
+                cmdAPI.notify("Error creating board.");
+                return;
+            }
+        }
+
+        if (board) {
+            const link = cmdAPI.getLocation();
+            const success = await this.#pinterestAPI.createPin(board.id, title, link, imageURL);
+            if (!success)
+                cmdAPI.notify("Error creating pin.")
+        }
+    }
+
+    async execute({OBJECT: {text: query}}, storage) {
+        await this.#pinterestAPI.authenticate();
+    }
+}
+
+function extractImagesUserScript(dimension) {
+    dimension = parseInt(dimension);
+
+    let images = $("img").filter(function () {
+        return this.naturalWidth >= dimension || this.naturalHeight >= dimension;
+    });
+
+    const sortByDimDesc = (a, b) => Math.max(b.naturalWidth, b.naturalHeight)
+                                  - Math.max(a.naturalWidth, a.naturalHeight)
+
+    images = images.toArray().sort(sortByDimDesc);
+
+    return images.map(i => ({url: i.src, width: i.naturalWidth, height: i.naturalHeight}));
+}
+
+// A mock implementation of the Pinterest API.
+class PinterestAPI {
+    async getBoards() {
+        return {
+            items: [
+                {name: "Funny Cats"},
+                {name: "Memes"}
+            ]
+        }
+    }
+
+    async createBoard(name) {
+        console.log(`Created board: ${name}.`);
+        return true
+    }
+
+    async createPin(boardId, title, imageURL) {
+        console.log(`Created pin: "${title}" with image: ${imageURL}.`);
+        return true
+    }
+
+    async authenticate() {
+        console.log(`Authorized Pinterest API.`);
     }
 }</code></pre>
 

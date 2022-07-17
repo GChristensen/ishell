@@ -232,15 +232,6 @@ NounUtils.grepSuggs = function grepSuggs(input, suggs, key) {
         }
     }
 
-    // var result = suggs.map(sugg => {
-    //     if ((match = re.exec(sugg[key]))) {
-    //         sugg.score = matchScore(match);
-    //     }
-    //     else
-    //         sugg.score = 0;
-    //     return sugg;
-    // })
-
     const byScoreDescending = (a, b) => b.score - a.score;
 
     return result.sort(byScoreDescending);

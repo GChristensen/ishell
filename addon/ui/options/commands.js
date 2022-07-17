@@ -41,7 +41,7 @@ async function buildTable() {
 
     let userNamespaces = await repository.fetchUserScriptNamespaces();
     userNamespaces = userNamespaces.filter(n => !!n && n !== "default");
-    userNamespaces = userNamespaces.sort((a, b) => a.localeCompare(b, undefined, {sensitivity: 'base'}));
+    userNamespaces = userNamespaces.sort(cmdAPI.localeCompare());
 
     for (const n of userNamespaces)
         insertNamespace(n, userCommands, makeEditorLink(n));
@@ -157,7 +157,7 @@ function formatUrl(url) {
     return hu.link(hu);
 }
 
-const compareByName = (a, b) => a.name.localeCompare(b.name, undefined, {sensitivity: 'base'});
+const compareByName = cmdAPI.localeCompare("name");
 
 function fillTableRowForCmd(row, cmd, className) {
     var {name, names} = cmd;

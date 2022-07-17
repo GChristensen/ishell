@@ -2,6 +2,7 @@ import {settings} from "../settings.js";
 import {cmdManager} from "../cmdmanager.js";
 import {camelCaseToSnakeCase} from "../utils.js";
 import {CommandPreprocessor} from "../api/preprocessor.js";
+import {cmdAPI} from "../api/cmdapi.js";
 
 export const namespace = new CommandNamespace(CommandNamespace.SCRAPYARD, true);
 
@@ -670,12 +671,12 @@ chrome.management.onUninstalled.addListener(async (info) => {
 let SCRAPYARD_COMMANDS;
 namespace.onModuleCommandsLoaded = function() {
     const commandUUIDs = [
-        Shelf._annotations.uuid,
-        Scrapyard._annotations.uuid,
-        Bookmark._annotations.uuid,
-        Archive._annotations.uuid,
-        CopyAt._annotations.uuid,
-        MoveAt._annotations.uuid
+        cmdAPI.getCommandAttributes(Shelf).uuid,
+        cmdAPI.getCommandAttributes(Scrapyard).uuid,
+        cmdAPI.getCommandAttributes(Bookmark).uuid,
+        cmdAPI.getCommandAttributes(Archive).uuid,
+        cmdAPI.getCommandAttributes(CopyAt).uuid,
+        cmdAPI.getCommandAttributes(MoveAt).uuid
     ];
 
     SCRAPYARD_COMMANDS = commandUUIDs.map(cmdManager.getCommandByUUID.bind(cmdManager));

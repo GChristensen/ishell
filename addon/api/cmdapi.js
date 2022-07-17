@@ -17,6 +17,10 @@ export const cmdAPI = {
         return cmdManager.createCommand(options);
     },
 
+    getCommandAttributes(className) {
+        return className.__definition;
+    },
+
     htmlPreviewList(prefix, block, htmls, callback, css) {
         return CmdUtils.previewList(prefix, block, htmls, callback, css);
     },
@@ -49,6 +53,24 @@ export const cmdAPI = {
 export const R = cmdAPI.reduceTemplate;
 
 cmdAPI.objectPreviewList.CSS = CmdUtils.previewList2.CSS;
+
+cmdAPI.localeCompare = function(prop, desc) {
+    if (prop && !desc)
+        return (a, b) => a[prop].localeCompare(b[prop], undefined, {sensitivity: 'base'});
+    else if (prop && desc)
+        return (a, b) => b[prop].localeCompare(a[prop], undefined, {sensitivity: 'base'});
+    else if (!prop && desc)
+        return (a, b) => b.localeCompare(a, undefined, {sensitivity: 'base'});
+    else if (!prop && !desc)
+        return (a, b) => a.localeCompare(b, undefined, {sensitivity: 'base'});
+}
+
+cmdAPI.addSugg = function(suggs, text, html, data, score, selectionIndices) {
+     if (!suggs.some(s => !cmdAPI.localeCompare()(s.text, text))) {
+        const newSugg = cmdAPI.makeSugg(text, html, data, score, selectionIndices);
+        suggs.push(newSugg);
+    }
+}
 
 cmdAPI.previewFetch = async function(display, resource, init) {
     const REASON_TIMEOUT = "Timeout";
@@ -165,6 +187,79 @@ cmdAPI.executeScript = async function(tabId, options) {
     return executeScript(tabId, options);
 };
 
+cmdAPI.imagePreviewList = function(prefix, display, imageURLs, callback, css) {
+    if (typeof prefix !== "string") {
+        [display, imageURLs, callback, css] = [prefix, display, imageURLs, callback];
+        prefix = "";
+    }
+
+    const images = [];
+
+    imageURLs.forEach(imageURL => {
+        let span = document.createElement("span"); // <a> events do not bubble without href
+        let img = document.createElement("img");
+        img.src = imageURL;
+        span.appendChild(img);
+        images.push(span);
+    });
+
+    let i = 0;
+    for (let span of images) {
+        span.id = i;
+        span.setAttribute("key", i);
+        if (i < 32)
+            span.setAttribute("accessKey", String.fromCharCode("a".charCodeAt() + i));
+        ++i
+    }
+
+    const html =
+        `<style>
+            #image-preview-list {
+                text-align: center;
+            }
+            #image-preview-list span {
+              display: inline-block; vertical-align: top; position: relative;
+              margin: 0 1px 2px; padding: 0;
+              cursor: pointer;
+            }
+            #image-preview-list span::after {
+              content: attr(accesskey);
+              position: absolute; top: 0; left: 0;
+              padding: 0 4px 2px 3px; border-bottom-right-radius: 6px;
+              opacity: 0.5; color: #fff; background-color: #000;
+              font:bold medium monospace;
+            }
+            img {
+                max-width: 150px;
+                max-height: 150px;
+            }
+            ${css}
+         </style>
+         ${prefix}
+         <div id="image-preview-list">${R(images.map(a => a.outerHTML),html => html)}</div>
+        `;
+
+    display.set(html);
+
+    callback = callback || (i => browser.tabs.create({url: imageURLs[i], active: false}));
+
+    const thumbsDIV = $("#image-preview-list", display)[0], start = 0;
+    function onPreviewListClick(ev) {
+        ev.preventDefault();
+        var {target} = ev;
+        while (!target.getAttribute("key"))
+            target = target.parentNode;
+        callback.call(this, target.getAttribute("key"), ev);
+    }
+    callback && thumbsDIV.addEventListener("click", onPreviewListClick, false);
+    callback && thumbsDIV.addEventListener("mousedown", function (ev) {
+        if (ev.which === 2)
+            onPreviewListClick(ev)
+    }, false);
+
+    return thumbsDIV;
+}
+
 // add everything from Utils
 for (const prop of Object.keys(Utils))
     if (!cmdAPI.hasOwnProperty(prop) && typeof Utils[prop] === "function")
@@ -175,7 +270,7 @@ for (const prop of Object.keys(CmdUtils))
     if (!cmdAPI.hasOwnProperty(prop) && typeof CmdUtils[prop] === "function")
         cmdAPI[prop] = delegate(CmdUtils, CmdUtils[prop]);
 
-// add missing properties back to CmdUtils
+// add missing functions back to CmdUtils
 for (const prop of Object.keys(cmdAPI))
     if (!CmdUtils.hasOwnProperty(prop) && typeof cmdAPI[prop] === "function")
         CmdUtils[prop] = delegate(cmdAPI, cmdAPI[prop]);

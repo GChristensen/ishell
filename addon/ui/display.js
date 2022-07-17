@@ -10,6 +10,7 @@ export function createDisplayProxy(block) {
     block.fetchText = fetchTextBlock;
     block.fetchJSON = fetchJSONBlock;
     block.htmlList = htmlListBlock;
+    block.imageList = imageListBlock;
     block.objectList = objectListBlock;
 
     return block;
@@ -62,6 +63,17 @@ function htmlListBlock(...args) {
     return cmdAPI.htmlPreviewList(...args);
 }
 
+function imageListBlock(...args) {
+    if (typeof args[0] === "string") {
+        const prefix = args.shift();
+        args = [prefix, this, ...args];
+    }
+    else
+        args = [this, ...args];
+
+    return cmdAPI.imagePreviewList(...args);
+}
+
 function objectListBlock(...args) {
     if (typeof args[0] === "string") {
         const prefix = args.shift();
@@ -96,6 +108,8 @@ class DisplayHandler {
                 return (...args) => fetchJSONBlock.call(target, ...args);
             case "htmlList":
                 return (...args) => htmlListBlock.call(target, ...args);
+            case "imageList":
+                return (...args) => imageListBlock.call(target, ...args);
             case "objectList":
                 return (...args) => objectListBlock.call(target, ...args);
             default:

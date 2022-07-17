@@ -7,12 +7,15 @@ export class CommandList {
     #maxSuggestions;
     #previousSelection;
     #selectedSuggestion = 0;
-    #displayProxy;
 
     constructor(popup, maxSuggestions) {
         this.#maxSuggestions = maxSuggestions || 10;
-        this.#parser = cmdManager.makeParser();
         this.#popup = new WeakRef(popup);
+        return cmdManager.makeParser()
+            .then(parser => {
+                this.#parser = parser;
+                return this;
+            })
     }
 
     getAutocompletion() {
@@ -116,7 +119,7 @@ export class CommandList {
             this._processSuggestions(suggestions, previousSelection);
         };
 
-        query.run(); // WARNING: callback suggestions may make several calls of onResults
+        return query.run(); // WARNING: callback suggestions may make several calls of onResults
     }
 
     _processSuggestions(suggestions, previousSelection) {

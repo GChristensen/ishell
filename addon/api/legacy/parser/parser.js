@@ -254,7 +254,7 @@ var EnParser = {
 };
 
 NLParser.makeParserForLanguage =
-    function makeParserForLanguage(languageCode, verbList, contextUtils = ContextUtils, suggestionMemory = new SuggestionMemory()) {
+    async function makeParserForLanguage(languageCode, verbList, contextUtils = ContextUtils, suggestionMemory = new SuggestionMemory()) {
         let plugin = PLUGINS[languageCode]
         if (!plugin) {
             plugin = PLUGINS[languageCode] = {parseSentence: EnParser.parseSentence}
@@ -266,7 +266,9 @@ NLParser.makeParserForLanguage =
             plugin.pronouns = parser.anaphora.map(a =>
                 RegExp(a.replace(/\W/g, "\\$&").replace(/^\b|\b$/g, "\\b"), "i"))
         }
-        return new Parser(verbList, plugin, contextUtils, suggestionMemory);
+        const parser = new Parser(verbList, plugin, contextUtils, suggestionMemory);
+        await parser.initialize();
+        return parser;
     };
 
 // ParserQuery: An object that wraps a request to the parser for suggestions
@@ -280,6 +282,7 @@ function ParserQuery(parser, queryString, context, maxSuggestions) {
     this._queryString = queryString;
     this._context = context;
     this._parsingsList = [];
+    this._pendingCallbacks = [];
 
     this.maxSuggestions = maxSuggestions;
     this.nounCache = {"": {text: "", html: "", data: null, summary: ""}};
@@ -311,9 +314,13 @@ ParserQuery.prototype = {
     },
 
     // The handler that makes this a listener for partiallyParsedSentences.
-    onNewParseGenerated: async function PQ_onNewParseGenerated() {
+    onNewParseGenerated: async function PQ_onNewParseGenerated(triggerResults = true) {
         await this._refreshSuggestionList();
-        this.onResults();
+
+        if (triggerResults) {
+            await Promise.all(this._pendingCallbacks);
+            this.onResults();
+        }
     },
 
     run: async function PQ_run() {
@@ -364,6 +371,10 @@ function Parser(verbList, languagePlugin, contextUtils, suggestionMemory) {
 }
 
 Parser.prototype = {
+    initialize: async function() {
+        return this._sortGenericVerbCache();
+    },
+
     _nounFirstSuggestions:
         function P__nounFirstSuggestions(selObj, maxSuggestions, query) {
             var ok = v => !v.disabled
@@ -376,14 +387,14 @@ Parser.prototype = {
             return result;
         },
 
-    strengthenMemory: function P_strengthenMemory(chosenSuggestion) {
+    strengthenMemory: async function P_strengthenMemory(chosenSuggestion) {
         var verb = chosenSuggestion._verb;
         if (chosenSuggestion.hasFilledArgs) {
-            this._suggestionMemory.remember("", verb.cmd.id);
-            verb.usesAnySpecificNounType() || this._sortGenericVerbCache();
+            await this._suggestionMemory.remember("", verb.cmd.id);
+            verb.usesAnySpecificNounType() || await this._sortGenericVerbCache();
         }
         chosenSuggestion.fromNounFirstSuggestion ||
-        this._suggestionMemory.remember(verb.input, verb.cmd.id);
+        await this._suggestionMemory.remember(verb.input, verb.cmd.id);
     },
 
     async getSuggestionMemoryScore(input, cmdId) {
@@ -453,10 +464,9 @@ Parser.prototype = {
             verbs.push(verb);
             (verb.usesAnySpecificNounType() ? specifics : generics).push(verb);
         }
-        this._sortGenericVerbCache();
     },
 
-    _sortGenericVerbCache: function P__sortGenericVerbCache() {
+    _sortGenericVerbCache: async function P__sortGenericVerbCache() {
         var suggMemory = this._suggestionMemory;
         if (!suggMemory) return;
 
@@ -466,13 +476,12 @@ Parser.prototype = {
             return score;
         }
 
-        Promise.all(this._rankedVerbsThatUseGenericNouns.map(async v => await scoreVerb(v)))
-            .then(() => {
-                Utils.sort(
-                    this._rankedVerbsThatUseGenericNouns,
-                    v => v.__initialScore,
-                    true);
-            });
+        await Promise.all(this._rankedVerbsThatUseGenericNouns.map(async v => await scoreVerb(v)));
+
+        Utils.sort(
+            this._rankedVerbsThatUseGenericNouns,
+            v => v.__initialScore,
+            true);
     },
 };
 
@@ -761,19 +770,26 @@ PartiallyParsedSentence.prototype = {
                     this.addArgumentSuggestion(argName, suggestions[i]);
             }
             else {
-                let self = this;
+                let resolveCallback;
 
                 // Callback function for asynchronously generated suggestions:
-                function callback(suggs) {
-                    var suggestions = self._handleSuggestions(argName, suggs);
-                    if (!suggestions.length) return;
+                const callback = suggs => {
+                    var suggestions = this._handleSuggestions(argName, suggs);
+                    if (!suggestions.length) {
+                        resolveCallback && resolveCallback(false);
+                        return;
+                    }
 
                     for (let sugg of suggestions) {
                         sugg.score = sugg.score || 1;
                         for (let [pps, arg] of callback.otherSentences)
                             pps.addArgumentSuggestion(arg, sugg);
                     }
-                    self._query.onNewParseGenerated();
+
+                    if (resolveCallback)
+                        this._query.onNewParseGenerated(false).then(() => resolveCallback(true));
+                    else
+                        this._query.onNewParseGenerated();
                 }
 
                 const printError = e => console.error(
@@ -793,9 +809,12 @@ PartiallyParsedSentence.prototype = {
                 suggestions.callback = callback;
                 nounCache[key] = suggestions;
 
-                promise
-                    ?.then(suggs => callback(suggs))
-                    ?.catch(printError);
+                if (promise) {
+                    const callbackPromise = new Promise(resolve => resolveCallback = resolve);
+                    this._query._pendingCallbacks.push(callbackPromise);
+                    promise.then(suggs => callback(suggs))
+                           .catch(printError);
+                }
             }
             return suggestions.length > 0;
         },

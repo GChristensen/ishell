@@ -1,4 +1,6 @@
 import {cmdManager} from "../cmdmanager.js";
+import {cmdAPI} from "../api/cmdapi.js";
+import {capitalize} from "../utils.js";
 
 export const namespace = new CommandNamespace(CommandNamespace.BROWSER, true);
 
@@ -23,22 +25,11 @@ if (browser.contextualIdentities) {
  */
 export function noun_type_tab_group(text, html, _, selectionIndices) {
     if (text) {
-        const matcher = new RegExp(text, "i");
-        const matches = {};
+        let suggs = Object.keys(this._cmd.deref().tabGroups);
+        suggs = suggs.map(name => cmdAPI.makeSugg(name, name, null, 1, selectionIndices));
+        suggs = cmdAPI.grepSuggs(text, suggs);
 
-        const suggs = Object.values(this._cmd.deref().tabGroups)
-            .filter(i => {
-                matches[i.name] = matcher.exec(i.name);
-                return i.name && matches[i.name];
-            })
-            .map(i => cmdAPI.makeSugg(i.name, i.name, null,
-                matches[i.name].input? cmdAPI.matchScore(matches[i.name]): .0001,
-                selectionIndices
-            ));
-
-        const textSugg = cmdAPI.makeSugg(text, html, null, suggs.length ? .001 : 1, selectionIndices);
-        if (textSugg)
-            suggs.push(textSugg);
+        cmdAPI.addSugg(suggs, text, html, null, .001, selectionIndices);
 
         if (suggs.length > 0)
             return suggs;
@@ -51,19 +42,22 @@ export function noun_type_tab_group(text, html, _, selectionIndices) {
     Works best if persistent sessions are enabled in the browser settings.
 
     # Syntax
-    **tab-group** [**all** | *name*] [**to** *operation*] [**in** *container*] [**with** **all** | *name*]
+    **tab-group** [**all** | *name*] [**to** *operation*] [**in** *container*] [**by** *action*] [**at** *name*]
 
     # Arguments
-    - *name* - the name of a tab group to create or to operate on. The current tab group is assumed if not specified.
-        The keyword **all** designates all existing tab groups.
+    - *name* - the name of a tab group to create or to operate on. May also be specified in the **at** argument.
+        The current tab group is assumed if not specified. The keyword **all** designates all existing tab groups.
     - *operation* - the operation to perform on a tab group. *switch* is performed the if argument is not specified.
         - *switch* - switch to the tab group with the given name. The tab group will be created if not exists.
+        - *copy* and *paste* - copy or paste the tab group to/from the clipboard.
+        - *reload* - reload all tabs in the tab group.
         - *close* - close all tabs in the tab group.
         - *delete* - delete the specified tab group.
         - *window* - open all tabs of the tab group in a new window.
-        - *move* - move the tabs selected in the browser UI to the tab group.
-        - *merge* - move all tabs from the tab group specified by the **with** argument to the group specified by
-        the first argument.
+        - *move* - move all tabs from the current window to the specified tab group.
+        - *move-selected* - move the tabs selected in the browser UI to the specified tab group.
+    - *action* - an additional operation to perform.
+        - *switching* - switch to the specified tab group. May be used with the *move* and *move-all* operations.
     - *container* - the account container to use in the tab group.
 
     # Examples
@@ -71,7 +65,7 @@ export function noun_type_tab_group(text, html, _, selectionIndices) {
     - **tgr** *books* **in** *shopping*
     - **tgr** *books* **to** *delete*
     - **tgr** **all** **to** *close*
-    - **tgr** **to** *merge* *with* **all**
+    - **tgr** *new group* **to** *all* **by** *switching*
 
     @command tab-group, tgr
     @markdown
@@ -90,15 +84,16 @@ export class TabGroup {
 
         args[OBJECT] = {nountype: noun_type_tab_group, label: "name"}; // object
         //args[FOR]    = {nountype: noun_arb_text, label: "text"}; // subject
-        args[TO]     = {nountype: ["switch", "close", "delete", "window", "move", "merge"], label: "action"}; // goal
+        args[TO]     = {nountype: ["copy", "paste", "switch", "reload", "close", "delete", "window", "move",
+                                   "move-selected"], label: "action"}; // goal
         //args[FROM]   = {nountype: noun_arb_text, label: "text"}; // source
         //args[NEAR]   = {nountype: noun_arb_text, label: "text"}; // location
-        //args[AT]     = {nountype: noun_arb_text, label: "text"}; // time
-        args[WITH]   = {nountype: noun_type_tab_group, label: "name"}; // instrument
+        args[AT]     = {nountype: noun_type_tab_group, label: "text"}; // time
+        //args[WITH]   = {nountype: noun_type_tab_group, label: "name"}; // instrument
         args[IN]     = {nountype: noun_type_container, label: "container"}; // format
         //args[OF]     = {nountype: noun_arb_text, label: "text"}; // modifier
         //args[AS]     = {nountype: noun_arb_text, label: "text"}; // alias
-        //args[BY]     = {nountype: noun_arb_text, label: "text"}; // cause
+        args[BY]     = {nountype: ["switching"], label: "action"}; // cause
         //args[ON]     = {nountype: noun_arb_text, label: "text"}; // dependency
     }
 
@@ -131,11 +126,13 @@ export class TabGroup {
 
     async #onWindowCreated(browserWindow) {
         if (this.#recentTabGroup)
-            await this.#setWindowTabGroup(browserWindow, this.#recentTabGroup);
+            await this.#setWindowTabGroupName(browserWindow, this.#recentTabGroup);
     }
 
     async #onTabCreated(tab) {
-        return this.#addToActiveTabGroup(tab);
+        const name = await this.#getTabGroupName(tab, true);
+        if (!name)
+            await this.#addToActiveTabGroup(tab);
     }
 
     #onTabAttached(tabId, attachInfo) {
@@ -153,7 +150,7 @@ export class TabGroup {
         const tab = await browser.tabs.get(request.tabId);
 
         if (tab) {
-            const windowTabGroup = await this.#getTabWindowTabGroup(tab);
+            const windowTabGroup = await this.#getTabWindowTabGroupName(tab);
             const tabGroup = this.#tabGroups[windowTabGroup];
 
             if (windowTabGroup !== DEFAULT_TAB_GROUP && tabGroup.container) {
@@ -169,7 +166,11 @@ export class TabGroup {
         return {};
     }
 
-    async preview({OBJECT: {text: name}, TO: {text: action}, IN, WITH: {text: nameFrom}}, display, storage) {
+    async preview(args, display, storage) {
+        let {OBJECT: {text: name}, TO: {text: action}, BY: {text: action2}, IN, AT} = args;
+
+        name = name || AT?.text;
+
         if (name && !action) {
             if (this.#tabGroups[name])
                 await this.#listGroupTabs(display, name);
@@ -180,7 +181,8 @@ export class TabGroup {
             await this.#listGroups(display);
         }
         else if (action) {
-            this.#describeAction(display, action, name, nameFrom);
+            const params = {action, action2, name};
+            await this.#describeAction(display, params);
         }
     }
 
@@ -215,32 +217,32 @@ export class TabGroup {
         delete this.#tabGroups[name];
     }
 
-    async #getWindowTabGroup(window) {
+    async #getWindowTabGroupName(window) {
         const windowTabGroup = await browser.sessions.getWindowValue(window.id, 'tabGroup');
         return windowTabGroup || DEFAULT_TAB_GROUP;
     }
 
-    async #setWindowTabGroup(window, name) {
+    async #setWindowTabGroupName(window, name) {
         return browser.sessions.setWindowValue(window.id, 'tabGroup', name);
     }
 
-    async #getTabWindowTabGroup(tab) {
+    async #getTabWindowTabGroupName(tab) {
         const tabWindow = await browser.windows.get(tab.windowId);
-        return this.#getWindowTabGroup(tabWindow);
+        return this.#getWindowTabGroupName(tabWindow);
     }
 
-    async #getCurrentWindowTabGroup() {
+    async #getCurrentWindowTabGroupName() {
         const currentWindow = await browser.windows.getCurrent();
-        return this.#getWindowTabGroup(currentWindow);
+        return this.#getWindowTabGroupName(currentWindow);
     }
 
-    async #setCurrentWindowTabGroup(name) {
+    async #setCurrentWindowTabGroupName(name) {
         const currentWindow = await browser.windows.getCurrent();
-        return this.#setWindowTabGroup(currentWindow, name);
+        return this.#setWindowTabGroupName(currentWindow, name);
     }
 
     async #addToActiveTabGroup(tab) {
-        const windowTabGroup = await this.#getTabWindowTabGroup(tab);
+        const windowTabGroup = await this.#getTabWindowTabGroupName(tab);
         if (windowTabGroup !== DEFAULT_TAB_GROUP)
             await browser.sessions.setTabValue(tab.id, 'tabGroup', windowTabGroup);
     }
@@ -249,17 +251,21 @@ export class TabGroup {
         await browser.sessions.setTabValue(tab.id, 'tabGroup', tabGroup);
     }
 
-    async #getTabGroup(tab) {
+    async #getTabGroupName(tab, raw) {
         let tabGroup = await browser.sessions.getTabValue(tab.id, 'tabGroup');
-        return tabGroup || DEFAULT_TAB_GROUP;
+        if (raw)
+            return tabGroup;
+        else
+            return tabGroup || DEFAULT_TAB_GROUP;
     }
 
     async #switchToTabGroup(name, activeTab) {
-        let windowTabGroup = await this.#getCurrentWindowTabGroup();
+        let windowTabGroup = await this.#getCurrentWindowTabGroupName();
+        name = name || DEFAULT_TAB_GROUP;
 
         if (windowTabGroup !== name) {
             this.#installListeners();
-            await this.#setCurrentWindowTabGroup(name);
+            await this.#setCurrentWindowTabGroupName(name);
             this.#recentTabGroup = name;
 
             const tabs = await browser.tabs.query({ currentWindow: true });
@@ -291,7 +297,7 @@ export class TabGroup {
 
         await Promise.all(tabs.map(async tab => {
             try {
-                const tabGroup = await this.#getTabGroup(tab);
+                const tabGroup = await this.#getTabGroupName(tab);
 
                 if (tabGroup !== name)
                     tabsToHide.push(tab);
@@ -316,7 +322,7 @@ export class TabGroup {
 
         const result = [];
         for (const tab of tabs) {
-            const tabGroup = await this.#getTabGroup(tab);
+            const tabGroup = await this.#getTabGroupName(tab);
             if (tabGroup === name)
                 result.push(tab);
         }
@@ -346,7 +352,7 @@ export class TabGroup {
     }
 
     async #listGroups(display) {
-        const windowTabGroup = await this.#getCurrentWindowTabGroup();
+        const windowTabGroup = await this.#getCurrentWindowTabGroupName();
         const groupTabs = {};
 
         let groups = Object.values(this.#tabGroups);
@@ -386,8 +392,7 @@ export class TabGroup {
         const defaultGroupIdx = groups.findIndex(g => g.name === DEFAULT_TAB_GROUP);
         const defaultGroup = groups[defaultGroupIdx];
         groups.splice(defaultGroupIdx, 1);
-        groups.sort((a, b) =>
-            a.name.localeCompare(b.name, undefined, {sensitivity: 'base'}))
+        groups.sort(cmdAPI.localeCompare("name"))
         return [defaultGroup, ...groups];
     }
 
@@ -430,28 +435,66 @@ export class TabGroup {
         return `Create the <b>${name}</b> tab group${container}.`;
     }
 
-    #describeAction(display, action, name, nameFrom) {
+    async #describeAction(display, params) {
         let html = "";
 
-        switch (action) {
+        switch (params.action) {
+            case "copy":
+                html = this.#describeCopy(params.name);
+                break;
+            case "paste":
+                html = await this.#describePaste();
+                break;
+            case "reload":
+                html = this.#describeReload(params.name);
+                break;
             case "close":
-               html = this.#describeClose(name);
-               break;
+                html = this.#describeClose(params.name);
+                break;
             case "delete":
-                html = this.#describeDelete(name);
+                html = this.#describeDelete(params.name);
                 break;
             case "window":
-                html = this.#describeWindow(name);
+                html = this.#describeWindow(params.name);
                 break;
             case "move":
-                html = this.#describeMove(name);
-                break;
-            case "merge":
-                html = this.#describeMerge(name, nameFrom);
+            case "move-selected":
+                html = this.#describeMove(params.name, params.action === "move");
                 break;
         }
 
         display.text(html);
+    }
+
+    #describeCopy(name) {
+        if (name) {
+            if (name === ALL_GROUPS_SPECIFIER)
+                return `This operation can not be performed.`;
+            else
+                return `Copy the <b>${name}</b> tab group to the clipboard.`;
+        }
+        else
+            return `Copy the the current tab group to the clipboard.`
+    }
+
+    async #describePaste() {
+        const inputObject = await this.#parseClipboardContent();
+
+        if (inputObject?.command === "ishell-tab-group")
+            return `Paste the <b>${inputObject.tabGroup.name}</b> tab group from clipboard.`;
+        else
+            return `The clipboard does not contain valid content.`
+    }
+
+    #describeReload(name) {
+        if (name) {
+            if (name === ALL_GROUPS_SPECIFIER)
+                return `Reload all tabs in all tab groups.`;
+            else
+                return `Reload all tabs in the <b>${name}</b> tab group.`;
+        }
+        else
+            return `Reload all tabs in the current tab group.`;
     }
 
     #describeClose(name) {
@@ -483,48 +526,112 @@ export class TabGroup {
             return `Move all tabs from the current tab group to a new window.`;
     }
 
-    #describeMove(name) {
+    #describeMove(name, all) {
+        const tabs = all? "all": "selected";
+
         if (name)
-            return `Move selected tabs to the <b>${name}</b> tab group.`;
+            return `Move ${tabs} tabs to the <b>${name}</b> tab group.`;
         else
-            return `Specify a tab group name to move to.`;
+            return `Move ${tabs} tabs to the <b>default</b> tab group.`;
     }
 
-    #describeMerge(name, nameFrom) {
-        name = name? `the <b>${name}</b> tab group`: "the current tab group";
-        if (nameFrom && nameFrom !== ALL_GROUPS_SPECIFIER)
-            return `Add all tabs from the <b>${nameFrom}</b> tab group to ${name}.`;
-        else if (nameFrom === ALL_GROUPS_SPECIFIER)
-            return `Add tabs from all tab groups to the <b>${name}</b> tab group.`;
-
-        return "Specify more arguments for the merge.";
-    }
-
-    async #performAction(name, action, nameTo) {
-        switch (action) {
+    async #performAction(name, params) {
+        switch (params.action) {
+            case "copy":
+                await this.#copyTabGroup(params.name)
+                break;
+            case "paste":
+                await this.#pasteTabGroup(params.name)
+                break;
             case "switch":
-                await this.#switchToTabGroup(name)
+                await this.#switchToTabGroup(params.name)
+                break;
+            case "reload":
+                await this.#reloadTabGroup(params.name);
                 break;
             case "close":
-                await this.#closeTabGroup(name);
+                await this.#closeTabGroup(params.name);
                 break;
             case "delete":
-                await this.#deleteTabGroup(name);
+                await this.#deleteTabGroup(params.name);
                 break;
             case "window":
-                await this.#tabGroupInNewWindow(name);
+                await this.#tabGroupInNewWindow(params.name);
                 break;
             case "move":
-                await this.#moveSelectedTabsToGroup(name);
-                break;
-            case "merge":
-                await this.#mergeTabGroups(name, nameTo);
+            case "move-selected":
+                await this.#moveVisibleTabsToGroup(params.name, params.action === "move-selected", params.action2);
                 break;
         }
     }
 
+    async #copyTabGroup(name) {
+        if (this.#isTabGroupExists(name)) {
+            const currentWindowTabGroup = await this.#getCurrentWindowTabGroupName();
+            name = name || currentWindowTabGroup;
+
+            const tabGroup = this.#tabGroups[name];
+            const tabs = await this.#getGroupTabs(name, false);
+            const outputObject = {
+                command: "ishell-tab-group",
+                version: 1,
+                tabGroup: tabGroup,
+                tabs: tabs.map(t => t.url)
+            };
+            const output = JSON.stringify(outputObject, null, 2);
+            await navigator.clipboard.writeText(output);
+        }
+    }
+
+    async #parseClipboardContent(verbose) {
+        const input = await navigator.clipboard.readText();
+        let inputObject;
+
+        try {
+            inputObject = JSON.parse(input);
+        } catch (e) {
+            if (verbose)
+                cmdAPI.notify(e.message);
+        }
+
+        return inputObject;
+    }
+
+    async #pasteTabGroup() {
+        const inputObject = await this.#parseClipboardContent(true);
+
+        if (inputObject?.command === "ishell-tab-group") {
+            const name = inputObject.tabGroup.name;
+            this.#tabGroups[name] = inputObject.tabGroup;
+            const tabs = await this.#getGroupTabs(name, false);
+            const tabsToCreate = inputObject.tabs.filter(url => !tabs.some(t => t.url === url));
+            const currentWindowTabGroup = await this.#getCurrentWindowTabGroupName();
+
+            for (const url of tabsToCreate) {
+                const tab = await browser.tabs.create({url, active: false});
+                await this.#addToTabGroup(tab, name);
+                if (currentWindowTabGroup !== name)
+                    browser.tabs.hide(tab.id);
+            }
+        }
+    }
+
+    async #reloadTabGroup(name) {
+        const currentWindowTabGroup = await this.#getCurrentWindowTabGroupName();
+        name = name || currentWindowTabGroup;
+
+        let tabs;
+        if (name === ALL_GROUPS_SPECIFIER)
+            tabs = await browser.tabs.query({});
+        else
+            tabs = await this.#getGroupTabs(name, false);
+
+        for (const tab of tabs)
+            await browser.tabs.update(tab.id, {url: tab.url});
+    }
+
     async #closeTabGroup(name) {
-        const currentWindowTabGroup = await this.#getCurrentWindowTabGroup();
+        const currentWindowTabGroup = await this.#getCurrentWindowTabGroupName();
         name = name || currentWindowTabGroup;
 
         let tabs;
@@ -540,7 +647,7 @@ export class TabGroup {
     }
 
     async #deleteTabGroup(name) {
-        const currentWindowTabGroup = await this.#getCurrentWindowTabGroup();
+        const currentWindowTabGroup = await this.#getCurrentWindowTabGroupName();
         name = name || currentWindowTabGroup;
 
         if (name !== DEFAULT_TAB_GROUP) {
@@ -567,7 +674,7 @@ export class TabGroup {
     }
 
     async #tabGroupInNewWindow(name) {
-        const currentWindowTabGroup = await this.#getCurrentWindowTabGroup();
+        const currentWindowTabGroup = await this.#getCurrentWindowTabGroupName();
         name = name || currentWindowTabGroup;
 
         const currentWindow = await browser.windows.getCurrent();
@@ -582,7 +689,7 @@ export class TabGroup {
 
         if (tabs.length) {
             const newWindow = await browser.windows.create({});
-            await this.#setWindowTabGroup(newWindow, name);
+            await this.#setWindowTabGroupName(newWindow, name);
 
             const windowTabs = await browser.tabs.query({windowId: newWindow.id});
             if (name === currentWindowTabGroup)
@@ -593,50 +700,41 @@ export class TabGroup {
         }
     }
 
-    async #moveSelectedTabsToGroup(name) {
-        const currentWindowTabGroup = await this.#getCurrentWindowTabGroup();
-        const windowTabs = (await browser.tabs.query({currentWindow: true})).filter(t => !t.hidden);
-        const selectedTabs = await browser.tabs.query({highlighted: true, currentWindow: true});
-        const notSelectedTabs = windowTabs.filter(t => !selectedTabs.some(st => st.id === t.id));
-        notSelectedTabs.sort((a, b) => b.lastAccessed - a.lastAccessed);
+    async #moveVisibleTabsToGroup(name, onlySelected = true, action) {
+        const currentWindowTabGroup = await this.#getCurrentWindowTabGroupName();
+        const switching = action === "switching";
+        name = name || DEFAULT_TAB_GROUP;
 
-        if (name && name !== currentWindowTabGroup) {
-            for (const tab of selectedTabs)
+        if (name !== currentWindowTabGroup) {
+            const windowVisibleTabs = (await browser.tabs.query({currentWindow: true})).filter(t => !t.hidden);
+
+            let tabsToMove = windowVisibleTabs;
+            let tabToActivate;
+
+            if (onlySelected) {
+                tabsToMove = await browser.tabs.query({highlighted: true, currentWindow: true});
+                if (windowVisibleTabs.length === tabsToMove.length && !switching)
+                    tabToActivate = await browser.tabs.create({});
+                else if (!switching) {
+                    const notSelectedTabs = windowVisibleTabs.filter(t => !tabsToMove.some(st => st.id === t.id));
+                    notSelectedTabs.sort((a, b) => b.lastAccessed - a.lastAccessed);
+                    tabToActivate = notSelectedTabs[0];
+                }
+            }
+            else if (!switching) {
+                tabToActivate = await browser.tabs.create({});
+            }
+
+            for (const tab of tabsToMove)
                 await this.#addToTabGroup(tab, name);
 
-            if (windowTabs.length === selectedTabs.length)
-                await browser.tabs.create({});
-            else
-                await browser.tabs.update(notSelectedTabs[0].id, {active: true});
-
-            await browser.tabs.hide(selectedTabs.map(t => t.id));
-        }
-    }
-
-    async #mergeTabGroups(name, nameFrom) {
-        if (!nameFrom)
-            return;
-
-        const currentWindowTabGroup = await this.#getCurrentWindowTabGroup();
-        name = name || currentWindowTabGroup;
-
-        let fromTabs;
-        if (nameFrom === ALL_GROUPS_SPECIFIER)
-            fromTabs = await browser.tabs.query({});
-        else
-            fromTabs = await this.#getGroupTabs(nameFrom, false);
-
-        for (const tab of fromTabs)
-            await this.#addToTabGroup(tab, name);
-
-        const currentWindow = await browser.windows.getCurrent();
-        const fromTabsInThisWindow = fromTabs.filter(t => t.windowId === currentWindow.id);
-
-        if (name === currentWindowTabGroup)
-            await browser.tabs.show(fromTabsInThisWindow.map(t => t.id));
-        else if (nameFrom === currentWindowTabGroup) {
-            await browser.tabs.create({});
-            await browser.tabs.hide(fromTabs.map(t => t.id));
+            if (switching) {
+                this.#switchToTabGroup(name);
+            }
+            else {
+                await browser.tabs.update(tabToActivate.id, {active: true});
+                await browser.tabs.hide(tabsToMove.map(t => t.id));
+            }
         }
     }
 
@@ -658,26 +756,32 @@ export class TabGroup {
         }
     }
 
-    async execute({OBJECT: {text: name}, TO: {text: action}, IN, WITH: {text: nameFrom}}, storage) {
-        if (name && !action) {
+    async execute(args, storage) {
+        let {OBJECT: {text: name}, TO: {text: action}, BY: {text: action2}, IN, AT} = args;
+
+        name = name || AT?.text;
+
+        if (name) {
             if (!this.#isTabGroupExists(name))
                 this.#createTabGroup(name);
 
-            this.#assignTabGroupContainer(name, IN?.text);
-            await this.#switchToTabGroup(name);
-            this.#saveState(storage);
+            if (name !== DEFAULT_TAB_GROUP)
+                this.#assignTabGroupContainer(name, IN?.text);
         }
-        else if (action) {
-            await this.#performAction(name, action, nameFrom);
-            this.#saveState(storage);
-        }
+
+        action = action || "switch";
+
+        const params = {action, action2, name};
+        await this.#performAction(name, params);
+        this.#saveState(storage);
     }
 
 }
 
 namespace.onModuleCommandsLoaded = () => {
     if (!_BACKGROUND_PAGE) { // Chrome can't hide tabs
-        const tabGroupCommand = cmdManager.getCommandByUUID(TabGroup._annotations.uuid);
+        const cmdDef = cmdAPI.getCommandAttributes(TabGroup);
+        const tabGroupCommand = cmdManager.getCommandByUUID(cmdDef.uuid);
         cmdManager.removeCommand(tabGroupCommand)
     }
 };

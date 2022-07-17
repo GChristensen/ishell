@@ -377,7 +377,7 @@ var BinHandler = {
     },
 };
 
-Utils.makeBin = async function(uuid, callback) {
+Utils.createBin = Utils.makeBin = async function(uuid, callback) {
     const bin = await repository.getCommandStorage(uuid);
 
     const proxy = new Proxy({

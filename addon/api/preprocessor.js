@@ -379,81 +379,6 @@ export class CommandPreprocessor {
         return result;
     }
 
-    generateCommandPropertyBlock(properties, prefix = "") {
-        let block = "";
-        let commandName;
-
-        if (Array.isArray(properties.command))
-            commandName = JSON.stringify(properties.command)
-        else
-            commandName = typeof properties.command === "string"
-                ? this.generateProperty(properties.command)
-                : this.generateProperty(properties.name);
-
-        if (commandName.startsWith("["))
-            block += `    ${prefix}names = ${commandName};\n`;
-        else
-            block += `    ${prefix}name = ${commandName};\n`;
-        if (properties.delay)
-            block += `    ${prefix}previewDelay = ${properties.delay || "undefined"};\n`;
-        if (properties.preview)
-            block += `    ${prefix}preview = ${this.generateProperty(properties.preview)};\n`;
-        if (properties.license)
-            block += `    ${prefix}license = ${this.generateProperty(properties.license)};\n`;
-        if (properties.authors)
-            block += `    ${prefix}authors = ${this.generateProperty(properties.authors)};\n`;
-        if (properties.icon)
-            block += `    ${prefix}icon = ${this.generateProperty(properties.icon)};\n`;
-        if (properties.homepage)
-            block += `    ${prefix}homepage = ${this.generateProperty(properties.homepage)};\n`;
-        if (properties.description)
-            block += `    ${prefix}description = ${this.generateProperty(properties.description)};\n`;
-        if (properties.help)
-            block += `    ${prefix}help = ${this.generateProperty(properties.help)};\n`;
-        if (properties.uuid)
-            block += `    ${prefix}uuid = ${this.generateProperty(properties.uuid)};\n`;
-        if (properties.hidden)
-            block += `    ${prefix}_hidden = true;\n`;
-
-        if (properties.url)
-            block += `    ${prefix}url = ${this.generateProperty(properties.url)};\n`;
-        if (properties.post)
-            block += `    ${prefix}postData = ${this.generateProperty(properties.post)};\n`;
-        if (properties.defaultUrl)
-            block += `    ${prefix}defaultUrl = ${this.generateProperty(properties.defaultUrl)};\n`;
-
-        if (properties.container) {
-            block += `    ${prefix}parser = {\n`
-            if (properties.parser)
-                block += `        type: ${this.generateProperty(properties.parser)},\n`;
-            if (properties.parserUrl)
-                block += `        url: ${this.generateProperty(properties.parserUrl)},\n`;
-            if (properties.parserPost)
-                block += `        postData: ${this.generateProperty(properties.parserPost)},\n`;
-            if (properties.container)
-                block += `        container: ${this.generateProperty(properties.container)},\n`;
-            if (properties.title)
-                block += `        title: ${this.generateProperty(properties.title)},\n`;
-            if (properties.href)
-                block += `        href: ${this.generateProperty(properties.href)},\n`;
-            if (properties.thumbnail)
-                block += `        thumbnail: ${this.generateProperty(properties.thumbnail)},\n`;
-            if (properties.body)
-                block += `        body: ${this.generateProperty(properties.body)},\n`;
-            if (properties.base)
-                block += `        baseUrl: ${this.generateProperty(properties.base)},\n`;
-            if (properties.results)
-                block += `        maxResults: ${this.generateProperty(properties.results)},\n`;
-            if (properties.plain)
-                block += `        plain: ${this.generateProperty(properties.plain)},\n`;
-            if (properties.display)
-                block += `        display: ${this.generateProperty(properties.display)},\n`;
-            block += `    };\n`
-        }
-        
-        return block;
-    }
-
     static assignCommandProperties(object, properties) {
         properties = {...properties};
 
@@ -526,32 +451,39 @@ export class CommandPreprocessor {
     }
     
     generateCommandSetupBlock(object) {
-        const makerFunc = object.properties.search
+        const generatingFunc = object.properties.search
             ? "createSearchCommand"
             : "createCommand";
 
         let block = `\n{
+    const properties = ${JSON.stringify(object.properties, null, 6)};
+    CommandPreprocessor.assignCommandAnnotations(${object.name}, properties);
+    
     const args = {};
     const command = new ${object.name}(args);
-    if (Object.keys(args).length > 0)
-        command.arguments = CommandPreprocessor.assignCommandArguments(args);\n\n`
 
-        block += this.generateCommandPropertyBlock(object.properties, "command.");
-        block += `\n    CommandPreprocessor.assignCommandHandlers(command);`
-        block += `\n    cmdAPI.${makerFunc}(command);\n}\n`;
+    if (Object.keys(args).length > 0)
+        command.arguments = CommandPreprocessor.assignCommandArguments(args);
+    CommandPreprocessor.assignCommandProperties(command, properties);    
+    CommandPreprocessor.assignCommandHandlers(command);
+    
+    cmdAPI.${generatingFunc}(command);\n}\n`;
 
         return block;
     }
 
-    static instantiateCommand(classDef, classMeta = {properties: {}}) {
-        classDef._annotations = {};
-        CommandPreprocessor.assignCommandProperties(classDef._annotations, classMeta.properties);
+    static assignCommandAnnotations(classDef, annotations) {
+        classDef.__definition = {};
+        CommandPreprocessor.assignCommandProperties(classDef.__definition, annotations);
+    }
 
+    static instantiateCommand(classDef, classMeta = {properties: {}}) {
         const args = {};
         const command = new classDef(args);
 
         if (Object.keys(args).length > 0)
             command.arguments = CommandPreprocessor.assignCommandArguments(args);
+        CommandPreprocessor.assignCommandAnnotations(classDef, classMeta.properties);
         CommandPreprocessor.assignCommandProperties(command, classMeta.properties);
         CommandPreprocessor.assignCommandHandlers(command);
 
@@ -565,22 +497,25 @@ export class CommandPreprocessor {
     generateMetaClass(script, object) {
         let metaName = `__metaclass_${object.name}`;
         let nameRx = new RegExp(`/\\*\\*.*?\\*/\\s*(^\\s*class\\s+)${object.name}(.*?{)`, "sm");
-        let metaDefinition = object.fullDefinition.replace(nameRx, `\$1${metaName}\$2`);
+        let metaPropertiesName = `__metaclass_${object.name}_properties`;
+        let metaProperties = `\n${metaPropertiesName} = ${JSON.stringify(object.properties, null, 12)};\n`;
+        let metaDefinition = object.fullDefinition.replace(nameRx, `\$1${metaName}\$2`) + metaProperties;
         let metaGenerator = `\n\nclass ${object.name} extends ${metaName} {
     constructor() {
         let args = {};
         super(args);
         if (Object.keys(args).length > 0)
             this.arguments = CommandPreprocessor.assignCommandArguments(args);
-            
-        ${this.generateCommandPropertyBlock(object.properties, "this.")}        
-        
+
+        CommandPreprocessor.assignCommandProperties(this, ${metaPropertiesName}); 
         CommandPreprocessor.assignCommandHandlers(this); 
         
         if (this.metaconstructor)
             return this.metaconstructor.apply(this, arguments);
     }
-}`
+}
+CommandPreprocessor.assignCommandAnnotations(${object.name}, ${metaPropertiesName});
+`
 
         return script.replace(object.fullDefinition, metaDefinition + metaGenerator);
     }
@@ -599,7 +534,7 @@ export class CommandPreprocessor {
             definition += `\n    label: ${this.generateProperty(properties.label)},`
 
         definition += `
-    suggest: ${object.async_ || ""} function ${object.args.trim()} {
+    suggest: ${object.async || ""} function ${object.args.trim()} {
     ${object.fullDefinition.replace(object.fullDeclaration, "")}
 };`
 

@@ -278,11 +278,11 @@ export class Zlibrary {
     }
 
     #sortStringsAsc(a, b, attr) {
-        return a[attr].localeCompare(b[attr], undefined, {sensitivity: 'base'});
+        return cmdAPI.localeCompare(attr)(a, b);
     }
 
     #sortStringsDesc(a, b, attr) {
-        return b[attr].localeCompare(a[attr], undefined, {sensitivity: 'base'});
+        return cmdAPI.localeCompare(attr)(b, a);
     }
 
     #sortNumAsc(a, b, attr) {

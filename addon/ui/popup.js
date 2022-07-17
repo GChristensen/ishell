@@ -13,7 +13,7 @@ async function initPopup() {
     await cmdManager.initializeCommandsOnPopup(document);
     await ContextUtils.updateActiveTab();
 
-    popup = new PopupWindow();
+    popup = await new PopupWindow();
 
     const input = popup.loadInput();
     popup.generateSuggestions(input);
@@ -33,8 +33,6 @@ class PopupWindow {
         this.pblock = document.getElementById('shell-command-preview');
         this.pblock = createDisplayProxy(this.pblock);
 
-        this._commandList = new CommandList(this, settings.max_suggestions());
-
         cmdAPI.getCommandLine = () => this.getInput();
         cmdAPI.setCommandLine = text => this.setCommand(text);
         cmdAPI.closeCommandLine = () => window.close();
@@ -43,6 +41,16 @@ class PopupWindow {
 
         document.addEventListener('keydown', this.onKeyDown.bind(this), false);
         document.addEventListener('keyup', this.onKeyUp.bind(this), false);
+
+        return new CommandList(this, settings.max_suggestions())
+            .then(commandList => {
+                this._commandList = commandList;
+                return this;
+            });
+    }
+
+    async initialize() {
+        return this._commandList.initialize();
     }
 
     loadInput() {

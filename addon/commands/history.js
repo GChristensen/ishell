@@ -53,6 +53,7 @@ function dayToDate(day) {
         case "yesterday":
             date = new Date();
             date.setDate(date.getDate() - 1);
+            date.setHours(0,0,0,0);
             break;
         case "week":
             date = new Date();
@@ -121,6 +122,9 @@ export class History {
             startDate = FROM?.data;
 
         let endDate = new Date();
+
+        if (OF?.text === "yesterday")
+            endDate.setHours(0, 0, 0, 0);
 
         if (TO?.data)
             endDate = TO?.data;

@@ -125,65 +125,28 @@ export class Images {
     }
 
     #generateView(display, results, params) {
-        var images = [], info;
-
-        results.items.forEach(item => {
-            let a = document.createElement("a");
-            a.setAttribute("href", item.link);
-            let img = document.createElement("img");
-            img.src = item.link;
-            a.appendChild(img);
-            images.push(a);
-        });
-    
-        var i = 0
-        for (let a of images) {
-            a.id = i;
-            if (i < 32)
-                a.accessKey = String.fromCharCode("a".charCodeAt() + i)
-            ++i
-        }
-    
-        const range = images.length
-            ? `${params.start + 1} ~ ${params.start + images.length}`
+        const range = results.items.length
+            ? `${params.start + 1} ~ ${params.start + results.items.length}`
             : 'x';
 
-        info = info ? info.outerHTML : '';
+        const style =
+            `.navi {text-align: center}
+            .navi {margin-bottom: 5px}
+            .prev, .next {position: absolute}
+            .navi {font-weight: bold}
+            .prev {left:  0}
+            .next {right: 0}
+            `;
 
-        const html =
-            `<style>
-                .navi, .thumbs {text-align: center}
-                .thumbs {margin-top: 5px}
-                .prev, .next {position: absolute}
-                .navi {font-weight: bold}
-                .prev {left:  0}
-                .next {right: 0}
-                .thumbs a {
-                  display: inline-block; vertical-align: top; position: relative;
-                  margin: 0 1px 2px; padding: 0;
-                }
-                .thumbs a::after {
-                  content: attr(accesskey);
-                  position: absolute; top: 0; left: 0;
-                  padding: 0 4px 2px 3px; border-bottom-right-radius: 6px;
-                  opacity: 0.5; color: #fff; background-color: #000;
-                  font:bold medium monospace;
-                }
-                img {
-                    max-width: 150px;
-                    max-height: 150px;
-                }
-             </style>
-             <div class="navi">
+        const navi =
+            `<div class="navi">
                ${range}
                <input type="button" class="prev" value="&lt;" accesskey="&lt;"/>
                <input type="button" class="next" value="&gt;" accesskey="&gt;"/>
              </div>
-             <!--div class="info">${info}</div-->
-             <div class="thumbs">${R(images.map(a => a.outerHTML),h => h)}</div>
             `;
 
-        display.set(html);
+        display.imageList(navi, results.items.map(i => i.link), null, style);
 
         if (!params.start)
             display.querySelector(".prev").disabled = true
@@ -197,7 +160,7 @@ export class Images {
                 params.start = params.starts.pop() || 0
             else {
                 params.starts.push(params.start)
-                params.start += images.length
+                params.start += results.items.length
             }
             this.#previewImages(display, params);
         })

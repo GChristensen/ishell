@@ -105,10 +105,10 @@ class ContextMenuManager {
             chrome.contextMenus.onClicked.addListener(ContextMenuManager.contextMenuListener);
     }
 
-    executeContextMenuItem(command, contextMenuCmd) {
+    async executeContextMenuItem(command, contextMenuCmd) {
         let commandDef = cmdManager.getCommandByUUID(contextMenuCmd.uuid);
 
-        let parser = cmdManager.makeParser();
+        let parser = await cmdManager.makeParser();
         let query = parser.newQuery(command, null, settings.max_suggestions(), true);
 
         let executed = false;
