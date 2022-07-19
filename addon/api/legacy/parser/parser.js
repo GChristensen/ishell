@@ -578,7 +578,7 @@ ParsedSentence.prototype = {
     },
 
     preview: function PS_preview(previewBlock, context) {
-        this._verb.preview(context, previewBlock, this._argSuggs);
+        return this._verb.preview(context, previewBlock, this._argSuggs);
     },
 
     copy: function PS_copy() {
@@ -1033,7 +1033,7 @@ Verb.prototype = {
 
     preview: function V_preview(context, previewBlock, argumentValues) {
         // Same logic as the execute command -- see comment above.
-        (this.newAPI
+        return (this.newAPI
             ? this.cmd.preview(previewBlock, argumentValues, context)
             : this.cmd.preview(previewBlock, argumentValues.object, argumentValues));
     },

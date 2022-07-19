@@ -31,6 +31,7 @@
     <script src="../rainbow/rainbow.js"></script>
     <script src="../rainbow/languages/generic.js"></script>
     <script src="../rainbow/languages/javascript.js"></script>
+    <script src="../rainbow/languages/python.js"></script>
     <script src="external.js"></script>
 
     <link rel="stylesheet" type="text/css" media="all" href="../rainbow/themes/tricolore.css"/>
@@ -38,248 +39,233 @@
 <body dir="ltr">
 <div style="width: 875px">
 
-<div class="head"><span class="large">iShell: </span>Tutorial</div>
-<div id="nav-container">
-    <ul id="nav">
-        <li><a href="options.html">Settings</a></li>
-        <li><a href="commands.html">Your Commands</a></li>
-        <li><a href="cmenu.html">Context Menu</a></li>
-        <li><a href="edit.html">Command Editor</a></li>
-        <li><a href="API.html">API Reference</a></li>
-        <li class="selected"><a href="tutorial.html">Tutorial</a></li>
-        <li><a href="about.html">About</a></li>
-    </ul>
-</div>
+    <div class="head"><span class="large">iShell: </span>Tutorial</div>
+    <div id="nav-container">
+        <ul id="nav">
+            <li><a href="options.html">Settings</a></li>
+            <li><a href="commands.html">Your Commands</a></li>
+            <li><a href="cmenu.html">Context Menu</a></li>
+            <li><a href="edit.html">Command Editor</a></li>
+            <li><a href="API.html">API Reference</a></li>
+            <li class="selected"><a href="tutorial.html">Tutorial</a></li>
+            <li><a href="about.html">About</a></li>
+        </ul>
+    </div>
 
-<br clear="all"/>
+    <br clear="all"/>
 
-<div id="toc" class="toc-mobile"><h2>Contents</h2></div>
-<ul data-toc></ul>
-
-
-<h1 class="section-heading"><span id="The_iShell_Command_Tutorial">The iShell Command Tutorial</span></h1>
-
-<p>The great power of iShell - from a developer standpoint - is how easy it is to create commands.
-    With only a couple of lines of Javascript, it enables even casual web developers to drastically
-    enhance the features of the browser. This tutorial walks you through the process of being
-    generative with iShell. The original Ubiquity author tutorial, from which this one is adapted, could be found
-    <a href="https://wiki.mozilla.org/Labs/Ubiquity/Ubiquity_0.5_Author_Tutorial" target="_blank">here</a>.
-</p>
-
-<p>The rest of this page documents the command development API as it is implemented in iShell. See
-    <a href="API.html">iShell API Reference</a> for more details.</p>
-
-<p>
-    Note: iShell commands have access to the full browser WebExtension APIs and additionally jQuery.
-    If you need some features that are not covered by the existing addon permissions,
-    you need to add the necessary permissions in <code>manifest.json</code> and rebuild the addon.
-</p>
+    <div id="toc" class="toc-mobile"><h2>Contents</h2></div>
+    <ul data-toc></ul>
 
 
-<h2><span id="Real_Time_Development">Real-Time Development</span></h2>
+    <h1 class="section-heading"><span
+            id="The_iShell_Command_Tutorial">The iShell Command Tutorial</span></h1>
 
-<p>iShell doesn't require you to restart Firefox as you develop. Restarting is a drastic measure,
-    and we want none of it. When you are using the built-in editor then you don't even need to save!
-</p>
-<p>To open the iShell command editor, summon iShell (Control+Space) and use the
-    "edit-shell-commands" command.
-</p>
+    <p>The great power of iShell - from a developer standpoint - is how easy it is to create
+        commands. With only a couple of lines of Javascript, it enables even casual web developers
+        to drastically enhance the features of the browser. This tutorial walks you through the
+        process of being generative with iShell. The original Mozilla Ubiquity author tutorial, from which
+        this one is adapted, could be found <a
+                href="https://wiki.mozilla.org/Labs/Ubiquity/Ubiquity_0.5_Author_Tutorial"
+                target="_blank">here</a>.
+    </p>
 
+    <p>The rest of this page documents the command development API as it is implemented in iShell.
+        See the <a href="API.html">iShell API Reference</a> for more details.</p>
 
-<h2><span id="Hello_World:_The_First_Command">Hello World: The First Command (Object-Based Syntax)</span></h2>
-
-<h3><span id="Just_a_Message:_As_Simple_as_it_Gets">Just a Message: As Simple as it Gets</span></h3>
-<p>Let's start with the standard programming trope: printing "Hello, World!".</p>
-<p>In the command editor type the following:</p>
-
-<pre><code data-language="javascript">cmdAPI.createCommand({
-    names: ["say-hello"],
-    execute() {
-        cmdAPI.notify("Hello, World!");
-    }
-});</code></pre>
-
-<p>Now try executing "say hello". You'll see that "Hello, World!" is immediately displayed
-    at the bottom-right corner of the screen in a standard Firefox notification.
-</p>
-<p><img src="images/say-hello.png"></p>
+    <p>Note: iShell commands have access to the full browser WebExtension APIs and jQuery. If you
+        need some features that are not covered by the existing add-on permissions, you need to add
+        the necessary permissions to the add-on manifest and build/sign your own version of the
+        add-on.
+    </p>
 
 
-<h3><span id="oosyntax">A Glimpse to the Modern Class-Based Command Syntax</span></h3>
-<p>iShell allows to employ the full strength of <a
-        href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Classes">JavaScript
-    classes</a> in command creation. Let's rewrite the previous command in a more object-oriented way.
-    In this case, you don't need to use <code>cmdAPI.createCommand</code>. Just declare a class with
-    the <code>@command</code> annotation:</p>
+    <h2><span id="Real_Time_Development">Real-Time Development</span></h2>
 
-<pre><code data-language="javascript">/** @command */
+    <p>iShell doesn't require you to restart Firefox as you develop. Restarting is a drastic
+        measure, and we want none of it. When you are using the built-in editor then you don't even
+        need to save!
+    </p>
+    <p>To open the iShell command editor, summon iShell (Control+Space) and use the
+        "edit-shell-commands" command.
+    </p>
+
+
+    <h2><span id="Hello_World:_The_First_Command">Hello World: The First Command</span></h2>
+
+    <h3><span id="Just_a_Message:_As_Simple_as_it_Gets">Just a Message: As Simple as it Gets</span>
+    </h3>
+    <p>Let's start with the standard programming trope: printing "Hello, World!".</p>
+    <p>In the command editor type the following:</p>
+
+    <pre><code data-language="javascript">/** @command */
 class SayHello {
     execute() {
         cmdAPI.notify("Hello, World!");
     }
 }</code></pre>
 
-<p>The command name will be generated automatically. Only JavaDoc-style comments may be used to
-    annotate classes, the regular JavaScript comments are ignored. A command class can extend any
-    other classes.</p>
-<p>Class-based syntax also allows to significantly declutter command code, because all the noisy
-    attributes you pass to the <code>cmdAPI.createCommand</code> are moved to the documentation
-    comment. The class may contain only fields and functions related to its purpose. Explore
-    templates in the command editor for more examples.</p>
+    <p>Now try executing <b>say-hello</b>:</p>
 
+    <p><img src="images/say-hello.png"></p>
 
-<h3><span id="cmdAPI.createCommand">cmdAPI.createCommand</span></h3>
-<p><code>cmdAPI</code> is a namespace that contains all the functions you need to create commands.
-    Commands are created by making an object and passing it to <code>cmdAPI.createCommand</code>. In
-    Javascript, inline curly braces stand for object literal, so this code:
-</p>
+    <p>You'll see that "Hello, World!" is immediately displayed in the bottom-right corner of the
+        screen in a standard Firefox notification.
+    </p>
 
-<pre><code data-language="javascript">{
+    <h3><span id="cmdAPI">cmdAPI</span></h3>
+    <p><code>cmdAPI</code> is a namespace that contains all the functions you need to create
+        commands. In Mozilla Ubiquity commands were created by passing an object literal to the <a
+                href="API.html#create-command">createCommand</a> function, like the
+        following:
+
+    <pre><code data-language="javascript">cmdAPI.createCommand({
     names: ["say-hello"],
-    execute: function () { //etc }
-}</code></pre>
-
-<p>means "Make an object with two attributes, 'names' and 'execute'." This object is then passed as
-    the argument to <code>cmdAPI.createCommand</code>. 'names' and 'execute' are the only mandatory
-    attributes for your command object. 'names' specifies what the command is called, and 'execute'
-    specifies what it does. There are plenty of other attributes that you can specify, but they are
-    all optional.<br>
-</p>
-
-
-<h3><span id="names">names</span></h3>
-<p>'names' is always an array (thus the square brackets). In the case of this command, we provided only one
-    name, "say-hello". But we could have provided as many names as we wanted. For instance, if we had
-    said:
-</p>
-
-<pre><code data-language="javascript">names: ["say-hello", "greet"]</code></pre>
-
-<p>then "say-hello" would be the normal name of the command, but iShell would also recognize "greet"
-    as a synonym or alias for the command.
-</p>
-
-
-<h3><span id="execute">execute</span></h3>
-<p>'execute' is always a function. When the user executes your command, this is the function that
-    will be run. It can do pretty much anything you want - or at least, anything you know how to
-    write in JavaScript.
-</p>
-<p>In the example above, we simply call <code>cmdAPI.notify()</code>, which displays the given
-    message in whichever way the operating system can.
-</p>
-<p>
-    There are many other useful functions in the <code>cmdAPI</code> namespace. For more
-    detailed information, take a look at the <a href="API.html">iShell API Reference</a>.
-</p>
-
-
-<h3><span id="uuid">Command UUID</span></h3>
-<p>Although any command could be run without an 'uuid' attribute, it is recommended to add it to
-    every command you create. If a command is renamed, this will help to
-    preserve its context menu entries, performance data, and the data the command
-    stores through the Bin interface.</p>
-<p>
-    'uuid' may be an arbitrary unique string, for example, the homepage URL of a command. It is not
-    necessary to specify 'uuid' attribute if the proper 'homepage' attribute is specified and will never change.
-    An RFC 4122 v4 UUID is generated automatically for commands inserted through command editor
-    templates. In the examples below we omit this attribute for brevity.
-</p>
-
-
-<h3><span id="Adding_a_Preview">Adding a Preview</span></h3>
-<p><img src="images/preview.jpg"></p>
-<p>Let's add a preview to our new command. Previews give the user feedback about what a command does
-    before it's executed. Previews are great for providing rich visual feedback like displaying
-    search results when using the <b>images</b> command as shown above. Previews have the full expressive
-    power of HTML, including animations, so there's a lot you can do with them.
-</p>
-<p>One point of design: preview code should never have side effects. That is, a preview should never
-    (without user interaction) change the state of the system.
-</p>
-<p>For the "say-hello" command, we don't need anything fancy: just some help text that is more
-    descriptive than the default "Executes the say hello command."
-</p>
-
-<pre><code data-language="javascript">cmdAPI.createCommand({
-    names: ["say-hello", "greet"],
-    preview: "Displays a &lt;i&gt;salutary&lt;/i&gt; greeting to the planet.",
     execute() {
         cmdAPI.notify("Hello, World!");
     }
-})</code></pre>
+});</code></pre>
 
-<p>Here the preview is an HTML-formatted string. The preview can also be a function. We'll get to
-    that in the next section.
-</p>
-<h2><span id="The_Date_Command:_The_Second_Command">The Date Command: The Second Command</span>
-</h2>
-<h3><span id="Setting_the_Selection">Setting the Selection</span></h3>
-<p>Let's create a command that inserts the current date at the location of the cursor.</p>
+    <p>In iShell you just declare a class with the <code>@command</code> annotation. The command
+        name will be generated automatically. A command class may derive
+        from any other classes.</p>
 
-<pre><code data-language="javascript">cmdAPI.createCommand({
-    names: ["insert-date"],
+    <p>Only JavaDoc-style comments that start with
+        <code>/**</code> may be used to annotate classes, the regular JavaScript comments are
+        ignored. The content of this comment (except annotations) is displayed in the help section
+        of the iShell command listing. It may contain HTML or <a
+                href="https://en.wikipedia.org/wiki/Markdown" target="_blank">Markdown</a>-formatted
+        text if the <code>@markdown</code> annotation is used.</code> </p>
+
+
+    <p><code>execute</code> is the only mandatory method for your commands. There are plenty of
+        other attributes that you can specify as methods or in annotations, but they are all
+        optional.
+    </p>
+
+    <h3><span id="names">Command Names</span></h3>
+    <p>The command name is automatically generated from the class name in the kebab case. It is
+        possible to specify several names for a command through the <code>@commnad</code> annotation
+        by separating them with a comma:
+    </p>
+
+    <pre>@command say-hello, greet</pre>
+
+    <p>In this case, the class name is not used.</p>
+
+    <h3><span id="execute">execute</span></h3>
+    <p>This method is invoked when the user hits <code>Enter</code> in the iShell window. It can do
+        pretty much anything you want - or at least, anything you know how to write in JavaScript.
+    </p>
+    <p>In the example above, we simply call <code>cmdAPI.notify()</code>, which displays the given
+        message in whichever way the operating system can.
+    </p>
+    <p>
+        There are many other useful functions in the <code>cmdAPI</code> namespace. For more
+        detailed information, take a look at the <a href="API.html">iShell API Reference</a>.
+    </p>
+
+    <h3><span id="Adding_a_Preview">Adding a Preview</span></h3>
+    <p><img src="images/preview.jpg"></p>
+    <p>Let's add a preview to our new command. Previews give the user feedback about what a command
+        does before it's executed. Previews are great for providing rich visual feedback like
+        displaying search results when using the <b>images</b> command as shown above. Previews have
+        the full expressive power of HTML, including animations, so there's a lot you can do with
+        them.
+    </p>
+    <p>One point of design: preview code should never have side effects. That is, a preview should
+        never (without user interaction) change the state of the system.
+    </p>
+    <p>For the "say-hello" command, we don't need anything fancy: just some help text that is more
+        descriptive than the default "Executes the say hello command."
+    </p>
+
+    <pre><code data-language="javascript">/** @command say-hello, greet
+    @preview Displays a <i>salutary</i> greeting to the planet.
+ */
+class HelloWorld {
+    execute() {
+        cmdAPI.notify("Hello, World!");
+    }
+}</code></pre>
+
+    <p>Here the preview is an HTML-formatted string. The preview can also be a function. We'll get
+        to that in the next section.
+    </p>
+    <h2><span id="The_Date_Command:_The_Second_Command">The Date Command: The Second Command</span>
+    </h2>
+    <h3><span id="Setting_the_Selection">Setting the Selection</span></h3>
+    <p>Let's create a command that inserts the current date at the location of the cursor.</p>
+
+    <pre><code data-language="javascript">/** @command */
+class InsertDate {
     execute() {
         cmdAPI.setSelection(new Date().toLocaleDateString());
     }
-})</code></pre>
+}</code></pre>
 
-<p>The new function here is <code>setSelection()</code>. This inserts the passed-in text onto the
-    page at the location of the cursor. If the cursor is in an editable text or a rich-text field,
-    the text gets dumped there. If the cursor isn't in an editable area, <code>setSelection()</code>
-    will still be able to insert the date. (Even when it isn't displayed, Firefox always keeps track
-    of a cursor position. To see it, type F7.) Try going to a page, selecting some non-mutable text,
-    and using the command. See, it works! This is particularly useful for commands like "translate",
-    where you want to replace non-editable text with its translation.
-</p>
-<p>The <code>toLocaleDateString()</code> function is native to Javascript, so if you're not familiar
-    with it check out the documentation for the Javascript <a rel="nofollow" class="external text"
-    href="https://developer.mozilla.org/en/Core_JavaScript_1.5_Reference/Global_Objects/Date">Date
-    object</a>.
-</p>
+    <p>The new function here is <code>setSelection()</code>. This inserts the passed-in text onto
+        the page at the location of the cursor. If the cursor is in an editable text or a rich-text
+        field, the text gets dumped there. If the cursor isn't in an editable area, <code>setSelection()</code>
+        will still be able to insert the date. (Even when it isn't displayed, Firefox always keeps
+        track of a cursor position. To see it, type F7.) Try going to a page, selecting some
+        non-mutable text, and using the command. See, it works! This is particularly useful for
+        commands like "translate", where you want to replace non-editable text with its translation.
+    </p>
+    <p>The <code>toLocaleDateString()</code> function is native to Javascript, so if you're not
+        familiar with it check out the documentation for the Javascript <a rel="nofollow"
+                                                                           class="external text"
+                                                                           href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Date">Date
+            object</a>.
+    </p>
 
 
-<h3><span id="A_Better_Preview">A Better Preview</span></h3>
-<p>It's time to add a better preview to the date command. Let's have the preview show the date so
-    that the user will know what to expect when they execute the command. (As a side benefit the
-    user doesn't even need to execute the command to do a quick check of the day.)
-</p>
+    <h3><span id="A_Better_Preview">A Better Preview</span></h3>
+    <p>It's time to add a better preview to the date command. Let's have the preview show the date
+        so that the user will know what to expect when they execute the command. As a side benefit
+        the user doesn't even need to execute the command to do a quick check of the day.
+    </p>
 
-<pre><code data-language="javascript">cmdAPI.createCommand({
-    names: ["insert-date"],
-
+    <pre><code data-language="javascript">/** @command */
+class InsertDate {
     _date() {
         return new Date().toLocaleDateString();
-    },
+    }
 
-    preview(pblock) {
+    preview(_, display) {
         const date = this._date();
-        pblock.innerHTML = `Inserts today's date: "&lt;i&gt;${date}&lt;/i&gt;"`;
-    },
+        display.text(`Inserts today's date: "&lt;i&gt;${date}&lt;/i&gt;"`);
+    }
 
     execute() {
         cmdAPI.setSelection(this._date());
     }
-})</code></pre>
+}</code></pre>
 
-<p>We've done three things here. The first was to factor out the code for getting the date into the
-    <code>_date()</code> function. This way we don't break <a rel="nofollow" class="external text"
-                                                              href="http://en.wikipedia.org/wiki/Don%27t_repeat_yourself">DRY</a>
-    by repeating code across the preview and execute functions. Notice that to access the <code>_date()</code>,
-    we use the <code>this</code> keyword.
-</p>
-<p>The second thing we've done is to add a preview function. The first argument is the DOM element
-    that gets displayed as the preview for your command. Modify <code>pblock</code> and you modify
-    the preview. In this case, we set the <code>innerHTML</code> of the preview block to be the
-    message we want.
-</p>
-<p>The third thing we've done is the string formatting using JavaScript template literals. If some
-    advanced formatting is required, there is a handy function for this: <a href="API.html#reduce-template">cmdAPI.reduceTemplate()</a>,
-    that is also called <code>R</code>. For example, the following code generates a nested HTML list
-    from the provided array of items:
-</p>
+    <p>We've done three things here. The first was to factor out the code for getting the date into
+        the <code>_date()</code> function. This way we don't break <a rel="nofollow"
+                                                                      class="external text"
+                                                                      href="http://en.wikipedia.org/wiki/Don%27t_repeat_yourself">DRY</a>
+        by repeating code across the preview and execute functions. Notice that to access the <code>_date()</code>,
+        we use the <code>this</code> keyword.
+    </p>
+    <p>The second thing we've done is to add a preview function. The second argument is the DOM
+        element that gets displayed as the preview for your command. Modify the
+        <code>innerHTML</code> property of <code>display</code> and you modify the preview. In
+        iShell it has some <a href="API.html#create-command-preview">additional methods</a>. In this
+        case, we use the <code>text</code> method of the display object to show the message we want.
+        Note that in the class-based command syntax the preview element is passed as the second
+        argument. In the object-based syntax of Mozilla Ubiquity, the preview block is passed as the
+        first parameter of the <code>preview</code> function.
+    </p>
+    <p>The third thing we've done is the string formatting using JavaScript template literals. If
+        some advanced formatting is required, there is a handy function for this: <a
+                href="API.html#reduce-template">cmdAPI.reduceTemplate()</a>, that is also called
+        <code>R</code>. For example, the following code generates a nested HTML list from the
+        provided array of items:
+    </p>
 
-<pre>const html =
+    <pre>const html =
   `&lt;ul&gt;${
     R(items, item =&gt;
       `&lt;li&gt;${item.text}:
@@ -289,426 +275,476 @@ class SayHello {
       &lt;/li&gt;`)
   }&lt;/ul&gt;`;</pre>
 
-<h3><span id="Networking_calls_and_placeholder_previews">Networking calls and placeholder previews</span>
-</h3>
-<p>Previews display something meaningful to the user immediately. If you have a preview that
-    requires an AJAX request - say, to fetch some search results - that call might take a while to
-    return. In the meantime, your command should display a placeholder preview giving the user
-    feedback.
-</p>
+    <h3><span id="Networking_calls_and_placeholder_previews">Networking calls and placeholder previews</span>
+    </h3>
+    <p>Previews display something meaningful to the user immediately. If you have a preview that
+        requires a network request - say, to fetch some search results - that call might take a
+        while to return. In the meantime, your command should display a placeholder preview giving
+        the user feedback.
+    </p>
 
-<pre><code data-language="javascript">preview(pblock) {
-    pblock.innerHTML = "This will show until the AJAX request returns";
-    cmdAPI.previewAjax(pblock, {url: "http://example.com", success: function (htm) {
-        pblock.innerHTML = htm;
-    }});
-},</code></pre>
+    <pre><code data-language="javascript">async preview(_, display) {
+    display.text("This will show until the fetch request completes");
+    const response = await cmdAPI.previewFetch(display, "http://example.com");
+    if (response.ok) {
+        const html = await response.text();
+        display.set(html);
+    }
+    else
+        display.error("HTTP request error.");
+}</code></pre>
 
-<p>In the command <code>preview</code> handler, networking calls should be performed with the <b>cmdAPI.preview*</b>
-family of functions to make these calls automatically interruptable by the output of other commands.
-There are also shorthands for the <a href="API.html#create-command-preview">cmdAPI.previewFetch</a>
-in the <code>pblock</code> object. For example, the handler in the previous listing could be equivalently
-written as follows:</p>
+    <p>In the command <code>preview</code> handler, networking calls should be performed with the <a
+            href="API.html#preview-fetch">cmdAPI.preview*</a> family of functions to make these
+        calls automatically interruptable by the output of other commands. In the
+        <code>display</code> object, there are also few shorthands for the <a
+                href="API.html#create-command-preview">cmdAPI.previewFetch</a> function:
+        <code>fetch</code>, <code>fetchText</code>, and <code>fetchJSON</code>. For example, the
+        handler in the previous listing could be equivalently written as follows:</p>
 
-<pre><code data-language="javascript">async preview(pblock) {
-    pblock.innerHTML = "This will show until the fetch request completes";
-    const htm = await pblock.fetchText("http://example.com");
-    pblock.innerHTML = htm;
-},</code></pre>
+    <pre><code data-language="javascript">async preview(_, display) {
+    display.text("This will show until the fetch request completes");
+    const html = await display.fetchText("http://example.com");
+    if (html)
+        display.set(html);
+    else
+        display.error("HTTP request error.");
+}</code></pre>
 
-<a id="commands-with-arguments"></a>
-<h1 class="section-heading"><span id="Commands_with_Arguments">Commands with Arguments</span></h1>
+    <p>If a call to <code>cmdAPI.previewFetch</code> is interrupted by the preview of some other
+        command, it throws an <code>AbortError</code> exception. If you need to perform some complex
+        error processing and catch exceptions thrown by this function, do not change the preview if
+        <code>AbortError</code> is thrown. You can determine this with
+        <code>cmdAPI.fetchAborted</code> function: </p>
 
+    <pre><code data-language="javascript">async preview(_, display) {
+    display.text("This will show until the fetch request completes");
+    let html;
+    try {
+        html = await display.fetchText("http://example.com");
+    } catch (e) {
+        if (!cmdAPI.fetchAborted(e))
+            display.error("Network error.");
+        throw e; // AbortError may be rethrown, as any other exception
+    }
+    if (html)
+        display.set(html);
+    else
+        display.error("HTTP request error.");
+}</code></pre>
 
-<h2><span id="Echo">Echo</span></h2>
-<p>Let's start by making a simple command to echo back whatever you type.</p>
+    <p>The code above could be written in a more concise way:</p>
 
-<pre><code data-language="javascript">cmdAPI.createCommand({
-    names: ["echo"],
-    arguments: [{role: "object",
-                 nountype: noun_arb_text,
-                 label: "your shout"}],
-    preview(pblock, args) {
-        pblock.innerHTML = "Will echo: " + args.object.text;
-    },
+    <pre><code data-language="javascript">async preview(_, display) {
+    display.text("This will show until the fetch request completes");
+    const html = await display.fetchText("http://example.com", {_displayError: "Network error."});
+    if (html)
+        display.set(html);
+    else
+        display.error("HTTP request error.");
+}</code></pre>
+
+    <p>While <code>fetch</code>-based functions use <code>response.ok/status</code> and exceptions
+        for error handling, old-fashioned jQuery-based functions, such as
+        <code>cmdAPI.previewAjax</code> do not throw exceptions. They accept error codes through
+        callbacks.</p>
+
+    <a id="commands-with-arguments"></a>
+    <h1 class="section-heading"><span id="Commands_with_Arguments">Commands with Arguments</span>
+    </h1>
+
+    <h2><span id="Echo">Echo</span></h2>
+    <p>Let's start by making a simple command to echo back whatever you type.</p>
+
+    <pre><code data-language="javascript">/** @command */
+class Echo {
+    constructor(args) {
+        args[OBJECT] = {nountype: noun_arb_text, label: "your shout"};
+    }
+
+    preview(args, display) {
+        display.text("Will echo: " + args.OBJECT.text);
+    }
+
     execute(args) {
-        const msg = args.object.text + "... " + args.object.text + "......";
+        const msg = args.OBJECT.text + "... " + args.OBJECT.text + "......";
         cmdAPI.notify(msg);
-    },
-});</code></pre>
+    }
+}</code></pre>
 
-<p>This says that the command "echo" takes one argument which is arbitrary text. Whatever text the
-    user enters will get wrapped in an input object and passed into both the preview and execute
-    the function.
-</p>
-<p>Try it! Run "echo hellooooo" and watch what happens.
-</p>
-<p>iShell takes care of parsing the user's input, so you don't need to worry about handling pronoun
-    substitution or any of the other natural-language-like features of the iShell parser. Try
-    selecting some text on a page, and run "echo this". iShell should now echo the selected text.
-</p>
-<p>Note that we gave three pieces of information when defining our argument: its role, its nountype,
-    and its label. The label is the easiest part: It's just whatever text you want has to appear in
-    the iShell interface as a prompt for the user. E.g, if you run "echo", you will see the label
-    for the argument:
-</p>
+    <p>This says that the command "echo" takes one argument which is arbitrary text. Whatever text
+        the user enters will get wrapped in an input object and passed into both the preview and
+        execute the function.
+    </p>
+    <p>Try it! Run "echo hellooooo" and watch what happens.
+    </p>
+    <p>iShell takes care of parsing the user's input, so you don't need to worry about handling
+        pronoun substitution or any of the other natural-language-like features of the iShell
+        parser. Try selecting some text on a page, and run "echo this". iShell should now echo the
+        selected text.
+    </p>
+    <p>Note that we gave three pieces of information when defining our argument: its pronoun, its
+        nountype, and its label. The label is the easiest part: It's just whatever text you want has
+        to appear in the iShell interface as a prompt for the user. E.g, if you run "echo", you will
+        see the label for the argument:
+    </p>
 
-<pre><code data-language="javascript">echo (your shout)</code></pre>
+    <pre>echo (your shout)</pre>
 
-<p>The roles and the nountypes require some more explanation. We'll cover each of them in detail
-    next.
-</p>
-<h3><span id="Argument_Roles">Argument Roles</span></h3>
-<p>Your command can take multiple arguments. Each one is identified by a "role". To understand
-    roles, it helps to think of your command name as a verb, and each argument as a noun. Remember
-    that iShell's command line is a pseudo-natural-language environment, so it attempts to be as
-    close to natural language grammar as possible.
-</p>
-<p>For example, if you've ever used the <b>email</b> command, you know that it takes up to two
-    arguments: a <i>message</i> and a <i>person</i>.
-</p>
+    <p>The pronouns and the nountypes require some more explanation. We'll cover each of them in
+        detail next.
+    </p>
 
-<pre>email message
-email to person
-email message to person
-email to person message</pre>
+    <h3><span id="Argument_Roles">Argument Pronouns and Roles</span></h3>
+    <p>Your command can take multiple arguments. Each one is identified by a pronoun. Each pronoun
+        has the corresponding role. To understand roles, it helps to think of your command name as a
+        verb, and each argument as a noun. Remember that iShell's command line is a
+        pseudo-natural-language environment, so it attempts to be as close to natural language
+        grammar as possible.
+    </p>
+    <p>For example, if you've ever used the <b>email</b> command, you know that it takes up to two
+        arguments: a <i>message</i> and a <i>contact</i>.
+    </p>
 
-<p>In grammatical terms, the <i>message</i> argument is the "direct object" of the verb "email". The <i>person</i>
-    argument is an indirect object. We call it the "goal" of the verb. So if we were writing the <b>email</b>
-    command, we'd define the arguments like this:
-</p>
+    <pre>email message
+email to person@example.com
+email message to person@example.com
+email to person@example.com message</pre>
 
-<pre><code data-language="javascript">arguments: [{role: "object",
-             nountype: noun_arb_text,
-             label: "message"},
-            {role: "goal",
-             nountype: noun_type_contact,
-             label: "recipient"}]</code></pre>
+    <p>In grammatical terms, the <i>message</i> argument is the "direct object" of the verb "email".
+        The <i>person@example.com</i> argument is an indirect object. We call it the "goal" of the verb.</p>
 
-<p>Because we give the recipient argument the "goal" role, the iShell parser knows to expect the
-    user to type the word "to". When the user enters "email hello to user@example.com", the parser knows that the
-    word following "to" - that is, "user@example.com" - should be assigned to the recipient argument.
-</p>
-<p>In our simple "echo" command, we expect the user to type "echo hellooooo" or something like that.
-    The "hellooooo" is the direct object of the verb "echo", so we give it the "object" role.
-</p>
-<p>"Object" is the most common role. If a command takes only one argument, that argument is usually
-    an "object".
-</p>
+    <p>In our simple "echo" command, we expect the user to type "echo hellooooo" or something like
+        that. The "hellooooo" is the direct object of the verb "echo", so we give it the <code>OBJECT</code>
+        role. If a command takes only one argument, that argument is usually an "object".
+    </p>
 
-<h4><span id="What_Roles_Can_I_Use.3F">What Roles Can I Use?</span></h4>
-<ul>
-    <li> object (in "echo helloooo", hello is the object.)</li>
-    <li> subject (in "order flowers for Algernon", Algernon is the subject.)</li>
-    <li> goal (in "email this to Brandon", Brandon is the goal.)</li>
-    <li> source (in "translate this from Spanish", Spanish is the source.)</li>
-    <li> location (in "yelp pizza near Boston", Boston is the location.)</li>
-    <li> time (in "book a flight on thursday", thursday is the time.)</li>
-    <li> instrument (in "search monkeys with Google", Google is the instrument.)</li>
-    <li> format (in "check weather in Celsius", Celsius is the format.)</li>
-    <li> modifier (in "get email address for Chris", Chris is the modifier.)</li>
-    <li> alias (in "twitter this as Jono", Jono is the alias.)</li>
-    <li> cause (in "sort lines by length", length is the cause.)</li>
-    <li> dependency (in "listen song on Spotify", Spotify is the dependency.)</li>
-</ul>
+    <p>In the class-based syntax of iShell, if we were writing the <b>email</b> command, we'd define the arguments in the
+        class constructor using pronouns (<code>OBJECT</code> is an exception):
+    </p>
 
-<h3><span id="The_Arguments_Object">The Arguments Object</span>
-</h3>
-<p>When your execute method is called, it is passed a single object that encapsulates the values for
-    all arguments.
-</p>
-<p>When your preview method is called, it is passed this object, too.
-</p>
-<p>The object has one attribute corresponding to each role. In our example above, the command
-    accepts only an object-role argument, so the preview and execute methods get passed an argument
-    with an <code>args.object</code> attribute.
-</p>
-<p>If we made a command, like email, that takes an object-role argument and a goal-role argument,
-    its preview and execute methods would get passed an argument with <code>args.object</code> and
-    <code>args.goal</code>.
-</p>
-<p><code>args.object</code> (or <code>args.goal</code>) has several attributes of its own:
-</p>
-
-<pre><code data-language="javascript">args.object.text    // a string of the input in plain text, without formatting
-args.object.html    // a string of the input in formatted HTML, including tags
-args.object.data    // for non-text input types, an arbitrary data object
-args.object.summary // the HTML string displayed in the suggestion list, abbreviated if long</code></pre>
-
-<p>Our example command only cares about the <code>.text</code> attribute of the input, because it
-    simply wants plain text. Often, when the user invokes your command by typing a few short words
-    into the input box, <code>.text</code>, <code>.html</code>, and <code>.summary</code> will all
-    have exactly the same value, and <code>.data</code> will be null. Many, if not most, commands
-    that you write will only care about the text value. Nevertheless, the other versions of the
-    input data are provided to you in case they differ from <code>.text</code> and in case your
-    command has a use for them.
-</p>
-
-<h2><span id="Introduction_to_Noun_Types">Introduction to Noun Types</span></h2>
-<p>Noun types specify what <i>kind</i> of input your command can accept for each one of its
-    arguments.
-</p>
-<p>For the "echo" command, we wanted the object-role argument to accept any text whatsoever, so for
-    its nountype we passed in the predefined <code>noun_arb_text</code> object. This object accepts
-    any arbitrary text as a valid argument and passes it to the command unchanged.<br> Note:
-    unexpected things may happen if a command contains more than one argument of this type.
-</p>
-<p><code>noun_arb_text</code> is OK for very simple commands, like echoing back the user's input. But for commands that
-    take structured data, you will want to use more specific nountypes.
-</p>
-<p>For example, if a command can take a date, you would want to
-    use <code>noun_type_date</code> as the nountype of the argument. <code>noun_type_date</code>
-    provides several benefits to your command: it does all of the date parsing for you; it suggests
-    dates that the user might want to enter (for instance, it defaults to today's date). And, it
-    lets the parser know that your command takes a date. This is useful because when the user
-    selects a date on a page and invokes iShell, your command will
-    be one of the top suggestions.
-</p>
-<p>You can write your own noun types - we'll get into that later. For now, let's take a look at the
-    built-in nountypes that your command can use. These include:
-</p>
-
-<ul>
-    <li> noun_arb_text (Arbitrary text)</li>
-    <li> noun_type_date (A date, in any format, or a word like "yesterday")</li>
-    <li> noun_type_time (A time, in any format)</li>
-    <li> noun_type_percentage (A percentage value)</li>
-    <li> noun_type_email (A valid email address)</li>
-    <li> noun_type_tab (One of the currently open tabs matched by title or URL)</li>
-</ul>
-
-<p><br> Once you are familiar with writing commands, you should check out the nountypes.js at the
-    addon source code, which has the implementation for most of the nountypes.
-</p>
-<h3><span id="Regexps_as_Noun_Types">Regexps as Noun Types</span>
-</h3>
-<p>If none of the nountypes above is what you're looking for, there are several ways to define your
-    own. The simplest is to use a regular expression. Suppose that (for whatever odd reason) you
-    wanted your command to accept only arguments that begin with the letter N. The following regexp
-    matches words that start with N:
-</p>
-
-<pre><code data-language="javascript">/^[nN]/</code></pre>
-
-<p>You could use it as a noun type, like so:</p>
-
-<pre><code data-language="javascript">arguments: [{role: "object",
-             nountype: /^[nN]/,
-             label: "word that starts with n"}]</code></pre>
-
-<p>(Note that you do <i>not</i> put quotes around the regexp.)</p>
-<p>A regexp nountype will reject input that doesn't match, but it doesn't know how to help the user by
-    suggesting appropriate input.
-</p>
-
-
-<h3><span id="Lists_as_Noun_Types">Lists as Noun Types</span></h3>
-<p>Suppose you're writing a command that takes a color as an argument (perhaps it outputs a
-    hexadecimal RGB representation of that color.) To make a nountype that accepts colors, you can
-    simply pass in an array of strings:
-</p>
-
-<pre><code data-language="javascript">names: ["convert-color"],
-arguments: [{role: "object",
-             nountype: ["red", "orange", "yellow", "green",
-                        "blue", "violet", "black", "white",
-                        "grey", "brown", "beige", "magenta",
-                        "cerulean", "puce"],
-             label: "color to convert"}]</code></pre>
+<pre><code data-language="javascript">class Email {
+    constructor(args) {
+        args[OBJECT] = {nountype: noun_arb_text, label: "message""}; // object
+        args[TO]     = {nountype: noun_type_contact, label: "contact"}; // goal
+    }</code></pre>
 
 <p>
-    One benefit of specifying a list is that the parser can use it to offer suggestions. If the
-    user enters "get-color bl", for instance, iShell will be able to suggest "black" and "blue" as
-    the two valid completions based on the input. This makes list-based nountypes very useful for
-    any command that can accept only a finite set of values.
-</p>
+    Please do not use the command constructor for any purposes other than argument definition
+    and simple field initialization, since iShell may create the command object multiple times
+    for various reasons. There are <a
+        href="#Running_on_iShell_load_and_when_iShell_popup_is_shown_">several other
+    functions</a> that are used to initialize commands.</p>
+
+<p>In the object-based syntax of Mozilla Ubiquity, it is only possible to define command arguments
+    using roles by setting the <code>arguments</code> command attribute:</p>
+
+<pre><code data-language="javascript">names: ["email"],
+arguments: [{role: "object", nountype: noun_arb_text, label: "message"}, // object
+            {role: "goal",   nountype: noun_arb_contact, label: "contact"}], // to</code></pre>
+
+    <h4><span id="What_Roles_Can_I_Use.3F">What Argument Roles Can I Use?</span></h4>
+    <ul>
+        <li> object (in "echo helloooo", hello is the object.)</li>
+        <li> subject (in "order flowers <b>FOR</b> Algernon", Algernon is the subject.)</li>
+        <li> goal (in "email this <b>TO</b> Brandon", Brandon is the goal.)</li>
+        <li> source (in "translate this <b>FROM</b> Spanish", Spanish is the source.)</li>
+        <li> location (in "yelp pizza <b>NEAR</b> Boston", Boston is the location.)</li>
+        <li> time (in "book a flight <b>AT</b> thursday", thursday is the time.)</li>
+        <li> instrument (in "search monkeys <b>WITH</b> Google", Google is the instrument.)</li>
+        <li> format (in "check weather <b>IN</b> Celsius", Celsius is the format.)</li>
+        <li> modifier (in "get email address <b>FOR</b> Chris", Chris is the modifier.)</li>
+        <li> alias (in "twitter this <b>AS</b> Jono", Jono is the alias.)</li>
+        <li> cause (in "sort lines <b>BY</b> length", length is the cause.)</li>
+        <li> dependency (in "listen song <b>ON</b> Spotify", Spotify is the dependency.)</li>
+    </ul>
+
+    <h3><span id="The_Arguments_Object">The Arguments Dictionary</span>
+    </h3>
+    <p>When your execute method is called, it is passed a dictionary that encapsulates the values
+        for all arguments. Here we call JavaScript objects a dictionary to not confuse them with
+        argument roles.
+    </p>
+    <p>When your preview method is called, it is passed this dictionary, too.
+    </p>
+    <p>This dictionary has one attribute corresponding to each pronoun. In our example above, the
+        command accepts only an object-role argument, so the preview and execute methods get passed
+        a dictionary with an <code>OBJECT</code> attribute (<code>args.OBJECT</code> in the code of
+        the <b>echo</b> command above).
+    </p>
+    <p>If we made a command, like <b>email</b>, that takes an object-role argument and a goal-role
+        argument, its preview and execute methods would get passed a dictionary with
+        <code>OBJECT</code> and <code>TO</code> attributes (in the object-based syntax of
+        Mozilla Ubiquity thease attributes are called <code>object</code> and <code>goal</code> respectively).
+    </p>
+    <p><code>args.OBJECT</code> (or <code>args.TO</code>) has several attributes of its own:
+    </p>
+
+    <pre><code data-language="javascript">args.OBJECT.text    // a string of the input in plain text, without formatting
+args.OBJECT.html    // a string of the input in formatted HTML, including tags
+args.OBJECT.data    // for non-text input types, an arbitrary data object
+args.OBJECT.summary // the HTML string displayed in the suggestion list, abbreviated if long</code></pre>
+
+    <p>Our example command only cares about the <code>.text</code> attribute of the input, because
+        it simply wants plain text. Often, when the user invokes your command by typing a few short
+        words into the input box, <code>.text</code>, <code>.html</code>, and <code>.summary</code>
+        will all have exactly the same value, and <code>.data</code> will be null. Many, if not
+        most, commands that you write will only care about the text value. Nevertheless, the other
+        versions of the input data are provided to you in case they differ from <code>.text</code>
+        and in case your command has a use for them.
+    </p>
+
+    <h2><span id="Introduction_to_Noun_Types">Introduction to Noun Types</span></h2>
+    <p>Noun types specify what <i>kind</i> of input your command can accept for each one of its
+        arguments.
+    </p>
+    <p>For the <b>echo</b> command, we wanted the object-role argument to accept any text whatsoever, so
+        for its nountype we passed in the predefined <code>noun_arb_text</code> object. This object
+        accepts any arbitrary text as a valid argument and passes it to the command unchanged.
+    </p>
+    <p><code>noun_arb_text</code> is OK for very simple commands, like echoing back the user's
+        input. But for commands that take structured data, you will want to use more specific
+        nountypes.
+    </p>
+    <p>For example, if a command can take a date, you would want to use <code>noun_type_date</code>
+        as the nountype of the argument. <code>noun_type_date</code> provides several benefits to
+        your command: it does all of the date parsing for you; it suggests dates that the user might
+        want to enter (for instance, it defaults to today's date). And, it lets the parser know that
+        your command takes a date. This is useful because when the user selects a date on a page and
+        invokes iShell, your command will be one of the top suggestions.
+    </p>
+    <p>You can write your own noun types - we'll get into that later. For now, let's take a look at
+        the built-in nountypes that your command can use. These include:
+    </p>
+
+    <ul>
+        <li> noun_arb_text (Arbitrary text)</li>
+        <li> noun_type_date (A date, in any format, or a word like "yesterday")</li>
+        <li> noun_type_time (A time, in any format)</li>
+        <li> noun_type_percentage (A percentage value)</li>
+        <li> noun_type_email (A valid email address)</li>
+        <li> noun_type_tab (One of the currently open tabs matched by title or URL)</li>
+    </ul>
+
+    <p><br> Once you are familiar with writing commands, you should check out the nountypes.js at
+        the addon source code, which has the implementation for most of the nountypes.
+    </p>
+    <h3><span id="Regexps_as_Noun_Types">Regexps as Noun Types</span>
+    </h3>
+    <p>If none of the nountypes above is what you're looking for, there are several ways to define
+        your own. The simplest is to use a regular expression. Suppose that (for whatever odd
+        reason) you wanted your command to accept only arguments that begin with the letter N. The
+        following regexp matches words that start with N:
+    </p>
+
+    <pre><code data-language="javascript">/^[nN]/</code></pre>
+
+    <p>You could use it as a noun type, like so:</p>
+
+    <pre><code data-language="javascript">args[OBJECT] = {nountype: /^[nN]/, label: "word that starts with n"}]</code></pre>
+
+    <p>(Note that you do <i>not</i> put quotes around the regexp.)</p>
+    <p>A regexp nountype will reject input that doesn't match, but it doesn't know how to help the
+        user by suggesting appropriate input.
+    </p>
 
 
-<h3><span id="Objects_as_Noun_Types">Objects as Noun Types</span></h3>
+    <h3><span id="Lists_as_Noun_Types">Lists as Noun Types</span></h3>
+    <p>Suppose you're writing a command that takes a color as an argument (perhaps it outputs a
+        hexadecimal RGB representation of that color.) To make a nountype that accepts colors, you
+        can simply pass in an array of strings:
+    </p>
 
-<p>Objects used as noun types allow to associate arbitrary data with the argument input value. Let's
-    imagine that you want to create a command that offers a choice between some options represented
-    by API parameters, that you do not want show to the user.</p>
+    <pre><code data-language="javascript">args[OBJECT] = {nountype: ["red", "orange", "yellow", "green",
+                           "blue", "violet", "black", "white",
+                           "grey", "brown", "beige", "magenta",
+                           "cerulean", "puce"],
+                label: "color to convert"}]</code></pre>
 
-<pre><code data-language="javascript">names: ["call-api-with"],
-arguments: [{role: "object",
-             nountype: {"option1": "api-parameter-1",
-                        "option2": "api-parameter-2",
-                        "option3": "api-parameter-3"}
-             label: "option"}]</code></pre>
-
-<p>Although "option1", "option2"... will be shown to the user and stored in <code>args.object.text</code>,
-    in the command handler methods you can access the actual values of the corresponding API parameters
-    using the <code>args.object.data</code> property.</p>
-
-
-<h3><span id="Writing_a_Noun_Type_Object">Creating Custom Noun Types</span></h3>
-<p>Of course, not every type of noun you'd be interested in can be represented as a finite list or
-    as a regexp. If you want to be able to accept or reject input based on some algorithmic test,
-    you can do so by writing a custom JavaScript object that implements a <code>suggest()</code>
-    method (and, optionally, a <code>default()</code> method.)
-</p>
-<p>There is an example of how to do this in the section on the tab commands below.</p>
+    <p>
+        One benefit of specifying a list is that the parser can use it to offer suggestions. If the
+        user enters "get-color bl", for instance, iShell will be able to suggest "black" and "blue"
+        as the two valid completions based on the input. This makes list-based nountypes very useful
+        for any command that can accept only a finite set of values.
+    </p>
 
 
-<h2><span id="Insert_Email:_the_Contact_noun_type">Insert Email: the Contact noun type</span></h2>
-<p>Let's take a look at one of the built-in nountypes: <code>noun_type_contact</code>. By using this
-    nountype, iShell will be able to autocomplete the known emails while the user is entering the command.
-    <code>noun_type_contact</code> is what the built-in iShell command "email" uses. At the moment, iShell figures out what
-    the known emails are just by remembering arguments you have ever passed to the <b>email</b> or <b>compose</b>
-    commands.
-</p>
-<p>The following command lets you insert someone's email address using autocompletion.
-</p>
+    <h3><span id="Objects_as_Noun_Types">Objects as Noun Types</span></h3>
 
-<pre><code data-language="javascript">cmdAPI.createCommand({
-    name: "insert-email",
-    arguments: [{role: "modifier", nountype: noun_type_contact}],
-    preview: "Inserts someone's email address.",
-    execute(args) {
-        cmdAPI.setSelection(args.modifier.html);
-    },
-});</code></pre>
+    <p>Objects used as noun types allow to associate arbitrary data with the argument input value.
+        Let's imagine that you want to create a command that offers a choice between some options
+        represented by API parameters, that you do not want to show to the user.</p>
 
-<p>To try this out, execute "insert-email of " and then the first few letters of address someone you mailed
-    earlier through the commands mentioned above.
-</p>
+    <pre><code data-language="javascript">args[OBJECT] = {nountype: {"option1": "api-parameter-1",
+                           "option2": "api-parameter-2",
+                           "option3": "api-parameter-3"}
+                label: "option"}]</code></pre>
 
-<h1 class="section-heading"><span id="Search_Commands">Creating Search Commands</span></h1>
-    <p>Because the Web is volatile, iShell provides search commands only for the essential sites and
-        services. Nevertheless, you can easily make your own search command with the
-        <a href="API.html#create-search-command" target="_blank">cmdAPI.createSearchCommand()</a>
-        function. It can automatically parse HTML and JSON content and also accepts custom
-        filter functions to process DOM of the requested page with jQuery. Let's make a function that
-        performs search a dictionary:</p>
+    <p>"option1", "option2"... will be shown in the UI and stored in <code>args.OBJECT.text</code>.
+        In the command handler methods, you can access the actual values of the corresponding API
+        parameters using the <code>args.object.data</code> property.</p>
 
-<pre><code data-language="javascript">cmdAPI.createSearchCommand({
-    name: "mydictionary",
-    previewDelay: 1000,
-    url: "https://mydictionary.com/define.php?term=%s",
-    description: "Find definitions in mydictionary.com",
-    uuid: "261DF55D-5E22-4E5F-8A81-6ED31B81AE3E",
-    parser: {
-        type      : "html",
-        container : ".definition",
-        title     : "h1 a",
-        href      : "h1 a",
-        body      : container => {
-            const meaning = container.find(".meaning");
-            meaning.css("border-bottom", "1px solid white");
-            meaning.css("margin-bottom", "5px");
-            const example = container.find(".example");
-            example.css("font-style", "italic");
-            return $("&lt;div&gt;").append(meaning).append(example);
-        }
+    <h1 class="section-heading"><span
+            id="Switching_Tabs">Switching Tabs: Creating Custom Noun Types</span></h1>
+    <p>Of course, not every type of noun you'd be interested in can be represented as a finite list
+        or as a regexp. If you want to be able to accept or reject input based on some algorithmic
+        test, you can do so by writing a custom JavaScript object that implements a
+        <code>suggest()</code> method (and, optionally, a <code>default()</code> method.
+    </p>
+    <p>For example, we can switch browser tabs with a command. The end goal is this: type a few
+        characters that match the title of an open tab (in any window), hit return, and you've
+        switched to that tab.
+    </p>
+    <p>We'll write a command for this in two steps. The first step is creating a tab nountype. The
+        second step is using that nountype to create the tab-switching command.
+    </p>
+
+
+    <h3><span id="Switching_Tabs:_Writing_your_own_Noun-Types">Switching Tabs: Writing your own Noun-Types</span>
+    </h3>
+    <p>A nountype needs to only have two things: A <code>label</code> and a <code>suggest()</code>
+        function. It can optionally also have a <code>default()</code> function.
+    </p>
+    <p>The label is what shows up when the command prompts for input. Suggest returns a list of
+        input objects, each one containing the name of a matching tab.
+    </p>
+
+    <pre><code data-language="javascript">const noun_type_browser_tab = {
+    label: "tab title or URL",
+
+    // Suggestion methods declared as async should not use the callback argument.
+    async suggest(text, html, callback, selectedIndices) {
+        const tabs = await browser.tabs.query({});
+        let suggs = tabs.map(tab => cmdAPI.makeSugg(tab.title || tab.url, null, tab, 1,
+                             selectedIndices));
+
+        // cmdAPI.grepSuggs filters suggestions by the user input and scores them.
+        return cmdAPI.grepSuggs(text, suggs);
     }
-});</code></pre>
+};</code></pre>
 
-<p>A class-based equivalent looks like the following:</p>
+    <p>The suggest method of a noun type always gets passed both text and html. If the input is
+        coming from a part of a web page that the user has selected, these values can be different:
+        they are both strings, but the html value contains markup tags while the text value does
+        not. The Tab noun type only cares about the plain text of the tab name, so we ignore the
+        value of html.
+    </p>
+    <p>The callback argument is for use by nountypes that need to run asynchronously, i.e. because
+        they need to do network calls to generate suggestions. Note that when the
+        <code>suggest</code> function is declared as async, it <b>should not</b> call this function.
+        Please, avoid the use of the callback entirely, as it is left only for backward
+        compatibility. Return promises even if you use the old-fashioned callback-based APIs, such
+        as XMLHttpRequest or jQuery.ajax.
+    </p>
+    <p>We use the convenience function <code>cmdAPI.makeSugg()</code> to generate an input object of
+        the type that the iShell parser expects. The full signature of this function is:
+    </p>
 
-<pre><code data-language="javascript">/**
-    @search
-    @command
-    @delay 1000
-    @url https://mydictionary.com/define.php?term=%s
-    @container .definition
-    @title h1 a
-    @href h1 a
-    @description Find definitions in mydictionary.com
-    @uuid 261DF55D-5E22-4E5F-8A81-6ED31B81AE3E
+    <pre><code data-language="javascript">cmdAPI.makeSugg(text, html, data, score, selectionIndices);</code></pre>
+
+    <p>It requires at least one of <code>text</code>, <code>html</code>, <code>data</code>. Use
+        <code>null</code> if you want to skip <code>text</code> and/or <code>html</code>.
+    </p>
+    <p>If the text or html input is very long, <code>makeSugg()</code> generates a summary for us
+        and puts it in the <code>summary</code> attribute of the input object.
+    </p>
+    <p>We could have accomplished mostly the same thing without calling <code>makeSugg()</code> by
+        returning a list of anonymous objects like these:
+    </p>
+
+    <pre><code data-language="javascript">{ text: tabName,
+  html: Utils.escapeHtml(tabName),
+  data: tab,
+  summary: Utils.escapeHtml(tabName) };</code></pre>
+
+    <p>The suggestion objects that our <code>suggest()</code> method generates are the same objects
+        that will eventually get passed in argument dictionaries into the <code>execute()</code> and
+        <code>preview()</code> methods of any commands that use this noun type.
+    </p>
+
+    <h3><span
+            id="generating_nountypes_with_annotations">Generating Noun Types with Annotations</span>
+    </h3>
+
+    <p>If your noun type needs nothing more than the <code>suggest</code> function, you may apply
+        <code>@nountype</code> annotation to a regular function to generate the noun type with the
+        same name:</p>
+
+    <pre><code data-language="javascript">/** @nountype
+    @label foo
 */
-class MyDictionary {
-    // container, title, href, thumbnail, and body properties could be parsed
-    // with the corresponding methods
-    parseBody(container) {
-        const meaning = container.find(".meaning");
-        meaning.css("border-bottom", "1px solid white");
-        meaning.css("margin-bottom", "5px");
-        const example = container.find(".example");
-        example.css("font-style", "italic");
-        return $("&lt;div&gt;").append(meaning).append(example);
-    }
+function noun_type_foo(text, html, callback, selectedIndices) {
+    // ...
 }</code></pre>
 
+    <p>The annotated function accepts the same arguments as the <code>suggest</code> function of a
+        full-fledged noun type.
+    </p>
 
-<h1><span id="oosyntax_revisited">Class-Based Syntax Revisited</span></h1>
+    <h3><span id="Switching_Tabs:_The_Command">Switching Tabs: The Command</span></h3>
+    <p>Now that we are armed with the tab nountype, it is easy to make the tab-switching command.
+    </p>
 
-<p>Now you know more about commands and arguments, so we can create a more complex class-based
-    command with arguments. Let's call it <code>show-text</code>. It has the following syntax:
-    <b>show-text</b> <i>message text</i> <b>in</b> <i>destination</i>.</p>
-
-<pre><code data-language="javascript">/**
-    Displays a given message at a popup or prints it to the browser log.
-
-    @command show-text, display-text
-    @description A class-based command with arguments.
+    <pre><code data-language="javascript">/** @command
+    @description Switches to the tab with the given title.
 */
-class ShowTextCommandClass {
+class SwitchTab {
     constructor(args) {
-        args[OBJECT] = {nountype: noun_arb_text, label: "message"};
-        args[IN]     = {nountype: ["popup", "log"], label: "destination"};
+        args[OBJECT] = {nountype: noun_type_browser_tab};
     }
 
-    preview(args, display, storage) {
-        const message = args[OBJECT]?.text;
-        if (message) {
-            const html = `Shows &lt;i&gt;${message}&lt;/i&gt; in &lt;b&gt;${args[IN]?.text || "popup"}&lt;/b&gt;`;
-            display.set(html);
-        }
+    preview({OBJECT: {text: tabName}}, display) {
+        if (tabName)
+            display.text(`Changes to <strong>${tabName}</strong> tab.`);
         else
-            this.previewDefault(display);
+            display.text(`Switch to a tab by name.`);
     }
 
-    execute(args, storage) {
-        const destination = args[IN]?.text;
-        const message = args[OBJECT]?.text;
-
-        if (destination === "log")
-            console.log(message);
-        else
-            cmdAPI.notify(message);
+    execute({OBJECT: {data: tab}}) {
+        browser.tabs.update(tab?.id, {active: true});
     }
 }</code></pre>
 
-<p>Let's see what happens here.</p>
-<p>The <code>@command</code> annotation allows to override the command name generated by default.
-    The content of the documentation comment above the class (except annotations) is displayed in
-    the help section of iShell command listing. It may contain HTML or <a
-            href="https://en.wikipedia.org/wiki/Markdown" target="_blank">markdown</a>-formatted
-    text if the <code>@markdown</code> annotation is used.</code></p>
 
-<p><code>show-text</code> defines the nameless arbitrary text <b>object</b> argument in its
-    constructor, along with the argument named <b>in</b> that can take two values:
-    <i>popup</i> and <i>log</i>. These values will be available to the autocompletion.</p>
+    <!--h2><span id="Insert_Email:_the_Contact_noun_type">Insert Email: the Contact noun type</span></h2>
+    <p>Let's take a look at one of the built-in nountypes: <code>noun_type_contact</code>. By using this
+        nountype, iShell will be able to autocomplete the known emails while the user is entering the command.
+        <code>noun_type_contact</code> is what the built-in iShell command "email" uses. At the moment, iShell figures out what
+        the known emails are just by remembering arguments you have ever passed to the <b>email</b> or <b>compose</b>
+        commands.
+    </p>
+    <p>The following command lets you insert someone's email address using autocompletion.
+    </p>
 
-<p>With the class-based syntax, you do not need to remember obscure argument roles and just
-    directly use the names of arguments when defining them in the constructor or accessing them in
-    methods. It is still possible to access arguments in the old way if you prefer. Please do not use the
-    command constructor for any purposes other than argument definition and simple field
-    initialization, since iShell may create the command object multiple times for various reasons.
-    There are <a href="#Running_on_iShell_load_and_when_iShell_popup_is_shown_">several other
-        functions</a> that are used to initialize commands.
-</p>
+    <pre><code data-language="javascript">/** @command
+        @description Inserts someone's email address.
+    */
+    class InsertEmail {
+        constructor(args) {
+            args[OF] = {nountype: noun_type_contact, label: "text"};
+        }
 
-<p>You may also notice that class-based methods have the <code>args</code> argument always in
-    the first position, and <code>pblock</code> argument is now called <code>display</code>. It
-    still contains the reference to the same <code>div</code> element of iShell preview area but has
-    the new nice <code>set</code> method that modifies innerHTML property of the element. <code>storage</code>
-    argument is a reference to the <a href="API.html#bin">Bin interface</a> of the
-    command.</p>
+        execute(args) {
+            cmdAPI.setSelection(args.OF.html);
+        }
+    }</code></pre>
 
+    <p>To try this out, execute "insert-email of " and then the first few letters of address someone you mailed
+        earlier through the commands mentioned above.
+    </p-->
 
-<h2><span id="metaclass">The @metaclass Annotation</span></h2>
+    <h1><span id="metaclass">The @metaclass Annotation</span></h1>
 
-<p>Classes annotated with the <code>@metaclass</code> annotation do not automatically create
-    commands. Instead, they could be instantiated and passed to <code>cmdAPI.createCommand</code>,
-    or be inherited from. This is convenient when it is necessary to create a command-generating
-    function like <code>cmdAPI.createSearchCommand</code>, which produces commands that contain the
-    same logic but differ slightly in some aspects. In the example below, <code>createSuffixCommand</code>
-    function uses a metaclass to generate a set of such commands.
-</p>
+    <p>Classes annotated with the <code>@metaclass</code> annotation do not automatically create
+        commands. Instead, they could be instantiated and passed to
+        <code>cmdAPI.createCommand</code>, or be inherited from. This is convenient when it is
+        necessary to create a command-generating function like
+        <code>cmdAPI.createSearchCommand</code>, which produces commands that contain the same logic
+        but differ slightly in some aspects. In the example below, <code>createSuffixCommand</code>
+        function uses a metaclass to generate a set of such commands.
+    </p>
 
-<pre><code data-language="javascript">/**
+    <pre><code data-language="javascript">/**
     This class does not create any commands automatically.
 
     @command
@@ -722,14 +758,15 @@ class SuffixCommand {
         args[OBJECT] = {nountype: noun_arb_text, label: "input"};
     }
 
-    // a method named metaconstructor is used to initialize instances
-    // of the command
+    // a method named metaconstructor is used to initialize instances of the command
     metaconstructor(options) {
-        Object.assign(this, options);
-
-        // Note that in the metaconstructor it is possible to modify the values of command
-        // properties, The following is not possible in a regular constructor:
+        // In metaconstructor it is possible to modify the values of the command
+        // attributes as they are defined for cmdAPI.createCommand.
+        // The following is not possible in a regular constructor:
         this.description = this.description.replace("%s", this.suffix);
+
+        // the suffix and name properties are assigned here
+        Object.assign(this, options);
     }
 
     preview({OBJECT}, display) {
@@ -747,56 +784,106 @@ function createSuffixCommand(options) {
     cmdAPI.createCommand(new SuffixCommand(options));
 }
 
-createSuffixCommand({name: "um-suffix", suffix: "um", uuid: "uuid1"});
-createSuffixCommand({name: "issa-suffix", suffix: "issa", uuid: "uuid2"});</code></pre>
+createSuffixCommand({name: "add-um-suffix", suffix: "um"});
+createSuffixCommand({name: "add-issa-suffix", suffix: "issa"});</code></pre>
 
-<p>Here we use <code>display.text</code> method instead of <code>display.set</code> to change the
-    contents of the preview. <code>display.text</code> adds the same margins to the output, as the ones
-    iShell uses to display command description, so the output does not wiggle as in the previous command.
-</p>
+    <h1 class="section-heading"><span id="Search_Commands">Creating Search Commands</span></h1>
+    <p>Because the Web is volatile, iShell provides search commands only for the essential sites and
+        services. Nevertheless, you can easily make your own search command with the
+        <code>@search</code> annotation (the equivalent of <a href="API.html#create-search-command"
+                                                              target="_blank">cmdAPI.createSearchCommand()</a>).
+        They can automatically parse HTML and JSON
+        content, generate preview, and also provide custom filter functions to process DOM of the
+        requested page with jQuery. Let's make a function that performs search in a dictionary:</p>
 
-
-<h1><span id="TinyURL:_Network_Calls_and_jQuery">TinyURL: Network Calls and jQuery</span></h1>
-
-<p>Often while writing emails, we'll discover that we've pasted in a URL long enough to be used for
-    unfortunate analogies. We'd like to be able to quickly turn that into a <a rel="nofollow"
-                                                                              class="external text"
-                                                                              href="http://en.wikipedia.org/wiki/Tinyurl">TinyURL</a>
-    - but the process of making a TinyURL involves lots of fiddly steps. iShell to the rescue.
-</p>
-<p>Because we include <a rel="nofollow" class="external text"
-                         href="http://en.wikipedia.org/wiki/jQuery">jQuery</a> with iShell, it is
-    simple to perform Ajax calls as well as parse returning data. TinyUrl.com provides an easy-to-use
-    RESTful API where you pass a URL and it returns its shortened form. We use that API in this
-    command.
-</p>
-
-<pre><code data-language="javascript">/** @command
-    @description Replaces the selected URL with a TinyUrl.
+    <pre><code data-language="javascript">/**
+    @search
+    @command
+    @delay 1000
+    @url https://mydictionary.com/define.php?term=%s
+    @container .definition
+    @title h1 a
+    @href h1 a
+    @description Find definitions in mydictionary.com
 */
-class Tinyurl {
-    constructor(args) {
-        args[OBJECT] = {nountype: noun_arb_text, label: "url to shorten"};
-    }
-    execute({OBJECT: {text: userUrl}}) {
-        const apiUrl = "http://tinyurl.com/api-create.php";
-        jQuery.get(apiUrl, {url: userUrl}, tinyUrl => cmdAPI.setSelection(tinyUrl));
+class MyDictionary {
+    // container, title, href, thumbnail, and body properties could be parsed
+    // with the corresponding methods
+    parseBody(container) {
+        const meaning = container.find(".meaning");
+        meaning.css("border-bottom", "1px solid white");
+        meaning.css("margin-bottom", "5px");
+        const example = container.find(".example");
+        example.css("font-style", "italic");
+        return $("&lt;div&gt;").append(meaning).append(example);
     }
 }</code></pre>
 
-<p>jQuery is a powerful tool. With it, you can fairly effortlessly cherry-pick the data you need
-    from RSS feeds, XML, and all sorts of other data formats. It also makes doing in-preview
-    animations a breeze.
-</p>
+    <p>An object-based equivalent looks like the following:</p>
 
-<h1 class="section-heading"><span id="content-scripts">Executing Content Scripts</span></h1>
-<p>Content scripts allow to modify the live document loaded into a browser
-    tab or to retrieve its contents. Use the <a href="API.html#execute-script" target="_blank">cmdAPI.executeScript()</a>
-    function to run JavaScript code in the context of the tab document. For
-    example, let's create a command that changes the color of the heading tags
-    (for example, H1 or H2) and prints the text of each heading in the preview area.</p>
+    <pre><code data-language="javascript">cmdAPI.createSearchCommand({
+    name: "mydictionary",
+    previewDelay: 1000,
+    url: "https://mydictionary.com/define.php?term=%s",
+    description: "Find definitions in mydictionary.com"
+    parser: {
+        type      : "html",
+        container : ".definition",
+        title     : "h1 a",
+        href      : "h1 a",
+        body      : container => {
+            const meaning = container.find(".meaning");
+            meaning.css("border-bottom", "1px solid white");
+            meaning.css("margin-bottom", "5px");
+            const example = container.find(".example");
+            example.css("font-style", "italic");
+            return $("&lt;div&gt;").append(meaning).append(example);
+        }
+    }
+});</code></pre>
 
-<pre><code data-language="javascript">/**
+    <!--h1><span id="TinyURL:_Network_Calls_and_jQuery">TinyURL: Network Calls and jQuery</span></h1>
+
+    <p>Often while writing emails, we'll discover that we've pasted in a URL long enough to be used for
+        unfortunate analogies. We'd like to be able to quickly turn that into a <a rel="nofollow"
+                                                                                  class="external text"
+                                                                                  href="http://en.wikipedia.org/wiki/Tinyurl">TinyURL</a>
+        - but the process of making a TinyURL involves lots of fiddly steps. iShell to the rescue.
+    </p>
+    <p>Because we include <a rel="nofollow" class="external text"
+                             href="http://en.wikipedia.org/wiki/jQuery">jQuery</a> with iShell, it is
+        simple to perform Ajax calls as well as parse returning data. TinyUrl.com provides an easy-to-use
+        RESTful API where you pass a URL and it returns its shortened form. We use that API in this
+        command.
+    </p>
+
+    <pre><code data-language="javascript">/** @command
+        @description Replaces the selected URL with a TinyUrl.
+    */
+    class Tinyurl {
+        constructor(args) {
+            args[OBJECT] = {nountype: noun_arb_text, label: "url to shorten"};
+        }
+        execute({OBJECT: {text: userUrl}}) {
+            const apiUrl = "http://tinyurl.com/api-create.php";
+            jQuery.get(apiUrl, {url: userUrl}, tinyUrl => cmdAPI.setSelection(tinyUrl));
+        }
+    }</code></pre>
+
+    <p>jQuery is a powerful tool. With it, you can fairly effortlessly cherry-pick the data you need
+        from RSS feeds, XML, and all sorts of other data formats. It also makes doing in-preview
+        animations a breeze.
+    </p-->
+
+    <h1 class="section-heading"><span id="content-scripts">Executing Content Scripts</span></h1>
+    <p>Content scripts allow modifying the live document loaded into a browser tab or retrieving its
+        contents. Use the <a href="API.html#execute-script"
+                             target="_blank">cmdAPI.executeScript()</a> function to run JavaScript
+        code in the context of the tab document. For example, let's create a command that changes
+        the color of the heading tags (for example, H1 or H2) and prints the text of each heading in
+        the preview area.</p>
+
+    <pre><code data-language="javascript">/**
     Executes content scripts in the active tab
 
     # Examples
@@ -842,14 +929,15 @@ function colorHeadings(selector, color) {
     $(selector).css("color", color);
 }</code></pre>
 
-<h1 class="section-heading"><span id="Persistent_Storage">Persistent Storage</span></h1>
-<p>Some commands may want to store data that persist even after closing Firefox.
-    Meet the <a href="API.html#bin" target="_blank">Bin</a> interface. Note the use of
-    <a href="API.html#preview-list" target="_blank">display.htmlList()</a> function to create
-    a list with clickable items.
-</p>
+    <h1 class="section-heading"><span id="Persistent_Storage">Persistent Storage</span></h1>
+    <p>Some commands may want to store data that persist even after closing Firefox. Meet the <a
+            href="API.html#bin" target="_blank">Bin</a> interface. It is available as the last
+        argument of every command method called by iShell (except constructor). Note the use of <a
+                href="API.html#preview-list" target="_blank">display.htmlList()</a> function to
+        create a list with clickable items in the preview area.
+    </p>
 
-<pre><code data-language="javascript">/**
+    <pre><code data-language="javascript">/**
     @command
     @delay 1000
     @description Lets you jot a memo for the page.
@@ -874,7 +962,7 @@ class Memo {
             display.text(`No memos taken for: <small><code>${href}</code></small>`);
     }
 
-    execute({object: {html}}, Bin) {
+    execute({OBJECT: {html}}, Bin) {
         const href = cmdAPI.getLocation();
         const list = Bin[href]() || [];
 
@@ -883,178 +971,64 @@ class Memo {
     }
 }</code></pre>
 
-<h1 class="section-heading"><span id="Switching_Tabs">Switching Tabs: Creating Custom Noun Types</span></h1>
+    <h1 class="section-heading"><span id="Full_Blown_Command">Putting It All Together: Creating Pins on Pinterest</span>
+    </h1>
+    <p>The code below is the actual source code of the Pinterest command almost as it appears in iShell. It also demonstrates
+        some tricks that you would not find in the official documentation. With this command the user is be able to
+        pin images found on the current page to a <a href="https://pinterest.com">Pinterest</a>
+        board. One of the command arguments provides autocompletion for all user's boards. It
+        is also possible to create a board if it does not exist.</p>
 
-<p>We can switch browser tabs with a command. The end goal is this: type a
-    few characters that match the title of an open tab (in any window), hit return, and you've
-    switched to that tab.
-</p>
-<p>We'll write this command in two steps. The first step is creating a tab nountype. The second
-    step is using that nountype to create the tab-switching command.
-</p>
-
-
-<h3><span id="Switching_Tabs:_Writing_your_own_Noun-Types">Switching Tabs: Writing your own Noun-Types</span>
-</h3>
-<p>A nountype needs to only have two things: A <code>label</code> and a <code>suggest()</code>
-    function. It can optionally also have a <code>default()</code> function.
-</p>
-<p>The label is what shows up when the command prompts for input. Suggest returns a list of input
-    objects, each one containing the name of a matching tab.
-</p>
-
-<pre><code data-language="javascript">const noun_type_browser_tab = {
-    label: "tab title or URL",
-
-    // Suggestion methods declared as async should not use the callback argument.
-    async suggest(text, html, callback, selectedIndices) {
-        const tabs = await browser.tabs.query({});
-        let suggs = tabs.map(tab => cmdAPI.makeSugg(tab.title || tab.url, null, tab, 1,
-                             selectedIndices));
-
-        // cmdAPI.grepSuggs filters suggestions by the user input and scores them.
-        return cmdAPI.grepSuggs(text, suggs);
-    }
-};</code></pre>
-
-<p>The suggest method of a noun type always gets passed both text and html. If the input is coming
-    from a part of a web page that the user has selected, these values can be different: they are
-    both strings, but the html value contains markup tags while the text value does not. The Tab
-    noun type only cares about the plain text of the tab name, so we ignore the value of html.
-</p>
-<p>The callback argument is for use by nountypes that need to run asynchronously, i.e. because they
-    need to do network calls to generate suggestions. Note that when the <code>suggest</code> function
-    is declared as async, it <b>should not</b> call this function. Please, avoid the use of
-    the callback entirely, as it is left only for backward compatibility.
-    Return promises even if you use the old-fashioned callback-based API, such as XMLHttpRequest or
-    jQuery.ajax.
-</p>
-<p>We use the convenience function <code>cmdAPI.makeSugg()</code> to generate an input object of the
-    type that the iShell parser expects. The full signature of this function is:
-</p>
-
-<pre><code data-language="javascript">cmdAPI.makeSugg(text, html, data, score, selectionIndices);</code></pre>
-
-<p>It requires at least one of <code>text</code>, <code>html</code>, <code>data</code>. Use <code>null</code>
-    if you want to skip <code>text</code> and/or <code>html</code>.
-</p>
-<p>If the text or html input is very long, <code>makeSugg()</code> generates a summary for us and
-    puts it in the <code>summary</code> attribute of the input object.
-</p>
-<p>We could have accomplished mostly the same thing without calling <code>makeSugg()</code> by
-    returning a list of anonymous objects like these:
-</p>
-
-<pre><code data-language="javascript">{ text: tabName,
-  html: Utils.escapeHtml(tabName),
-  data: tab,
-  summary: Utils.escapeHtml(tabName) };</code></pre>
-
-<p>The input objects that our <code>suggest()</code> method generates are the same objects that will
-    eventually get passed into the <code>execute()</code> and <code>preview()</code> methods of any
-    commands that use this noun type.
-</p>
-
-<h3><span id="generating_nountypes_with_annotations">Generating Noun Types with Annotations</span></h3>
-
-<p>If your noun type needs nothing more than the <code>suggest</code> function, you may apply <code>@nountype</code>
-    annotation to a regular function to generate the noun type with the same name:</p>
-
-<pre><code data-language="javascript">/** @nountype
-    @label foo
-*/
-function noun_type_foo(text, html, callback, selectedIndices) {
-    // ...
-}</code></pre>
-
-<p>The annotated function accepts the same arguments as the <code>suggest</code> function of a
-    full-fledged noun type.
-</p>
-
-<h3><span id="Switching_Tabs:_The_Command">Switching Tabs: The Command</span></h3>
-<p>Now that we are armed with the tab nountype, it is easy to make the tab-switching command.
-</p>
-
-<pre><code data-language="javascript">/** @command
-    @description Switches to the tab with the given title.
-*/
-class SwitchTab {
-    constructor(args) {
-        args[OBJECT] = {nountype: noun_type_browser_tab};
-    }
-    preview({OBJECT: {text: tabName}}, display) {
-        if (tabName)
-            display.text(`Changes to <strong>${tabName}</strong> tab.`);
-        else
-            display.text(`Switch to a tab by name.`);
-    }
-    execute({OBJECT: {data: tab}}) {
-        browser.tabs.update(tab?.id, {active: true});
-    }
-}</code></pre>
-
-<h1 class="section-heading"><span id="Real_World_Command">A Full-Blown Command: Create Pins on Pinterest</span></h1>
-<p>The following command shows how things are generally done in iShell. It also demonstrates some
-    tricks that you would not find in the official documentation. The user would be able to
-    pin images found on the current page to a <a href="https://pinterest.com">Pinterest</a> board.
-    One of the command arguments will provide autocompletion for all user's Pinterest boards.</p>
+    <p>To achieve this we need to create a custom noun type that obtains the list of user's boards
+       and appends the current input as an additional suggestion to its suggestion list.
+       If there are some boards that match the current input, we need to score our additional
+       suggestion with some low score value to make it appear at the bottom. In the absence of the matching
+       boards we will promote the creation of a new one by scoring the suggestion with the maximum possible value
+       of 1. Note that generally the score value of 1 may conflict with the scoring of other arguments
+       and produce unexpected results.
+    </p>
 
 <pre><code data-language="javascript">/**
-    This noun type provides autocompletion for user's Pinterest boards.
+    This noun type provides autocompletion for the user's Pinterest boards.
 
     @label board
     @nountype
 */
 async function noun_type_board(text, html, _, selectionIndices) {
-    let suggs = [], boards = await getPinterestBoards(this);
+    let suggs = [], boards = this._command.deref().boards;
 
     if (boards) {
         // Create suggestions from all user's boards and filter them by the current input.
-        // Created suggestions contain board API objects.
-        suggs = boards.items.map(b => cmdAPI.makeSugg(b.name, b.name, b, 1, selectionIndices));
+        // Created suggestions contain board API objects in their .data property.
+        suggs = boards.map(b => cmdAPI.makeSugg(b.name, b.name, b, 1, selectionIndices));
         suggs = cmdAPI.grepSuggs(text, suggs);
     }
 
-    // To allow the creation of new boards, add the current input as a suggestion displayed
-    // at the bottom by scoring it at .001 in the presence of other suggestions. This suggestion
-    // does not contain a board object. Note that generally the score value of 1 used here in the case
-    // if there are no boards may conflict with other arguments and produce unexpected results.
-    // Due to the conceptual limitations of the iShell parser, the text of this suggestion will also
-    // not contain spaces because we already have one argument of the arbitrary text noun type
-    // (OBJECT). All text after the first space will automatically be assigned to the OBJECT argument.
+    // Also add the current input as a suggestion. This suggestion does not contain a board
+    // object.
+    // Due to the conceptual limitations of the iShell parser, the text of this suggestion
+    // can not contain spaces because we already have one argument of the arbitrary text
+    // noun type (OBJECT). All text after the first space will automatically be assigned
+    // to the OBJECT argument.
     cmdAPI.addSugg(suggs, text, html, null, suggs.length? .001 : 1, selectionIndices);
     return suggs;
 }
 
-async function getPinterestBoards(nounType) {
-    if (!nounType._boards) {
-        // Obtain the same storage Bin that is used by the command class.
-        const cmdDef = cmdAPI.getCommandAttributes(Pinterest);
-        const storage = await cmdAPI.createBin(cmdDef.uuid);
-        // Obtain the list of user's Pinterest boards.
-        const pinterestAPI = new PinterestAPI(storage);
-        nounType._boards = await pinterestAPI.getBoards();
-    }
-
-    return nounType._boards;
-}
-
 /**
-    Execute the command without arguments to authorize on Pinterest.
     To create a pin, fill in the arguments and click on an image in the preview area
     or press the corresponding Ctrl+Alt+&lt;key&gt; combination.
 
     # Syntax
-    **pinterest** *pin title* **to** *board* [**of** *dimension*]
+    **pinterest** [*description*] **to** *board* [**of** *dimension*]
 
     # Arguments
-    - *pin title* - title of the pin being created.
-    - *board* - name of the board to attach the pin to. Created if not exists.
-    - *dimension* - minimal dimension of the images displayed in the command preview.
+    - *description* - a comment to the pin being created.
+    - *board* - a name of the board to attach the pin to. Created if not exists.
+    - *size* - minimal size of the images displayed in the command preview.
       500 pixels is the default.
 
     # Examples
-    **pinterest** Nice Kitty to cats of 1000
+    **pinterest** **to** *cats* **of** *1000** *Nice Kitty*
 
     @command
     @markdown
@@ -1063,35 +1037,41 @@ async function getPinterestBoards(nounType) {
     @description Pin image to a board on Pinterest.
     @uuid 06364E1A-7A38-4590-86F6-6CA7AECD971F
  */
-class Pinterest {
+export class Pinterest {
     #pinterestAPI;
+    #boards;
 
     constructor(args) {
-        args[OBJECT] = {nountype: noun_arb_text, label: "title"};
+        noun_type_board._command = new WeakRef(this);
+        args[OBJECT] = {nountype: noun_arb_text, label: "description"};
         args[TO]     = {nountype: noun_type_board, label: "board"};
-        args[OF]     = {nountype: noun_type_number, label: "dimension"};
+        args[OF]     = {nountype: noun_type_number, label: "size"};
     }
 
-    // Create the PinterestAPI object on the iShell load, here a mock object is created.
-    // The real API implementation may use storage to keep OAuth2 authentication tokens.
-    async load(storage) {
-        this.#pinterestAPI = new PinterestAPI(storage);
+    async load() {
+        this.#pinterestAPI = await new PinterestAPI();
+        this.#boards = await this.#pinterestAPI.getBoards();
+    }
+
+    get boards() {
+        return this.#boards;
     }
 
     async preview({OBJECT: {text: title}, OF: {text: dimension}, TO}, display, storage) {
         dimension = dimension || 500;
-        const images = await this.#extractImagesFromPage(dimension);
+        const extractedImages = await this.#extractImagesFromPage(dimension);
 
-        if (images?.length) {
-            const handler = i => this.#createPin(TO.data || TO.text, title, images[i].url);
+        if (extractedImages?.length) {
+            let imageList
+            const imageHandler = i => {
+                const board = TO?.data || TO?.text;
+                const imageURL = extractedImages[i].url;
+                this.#createPin(board, title, imageURL);
+            };
 
-            display.imageList(images.map(i => i.url), handler);
-
-            $("img", display).each(function() {
-                const image = images.find(i => i.url === this.src);
-                const title = `${image.width}x${image.height}`;
-                this.setAttribute("title", title);
-            });
+            const imageURLs = extractedImages.map(i => i.url);
+            imageList = display.imageList(imageURLs, imageHandler);
+            this.#displayImageDimensions(imageList, extractedImages);
         }
         else
             display.text(`No images larger than ${dimension}px found.`)
@@ -1107,30 +1087,50 @@ class Pinterest {
         }
     }
 
-    async #createPin(board, title, imageURL) {
+    #displayImageDimensions(imageList, extractedImages) {
+        $("img", imageList).each(function() {
+            const image = extractedImages.find(i => i.url === this.src);
+            const title = `${image.width}x${image.height}`;
+            this.setAttribute("title", title);
+        });
+    }
+
+    async #createPin(board, description, imageURL) {
         if (!board) {
             cmdAPI.notify("No board is selected.");
-            return;
+            return false;
         }
 
-        if (typeof board === "string") {
-            board = await this.#pinterestAPI.createBoard(board);
-            if (!board) {
-                cmdAPI.notify("Error creating board.");
-                return;
-            }
-        }
+        if (typeof board === "string")
+            board = await this.#createBoard(board);
 
         if (board) {
             const link = cmdAPI.getLocation();
-            const success = await this.#pinterestAPI.createPin(board.id, title, link, imageURL);
-            if (!success)
-                cmdAPI.notify("Error creating pin.")
+            const success =
+                await this.#pinterestAPI.createPin(board.id, description, link, imageURL);
+
+            if (success) {
+                cmdAPI.notify("Successfully pinned image.");
+                return true;
+            }
+            else
+                cmdAPI.notify("Error creating pin.");
         }
     }
 
-    async execute({OBJECT: {text: query}}, storage) {
-        await this.#pinterestAPI.authenticate();
+    async #createBoard(name) {
+        const board = await this.#pinterestAPI.createBoard(name);
+        if (board) {
+            this.#boards.push(board);
+            return board;
+        }
+        else
+            cmdAPI.notify("Error creating board.");
+    }
+
+    async execute() {
+        cmdAPI.addTab(this.#pinterestAPI.userProfileURL);
+        this.#boards = await this.#pinterestAPI.getBoards();
     }
 }
 
@@ -1141,110 +1141,136 @@ function extractImagesUserScript(dimension) {
         return this.naturalWidth >= dimension || this.naturalHeight >= dimension;
     });
 
-    const sortByDimDesc = (a, b) => Math.max(b.naturalWidth, b.naturalHeight)
-                                  - Math.max(a.naturalWidth, a.naturalHeight)
+    const bySizeDesc = (a, b) => Math.max(b.naturalWidth, b.naturalHeight)
+                               - Math.max(a.naturalWidth, a.naturalHeight)
 
-    images = images.toArray().sort(sortByDimDesc);
+    images = images.toArray().sort(bySizeDesc);
 
     return images.map(i => ({url: i.src, width: i.naturalWidth, height: i.naturalHeight}));
-}
+}</code></pre>
 
-// A mock implementation of the Pinterest API.
-class PinterestAPI {
-    async getBoards() {
-        return {
-            items: [
-                {name: "Funny Cats"},
-                {name: "Memes"}
-            ]
-        }
-    }
 
-    async createBoard(name) {
-        console.log(`Created board: ${name}.`);
-        return true
-    }
+    <h1 class="section-heading"><span id="helper">The Helper Application</span></h1>
+    <p>The helper application that could be installed along with iShell is a local web server that
+        may be used to transcend the limits of WebExtensions. Because dynamic code execution is
+        forbidden in WebExtensions manifest v3, the helper application is the only way to evaluate
+        user commands in the MV3 version of iShell.
+    </p>
 
-    async createPin(boardId, title, imageURL) {
-        console.log(`Created pin: "${title}" with image: ${imageURL}.`);
-        return true
-    }
+    <p>If you installed the helper application as a Python package, you may develop your own <a
+            href="https://flask.palletsprojects.com/en/2.1.x/" target="_blank">Flask</a> handlers
+        callable from user commands. There you could do anything that Python can (see also: <a
+                href="https://gchristensen.github.io/enso-portable/" target="_blank">Enso</a>).
+        Although technically you may make requests to any local web server, the lifetime of the
+        helper application is managed automatically by the browser. Use the <a
+                href="API.html#helper-fetch" target="_blank">cmdAPI.helperFetch()</a> function to
+        call helper application handlers. For example, this is how you implement
+        <b>close-browser</b> command for the Windows version of Firefox:</p>
 
-    async authenticate() {
-        console.log(`Authorized Pinterest API.`);
+    <pre><code data-language="javascript">/** @command
+    @description Closes the browser.
+ */
+class CloseFirefox {
+    async execute() {
+        await cmdAPI.helperFetch("/close_browser")
     }
 }</code></pre>
 
-<h1 class="section-heading"><span id="Development_Hints">Development Hints</span></h1>
+    <pre><code data-language="python"># The Flask handler.
+# Requires psutil and pywin32 Python libraries.
+import os
+import psutil
+import win32api
+import win32con
+import win32gui
+import win32process
 
-<p>You now know all you need to know to get started developing useful iShell commands of your own.
-</p>
-<p>Here are some miscellaneous tips that didn't fit elsewhere on this page, that may make
-    development easier for you.
-</p>
+@app.route("/close_browser", methods=['GET'])
+def close_browser():
+    pid = os.getpid()
+    firefox = psutil.Process(pid).parent().parent()
+    firefox_tree = firefox.children(recursive=True)
+    firefox_pids = [p.pid for p in firefox_tree]
+    firefox_pids.append(firefox.pid)
 
-<h2 id="helper"><span>Helper Application</span></h2>
-<p>The helper application that could be installed along with iShell is a local web server that
-    may be used to transcend the limits of WebExtensions. Because dynamic code execution is forbidden
-    in WebExtensions manifest v3, the helper application is the only way to evaluate user commands
-    in MV3 version of iShell.
+    def enumHandler(hwnd, lParam):
+        [_, pid] = win32process.GetWindowThreadProcessId(hwnd)
+        if pid in firefox_pids:
+            win32api.SendMessage(hwnd, win32con.WM_CLOSE)
+
+    win32gui.EnumWindows(enumHandler, None)
+
+    return "", 204</code></pre>
+
+    <h1 class="section-heading"><span id="Development_Hints">Development Hints</span></h1>
+
+    <p>You now know all you need to know to get started developing useful iShell commands of your
+        own.
+    </p>
+    <p>Here are some miscellaneous tips that didn't fit elsewhere on this page, that may make
+        development easier for you.
     </p>
 
-<p>If you installed the helper application as a Python package, you may develop your own
-    <a href="https://flask.palletsprojects.com/en/2.1.x/" target="_blank">Flask</a> handlers
-    callable from user commands. There you could do anything that Python can.
-    Although technically you may make requests to any
-    local web server, the lifetime of the helper application is managed automatically by the browser.
-    Use the <a href="API.html#helper-fetch" target="_blank">cmdAPI.helperFetch()</a>
-    function to call helper application handlers. See also: <a href="https://gchristensen.github.io/enso-portable/" target="_blank">Enso</a>.
-</p>
+    <h2><span id="Running_on_page_load.2C_iShell_load_and_startup">Running Code on iShell load and when iShell popup is shown</span>
+    </h2>
+    <p>There are two additional command properties that may be set in cmdAPI.createCommand for that
+        purposes:</p>
+    <ul>
+        <li><b>load</b> - a function, called exactly once when iShell is loaded.</li>
+        <li><b>init</b> - a function, called each time iShell popup is shown with the popup document
+            as the parameter. Any document-wide CSS/script injections should be performed here.
+        </li>
+    </ul>
 
-<h2><span id="Running_on_page_load.2C_iShell_load_and_startup">Running Code on iShell load and when iShell popup is shown</span></h2>
-<p>There are two additional command properties may be set in cmdAPI.createCommand for that purposes:</p>
-<ul>
-    <li><b>load</b> - a function, called exactly once when iShell is loaded.</li>
-    <li><b>init</b> - a function, called each time iShell popup is shown with the popup document
-        as the parameter. Any document-wide CSS/script injections should be performed here.
-    </li>
-</ul>
+    <h2><span id="uuid">Command UUID</span></h2>
+    <p>Although any command could be run without an 'uuid' attribute, it is recommended to add it to
+        every command you create. If a command is renamed, this will help to preserve its context
+        menu entries, performance data, and the data the command stores through its <a
+                href="API.html#bin">Bin interface</a>.</p>
+    <p>
+        'uuid' may be an arbitrary unique string, for example, the homepage URL of a command. It is
+        not necessary to specify 'uuid' attribute if the proper 'homepage' attribute is specified
+        and will never change. An RFC 4122 v4 UUID is generated automatically for the commands
+        inserted through command editor templates. In the examples above we omit this attribute for
+        brevity.
+    </p>
 
-<h2><span id="Anaphora">Anaphora</span></h2>
-<p>If there is an active selection, and the value of an <i>arbitrary text argument</i> is equal to one of the
-    predefined <a href="https://en.wikipedia.org/wiki/Anaphora_(linguistics)" target="_blank">anaphoric</a>
-    pronouns, the command handler methods will receive the content of the selection through this
-    argument. In the following example, the pronoun <b>this</b> will be substituted for the content of
-    the active selection at the current page:<br><br>
-    &nbsp;&nbsp;<b>send</b> <b>this</b> <b>to</b> <i>user@example.com</i> <b>with</b> <i>subject
-        text</i><br><br> This may be useful if the command contains more than one <i>arbitrary text
-    argument</i>, so it is possible to specify any value of the second such argument in the command line
-    (the <b>with</b> argument in the example above). Without anaphoric pronouns, all text after the
-    first space in the value of the second <i>arbitrary text argument</i> will be assigned to
-    the first such one, which is always the <code>object</code>. If there is no active selection,
-    anaphoric pronouns are treated as literal text values.
-</p>
-<p>iShell parser recognizes the following anaphoric pronouns:</p>
-<ul>
-    <li>this</li>
-    <li>that</li>
-    <li>it</li>
-    <li>selection</li>
-    <li>him</li>
-    <li>her</li>
-    <li>them</li>
-</ul>
+    <h2><span id="Anaphora">Anaphora</span></h2>
+    <p>If there is an active selection, and the value of an <i>arbitrary text argument</i> is equal
+        to one of the predefined <a href="https://en.wikipedia.org/wiki/Anaphora_(linguistics)"
+                                    target="_blank">anaphoric</a> pronouns, the command handler
+        methods will receive the content of the selection through this argument. In the following
+        example, the pronoun <b>this</b> will be substituted for the content of the active selection
+        at the current page:<br><br>
+        &nbsp;&nbsp;<b>send</b> <b>this</b> <b>to</b> <i>user@example.com</i> <b>with</b> <i>subject
+            text</i><br><br> This may be useful if the command contains more than one <i>arbitrary
+            text argument</i>, so it is possible to specify any value of the second such argument in
+        the command line (the <b>with</b> argument in the example above). Without anaphoric
+        pronouns, all text after the first space in the value of the second <i>arbitrary text
+            argument</i> will be assigned to the first such one, which is always the
+        <code>object</code>. If there is no active selection, anaphoric pronouns are treated as
+        literal text values.
+    </p>
+    <p>iShell parser recognizes the following anaphoric pronouns:</p>
+    <ul>
+        <li>this</li>
+        <li>that</li>
+        <li>it</li>
+        <li>selection</li>
+        <li>him</li>
+        <li>her</li>
+        <li>them</li>
+    </ul>
 
-<h2><span id="Ace_Code_Editor">Ace Code Editor</span></h2>
-<p>iShell uses <a href="https://ace.c9.io/" target="_blank">Ace</a> code editor to edit user-defined
-    commands. It is worth getting familiar with its <a
-            href="https://github.com/ajaxorg/ace/wiki/Default-Keyboard-Shortcuts" target="_blank">keyboard
-        shortcuts</a>. The most often used ones are: <code>Ctrl-F</code> - find, <code>Ctrl-H</code>
-    - replace, <code>Ctrl-,</code> (Ctrl and comma) - open editor settings panel. An additional
-    nonstandard shortcut: <code>Ctrl-S</code> will immediately evaluate and save the edited code.
-</p>
-
-<hr>
-<p>Authors: Aza Raskin, Blair McBride, Abimanyu Raja, Jono DiCarlo, Atul Varma, Gerrard Christensen</p>
-
+    <h2><span id="Ace_Code_Editor">Ace Code Editor</span></h2>
+    <p>iShell uses <a href="https://ace.c9.io/" target="_blank">Ace</a> code editor to edit
+        user-defined commands. It is worth getting familiar with its <a
+                href="https://github.com/ajaxorg/ace/wiki/Default-Keyboard-Shortcuts"
+                target="_blank">keyboard shortcuts</a>. The most often used ones are:
+        <code>Ctrl-F</code> - find, <code>Ctrl-H</code> - replace, <code>Ctrl-,</code> (Ctrl and
+        comma) - open editor settings panel. An additional nonstandard shortcut: <code>Ctrl-S</code>
+        will immediately evaluate and save the edited code.
+    </p>
 </div>
 </body>
 </html>

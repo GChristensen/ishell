@@ -102,7 +102,7 @@
             <ul>
                 <li><b>set</b> - sets <strong>pblock.innerHTML</strong> verbatim.</li>
                 <li><b>text</b> - sets <strong>pblock.innerHTML</strong> by adding the same margins
-                    as the displayed description of the command has.</li>
+                    as for the displayed description of the command.</li>
                 <li><b>error</b> - displays an error message in the same way as the <b>text</b> method
                     but in red color.</li>
                 <li><b>fetch</b><span class="since">since v0.8</span> - a shorthand for <a href="#preview-fetch">previewFetch</a>.
@@ -230,9 +230,14 @@
 </blockquote>
 
 <h3><a id="user-content-cmdutilsnotifymessage-title" class="anchor" href="#cmdutilsnotifymessage-title"></a>cmdAPI.notify(message, title)</h3>
-<p class="legacy-name">Legacy names: CmdUtils.notify, displayMessage</p>
+<p class="legacy-name">Legacy names: displayMessage</p>
 <blockquote>
     <p>Display a popup notification with the specified <strong>message</strong> and <strong>title</strong>.</p>
+</blockquote>
+
+<h3><a id="user-content-cmdutilsnotifyerrormessage-title" class="anchor" href="#cmdutilsnotifyerrormessage-title"></a>cmdAPI.notifyError(message, title)<span class="since">since v0.8</span></h3>
+<blockquote>
+    <p>Display an error popup notification with the specified <strong>message</strong> and <strong>title</strong>.</p>
 </blockquote>
 
 <h3><a id="preview-list" class="anchor"

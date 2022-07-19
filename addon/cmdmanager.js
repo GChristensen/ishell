@@ -120,6 +120,7 @@ class CommandManager {
         "/commands/lingvo.js",
         "/commands/literature.js",
         "/commands/mail.js",
+        "/commands/pinterest.js",
         "/commands/resurrect.js",
         "/commands/scrapyard.js",
         "/commands/search.js",
@@ -195,13 +196,13 @@ class CommandManager {
         let to = parseInt(options.timeout || options.previewDelay);
         if (to > 0) {
             if (typeof options.preview === 'function') {
-                options.__preview = options.preview;
+                options.__delayed_preview = options.preview;
                 options.preview = function(pblock) {
                     let args = arguments;
-                    let callback = CmdUtils.previewCallback(pblock, options.__preview);
-                    if (options.preview_timeout !== null)
-                        clearTimeout(options.preview_timeout);
-                    options.preview_timeout = setTimeout(function () {
+                    let callback = CmdUtils.previewCallback(pblock, options.__delayed_preview);
+                    if (options.__preview_timeout !== null)
+                        clearTimeout(options.__preview_timeout);
+                    options.__preview_timeout = setTimeout(function () {
                         callback.apply(options, args);
                     }, to);
                 };
@@ -264,26 +265,38 @@ class CommandManager {
         }
     };
 
+    _printCommandError(command, error) {
+        console.error(`iShell command: ${command.name}\n${error.toString()}\n${error.stack}`);
+    }
+
     // adds a storage bin obtained from the command uuid as the last argument of the called function
-    async _callCommandHandler(cmd, obj, f) {
+    async _callCommandHandler(command, obj, f) {
         let newArgs = Array.prototype.slice.call(arguments, 3);
 
-        const bin = await Utils.makeBin(cmd.uuid);
+        const bin = await Utils.makeBin(command.uuid);
         newArgs.push(bin);
 
+        let result;
         try {
-            f.apply(obj, newArgs); // sic!
+            result = f.apply(obj, newArgs);
         } catch (e) {
-            console.error(`iShell command: ${cmd.name}\n${e.toString()}\n${e.stack}`);
+            this._printCommandError(command, e);
         }
+
+        return result;
     }
 
     callPreview(sentence, pblock) {
         return this._callCommandHandler(sentence.getCommand(), sentence, sentence.preview, pblock);
     }
 
-    callExecute(sentence) {
-        return this._callCommandHandler(sentence.getCommand(), sentence, sentence.execute)
+    async callExecute(sentence) {
+        try {
+            await this._callCommandHandler(sentence.getCommand(), sentence, sentence.execute);
+        }
+        catch (e) {
+            this._printCommandError(sentence.getCommand(), e);
+        }
     }
 
     async loadBuiltinCommands() {
@@ -463,7 +476,7 @@ const cmdAPI = _BACKGROUND_API.cmdManager.createAPIProxy(__namespace__, _BACKGRO
     }
 
     async initializeCommandsOnPopup(doc) {
-        for (let cmd of this._commands) {
+        for (const cmd of this._commands) {
             try {
                 if (cmd.init && !cmd.disabled) {
                     await this._callCommandHandler(cmd, cmd, cmd.init, doc);

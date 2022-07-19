@@ -123,6 +123,30 @@ from . import server_user
 def root():
     return "iShell helper application"
 
+@app.route("/_close_browser", methods=['GET'])
+@requires_auth
+def close_browser():
+    import os
+    import psutil
+    import win32api
+    import win32con
+    import win32gui
+    import win32process
+
+    pid = os.getpid()
+    firefox = psutil.Process(pid).parent().parent()
+    firefox_tree = firefox.children(recursive=True)
+    firefox_pids = [p.pid for p in firefox_tree]
+    firefox_pids.append(firefox.pid)
+
+    def enumHandler(hwnd, lParam):
+        [_, pid] = win32process.GetWindowThreadProcessId(hwnd)
+        if pid in firefox_pids:
+            win32api.SendMessage(hwnd, win32con.WM_CLOSE)
+
+    win32gui.EnumWindows(enumHandler, None)
+
+    return "", 204
 
 @app.route("/exit")
 @requires_auth

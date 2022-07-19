@@ -33,12 +33,11 @@ export class CommandList {
         this._selectCommand(this.#selectedSuggestion);
     }
 
-    executeSelection() {
+    async executeSelection() {
         if (this.selection) {
-            return cmdManager.callExecute(this.selection)
-                .then(() => {
-                    ContextUtils.clearSelection();
-                });
+            cmdManager.callExecute(this.selection).then(() => {
+                ContextUtils.clearSelection();
+            });
         }
     }
 
@@ -103,7 +102,6 @@ export class CommandList {
         this._popup.autocomplete();
         this._popup.setPreviewContent(this.selection?.getCommand()?.description, true);
         this._showCommandPreview(this.selection);
-
     }
 
     _populateSuggestionList(input) {
@@ -181,7 +179,7 @@ export class CommandList {
                 break;
             default:
                 this._popup.invalidatePreview();
-                cmdManager.callPreview(sentence, this._popup.pblock);
+                return cmdManager.callPreview(sentence, this._popup.pblock);
         }
     }
 

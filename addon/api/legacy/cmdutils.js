@@ -79,7 +79,7 @@ CmdUtils.copyToClipboard = CmdUtils.setClipboard = function setClipboard (t) {
 
 // show browser notification with simple limiter
 CmdUtils.lastNotification = "";
-CmdUtils.notify = function (message, title) {
+CmdUtils.notifyIcon = function (message, title, icon) {
     if (typeof message === "object") {
         title = message.title;
         message = message.text;
@@ -87,11 +87,20 @@ CmdUtils.notify = function (message, title) {
     if (CmdUtils.lastNotification === title + "/" + message) return;
     browser.notifications.create({
         "type": "basic",
-        "iconUrl": browser.runtime.getURL("/ui/icons/logo.svg"),
+        "iconUrl": icon,
         "title": title || "iShell",
         "message": message
     });
     CmdUtils.lastNotification = title + "/" + message;
+};
+CmdUtils.notify = function (message, title) {
+    const icon = browser.runtime.getURL("/ui/icons/logo.svg");
+    CmdUtils.notifyIcon(message, title, icon);
+};
+CmdUtils.notifyError = function (message, title) {
+    title = title || "iShell Error";
+    const icon = browser.runtime.getURL("/ui/icons/logo_error.svg");
+    CmdUtils.notifyIcon(message, title, icon);
 };
 
 export const displayMessage = CmdUtils.notify;

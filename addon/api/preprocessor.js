@@ -288,12 +288,14 @@ export class CommandPreprocessor {
     }
 
     extractNounTypeProperties(comment) {
-        let nountype = comment.match(/@nountype/i);
-        let label = comment.match(/@label (.*?)(?:\r?\n|$)/i);
+        const nountype = comment.match(/@nountype/i);
+        const label = comment.match(/@label (.*?)(?:\r?\n|$)/i);
+        const dbgprint = comment.match(/@dbgprint/i);
 
         return {
             nountype: !!nountype,
-            label: label?.[1]?.trim()
+            label: label?.[1]?.trim(),
+            dbgprint: !!dbgprint
         };
     }
 
@@ -456,15 +458,15 @@ export class CommandPreprocessor {
             : "createCommand";
 
         let block = `\n{
-    const properties = ${JSON.stringify(object.properties, null, 6)};
-    CommandPreprocessor.assignCommandAnnotations(${object.name}, properties);
+    const attributes = ${JSON.stringify(object.properties, null, 6)};
+    CommandPreprocessor.assignCommandAnnotations(${object.name}, attributes);
     
     const args = {};
     const command = new ${object.name}(args);
 
     if (Object.keys(args).length > 0)
         command.arguments = CommandPreprocessor.assignCommandArguments(args);
-    CommandPreprocessor.assignCommandProperties(command, properties);    
+    CommandPreprocessor.assignCommandProperties(command, attributes);    
     CommandPreprocessor.assignCommandHandlers(command);
     
     cmdAPI.${generatingFunc}(command);\n}\n`;
@@ -491,13 +493,14 @@ export class CommandPreprocessor {
     }
 
     generateCommand(script, object) {
-        return script.replace(object.fullDefinition, object.fullDefinition + this.generateCommandSetupBlock(object));
+        object.generatedCode = object.fullDefinition + this.generateCommandSetupBlock(object);
+        return script.replace(object.fullDefinition, object.generatedCode);
     }
 
     generateMetaClass(script, object) {
         let metaName = `__metaclass_${object.name}`;
         let nameRx = new RegExp(`/\\*\\*.*?\\*/\\s*(^\\s*class\\s+)${object.name}(.*?{)`, "sm");
-        let metaPropertiesName = `__metaclass_${object.name}_properties`;
+        let metaPropertiesName = `__metaclass_${object.name}_attributes`;
         let metaProperties = `\n${metaPropertiesName} = ${JSON.stringify(object.properties, null, 12)};\n`;
         let metaDefinition = object.fullDefinition.replace(nameRx, `\$1${metaName}\$2`) + metaProperties;
         let metaGenerator = `\n\nclass ${object.name} extends ${metaName} {
@@ -515,9 +518,10 @@ export class CommandPreprocessor {
     }
 }
 CommandPreprocessor.assignCommandAnnotations(${object.name}, ${metaPropertiesName});
-`
+`;
 
-        return script.replace(object.fullDefinition, metaDefinition + metaGenerator);
+        object.generatedCode = metaDefinition + metaGenerator;
+        return script.replace(object.fullDefinition, object.generatedCode);
     }
 
     preprocessCommand(script, object) {
@@ -558,7 +562,8 @@ CommandPreprocessor.assignCommandAnnotations(${object.name}, ${metaPropertiesNam
             }
 
             object.fullDefinition = this.extractFullDefinition(script, object);
-            object.nounType = this.generateNounType(object, properties);
+            object.generatedCode = this.generateNounType(object, properties);
+            object.properties = properties;
         }
 
         return functionMatches;
@@ -569,9 +574,9 @@ CommandPreprocessor.assignCommandAnnotations(${object.name}, ${metaPropertiesNam
 
         for (let object of functionMatches)
             if (!object.skip)
-                script = script.replace(object.fullDefinition, object.nounType);
+                script = script.replace(object.fullDefinition, object.generatedCode);
 
-        return script;
+        return [script, functionMatches];
     }
 
     extractClasses(script) {
@@ -599,20 +604,22 @@ CommandPreprocessor.assignCommandAnnotations(${object.name}, ${metaPropertiesNam
         const classMatches = this.extractClasses(script);
 
         for (let object of classMatches)
-            if (!object.skip) {
+            if (!object.skip)
                 script = this.preprocessCommand(script, object);
-                if (object.properties.dbgprint)
-                    console.log(script);
-            }
 
-        return script;
+        return [script, classMatches];
     }
 
     transform(text) {
-        text = this.preprocessNounTypes(text);
-        text = this.preprocessCommands(text);
+        const [nounTypeOutput, functionMatches] = this.preprocessNounTypes(text);
+        const [output, classMatches] = this.preprocessCommands(nounTypeOutput);
+        const objects = [...functionMatches, ...classMatches];
 
-        return text;
+        for (const object of objects)
+            if (object.properties.dbgprint)
+                console.log(object.generatedCode);
+
+        return output;
     }
 
     async load(path) {

@@ -6,4 +6,3 @@ from .server import app, requires_auth
 @requires_auth
 def ping():
     return "pong"
-

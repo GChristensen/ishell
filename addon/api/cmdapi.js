@@ -66,7 +66,8 @@ cmdAPI.localeCompare = function(prop, desc) {
 }
 
 cmdAPI.addSugg = function(suggs, text, html, data, score, selectionIndices) {
-     if (!suggs.some(s => !cmdAPI.localeCompare()(s.text, text))) {
+    const comparator = cmdAPI.localeCompare();
+    if (!suggs.some(s => !comparator(s.text, text))) {
         const newSugg = cmdAPI.makeSugg(text, html, data, score, selectionIndices);
         suggs.push(newSugg);
     }

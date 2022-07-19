@@ -85,6 +85,18 @@ class PopupWindow {
         return settings.shell_last_command(this._lastInput);
     }
 
+    setCommand(text) {
+        this.setInput(text);
+        this.persistInput();
+        this.generateSuggestions(text);
+    }
+
+    removeCommandArguments() {
+        let input = this.getInput();
+        input = input.split(" ")[0];
+        this.setInput(input + " ");
+    }
+
     autocomplete() {
         let completion = this._commandList.getAutocompletion();
         let input = this.getInput();
@@ -98,12 +110,6 @@ class PopupWindow {
     async addCurrentInputToHistory() {
         await this.commandHistoryPush(this.getInput());
         await this._commandList.strengthenMemory();
-    }
-
-    setCommand(text) {
-        this.setInput(text);
-        this.persistInput();
-        this.generateSuggestions(text);
     }
 
     setSuggestionsContent(html) {
@@ -224,12 +230,13 @@ class PopupWindow {
                 <p>
                    <div class='help-heading'>Keyboard Shortcuts</div>
                    <span class='keys'>Tab</span> - complete the current input.<br>
+                   <span class='keys'>Alt+Backspace</span> - remove the command arguments.<br>
                    <span class='keys'>Ctrl+C</span> - copy the preview content to the clipboard.<br>
-                   <span class='keys'>Ctrl+Alt+Enter</span> - add the selected command to context menu.<br>
-                   <span class='keys'>Ctrl+Alt+\\</span> - show command history.<br>
+                   <span class='keys'>Ctrl+Alt+Enter</span> - add the selected command to the context menu.<br>
+                   <span class='keys'>Ctrl+Alt+\\</span> - show the command history.<br>
                    <span class='keys'>Ctrl+Alt+&ltkey&gt;</span> - select the list item prefixed with the &lt;key&gt;.<br>
-                   <span class='keys'>&#8593;/&#8595;</span> - cycle through command suggestions.<br>
-                   <span class='keys'>Ctrl+&#8593;/&#8595;</span> - scroll through preview list items.<br>
+                   <span class='keys'>&#8593;/&#8595;</span> - cycle through the command suggestions.<br>
+                   <span class='keys'>Ctrl+&#8593;/&#8595;</span> - scroll through the preview list items.<br>
                    <span class='keys'>F5</span> - reload the extension.
                    ${this._formatAnnouncement()}
                 </p>
@@ -260,14 +267,21 @@ class PopupWindow {
         if (!evt) return;
         let keyCode = evt.keyCode;
 
-        // On TAB, autocomplete
+        // Alt+Backspace
+        if (keyCode === 8 && evt.altKey) {
+            evt.preventDefault();
+            this.removeCommandArguments();
+            return;
+        }
+
+        // TAB
         if (keyCode === 9) {
             evt.preventDefault();
             this.autocomplete();
             return;
         }
 
-        // On ENTER, execute the given command
+        // ENTER
         if (keyCode === 13) {
             if (await Utils.easterListener(this.getInput()))
                 return;
@@ -289,7 +303,7 @@ class PopupWindow {
             }
         }
 
-        // On F5 restart extension
+        // F5
         if (keyCode === 116) {
             chrome.runtime.reload();
             return;
@@ -314,13 +328,13 @@ class PopupWindow {
             return;
         }
 
-        // execute events from preview lists
+        // execute events from the preview lists
         if (evt.ctrlKey && evt.altKey && keyCode >= 40 && keyCode <= 90) {
             this.selectPreviewItem(keyCode);
             return;
         }
 
-        // Ctrl+C copies preview to clipboard
+        // Ctrl+C
         if (keyCode === 67 && evt.ctrlKey) {
             cmdAPI.setClipboard(this.pblock.innerText);
             return;
@@ -344,13 +358,11 @@ class PopupWindow {
             return;
 
         // Cursor up
-        if (keyCode == 38) {
+        if (keyCode === 38)
             return;
-        }
         // Cursor Down
-        else if (keyCode == 40) {
+        else if (keyCode === 40)
             return;
-        }
 
         this.persistInput();
         this.generateSuggestions();

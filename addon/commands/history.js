@@ -67,7 +67,7 @@ function dayToDate(day) {
             if (day)
                 date = new Date(day + "T00:00:00");
             else {
-                console.log("date command: empty day");
+                console.log("The date command: empty day");
             }
     }
 

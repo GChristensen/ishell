@@ -1,11 +1,10 @@
 import {cmdManager} from "../cmdmanager.js";
-import {cmdAPI} from "../api/cmdapi.js";
-import {capitalize} from "../utils.js";
 
 export const namespace = new CommandNamespace(CommandNamespace.BROWSER, true);
 
 const DEFAULT_TAB_GROUP = "default";
 const ALL_GROUPS_SPECIFIER = "all";
+const TAB_GROUP_EXPORT_FIELD = "ishell-tab-group";
 
 let CONTAINERS = [];
 const noun_type_container = {};
@@ -45,10 +44,11 @@ export function noun_type_tab_group(text, html, _, selectionIndices) {
     **tab-group** [**all** | *name*] [**to** *operation*] [**in** *container*] [**by** *action*] [**at** *name*]
 
     # Arguments
-    - *name* - the name of a tab group to create or to operate on. May also be specified in the **at** argument.
+    - *name* - the name of a tab group to create or to operate on. May also be specified in the **at** argument (it has precedence).
         The current tab group is assumed if not specified. The keyword **all** designates all existing tab groups.
-    - *operation* - the operation to perform on a tab group. *switch* is performed the if argument is not specified.
+    - *operation* - the operation to perform on a tab group.
         - *switch* - switch to the tab group with the given name. The tab group will be created if not exists.
+         Performed if the **to** argument is not specified.
         - *copy* and *paste* - copy or paste the tab group to/from the clipboard.
         - *reload* - reload all tabs in the tab group.
         - *close* - close all tabs in the tab group.
@@ -65,7 +65,7 @@ export function noun_type_tab_group(text, html, _, selectionIndices) {
     - **tgr** *books* **in** *shopping*
     - **tgr** *books* **to** *delete*
     - **tgr** **all** **to** *close*
-    - **tgr** *new group* **to** *all* **by** *switching*
+    - **tgr** **to** *move* **by** *switching* **at** *new group*
 
     @command tab-group, tgr
     @markdown
@@ -169,7 +169,7 @@ export class TabGroup {
     async preview(args, display, storage) {
         let {OBJECT: {text: name}, TO: {text: action}, BY: {text: action2}, IN, AT} = args;
 
-        name = name || AT?.text;
+        name = AT?.text || name;
 
         if (name && !action) {
             if (this.#tabGroups[name])
@@ -469,19 +469,21 @@ export class TabGroup {
     #describeCopy(name) {
         if (name) {
             if (name === ALL_GROUPS_SPECIFIER)
-                return `This operation can not be performed.`;
+                return `Copy all tab groups to the clipboard.`;
             else
                 return `Copy the <b>${name}</b> tab group to the clipboard.`;
         }
         else
-            return `Copy the the current tab group to the clipboard.`
+            return `Copy the current tab group to the clipboard.`
     }
 
     async #describePaste() {
         const inputObject = await this.#parseClipboardContent();
 
-        if (inputObject?.command === "ishell-tab-group")
+        if (inputObject?.command === TAB_GROUP_EXPORT_FIELD)
             return `Paste the <b>${inputObject.tabGroup.name}</b> tab group from clipboard.`;
+        else if (Array.isArray(inputObject))
+            return `Paste multiple tab groups from clipboard.`;
         else
             return `The clipboard does not contain valid content.`
     }
@@ -566,21 +568,33 @@ export class TabGroup {
     }
 
     async #copyTabGroup(name) {
-        if (this.#isTabGroupExists(name)) {
-            const currentWindowTabGroup = await this.#getCurrentWindowTabGroupName();
-            name = name || currentWindowTabGroup;
+        const currentWindowTabGroup = await this.#getCurrentWindowTabGroupName();
+        name = name || currentWindowTabGroup;
 
-            const tabGroup = this.#tabGroups[name];
-            const tabs = await this.#getGroupTabs(name, false);
-            const outputObject = {
-                command: "ishell-tab-group",
-                version: 1,
-                tabGroup: tabGroup,
-                tabs: tabs.map(t => t.url)
-            };
-            const output = JSON.stringify(outputObject, null, 2);
-            await navigator.clipboard.writeText(output);
+        let outputObject;
+        if (name === ALL_GROUPS_SPECIFIER) {
+            outputObject = [];
+            for (const name in this.#tabGroups) {
+                const group = await this.#exportTabGroup(name);
+                outputObject.push(group);
+            }
         }
+        else if (this.#isTabGroupExists(name))
+            outputObject = await this.#exportTabGroup(name);
+
+        const output = JSON.stringify(outputObject, null, 2);
+        await navigator.clipboard.writeText(output);
+    }
+
+    async #exportTabGroup(name) {
+        const tabGroup = this.#tabGroups[name];
+        const tabs = await this.#getGroupTabs(name, false);
+        return {
+            command: TAB_GROUP_EXPORT_FIELD,
+            version: 1,
+            tabGroup: tabGroup,
+            tabs: tabs.map(t => t.url)
+        };
     }
 
     async #parseClipboardContent(verbose) {
@@ -600,19 +614,35 @@ export class TabGroup {
     async #pasteTabGroup() {
         const inputObject = await this.#parseClipboardContent(true);
 
-        if (inputObject?.command === "ishell-tab-group") {
-            const name = inputObject.tabGroup.name;
-            this.#tabGroups[name] = inputObject.tabGroup;
-            const tabs = await this.#getGroupTabs(name, false);
-            const tabsToCreate = inputObject.tabs.filter(url => !tabs.some(t => t.url === url));
-            const currentWindowTabGroup = await this.#getCurrentWindowTabGroupName();
+        if (Array.isArray(inputObject)) {
+            for (const object of inputObject)
+                if (object?.command === TAB_GROUP_EXPORT_FIELD)
+                    await this.#importTabGroup(object);
+        }
+        else if (inputObject?.command === TAB_GROUP_EXPORT_FIELD)
+            await this.#importTabGroup(inputObject);
+    }
 
-            for (const url of tabsToCreate) {
-                const tab = await browser.tabs.create({url, active: false});
-                await this.#addToTabGroup(tab, name);
-                if (currentWindowTabGroup !== name)
-                    browser.tabs.hide(tab.id);
-            }
+    async #importTabGroup(object) {
+        const name = object.tabGroup.name;
+        this.#tabGroups[name] = object.tabGroup;
+
+        const comparator = cmdAPI.localeCompare("name");
+        const container = CONTAINERS.find(c => !comparator(c, object.tabGroup.container));
+        if (container)
+            this.#tabGroups[name].container.cookieStoreId = container.cookieStoreId;
+        else
+            delete this.#tabGroups[name].container;
+
+        const tabs = await this.#getGroupTabs(name, false);
+        const tabsToCreate = object.tabs.filter(url => !tabs.some(t => t.url === url));
+        const currentWindowTabGroup = await this.#getCurrentWindowTabGroupName();
+
+        for (const url of tabsToCreate) {
+            const tab = await browser.tabs.create({url, active: false});
+            await this.#addToTabGroup(tab, name);
+            if (currentWindowTabGroup !== name)
+                browser.tabs.hide(tab.id);
         }
     }
 
@@ -759,9 +789,9 @@ export class TabGroup {
     async execute(args, storage) {
         let {OBJECT: {text: name}, TO: {text: action}, BY: {text: action2}, IN, AT} = args;
 
-        name = name || AT?.text;
+        name = AT?.text || name;
 
-        if (name) {
+        if (name && name !== ALL_GROUPS_SPECIFIER) {
             if (!this.#isTabGroupExists(name))
                 this.#createTabGroup(name);
 

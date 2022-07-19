@@ -50,7 +50,7 @@ namespace.createCommand({
             </ul>`,
     icon: "/ui/icons/encoding.svg",
     arguments: [{role: "object", nountype: noun_arb_text, label: "text"},
-        {role: "cause",  nountype: noun_type_number, label: "amount"}, // by
+                {role: "cause",  nountype: noun_type_number, label: "amount"}, // by
     ],
     _decode: function(url, n) {
         let s = url;
@@ -60,12 +60,28 @@ namespace.createCommand({
     },
     execute: function execute(args) {
         let n = args.cause && args.cause.text? parseInt(args.cause.text): 1;
-        CmdUtils.setSelection(this._decode(args.object.text, n));
+        let decodedURL;
+        try {
+            decodedURL = this._decode(args.object.text, n)
+        }
+        catch (e) {
+            console.error(e);
+        }
+        if (decodedURL)
+            CmdUtils.setSelection();
     },
     preview: function preview(pblock, args) {
         if (args.object?.text) {
             let n = args.cause?.text ? parseInt(args.cause.text) : 1;
-            pblock.innerHTML = this._decode(args.object?.text, n);
+            let decodedURL;
+            try {
+                decodedURL = this._decode(args.object.text, n)
+            }
+            catch (e) {
+                pblock.error(e.message);
+            }
+            if (decodedURL)
+                pblock.innerHTML = this._decode(args.object?.text, n);
         }
     },
 });
