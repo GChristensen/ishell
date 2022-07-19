@@ -193,27 +193,43 @@ class CommandManager {
             options.arguments = args;
         }
 
-        let to = parseInt(options.timeout || options.previewDelay);
-        if (to > 0) {
-            if (typeof options.preview === 'function') {
-                options.__delayed_preview = options.preview;
-                options.preview = function(pblock) {
-                    let args = arguments;
-                    let callback = CmdUtils.previewCallback(pblock, options.__delayed_preview);
-                    if (options.__preview_timeout !== null)
-                        clearTimeout(options.__preview_timeout);
-                    options.__preview_timeout = setTimeout(function () {
-                        callback.apply(options, args);
-                    }, to);
-                };
-            }
-        }
+        let timeout = parseInt(options.timeout || options.previewDelay);
+        if (timeout > 0 && typeof options.preview === 'function')
+            this._assignDelayedPreview(options, timeout);
 
         options.previewDefault = CmdUtils.CreateCommand.previewDefault;
 
         this._commands.push(options);
 
         return options;
+    }
+
+    _assignDelayedPreview(options, timeout) {
+        options.__delayed_preview = options.preview;
+        options.preview = function (pblock) {
+            let args = arguments;
+            let callback = CmdUtils.previewCallback(pblock, options.__delayed_preview);
+            if (options.__preview_timeout) {
+                clearTimeout(options.__preview_timeout);
+                options.__preview_resolve(undefined);
+            }
+            const result = new Promise((resolve, reject) => {
+                options.__preview_resolve = resolve;
+                options.__preview_reject = reject;
+            });
+            options.__preview_timeout = setTimeout(async function () {
+                try {
+                    const callbackResult = await callback.apply(options, args);
+                    options.__preview_resolve(callbackResult);
+                } catch (e) {
+                    options.__preview_reject(e);
+                }
+                options.__preview_timeout = null;
+                delete options.__preview_resolve;
+                delete options.__preview_reject;
+            }, timeout);
+            return result;
+        };
     }
 
     getCommandByUUID(uuid) {
@@ -265,38 +281,50 @@ class CommandManager {
         }
     };
 
-    _printCommandError(command, error) {
-        console.error(`iShell command: ${command.name}\n${error.toString()}\n${error.stack}`);
+    _toCommand(object) {
+        let command = object;
+        if (object instanceof ParsedSentence)
+            command = object.getCommand();
+        return command;
+    }
+
+    _printCommandError(object, method, error) {
+        const command = this._toCommand(object);
+        console.error(`iShell command: ${command.name}, ${method}\n${error.toString()}\n${error.stack}`);
     }
 
     // adds a storage bin obtained from the command uuid as the last argument of the called function
-    async _callCommandHandler(command, obj, f) {
-        let newArgs = Array.prototype.slice.call(arguments, 3);
-
+    async _callCommandHandler(object, handler, ...args) {
+        const command = this._toCommand(object);
         const bin = await Utils.makeBin(command.uuid);
-        newArgs.push(bin);
 
-        let result;
+        args.push(bin);
+        return handler.apply(object, args);
+    }
+
+    async _callCommandHandlerCatching(object, handler, method, ...args) {
         try {
-            result = f.apply(obj, newArgs);
+            await this._callCommandHandler(object, handler, ...args);
         } catch (e) {
-            this._printCommandError(command, e);
+            if (!this._skipLogingException(e))
+                this._printCommandError(object, method, e);
         }
+    }
 
-        return result;
+    _skipLogingException(e) {
+        if (cmdAPI.fetchAborted(e))
+            return true;
+        else if (e.message === "can't access dead object")
+            return true;
+        return false;
     }
 
     callPreview(sentence, pblock) {
-        return this._callCommandHandler(sentence.getCommand(), sentence, sentence.preview, pblock);
+        return this._callCommandHandlerCatching(sentence, sentence.preview, "preview", pblock);
     }
 
     async callExecute(sentence) {
-        try {
-            await this._callCommandHandler(sentence.getCommand(), sentence, sentence.execute);
-        }
-        catch (e) {
-            this._printCommandError(sentence.getCommand(), e);
-        }
+        return this._callCommandHandlerCatching(sentence, sentence.execute, "execute");
     }
 
     async loadBuiltinCommands() {
@@ -415,11 +443,13 @@ class CommandManager {
 _BACKGROUND_API.cmdManager.addUserCommandNamespace(__namespace__);
 const CmdUtils = _BACKGROUND_API.cmdManager.createAPIProxy(__namespace__, _BACKGROUND_API.CmdUtils);
 const cmdAPI = _BACKGROUND_API.cmdManager.createAPIProxy(__namespace__, _BACKGROUND_API.cmdAPI);
-`;
+`.replace(/\n/g, "");
     }
 
     generateUserCommandEvalPreamble() {
-        return `const CmdUtils = _BACKGROUND_API.cmdManager.createAPIProxy(null, _BACKGROUND_API.CmdUtils, true); const cmdAPI = _BACKGROUND_API.cmdManager.createAPIProxy(null, _BACKGROUND_API.cmdAPI, true);`;
+        return `const CmdUtils = _BACKGROUND_API.cmdManager.createAPIProxy(null, _BACKGROUND_API.CmdUtils, true); 
+const cmdAPI = _BACKGROUND_API.cmdManager.createAPIProxy(null, _BACKGROUND_API.cmdAPI, true);
+`.replace(/\n/g, "");
     }
 
     addUserCommandNamespace(namespace) {
@@ -464,28 +494,15 @@ const cmdAPI = _BACKGROUND_API.cmdManager.createAPIProxy(__namespace__, _BACKGRO
     }
 
     async _initializeCommands() {
-        for (const cmd of this._commands) {
-            try {
-                if (cmd.load && !cmd.disabled)
-                    await this._callCommandHandler(cmd, cmd, cmd.load);
-            }
-            catch (e) {
-                console.error(e, e.stack);
-            }
-        }
+        for (const cmd of this._commands)
+            if (cmd.load && !cmd.disabled)
+                await this._callCommandHandlerCatching(cmd, cmd.load, "load");
     }
 
     async initializeCommandsOnPopup(doc) {
-        for (const cmd of this._commands) {
-            try {
-                if (cmd.init && !cmd.disabled) {
-                    await this._callCommandHandler(cmd, cmd, cmd.init, doc);
-                }
-            }
-            catch (e) {
-                console.error(e.message);
-            }
-        }
+        for (const cmd of this._commands)
+            if (cmd.init && !cmd.disabled)
+                await this._callCommandHandlerCatching(cmd, cmd.init, "init", doc);
     }
 }
 

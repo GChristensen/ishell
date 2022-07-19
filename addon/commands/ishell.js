@@ -13,7 +13,7 @@ namespace.createCommand({
 });
 
 namespace.createCommand({
-    names: ["edit-shell-settings", "edit-shell-options"],
+    names: ["edit-shell-settings"],
     uuid: "3A9CD64F-3D4D-4D90-BA5A-882615672396",
     icon: "/ui/icons/debug.png",
     _hidden: true,

@@ -65,9 +65,13 @@ cmdAPI.localeCompare = function(prop, desc) {
         return (a, b) => a.localeCompare(b, undefined, {sensitivity: 'base'});
 }
 
-cmdAPI.addSugg = function(suggs, text, html, data, score, selectionIndices) {
+cmdAPI.hasSugg = function(suggs, text, prop = "text") {
     const comparator = cmdAPI.localeCompare();
-    if (!suggs.some(s => !comparator(s.text, text))) {
+    return suggs.some(s => !comparator(s[prop], text));
+}
+
+cmdAPI.addSugg = function(suggs, text, html, data, score, selectionIndices) {
+    if (!cmdAPI.hasSugg(suggs, text)) {
         const newSugg = cmdAPI.makeSugg(text, html, data, score, selectionIndices);
         suggs.push(newSugg);
     }
@@ -215,6 +219,7 @@ cmdAPI.imagePreviewList = function(prefix, display, imageURLs, callback, css) {
 
     const html =
         `<style>
+            
             #image-preview-list {
                 text-align: center;
             }
@@ -223,7 +228,7 @@ cmdAPI.imagePreviewList = function(prefix, display, imageURLs, callback, css) {
               margin: 0 1px 2px; padding: 0;
               cursor: pointer;
             }
-            #image-preview-list span::after {
+            #image-preview-list span::before {
               content: attr(accesskey);
               position: absolute; top: 0; left: 0;
               padding: 0 4px 2px 3px; border-bottom-right-radius: 6px;

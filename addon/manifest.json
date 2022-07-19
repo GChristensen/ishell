@@ -1,8 +1,8 @@
 {
-    "version": "0.8.1.6",
+    "version": "0.9",
     "applications": {
         "gecko": {
-            "id": "ishell@gchristensen.github.io",
+            "id": "ishell-we@gchristensen.github.io",
             "strict_min_version": "95.0"
         }
     },

@@ -131,12 +131,11 @@ class SayHello {
         from any other classes.</p>
 
     <p>Only JavaDoc-style comments that start with
-        <code>/**</code> may be used to annotate classes, the regular JavaScript comments are
-        ignored. The content of this comment (except annotations) is displayed in the help section
+        <code>/**</code> may be used to annotate classes. The regular JavaScript comments are
+        ignored. The content of these comments (except annotations) is displayed in the help section
         of the iShell command listing. It may contain HTML or <a
                 href="https://en.wikipedia.org/wiki/Markdown" target="_blank">Markdown</a>-formatted
         text if the <code>@markdown</code> annotation is used.</code> </p>
-
 
     <p><code>execute</code> is the only mandatory method for your commands. There are plenty of
         other attributes that you can specify as methods or in annotations, but they are all
@@ -254,9 +253,6 @@ class InsertDate {
         <code>innerHTML</code> property of <code>display</code> and you modify the preview. In
         iShell it has some <a href="API.html#create-command-preview">additional methods</a>. In this
         case, we use the <code>text</code> method of the display object to show the message we want.
-        Note that in the class-based command syntax the preview element is passed as the second
-        argument. In the object-based syntax of Mozilla Ubiquity, the preview block is passed as the
-        first parameter of the <code>preview</code> function.
     </p>
     <p>The third thing we've done is the string formatting using JavaScript template literals. If
         some advanced formatting is required, there is a handy function for this: <a
@@ -465,7 +461,9 @@ arguments: [{role: "object", nountype: noun_arb_text, label: "message"}, // obje
         for all arguments. Here we call JavaScript objects a dictionary to not confuse them with
         argument roles.
     </p>
-    <p>When your preview method is called, it is passed this dictionary, too.
+    <p>When your preview method is called, it is passed this dictionary, too. In the class-based syntax of
+        iShell, the argument dictionary is always passed as the first parameter. In the <code>preview</code>
+        method of object-based commands this dictionary comes at the second parameter.
     </p>
     <p>This dictionary has one attribute corresponding to each pronoun. In our example above, the
         command accepts only an object-role argument, so the preview and execute methods get passed
@@ -1048,9 +1046,12 @@ export class Pinterest {
         args[OF]     = {nountype: noun_type_number, label: "size"};
     }
 
-    async load() {
-        this.#pinterestAPI = await new PinterestAPI();
-        this.#boards = await this.#pinterestAPI.getBoards();
+    // Executed when iShell is loaded.
+    async load(storage) {
+        // The actual command uses a more sophisticated initialization
+        // which defers the retrieval of the boards until it is needed.
+        this.#pinterestAPI = await new PinterestAPI(storage);
+        this.#boards = await this.#pinterestAPI.getBoards() || [];
     }
 
     get boards() {
@@ -1071,7 +1072,7 @@ export class Pinterest {
 
             const imageURLs = extractedImages.map(i => i.url);
             imageList = display.imageList(imageURLs, imageHandler);
-            this.#displayImageDimensions(imageList, extractedImages);
+            this.#showImageDimensions(imageList, extractedImages);
         }
         else
             display.text(`No images larger than ${dimension}px found.`)
@@ -1087,7 +1088,7 @@ export class Pinterest {
         }
     }
 
-    #displayImageDimensions(imageList, extractedImages) {
+    #showImageDimensions(imageList, extractedImages) {
         $("img", imageList).each(function() {
             const image = extractedImages.find(i => i.url === this.src);
             const title = `${image.width}x${image.height}`;
@@ -1147,30 +1148,34 @@ function extractImagesUserScript(dimension) {
     images = images.toArray().sort(bySizeDesc);
 
     return images.map(i => ({url: i.src, width: i.naturalWidth, height: i.naturalHeight}));
+}
+
+class PinterestAPI {
+    // The details are not important...
 }</code></pre>
 
 
-    <h1 class="section-heading"><span id="helper">The Helper Application</span></h1>
-    <p>The helper application that could be installed along with iShell is a local web server that
-        may be used to transcend the limits of WebExtensions. Because dynamic code execution is
-        forbidden in WebExtensions manifest v3, the helper application is the only way to evaluate
-        user commands in the MV3 version of iShell.
-    </p>
+<h1 class="section-heading"><span id="helper">The Helper Application</span></h1>
+<p>The helper application that could be installed along with iShell is a local web server that
+    may be used to transcend the limits of WebExtensions. WebExtensions manifest v3 forbids dynamic
+    code execution. Because of that, the helper application is the only way to evaluate
+    user commands in the MV3 version of iShell.
+</p>
 
-    <p>If you installed the helper application as a Python package, you may develop your own <a
-            href="https://flask.palletsprojects.com/en/2.1.x/" target="_blank">Flask</a> handlers
-        callable from user commands. There you could do anything that Python can (see also: <a
-                href="https://gchristensen.github.io/enso-portable/" target="_blank">Enso</a>).
-        Although technically you may make requests to any local web server, the lifetime of the
-        helper application is managed automatically by the browser. Use the <a
-                href="API.html#helper-fetch" target="_blank">cmdAPI.helperFetch()</a> function to
-        call helper application handlers. For example, this is how you implement
-        <b>close-browser</b> command for the Windows version of Firefox:</p>
+<p>If you installed the helper application as a Python package, you may develop your own <a
+        href="https://flask.palletsprojects.com/en/2.1.x/" target="_blank">Flask</a> handlers
+    callable from user commands. There you could do anything that Python can (see also: <a
+            href="https://gchristensen.github.io/enso-portable/" target="_blank">Enso</a>).
+    Although technically you may make requests to any local web server, the lifetime of the
+    helper application is managed automatically by the browser. Use the <a
+            href="API.html#helper-fetch" target="_blank">cmdAPI.helperFetch()</a> function to
+    call helper application handlers. For example, this is how you implement
+    <b>close-browser</b> command for the Windows version of Firefox:</p>
 
     <pre><code data-language="javascript">/** @command
     @description Closes the browser.
  */
-class CloseFirefox {
+class CloseBrowser {
     async execute() {
         await cmdAPI.helperFetch("/close_browser")
     }

@@ -20,7 +20,8 @@ export async function noun_type_board(text, html, _, selectionIndices) {
 
 /**
     To create a pin, fill in the arguments and click on an image in the preview area
-    or press the corresponding Ctrl+Alt+&lt;key&gt; combination.
+    or press the corresponding Ctrl+Alt+&lt;key&gt; combination. A user should be
+    logged in to Pinterest to use this command.
 
     # Syntax
     **pinterest** [*description*] **to** *board* [**of** *dimension*]
@@ -32,13 +33,13 @@ export async function noun_type_board(text, html, _, selectionIndices) {
       500 pixels is the default.
 
     # Examples
-    **pinterest** **to** *cats* **of** *1000** *Nice Kitty*
+    **pinterest** **to** *cats* **of** *1000* *Nice kitty*
 
     @command
     @markdown
     @delay 1000
     @icon /ui/icons/pinterest.png
-    @description Pin image to a board on Pinterest.
+    @description Pin images to a board on Pinterest.
     @uuid 06364E1A-7A38-4590-86F6-6CA7AECD971F
  */
 export class Pinterest {
@@ -60,10 +61,10 @@ export class Pinterest {
     }
 
     get pinterestAPI() { // ! Async property.
-        return this.#createPinterestAPI();
+        return this.#getPinterestAPI();
     }
 
-    async #createPinterestAPI() {
+    async #getPinterestAPI() {
         if (!this.#pinterestAPI)
             this.#pinterestAPI = await new PinterestAPI();
         return this.#pinterestAPI;
@@ -78,7 +79,7 @@ export class Pinterest {
         if (!this.#boardsLoaded){
             const pinterestAPI = await this.pinterestAPI;
             if (pinterestAPI.isAuthorized) {
-                this.#boards = await pinterestAPI.getBoards();
+                this.#boards = await pinterestAPI.getBoards() || [];
                 this.#boards = this.#boards.map(b => ({name: b.name, id: b.id}));
                 this.#storage.boards(this.#boards);
                 this.#boardsLoaded = true;
@@ -100,8 +101,15 @@ export class Pinterest {
                     this.#setImagePinned(imageList, imageURL);
             };
 
+            const style = `.image-dimensions {
+                position: absolute; bottom: 0; right: 0;
+                padding: 0 3px 1px 2px; border-top-left-radius: 6px;
+                opacity: 0.7; color: #000; background-color: #fff;
+                margin-bottom: 4px; 
+            }`;
+
             const imageURLs = extractedImages.map(i => i.url);
-            imageList = display.imageList(imageURLs, imageHandler);
+            imageList = display.imageList(imageURLs, imageHandler, style);
             this.#displayImageDimensions(imageList, extractedImages);
         }
         else
@@ -122,7 +130,7 @@ export class Pinterest {
         $("img", imageList).each(function() {
             const image = extractedImages.find(i => i.url === this.src);
             const title = `${image.width}x${image.height}`;
-            this.setAttribute("title", title);
+            $(this).parent().append(`<div class="image-dimensions">${title}</div>`);
         });
     }
 
@@ -138,7 +146,7 @@ export class Pinterest {
         if (board) {
             const link = cmdAPI.getLocation();
             const pinterestAPI = await this.pinterestAPI;
-            const success = pinterestAPI.isAuthorized
+            const success = pinterestAPI.checkAuthorization()
                     && await pinterestAPI.createPin(board.id, description, link, imageURL);
 
             if (success) {
@@ -152,7 +160,7 @@ export class Pinterest {
 
     async #createBoard(name) {
         const pinterestAPI = await this.pinterestAPI;
-        const board = pinterestAPI.isAuthorized && await pinterestAPI.createBoard(name);
+        const board = pinterestAPI.checkAuthorization() && await pinterestAPI.createBoard(name);
 
         if (board) {
             this.#boards.push(board);
@@ -174,7 +182,7 @@ export class Pinterest {
         imageList.data(pinnedImages);
     }
 
-    async execute() {
+    async execute(args, storage) {
         this.#pinterestAPI = null;
         this.#boardsLoaded = false;
         const pinterestAPI = await this.pinterestAPI;
@@ -215,6 +223,13 @@ class PinterestAPI {
             });
     }
 
+    checkAuthorization() {
+        const authorized = this.isAuthorized;
+        if (!authorized)
+            cmdAPI.notifyError("The user is not logged in to Pinterest.")
+        return authorized;
+    }
+
     get isAuthorized() {
         return !!this.#userName;
     }
@@ -244,12 +259,19 @@ class PinterestAPI {
                 "Content-Type": "application/x-www-form-urlencoded"
             };
 
-        const response = await fetch(url, init);
+        let json;
+        try {
+            const response = await fetch(url, init);
 
-        if (response.redirected)
-            this.PINTEREST_URL = new URL(response.url).origin;
+            if (response.redirected)
+                this.PINTEREST_URL = new URL(response.url).origin;
 
-        return response.json();
+            json = response.json();
+        } catch (e) {
+            console.error(e);
+        }
+
+        return json;
     }
 
     async #getCSRFToken(url) {
@@ -261,10 +283,29 @@ class PinterestAPI {
     }
 
     async #postPinterestJSON(url, params) {
-        return await this.#fetchPinterestJSON(url, params, "post")
+        return this.#fetchPinterestJSON(url, params, "post")
     }
 
-    async getBoards() {
+    #printError(response) {
+        if (response?.error) {
+            const status = response.error.http_status;
+            const message = response.error.message + " " + (response.error.message_detail || "");
+            console.error(`Pinterest API error: HTTP status ${status}, (${message})`);
+        }
+        else
+            console.error(`Pinterest API error: unknown`);
+    }
+
+    #handleResponse(json) {
+        const success = json?.resource_response?.status === "success";
+
+        if (success)
+            return json.resource_response.data;
+        else
+            this.#printError(json?.resource_response);
+    }
+
+    async #getBoardsPage(bookmark) {
         const pinterestOptions = {
             "options": {
                 "username": this.#userName,
@@ -276,11 +317,32 @@ class PinterestAPI {
             },
             "context": {}
         };
+
+        if (bookmark)
+            pinterestOptions.options.bookmarks = [bookmark];
+
         const params = {data: JSON.stringify(pinterestOptions)};
         const json = await this.#fetchPinterestJSON("/resource/BoardsResource/get/", params);
 
-        if (json.resource_response?.status === "success")
-            return json.resource_response.data;
+        if (json?.resource_response?.status === "success")
+            return [json.resource_response.data, json.resource_response.bookmark];
+        else {
+            this.#printError(json?.resource_response);
+            return [null, null];
+        }
+    }
+
+    async getBoards() {
+        let boards = [], page, bookmark;
+
+        do {
+            [page, bookmark] = await this.#getBoardsPage(bookmark);
+            if (page?.length)
+                boards = [...boards, ...page];
+        } while (bookmark);
+
+        if (boards.length)
+            return boards;
     }
 
     async createBoard(name) {
@@ -302,8 +364,7 @@ class PinterestAPI {
         const json = await this.#postPinterestJSON("/resource/BoardResource/create/", params);
         await sleep(200);
 
-        if (json.resource_response?.status === "success")
-            return json.resource_response.data;
+        return this.#handleResponse(json);
     }
 
     async createPin(boardId, description, link, imageURL) {
@@ -330,7 +391,6 @@ class PinterestAPI {
         };
 
         const json = await this.#postPinterestJSON("/resource/PinResource/create/", params);
-
-        return json.resource_response?.status === "success";
+        return !!this.#handleResponse(json);
     }
 }

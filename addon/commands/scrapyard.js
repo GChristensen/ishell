@@ -244,8 +244,8 @@ export class Shelf {
  - *filter* - arbitrary text, filters bookmarks by title, URL or content, depending on **type** parameter.
  - *path* - limits the scope of search to the specified path. The default shelf is designated by '~' character.
  - *depth*
-     - **folder** - return only bookmarks found in the specified path.
-     - **subtree** - search in subfolders (default).
+     - *folder* - return only bookmarks found in the specified path.
+     - *subtree* - search in subfolders (default).
  - *type*
      - *bookmark* - return only bookmarks.
      - *archive* - return only archives.
@@ -285,7 +285,7 @@ export class Scrapyard {
         //args[ON]     = {nountype: noun_arb_text, label: "text"}; // dependency
     }
 
-    init(doc) {
+    init() {
         updateCompletion();
     }
 
@@ -538,7 +538,7 @@ class CopyCommandBase {
 
  - *path* - path of the destination folder.
  - *action* - action to take after copying:
-    - **switching** - switch to the destination folder.
+    - *switching* - switch to the destination folder.
 
  # Example
  - **copy-at** *~/wiki* **by** *switching*

@@ -63,7 +63,7 @@ export function noun_type_tab_group(text, html, _, selectionIndices) {
     # Examples
     - **tab-group** *cats*
     - **tgr** *books* **in** *shopping*
-    - **tgr** *books* **to** *delete*
+    - **tgr** **to** *delete* *books*
     - **tgr** **all** **to** *close*
     - **tgr** **to** *move* **by** *switching* **at** *new group*
 

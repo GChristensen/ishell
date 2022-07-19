@@ -1,4 +1,6 @@
-// Preprocessor used to provide new object-oriented command syntax
+// Preprocessor used to provide the new class-based command syntax
+
+import {marked} from "../lib/marked.js";
 
 export const OBJECT = "object";
 export const FOR = "subject";
@@ -127,7 +129,7 @@ export class CommandPreprocessor {
 
     extractAnnotatedEntities(script, type) {
         // the regex only allows to extract the last annotated definition in the script
-        const rx = /\/\*\*(?!.*\/\*\*)(.*?)\*\/\s*^\s*(?:export\s*)?(async\s*)?(class|function)\s*(\w+)(.*?)?{/gsm
+        const rx = /(\/\*\*(?!.*\/\*\*)(.*?)\*\/\s*)^\s*(?:export\s*)?(async\s*)?(class|function)\s*(\w+)(.*?)?{/gsm
         const matches = [];
 
         let match;
@@ -142,11 +144,12 @@ export class CommandPreprocessor {
 
         const entities = matches.map(m => ({
             fullDeclaration: m[0],
-            comment: m[1],
-            async: m[2],
-            type: m[3],
-            name: m[4],
-            args: m[5],
+            fullComment: m[1],
+            comment: m[2],
+            async: m[3],
+            type: m[4],
+            name: m[5],
+            args: m[6],
             index: m.index
         }));
 
@@ -451,13 +454,13 @@ export class CommandPreprocessor {
             if (object[k] === null || object[k] === undefined)
                 delete object[k];
     }
-    
-    generateCommandSetupBlock(object) {
+
+    generateCommand(script, object) {
         const generatingFunc = object.properties.search
             ? "createSearchCommand"
             : "createCommand";
 
-        let block = `\n{
+        let setUpBlock = `\n{
     const attributes = ${JSON.stringify(object.properties, null, 6)};
     CommandPreprocessor.assignCommandAnnotations(${object.name}, attributes);
     
@@ -471,7 +474,10 @@ export class CommandPreprocessor {
     
     cmdAPI.${generatingFunc}(command);\n}\n`;
 
-        return block;
+        if (object.properties.dbgprint)
+            object.generatedCode = object.fullDefinition + setUpBlock;
+        const replacement = object.fullDefinition + setUpBlock.replace(/\n/g, "");
+        return script.replace(object.fullDefinition, replacement);
     }
 
     static assignCommandAnnotations(classDef, annotations) {
@@ -492,18 +498,14 @@ export class CommandPreprocessor {
         return command;
     }
 
-    generateCommand(script, object) {
-        object.generatedCode = object.fullDefinition + this.generateCommandSetupBlock(object);
-        return script.replace(object.fullDefinition, object.generatedCode);
-    }
-
     generateMetaClass(script, object) {
         let metaName = `__metaclass_${object.name}`;
         let nameRx = new RegExp(`/\\*\\*.*?\\*/\\s*(^\\s*class\\s+)${object.name}(.*?{)`, "sm");
         let metaPropertiesName = `__metaclass_${object.name}_attributes`;
         let metaProperties = `\n${metaPropertiesName} = ${JSON.stringify(object.properties, null, 12)};\n`;
-        let metaDefinition = object.fullDefinition.replace(nameRx, `\$1${metaName}\$2`) + metaProperties;
-        let metaGenerator = `\n\nclass ${object.name} extends ${metaName} {
+        let metaDefinition = object.fullComment + object.fullDefinition.replace(nameRx, `\$1${metaName}\$2`);
+        let metaGenerator = `${metaProperties}
+class ${object.name} extends ${metaName} {
     constructor() {
         let args = {};
         super(args);
@@ -520,8 +522,10 @@ export class CommandPreprocessor {
 CommandPreprocessor.assignCommandAnnotations(${object.name}, ${metaPropertiesName});
 `;
 
-        object.generatedCode = metaDefinition + metaGenerator;
-        return script.replace(object.fullDefinition, object.generatedCode);
+        if (object.properties.dbgprint)
+            object.generatedCode = metaDefinition + metaGenerator;
+        const replacement = metaDefinition + metaGenerator.replace(/\n/g, "");
+        return script.replace(object.fullDefinition, replacement);
     }
 
     preprocessCommand(script, object) {
@@ -531,18 +535,19 @@ CommandPreprocessor.assignCommandAnnotations(${object.name}, ${metaPropertiesNam
             return this.generateCommand(script, object);
     }
 
-    generateNounType(object, properties) {
-        let definition = `var ${object.name} = {`
+    generateNounType(script, object) {
+        let nounType = `${object.fullComment}var ${object.name} = {`
 
-        if (properties.label)
-            definition += `\n    label: ${this.generateProperty(properties.label)},`
+        if (object.properties.label)
+            nounType += `label: ${this.generateProperty(object.properties.label)}, `
 
-        definition += `
-    suggest: ${object.async || ""} function ${object.args.trim()} {
-    ${object.fullDefinition.replace(object.fullDeclaration, "")}
-};`
+        nounType += `suggest: ${object.async || ""} function ${object.args.trim()} {
+    ${object.fullDefinition.replace(object.fullDeclaration, "")}};`
 
-        return definition;
+        if (object.properties.dbgprint)
+            object.generatedCode = object.fullDefinition + setUpBlock;
+
+        return script.replace(object.fullDefinition, nounType);
     }
 
     static instantiateNounType(fun, funMeta) {
@@ -562,7 +567,6 @@ CommandPreprocessor.assignCommandAnnotations(${object.name}, ${metaPropertiesNam
             }
 
             object.fullDefinition = this.extractFullDefinition(script, object);
-            object.generatedCode = this.generateNounType(object, properties);
             object.properties = properties;
         }
 
@@ -574,7 +578,7 @@ CommandPreprocessor.assignCommandAnnotations(${object.name}, ${metaPropertiesNam
 
         for (let object of functionMatches)
             if (!object.skip)
-                script = script.replace(object.fullDefinition, object.generatedCode);
+                script = this.generateNounType(script, object);
 
         return [script, functionMatches];
     }

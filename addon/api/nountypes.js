@@ -179,49 +179,18 @@ export const noun_type_contact = {
     noExternalCalls: true,
     cacheTime: -1,
     BIN_UUID: "--stored-email-items",
-    suggest: function (text, html, cb, selectionIndices) {
-        Utils.makeBin(this.BIN_UUID).then(bin => {
-            let contacts = bin.contacts();
-            if (!contacts)
-                contacts = [];
+    suggest: async function (text, html, cb, selectionIndices) {
+        const bin = await Utils.makeBin(this.BIN_UUID);
+        const contacts = bin.contacts() || [];
+        let suggs = [];
 
-            if (contacts.find(c => c.toLowerCase() === text.toLowerCase())) {
-                cb([NounUtils.makeSugg(text, html, null, 1, selectionIndices)]);
-                return;
-            }
+        suggs = contacts.map(c => cmdAPI.makeSugg(c, c, null, 1, selectionIndices));
+        suggs = cmdAPI.grepSuggs(text, suggs);
 
-            let textSugg;
-            let matcher = new RegExp(text, "i");
+        if (!cmdAPI.hasSugg(suggs, text))
+            suggs = [...suggs, ...noun_type_email.suggest(text, html, cb, selectionIndices)];
 
-            let matchingItems = contacts.map(c => ({email: c})).filter(c => {
-                c.match = matcher.exec(c.email);
-                return !!c.match;
-            });
-
-            let contactSuggs = matchingItems.map(c =>
-                NounUtils.makeSugg(c.email, c.email, null, NounUtils.matchScore(c.match), selectionIndices));
-
-            if (EMAIL_USER.test(text)) {
-                textSugg = NounUtils.makeSugg(text, html, null, 0.3, selectionIndices);
-            }
-            else {
-                var match = text.match(EMAIL_ADDRESS);
-                if (match) {
-                    var domain = match[1];
-                    var score = /\.(?:\d+|[a-z]{2,})$/i.test(domain) ? 1 : 0.8;
-                    textSugg = NounUtils.makeSugg(text, html, null, score, selectionIndices);
-                }
-            }
-
-            if (textSugg)
-                contactSuggs.push(textSugg);
-
-            if (contactSuggs.length > 0) {
-                cb(contactSuggs);
-            }
-        });
-
-        return {};
+        return suggs;
     }
 };
 
@@ -231,31 +200,10 @@ export const noun_type_tab = {
     // suggestion methods declared as async should not use callback
     async suggest(text, html, callback, selectedIndices) {
         const tabs = await browser.tabs.query({});
-        let suggs = tabs.map(tab => cmdAPI.makeSugg(tab.title || tab.url, null, tab, 1,
-            selectedIndices));
+        const suggs = tabs.map(tab => cmdAPI.makeSugg(tab.title || tab.url, null, tab, 1, selectedIndices));
 
         return cmdAPI.grepSuggs(text, suggs);
     }
-};
-
-export const noun_type_context_menu_command = {
-    label: "label",
-    noExternalCalls: true,
-    suggest: function(text, html, cb, selectedIndices) {
-        let fakeReq = {readyState: 2};
-        let matcher = new RegExp(text, "i");
-
-        let matchingItems = contextMenuManager.contextMenuCommands.filter(m => {
-            m.match = matcher.exec(m.label);
-            return !!m.match;
-        });
-
-        fakeReq.readyState = 4;
-        cb(matchingItems.map(cm =>
-            NounUtils.makeSugg(cm.label, null, cm, NounUtils.matchScore(cm.match), selectedIndices)));
-
-        return [fakeReq];
-    },
 };
 
 export const noun_type_lang_google = NounUtils.NounType("language", {

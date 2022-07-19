@@ -113,7 +113,7 @@ class ContextMenuManager {
 
         let executed = false;
 
-        query.onResults = () => { // onResults can run several times, depending on suggestions with callbacks
+        query.onResults = () => { // suggestion that use the callback argument may call onResults several times
             if (executed)
                 return;
 
@@ -124,7 +124,7 @@ class ContextMenuManager {
 
             if (sent && sent.getCommand().uuid.toLowerCase() === commandDef.uuid.toLowerCase()) {
 
-                cmdManager.callExecute(sent).then(() => {
+                cmdManager.callExecute(sent).finally(() => {
                     ContextUtils.clearSelection();
                 });
 

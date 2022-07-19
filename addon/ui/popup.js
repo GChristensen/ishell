@@ -230,7 +230,7 @@ class PopupWindow {
                 <p>
                    <div class='help-heading'>Keyboard Shortcuts</div>
                    <span class='keys'>Tab</span> - complete the current input.<br>
-                   <span class='keys'>Alt+Backspace</span> - remove the command arguments.<br>
+                   <span class='keys'>Alt+Backspace</span> - clear the command arguments.<br>
                    <span class='keys'>Ctrl+C</span> - copy the preview content to the clipboard.<br>
                    <span class='keys'>Ctrl+Alt+Enter</span> - add the selected command to the context menu.<br>
                    <span class='keys'>Ctrl+Alt+\\</span> - show the command history.<br>

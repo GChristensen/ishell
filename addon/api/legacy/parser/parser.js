@@ -485,7 +485,7 @@ Parser.prototype = {
     },
 };
 
-function ParsedSentence(
+export function ParsedSentence(
     verb, args, verbMatchScore, selObj, argStrings, query) {
     this._verb = verb;
     this._argSuggs = args;

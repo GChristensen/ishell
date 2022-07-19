@@ -5,7 +5,6 @@ export class CommandList {
     #parser;
     #suggestions;
     #maxSuggestions;
-    #previousSelection;
     #selectedSuggestion = 0;
 
     constructor(popup, maxSuggestions) {
@@ -28,14 +27,13 @@ export class CommandList {
     }
 
     advanceSelection(direction) {
-        this.#previousSelection = this.#selectedSuggestion;
         this.#selectedSuggestion = this._incrementSelectionIndex(this.#selectedSuggestion, direction);
         this._selectCommand(this.#selectedSuggestion);
     }
 
     async executeSelection() {
         if (this.selection) {
-            cmdManager.callExecute(this.selection).then(() => {
+            cmdManager.callExecute(this.selection).finally(() => {
                 ContextUtils.clearSelection();
             });
         }
@@ -96,7 +94,7 @@ export class CommandList {
     _selectCommand(index) {
         this._ensureSelectionInRange();
 
-        $("#suggestion-item-" + this.#previousSelection).parent().removeClass("selected");
+        $(".selected", this._popup.sblock).removeClass("selected");
         $(`#suggestion-item-${index}`).parent().addClass('selected');
 
         this._popup.autocomplete();
@@ -129,8 +127,11 @@ export class CommandList {
             const suggestionListHTML = this._generateSuggestionHtml(this.#suggestions);
             this._popup.setSuggestionsContent(suggestionListHTML);
 
-            for (const i in this.#suggestions)
-                $(`#suggestion-item-${i}`).click(() => this._selectCommand(i));
+            for (let i = 0; i < this.#suggestions.length; ++i)
+                $(`#suggestion-item-${i}`).click(() => {
+                    this.#selectedSuggestion = i;
+                    this._selectCommand(i);
+                });
 
             if (!previousSelection?.equalCommands(this.selection))
                 this._popup.setPreviewContent(this.selection.getCommand().description, true);

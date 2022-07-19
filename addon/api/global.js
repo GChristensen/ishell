@@ -6,7 +6,6 @@ import {helperApp} from "../helper_app.js";
 await injectModules([
     "../lib/browser-polyfill.js",
     "../lib/math_parser.js",
-    "../lib/marked.js",
     "./api/legacy/utils.js",
     "./api/legacy/contextutils.js",
     "./api/legacy/parser/nounutils.js",
