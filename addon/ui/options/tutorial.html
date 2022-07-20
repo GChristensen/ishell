@@ -1129,8 +1129,11 @@ export class Pinterest {
             cmdAPI.notify("Error creating board.");
     }
 
-    async execute() {
-        cmdAPI.addTab(this.#pinterestAPI.userProfileURL);
+    async execute(args, storage) {
+        if (args.TO?.data)
+            cmdAPI.addTab(pinterestAPI.getBoardURL(args.TO.data));
+        else
+            cmdAPI.addTab(pinterestAPI.userProfileURL);
         this.#boards = await this.#pinterestAPI.getBoards();
     }
 }

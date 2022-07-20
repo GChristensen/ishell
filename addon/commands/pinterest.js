@@ -187,7 +187,10 @@ export class Pinterest {
         this.#boardsLoaded = false;
         const pinterestAPI = await this.pinterestAPI;
         if (pinterestAPI.isAuthorized)
-            cmdAPI.addTab(pinterestAPI.userProfileURL);
+            if (args.TO?.data)
+                cmdAPI.addTab(pinterestAPI.getBoardURL(args.TO.data));
+            else
+                cmdAPI.addTab(pinterestAPI.userProfileURL);
         else
             cmdAPI.addTab(pinterestAPI.PINTEREST_URL);
     }
@@ -237,6 +240,11 @@ class PinterestAPI {
     get userProfileURL() {
         if (this.#userName)
             return `${this.PINTEREST_URL}/${this.#userName}`;
+    }
+
+    getBoardURL(board) {
+        const boardURL = board.name.replace(/ /g, "-").toLowerCase();
+        return this.userProfileURL + `/${boardURL}`
     }
 
     async #fetchPinterestJSON(url, params, method) {

@@ -2,7 +2,7 @@
     "version": "0.9",
     "applications": {
         "gecko": {
-            "id": "ishell-we@gchristensen.github.io",
+            "id": "ishell@gchristensen.github.io",
             "strict_min_version": "95.0"
         }
     },
