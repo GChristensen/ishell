@@ -992,13 +992,14 @@ class Memo {
     @label board
     @nountype
 */
-async function noun_type_board(text, html, _, selectionIndices) {
+function noun_type_board(text, html, _, selectionIndices) {
     let suggs = [], boards = this._command.deref().boards;
 
     if (boards) {
-        // Create suggestions from all user's boards and filter them by the current input.
+        // Create suggestions from all user's boards.
         // Created suggestions contain board API objects in their .data property.
         suggs = boards.map(b => cmdAPI.makeSugg(b.name, b.name, b, 1, selectionIndices));
+        // Filter the suggestions by the current input.
         suggs = cmdAPI.grepSuggs(text, suggs);
     }
 
@@ -1014,7 +1015,8 @@ async function noun_type_board(text, html, _, selectionIndices) {
 
 /**
     To create a pin, fill in the arguments and click on an image in the preview area
-    or press the corresponding Ctrl+Alt+&lt;key&gt; combination.
+    or press the corresponding Ctrl+Alt+&lt;key&gt; combination. Execute the command to open
+    the chosen board.
 
     # Syntax
     **pinterest** [*description*] **to** *board* [**of** *dimension*]
@@ -1033,7 +1035,7 @@ async function noun_type_board(text, html, _, selectionIndices) {
     @delay 1000
     @icon https://pinterest.com/favicon.ico
     @description Pin image to a board on Pinterest.
-    @uuid 06364E1A-7A38-4590-86F6-6CA7AECD971F
+    @uuid 044941CF-A22B-45EA-B135-EFF0CA847DA7
  */
 export class Pinterest {
     #pinterestAPI;
@@ -1098,7 +1100,7 @@ export class Pinterest {
 
     async #createPin(board, description, imageURL) {
         if (!board) {
-            cmdAPI.notify("No board is selected.");
+            cmdAPI.notifyError("No board is selected.");
             return false;
         }
 
@@ -1115,7 +1117,7 @@ export class Pinterest {
                 return true;
             }
             else
-                cmdAPI.notify("Error creating pin.");
+                cmdAPI.notifyError("Error creating pin.");
         }
     }
 
@@ -1126,15 +1128,19 @@ export class Pinterest {
             return board;
         }
         else
-            cmdAPI.notify("Error creating board.");
+            cmdAPI.notifyError("Error creating board.");
     }
 
     async execute(args, storage) {
-        if (args.TO?.data)
-            cmdAPI.addTab(pinterestAPI.getBoardURL(args.TO.data));
+        if (this.#pinterestAPI.isAuthorized) {
+            if (args.TO?.data)
+                cmdAPI.addTab(this.#pinterestAPI.getBoardURL(args.TO.data));
+            else
+                cmdAPI.addTab(this.#pinterestAPI.userProfileURL);
+            this.#boards = await this.#pinterestAPI.getBoards();
+        }
         else
-            cmdAPI.addTab(pinterestAPI.userProfileURL);
-        this.#boards = await this.#pinterestAPI.getBoards();
+            cmdAPI.addTab(this.#pinterestAPI.PINTEREST_URL);
     }
 }
 

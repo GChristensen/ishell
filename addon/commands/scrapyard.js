@@ -57,36 +57,21 @@ function scrapyardSend(message, payload) {
 }
 
 function openListSuggestion(text, html, _, selectionIndices) {
+    let suggs = [];
+
     if (text) {
-        const matcher = new RegExp(text, "i");
+        const mkSugg = i => {
+            const title = i.path || i.name;
+            return cmdAPI.makeSugg(title, title, null, 1, selectionIndices);
+        };
+        suggs = this._items.map(mkSugg);
+        suggs = cmdAPI.grepSuggs(text, suggs);
 
-        const suggs = this._items
-            .filter(i => {
-                i.match = matcher.exec(i.path || i.name);
-                return (i.path || i.name) && i.match;
-            })
-            .map(i => cmdAPI.makeSugg(
-                i.path || i.name,
-                i.path || i.name,
-                null,
-                i.match.input
-                    ? cmdAPI.matchScore(i.match)
-                    : .0001,
-                selectionIndices
-            ));
-
-        const textSugg = cmdAPI.makeSugg(text, html, null, suggs.length ? .001 : 1, selectionIndices);
-        if (textSugg)
-            suggs.push(textSugg);
-
-        if (suggs.length > 0)
-            return suggs;
+        cmdAPI.addSugg(suggs, text, html, null, suggs.length ? .001 : 1, selectionIndices);
     }
 
-    return {};
+    return suggs;
 }
-
-cmdAPI.scrapyard = {};
 
 var noun_scrapyard_shelf = {
     label: "shelf",

@@ -6,7 +6,7 @@ export const namespace = new CommandNamespace(CommandNamespace.SYNDICATION, true
  @label board
  @nountype
  */
-export async function noun_type_board(text, html, _, selectionIndices) {
+export function noun_type_board(text, html, _, selectionIndices) {
     let suggs = [], boards = this._command.deref().boards;
 
     if (boards) {
@@ -21,7 +21,8 @@ export async function noun_type_board(text, html, _, selectionIndices) {
 /**
     To create a pin, fill in the arguments and click on an image in the preview area
     or press the corresponding Ctrl+Alt+&lt;key&gt; combination. A user should be
-    logged in to Pinterest to use this command.
+    logged in to Pinterest to use this command. Execute the command to open the 
+    chosen board.
 
     # Syntax
     **pinterest** [*description*] **to** *board* [**of** *dimension*]
