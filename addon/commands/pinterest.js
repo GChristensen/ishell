@@ -147,7 +147,7 @@ export class Pinterest {
         if (board) {
             const link = cmdAPI.getLocation();
             const pinterestAPI = await this.pinterestAPI;
-            const success = pinterestAPI.checkAuthorization()
+            const success = await pinterestAPI.checkAuthorization()
                     && await pinterestAPI.createPin(board.id, description, link, imageURL);
 
             if (success) {
@@ -161,7 +161,7 @@ export class Pinterest {
 
     async #createBoard(name) {
         const pinterestAPI = await this.pinterestAPI;
-        const board = pinterestAPI.checkAuthorization() && await pinterestAPI.createBoard(name);
+        const board = await pinterestAPI.checkAuthorization() && await pinterestAPI.createBoard(name);
 
         if (board) {
             this.#boards.push(board);
@@ -187,7 +187,7 @@ export class Pinterest {
         this.#pinterestAPI = null;
         this.#boardsLoaded = false;
         const pinterestAPI = await this.pinterestAPI;
-        if (pinterestAPI.isAuthorized)
+        if (await pinterestAPI.checkAuthorization())
             if (args.TO?.data)
                 cmdAPI.addTab(pinterestAPI.getBoardURL(args.TO.data));
             else
@@ -219,19 +219,25 @@ class PinterestAPI {
     #userName;
 
     constructor() {
-        return this.#fetchPinterestJSON("/resource/UserSettingsResource/get/")
-            .then(json => {
-                if (json.resource_response?.status === "success")
-                    this.#userName = json.resource_response.data.username;
-                return this;
-            });
+        return this.authorize().then(() => this);
     }
 
-    checkAuthorization() {
-        const authorized = this.isAuthorized;
-        if (!authorized)
-            cmdAPI.notifyError("The user is not logged in to Pinterest.")
-        return authorized;
+    async authorize() {
+        const json = await this.#fetchPinterestJSON("/resource/UserSettingsResource/get/");
+        const userDetails = this.#handleResponse(json);
+        if (userDetails)
+            this.#userName = userDetails.username;
+    }
+
+    async checkAuthorization() {
+        if (!this.isAuthorized) {
+            await this.authorize();
+            if (!this.isAuthorized) {
+                cmdAPI.notifyError("The user is not logged in to Pinterest.")
+                throw new Error("Pinterest is unauthorized");
+            }
+        }
+        return this.isAuthorized;
     }
 
     get isAuthorized() {
@@ -295,10 +301,10 @@ class PinterestAPI {
         return this.#fetchPinterestJSON(url, params, "post")
     }
 
-    #printError(response) {
-        if (response?.error) {
-            const status = response.error.http_status;
-            const message = response.error.message + " " + (response.error.message_detail || "");
+    #printError(error) {
+        if (error) {
+            const status = error.http_status;
+            const message = error.message + " " + (error.message_detail || "");
             console.error(`Pinterest API error: HTTP status ${status}, (${message})`);
         }
         else
@@ -311,7 +317,7 @@ class PinterestAPI {
         if (success)
             return json.resource_response.data;
         else
-            this.#printError(json?.resource_response);
+            this.#printError(json?.resource_response?.error);
     }
 
     async #getBoardsPage(bookmark) {
@@ -336,7 +342,7 @@ class PinterestAPI {
         if (json?.resource_response?.status === "success")
             return [json.resource_response.data, json.resource_response.bookmark];
         else {
-            this.#printError(json?.resource_response);
+            this.#printError(json?.resource_response?.error);
             return [null, null];
         }
     }
