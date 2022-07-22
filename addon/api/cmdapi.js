@@ -54,15 +54,20 @@ export const R = cmdAPI.reduceTemplate;
 
 cmdAPI.objectPreviewList.CSS = CmdUtils.previewList2.CSS;
 
-cmdAPI.localeCompare = function(prop, desc) {
+cmdAPI.localeCompare = function(prop, desc, caseSensitive) {
+    const options = {sensitivity: "base"};
+
+    if (caseSensitive)
+        options.sensitivity = "case";
+
     if (prop && !desc)
-        return (a, b) => a[prop].localeCompare(b[prop], undefined, {sensitivity: 'base'});
+        return (a, b) => a[prop].localeCompare(b[prop], undefined, options);
     else if (prop && desc)
-        return (a, b) => b[prop].localeCompare(a[prop], undefined, {sensitivity: 'base'});
+        return (a, b) => b[prop].localeCompare(a[prop], undefined, options);
     else if (!prop && desc)
-        return (a, b) => b.localeCompare(a, undefined, {sensitivity: 'base'});
+        return (a, b) => b.localeCompare(a, undefined, options);
     else if (!prop && !desc)
-        return (a, b) => a.localeCompare(b, undefined, {sensitivity: 'base'});
+        return (a, b) => a.localeCompare(b, undefined, options);
 }
 
 cmdAPI.hasSugg = function(suggs, text, prop = "text") {

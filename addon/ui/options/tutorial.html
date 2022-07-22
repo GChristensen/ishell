@@ -1039,7 +1039,7 @@ function noun_type_board(text, html, _, selectionIndices) {
  */
 export class Pinterest {
     #pinterestAPI;
-    #boards;
+    #boards = [];
 
     constructor(args) {
         noun_type_board._command = new WeakRef(this);

@@ -46,7 +46,7 @@ export function noun_type_board(text, html, _, selectionIndices) {
 export class Pinterest {
     #storage;
     #pinterestAPI;
-    #boards;
+    #boards = [];
     #boardsLoaded;
 
     constructor(args) {
@@ -54,6 +54,7 @@ export class Pinterest {
         args[OBJECT] = {nountype: noun_arb_text, label: "description"};
         args[TO]     = {nountype: noun_type_board, label: "board"};
         args[OF]     = {nountype: noun_type_number, label: "size"};
+        args[AS]     = {nountype: ["repin"], label: "option"};
     }
 
     async load(storage) {
@@ -184,16 +185,55 @@ export class Pinterest {
     }
 
     async execute(args, storage) {
+        const option = args.AS?.text;
+
+        if (option === "repin")
+            return this.#repinPinterestURL(args);
+        else
+            return this.#openPinterestPage(args);
+    }
+
+    async #openPinterestPage(args) {
         this.#pinterestAPI = null;
         this.#boardsLoaded = false;
+
         const pinterestAPI = await this.pinterestAPI;
-        if (await pinterestAPI.checkAuthorization())
+
+        if (await pinterestAPI.checkAuthorization()) {
             if (args.TO?.data)
                 cmdAPI.addTab(pinterestAPI.getBoardURL(args.TO.data));
             else
                 cmdAPI.addTab(pinterestAPI.userProfileURL);
+        }
         else
             cmdAPI.addTab(pinterestAPI.PINTEREST_URL);
+    }
+
+    async #repinPinterestURL(args) {
+        const pinterestAPI = await this.pinterestAPI;
+        const link = cmdAPI.getLocation();
+
+        if (pinterestAPI.isPinURL(link)) {
+            if (await pinterestAPI.checkAuthorization()) {
+                let board = args.TO?.data || args.TO?.text;
+
+                if (typeof board === "string")
+                    board = await this.#createBoard(board);
+
+                if (board) {
+                    const success = await pinterestAPI.createRepin(board.id, args.OBJECT.text, link);
+
+                    if (success)
+                        cmdAPI.notify("Successfully repinned image.");
+                    else
+                        cmdAPI.notifyError("Error creating pin.");
+                }
+                else
+                    cmdAPI.notifyError("No board is selected.");
+            }
+        }
+        else
+            cmdAPI.notifyError("It seems that this page is not a pin.");
     }
 }
 
@@ -242,6 +282,14 @@ export class PinterestAPI {
 
     get isAuthorized() {
         return !!this.#userName;
+    }
+
+    isPinterestURL(url) {
+        return url.startsWith(this.PINTEREST_URL);
+    }
+
+    isPinURL(url) {
+        return url.startsWith(`${this.PINTEREST_URL}/pin/`);
     }
 
     get userProfileURL() {
@@ -406,6 +454,29 @@ export class PinterestAPI {
         };
 
         const json = await this.#postPinterestJSON("/resource/PinResource/create/", params);
+        return !!this.#handleResponse(json);
+    }
+
+    async createRepin(boardId, description, link) {
+        link = link.replace(/\/$/, "");
+        const pinID = link.split("/").at(-1);
+
+        const pinterestOptions = {
+            "options": {
+                "description": description,
+                "pin_id": pinID,
+                "title": "",
+                "board_id": boardId,
+                "no_fetch_context_on_resource": false
+            }, "context": {}
+        };
+
+        const params = {
+            source_url: `/pin/${pinID}/`,
+            data: JSON.stringify(pinterestOptions)
+        };
+
+        const json = await this.#postPinterestJSON("/resource/RepinResource/create/", params);
         return !!this.#handleResponse(json);
     }
 }
