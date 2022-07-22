@@ -972,19 +972,27 @@ class Memo {
     <h1 class="section-heading"><span id="Full_Blown_Command">Putting It All Together: Creating Pins on Pinterest</span>
     </h1>
     <p>The code below is the actual source code of the Pinterest command almost as it appears in iShell. It also demonstrates
-        some tricks that you would not find in the official documentation. With this command the user is be able to
+        some tricks that you would not find in the official documentation. With the <b>pinterest</b> command, users can
         pin images found on the current page to a <a href="https://pinterest.com">Pinterest</a>
         board. One of the command arguments provides autocompletion for all user's boards. It
         is also possible to create a board if it does not exist.</p>
 
-    <p>To achieve this we need to create a custom noun type that obtains the list of user's boards
-       and appends the current input as an additional suggestion to its suggestion list.
-       If there are some boards that match the current input, we need to score our additional
-       suggestion with some low score value to make it appear at the bottom. In the absence of the matching
-       boards we will promote the creation of a new one by scoring the suggestion with the maximum possible value
-       of 1. Note that generally the score value of 1 may conflict with the scoring of other arguments
-       and produce unexpected results.
+    <p>To achieve this we need to create a custom noun type that obtains the list of user's boards.
+        This noun type should display as suggestions only those boards that match the current input. To create
+        a new board, we need to append the current input as an additional suggestion to the generated
+        suggestion list.</p>
+
+    <p>If some boards match the current input, we need to score our
+        additional suggestion with some low value to make it appear at the bottom. In the
+        absence of the matching boards, we need to promote the creation of a new one by scoring the
+        additional suggestion with the maximum possible value of 1. Note that generally the score
+        value of 1 may conflict with the scoring of other arguments and produce unexpected results.
     </p>
+
+    <p>Due to the conceptual limitations of the iShell parser, the text of the additional suggestion
+        as it is entered by the user can not contain spaces. It is because we already have one argument of <b>noun_arb_text</b>
+        type (OBJECT). All text after the first space will automatically be assigned to the OBJECT
+        argument. Board suggestions received from Pinterest can contain spaces, though.</p>
 
 <pre><code data-language="javascript">/**
     This noun type provides autocompletion for the user's Pinterest boards.
@@ -993,7 +1001,7 @@ class Memo {
     @nountype
 */
 function noun_type_board(text, html, _, selectionIndices) {
-    let suggs = [], boards = this._command.deref().boards;
+    let suggs = [], boards = this._command.deref().boards; // Obtain the list of all boards.
 
     if (boards) {
         // Create suggestions from all user's boards.
@@ -1003,12 +1011,8 @@ function noun_type_board(text, html, _, selectionIndices) {
         suggs = cmdAPI.grepSuggs(text, suggs);
     }
 
-    // Also add the current input as a suggestion. This suggestion does not contain a board
-    // object.
-    // Due to the conceptual limitations of the iShell parser, the text of this suggestion
-    // can not contain spaces because we already have one argument of the arbitrary text
-    // noun type (OBJECT). All text after the first space will automatically be assigned
-    // to the OBJECT argument.
+    // Add the current input as an additional suggestion. This suggestion does not contain
+    // a board object.
     cmdAPI.addSugg(suggs, text, html, null, suggs.length? .001 : 1, selectionIndices);
     return suggs;
 }
