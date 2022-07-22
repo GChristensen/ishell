@@ -60,6 +60,8 @@ export class Resurrect {
         }
         else if (cmdAPI.activeTab)
             return [cmdAPI.activeTab.url, this.#makeSummary(cmdAPI.activeTab.url)];
+
+        return ["", ""];
     }
 
     #makeSummary(text) {

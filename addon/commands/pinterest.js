@@ -213,7 +213,7 @@ function extractImagesUserScript(dimension) {
 }
 
 
-class PinterestAPI {
+export class PinterestAPI {
     PINTEREST_URL = "https://www.pinterest.com";
 
     #userName;

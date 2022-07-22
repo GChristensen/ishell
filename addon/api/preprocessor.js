@@ -191,6 +191,7 @@ export class CommandPreprocessor {
 
     extractCommandProperties(comment) {
         let command = comment.match(/@command(.*?)(?:\r?\n|$)/i);
+        let asyncConstructor = comment.match(/@async/i);
         let delay = comment.match(/@delay (\d+)/i);
         let preview = comment.match(/@preview (.*?)(?:\r?\n|$)/i);
         let license = comment.match(/@license (.*?)(?:\r?\n|$)/i);
@@ -249,6 +250,7 @@ export class CommandPreprocessor {
 
         return {
             command: commandName,
+            asyncConstructor: !!asyncConstructor,
             delay: delay && delay[1] ? parseInt(delay[1]) : undefined,
             preview: preview?.[1]?.trim(),
             license: license?.[1]?.trim(),
@@ -455,47 +457,63 @@ export class CommandPreprocessor {
                 delete object[k];
     }
 
+    static assignCommandAttributes(classDef, attributes) {
+        classDef.__definition = {};
+        CommandPreprocessor.assignCommandProperties(classDef.__definition, attributes);
+    }
+
+    static setUpCommand(command, args, attributes) {
+        if (Object.keys(args).length > 0)
+            command.arguments = CommandPreprocessor.assignCommandArguments(args);
+
+        CommandPreprocessor.assignCommandProperties(command, attributes);
+        CommandPreprocessor.assignCommandHandlers(command);
+
+        return command;
+    }
+
+    static instantiateCommand(classDef, attributes = {}) {
+        CommandPreprocessor.assignCommandAttributes(classDef, attributes);
+
+        const args = {};
+        const command = new classDef(args);
+
+        return this.setUpCommand(command, args, attributes);
+    }
+
+    static async instantiateCommandAsync(classDef, attributes = {}) {
+        CommandPreprocessor.assignCommandAttributes(classDef, attributes);
+
+        const args = {};
+        const command = await new classDef(args);
+
+        return this.setUpCommand(command, args, attributes);
+    }
+
     generateCommand(script, object) {
+        const attributes = JSON.stringify(object.properties, null, 8);
         const generatingFunc = object.properties.search
             ? "createSearchCommand"
             : "createCommand";
 
-        let setUpBlock = `\n{
-    const attributes = ${JSON.stringify(object.properties, null, 6)};
-    CommandPreprocessor.assignCommandAnnotations(${object.name}, attributes);
-    
-    const args = {};
-    const command = new ${object.name}(args);
+        let setUpBlock;
 
-    if (Object.keys(args).length > 0)
-        command.arguments = CommandPreprocessor.assignCommandArguments(args);
-    CommandPreprocessor.assignCommandProperties(command, attributes);    
-    CommandPreprocessor.assignCommandHandlers(command);
-    
+        if (object.properties.asyncConstructor) {
+            setUpBlock = `\n{
+    CommandPreprocessor.instantiateCommandAsync(${object.name}, ${attributes})
+    .then(command => cmdAPI.${generatingFunc}(command));\n}\n`;
+        }
+        else {
+            setUpBlock = `\n{
+    const command = CommandPreprocessor.instantiateCommand(${object.name}, ${attributes});
+
     cmdAPI.${generatingFunc}(command);\n}\n`;
+        }
 
         if (object.properties.dbgprint)
             object.generatedCode = object.fullDefinition + setUpBlock;
         const replacement = object.fullDefinition + setUpBlock.replace(/\n/g, "");
         return script.replace(object.fullDefinition, replacement);
-    }
-
-    static assignCommandAnnotations(classDef, annotations) {
-        classDef.__definition = {};
-        CommandPreprocessor.assignCommandProperties(classDef.__definition, annotations);
-    }
-
-    static instantiateCommand(classDef, classMeta = {properties: {}}) {
-        const args = {};
-        const command = new classDef(args);
-
-        if (Object.keys(args).length > 0)
-            command.arguments = CommandPreprocessor.assignCommandArguments(args);
-        CommandPreprocessor.assignCommandAnnotations(classDef, classMeta.properties);
-        CommandPreprocessor.assignCommandProperties(command, classMeta.properties);
-        CommandPreprocessor.assignCommandHandlers(command);
-
-        return command;
     }
 
     generateMetaClass(script, object) {
@@ -509,17 +527,14 @@ class ${object.name} extends ${metaName} {
     constructor() {
         let args = {};
         super(args);
-        if (Object.keys(args).length > 0)
-            this.arguments = CommandPreprocessor.assignCommandArguments(args);
-
-        CommandPreprocessor.assignCommandProperties(this, ${metaPropertiesName}); 
-        CommandPreprocessor.assignCommandHandlers(this); 
+        
+        CommandPreprocessor.setUpCommand(this, args, ${metaPropertiesName}); 
         
         if (this.metaconstructor)
             return this.metaconstructor.apply(this, arguments);
     }
 }
-CommandPreprocessor.assignCommandAnnotations(${object.name}, ${metaPropertiesName});
+CommandPreprocessor.assignCommandAttributes(${object.name}, ${metaPropertiesName});
 `;
 
         if (object.properties.dbgprint)
@@ -550,8 +565,8 @@ CommandPreprocessor.assignCommandAnnotations(${object.name}, ${metaPropertiesNam
         return script.replace(object.fullDefinition, nounType);
     }
 
-    static instantiateNounType(fun, funMeta) {
-        fun.label = funMeta.label;
+    static instantiateNounType(fun, attributes) {
+        fun.label = attributes.label;
         fun.suggest = function(...args) { return fun.apply(this, args); };
     }
 
@@ -643,7 +658,7 @@ CommandPreprocessor.assignCommandAnnotations(${object.name}, ${metaPropertiesNam
             if (!classMeta.skip) {
                 const classDef = Object.entries(module).find(e => e[0] === classMeta.name)?.[1];
                 if (classDef) {
-                    const command = CommandPreprocessor.instantiateCommand(classDef, classMeta);
+                    const command = CommandPreprocessor.instantiateCommand(classDef, classMeta.properties);
                     if (classMeta.properties.search)
                         module.namespace.createSearchCommand(command);
                     else
@@ -660,7 +675,7 @@ CommandPreprocessor.assignCommandAnnotations(${object.name}, ${metaPropertiesNam
             if (!funMeta.skip) {
                 const fun = Object.entries(module).find(e => e[0] === funMeta.name)?.[1];
                 if (fun)
-                    CommandPreprocessor.instantiateNounType(fun, funMeta);
+                    CommandPreprocessor.instantiateNounType(fun, funMeta.properties);
             }
         }
     }
