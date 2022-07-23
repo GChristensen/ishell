@@ -207,26 +207,26 @@ class CommandManager {
     _assignDelayedPreview(options, timeout) {
         options.__delayed_preview = options.preview;
         options.preview = function (pblock) {
-            let args = arguments;
-            let callback = CmdUtils.previewCallback(pblock, options.__delayed_preview);
+            const args = arguments;
+            const callback = CmdUtils.previewCallback(pblock, options.__delayed_preview);
             if (options.__preview_timeout) {
                 clearTimeout(options.__preview_timeout);
-                options.__preview_resolve(undefined);
+                options.__preview_resolve && options.__preview_resolve(undefined);
             }
+            let previewResolve, previewReject;
             const result = new Promise((resolve, reject) => {
-                options.__preview_resolve = resolve;
-                options.__preview_reject = reject;
+                previewResolve = options.__preview_resolve = resolve;
+                previewReject = reject;
             });
             options.__preview_timeout = setTimeout(async function () {
                 try {
                     const callbackResult = await callback.apply(options, args);
-                    options.__preview_resolve(callbackResult);
+                    previewResolve(callbackResult);
                 } catch (e) {
-                    options.__preview_reject(e);
+                    previewReject(e);
                 }
                 options.__preview_timeout = null;
                 delete options.__preview_resolve;
-                delete options.__preview_reject;
             }, timeout);
             return result;
         };
