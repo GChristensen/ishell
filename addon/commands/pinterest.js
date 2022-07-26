@@ -82,7 +82,7 @@ export class Pinterest {
             const pinterestAPI = await this.pinterestAPI;
             if (pinterestAPI.isAuthorized) {
                 this.#boards = await pinterestAPI.getBoards() || [];
-                this.#boards = this.#boards.map(b => ({name: b.name, id: b.id}));
+                this.#boards = this.#boards.map(b => ({name: b.name, id: b.id, url: b.url}));
                 this.#storage.boards(this.#boards);
                 this.#boardsLoaded = true;
             }
@@ -298,8 +298,7 @@ export class PinterestAPI {
     }
 
     getBoardURL(board) {
-        const boardURL = board.name.replace(/ /g, "-").toLowerCase();
-        return this.userProfileURL + `/${boardURL}`
+        return this.PINTEREST_URL + board.url;
     }
 
     async #fetchPinterestJSON(url, params, method) {
