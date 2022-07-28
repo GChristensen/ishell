@@ -162,18 +162,7 @@ const compareByName = cmdAPI.localeCompare("name");
 function fillTableRowForCmd(row, cmd, className) {
     var {name, names} = cmd;
 
-    var checkBoxCell = $('<td><input type="checkbox"/></td>');
-    (checkBoxCell.find("input")
-        .val(cmd.id)
-        .bind("change", (e) => {
-            cmd.disabled = !e.target.checked;
-            if (cmd.disabled)
-                cmdManager.disableCommand(cmd);
-            else
-                cmdManager.enableCommand(cmd);
-        })
-        [cmd.disabled ? "removeAttr" : "attr"]("checked", "checked"));
-
+    var checkBoxCell = $(`<td><input data-cmd-id="${cmd.id}" type="checkbox"/></td>`);
     var cmdElement = jQuery(
         `<td class="command" id="${name}"><img class="favicon" src="`
         + escapeHtml((!("icon" in cmd) || cmd["icon"] === "http://example.com/favicon.ico")? "/ui/icons/logo.svg": cmd.icon) + '"/>' +
@@ -205,5 +194,15 @@ function fillTableRowForCmd(row, cmd, className) {
         }
     }
 
-    return row.append(checkBoxCell, cmdElement);
+    row.append(checkBoxCell, cmdElement);
+
+    $(`input[data-cmd-id="${cmd.id}"]`, row)
+        .on("change", e => {
+            cmd.disabled = !e.target.checked;
+            if (cmd.disabled)
+                cmdManager.disableCommand(cmd);
+            else
+                cmdManager.enableCommand(cmd);
+        })
+        [cmd.disabled ? "removeAttr" : "attr"]("checked", "checked");
 }

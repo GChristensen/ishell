@@ -130,7 +130,7 @@ class CommandManager {
     
     constructor() {
         this._commands = [];
-        this._disabledCommands = [];
+        this._disabledCommands = {};
     }
 
     async makeParser() {
