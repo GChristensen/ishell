@@ -130,7 +130,7 @@ class CommandManager {
     
     constructor() {
         this._commands = [];
-        this._disabledCommands = {};
+        this._disabledCommands = settings.disabled_commands() || {};
     }
 
     async makeParser() {
@@ -482,13 +482,9 @@ const cmdAPI = _BACKGROUND_API.cmdManager.createAPIProxy(null, _BACKGROUND_API.c
     async _prepareCommands() {
         this._commands = this._commands.filter(cmd => !cmd._hidden || cmdAPI.DEBUG && cmd._debug);
 
-        let disabledCommands = settings.disabled_commands();
-
-        if (disabledCommands)
-            for (const cmd of this._commands) {
-                if (cmd.name in disabledCommands)
-                    cmd.disabled = true;
-            }
+        for (const cmd of this._commands)
+            if (cmd.name in this._disabledCommands)
+                cmd.disabled = true;
 
         return this._initializeCommands();
     }
