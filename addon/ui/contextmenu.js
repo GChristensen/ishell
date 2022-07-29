@@ -4,12 +4,9 @@ import {cmdManager} from "../cmdmanager.js";
 class ContextMenuManager {
     _context_menu_commands = [];
 
-    loadMenu() {
-        settings.get("context_menu_commands").then(commands => {
-            if (commands)
-                this._context_menu_commands = commands;
-            this.createContextMenu();
-        });
+    async loadMenu() {
+        this._context_menu_commands = await settings.get("context_menu_commands") || [];
+        this.createContextMenu();
     }
 
     get contextMenuCommands() {
@@ -34,7 +31,7 @@ class ContextMenuManager {
         this.createContextMenu();
     };
 
-    static async contextMenuListener(info) {
+    static contextMenuListener(info) {
         switch(info.menuItemId) {
             case "shell-settings":
                 chrome.tabs.create({"url": "ui/options/options.html"});
@@ -42,19 +39,19 @@ class ContextMenuManager {
             default:
                 let contextMenuCmd = contextMenuManager.getContextMenuCommand(info.menuItemId);
 
-                // open popup, if command "execute" flag is unchecked
                 if (contextMenuCmd && contextMenuCmd.execute) {
-                    await CmdUtils._updateActiveTab();
+                    ContextUtils.updateActiveTab().then(() => {
 
-                    if (info.linkUrl) {
-                        CmdUtils.selectedText = info.linkUrl;
-                        CmdUtils.selectedHtml = "<a class='__ishellLinkSelection' src='"
-                            + info.linkUrl + "'>" + info.linkText + "</a>";
-                    }
+                        if (info.linkUrl) {
+                            CmdUtils.selectedText = info.linkUrl;
+                            CmdUtils.selectedHtml = "<a class='__ishellLinkSelection' src='"
+                                + info.linkUrl + "'>" + info.linkText + "</a>";
+                        }
 
-                    contextMenuManager.executeContextMenuItem(info.menuItemId, contextMenuCmd);
+                        contextMenuManager.executeContextMenuItem(info.menuItemId, contextMenuCmd);
+                    });
                 }
-                else if (contextMenuCmd) {
+                else if (contextMenuCmd) { // open popup, if the command "execute" flag is unchecked
                     contextMenuManager.selectedContextMenuCommand = info.menuItemId;
 
                     if (_MANIFEST_V3)
@@ -79,7 +76,8 @@ class ContextMenuManager {
 
             let commandDef = cmdManager.getCommandByUUID(c.uuid);
 
-            menuInfo.icons = {"16": commandDef && commandDef.icon? commandDef.icon: "/ui/icons/logo.svg"};
+            if (_BACKGROUND_PAGE)
+                menuInfo.icons = {"16": commandDef && commandDef.icon? commandDef.icon: "/ui/icons/logo.svg"};
 
             chrome.contextMenus.create(menuInfo);
         }
@@ -97,7 +95,8 @@ class ContextMenuManager {
             contexts: contexts
         };
 
-        menuInfo.icons = {"32": "/ui/icons/settings.svg"};
+        if (_BACKGROUND_PAGE)
+            menuInfo.icons = {"32": "/ui/icons/settings.svg"};
 
         chrome.contextMenus.create(menuInfo);
 
@@ -110,7 +109,6 @@ class ContextMenuManager {
 
         let parser = await cmdManager.makeParser();
         let query = parser.newQuery(command, null, settings.max_suggestions(), true);
-
         let executed = false;
 
         query.onResults = () => { // suggestion that use the callback argument may call onResults several times
@@ -119,8 +117,7 @@ class ContextMenuManager {
 
             executed = true;
 
-            let sent = query.suggestionList
-            && query.suggestionList.length > 0? query.suggestionList[0]: null;
+            let sent = query.suggestionList && query.suggestionList.length > 0? query.suggestionList[0]: null;
 
             if (sent && sent.getCommand().uuid.toLowerCase() === commandDef.uuid.toLowerCase()) {
 

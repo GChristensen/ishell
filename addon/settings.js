@@ -3,7 +3,7 @@ import {injectModules, merge} from "./utils.js";
 if (!globalThis.browser)
     await injectModules(["./lib/browser-polyfill.js"]);
 
-const BROWSER = globalThis.browser;
+const BROWSER = globalThis.browser || globalThis.chrome;
 const ISHELL_SETTINGS_KEY = "shell_settings";
 
 class IShellSettings {

@@ -52,12 +52,14 @@ export class CommandList {
     }
 
     addContextMenuItem(input) {
-        if (this.selection && input) {
+        if (_BACKGROUND_PAGE && this.selection && input) {
             const commandText = this.getAutocompletion();
 
             if (!contextMenu.getContextMenuCommand(commandText))
                 contextMenu.addContextMenuCommand(this.selection.getCommand(), input.trim(), commandText);
         }
+        else if (!_BACKGROUND_PAGE)
+            cmdAPI.notify("Context menu is only available in Firefox.");
     }
 
     reset() {

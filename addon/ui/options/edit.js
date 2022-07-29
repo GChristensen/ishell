@@ -71,7 +71,7 @@ async function initEditor() {
     if (settings.scrapyard_presents())
         $("#capture-link").show();
 
-    await loadScripts();
+    await loadScriptNamespaces();
 
     editor.on("blur", saveScript);
 
@@ -193,14 +193,17 @@ function expandEditor() {
     editor.focus();
 }
 
-async function loadScripts() {
-    if (scriptNamespace === SHELL_SETTINGS)
-        chrome.storage.local.get(undefined, function (result) {
-            $("#script-namespaces").prop("disabled", "disabled");
-            if (result) {
-                editor.getSession().setValue(JSON.stringify(result, null, 2), -1);
-            }
+async function loadScriptNamespaces() {
+    if (scriptNamespace === SHELL_SETTINGS) {
+        const scriptNamespacesSelect = $("#script-namespaces");
+        scriptNamespacesSelect.prepend($("<option value='settings'>settings</option>"));
+        scriptNamespacesSelect.val("settings");
+        scriptNamespacesSelect.prop("disabled", "disabled");
+
+        chrome.storage.local.get(undefined, result => {
+            result && editor.getSession().setValue(JSON.stringify(result, null, 2), -1);
         });
+    }
     else {
         let namespaces = await repository.fetchUserScriptNamespaces();
 

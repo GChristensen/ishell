@@ -4,4 +4,4 @@ Windows Registry Editor Version 5.00
 @="D:\\sandbox\\firefox\\ishell\\helper\\helper_manifest.json"
 
 [HKEY_CURRENT_USER\SOFTWARE\Google\Chrome\NativeMessagingHosts\ishell_helper]
-@="D:\\sandbox\\firefox\\ishell\\helper\\helper_manifest.json"
+@="D:\\sandbox\\firefox\\ishell\\helper\\helper_manifest.json.chrome"

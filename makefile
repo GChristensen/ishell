@@ -10,6 +10,10 @@ sign:
 build:
 	cd addon; web-ext build -i web-ext-artifacts .web-extension-id *.mv2* *.mv3* background_worker.js mv3_scripts.js
 
+chrome:
+	rm -f iShell.zip
+	7za a iShell.zip ./addon/* -xr!web-ext-artifacts -xr!*.mv2* -xr!*.mv3*
+
 .PHONY: helper
 helper:
 	cd helper; rm -r -f build
