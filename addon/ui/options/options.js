@@ -211,11 +211,16 @@ async function loadHelperAppLinks() {
         const app = link1.endsWith(".exe")? link1: link2;
         const archive = link1.endsWith(".zip")? link1: link2;
 
-        if (_MANIFEST_V3)
-            $("#helper-windows").attr("href", app);
+        if (_MANIFEST_V3) {
+            if (_BACKGROUND_PAGE)
+                $("#helper-windows").attr("href", app);
+            else
+                $("#helper-windows").on("click",
+                    () => alert("The helper application is not mandatory to execute user commands in Chrome."));
+        }
         else
             $("#helper-windows").on("click",
-                () => alert("Windows installer is not provided with the MV2 version of the add-on."))
+                () => alert("Windows installer is not provided with the MV2 version of the add-on."));
 
         $("#helper-python").attr("href", archive);
     }

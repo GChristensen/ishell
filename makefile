@@ -7,10 +7,18 @@ test-nightly:
 sign:
 	cd addon; web-ext sign -i web-ext-artifacts .web-extension-id *.mv2* *.mv3* background_worker.js mv3_scripts.js `cat $(HOME)/.amo/creds`
 
+.PHONY: firefox-mv2
+firefox-mv2:
+	cd addon; cp manifest.json.mv2 manifest.json
+
+.PHONY: chrome-mv3
+chrome-mv3:
+	cd addon; cp manifest.json.mv3.chrome manifest.json
+
 build:
 	cd addon; web-ext build -i web-ext-artifacts .web-extension-id *.mv2* *.mv3* background_worker.js mv3_scripts.js
 
-chrome:
+build-chrome:
 	rm -f iShell.zip
 	7za a iShell.zip ./addon/* -xr!web-ext-artifacts -xr!*.mv2* -xr!*.mv3*
 
