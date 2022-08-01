@@ -215,7 +215,7 @@ class NyaaBase {
                 let peers = row.find("td:nth-child(5)");
                 peers.css("color", "red");
 
-                if (server === "www") {
+                if (domain === "www") {
                     const cat = `<td><span class="category-image" style="background-image: url('${categoryImage}')"
                                        title="${categoryTitle}">&nbsp;</span></td>`;
                     title.parent().after(cat);
