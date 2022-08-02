@@ -1,5 +1,5 @@
 {
-    "version": "0.9.9",
+    "version": "0.9.11",
     "name": "iShell Extension",
     "short_name": "iShell",
     "homepage_url": "https://gchristensen.github.io/#ishell",
@@ -58,7 +58,6 @@
         "unlimitedStorage",
         "contextMenus",
         "history",
-        "webNavigation",
         "management",
         "downloads",
         "scripting",
