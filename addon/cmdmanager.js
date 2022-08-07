@@ -131,6 +131,9 @@ class CommandManager {
     constructor() {
         this._commands = [];
         this._disabledCommands = settings.disabled_commands() || {};
+
+        if (settings.platform.chrome)
+            this._builtinModules = this._builtinModules.filter(m => !m.includes("tab-groups.js"));
     }
 
     async makeParser() {

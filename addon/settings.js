@@ -34,6 +34,9 @@ class IShellSettings {
             if (navigator.userAgent.indexOf("Firefox") >= 0) {
                 this._platform.firefox = true;
             }
+            if (navigator.userAgent.indexOf("Chrome") >= 0) {
+                this._platform.chrome = true;
+            }
         }
     }
 

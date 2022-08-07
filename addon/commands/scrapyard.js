@@ -620,10 +620,20 @@ cmdAPI.createCaptureCommand = function(options) {
     return cmdAPI.createCommand(command);
 };
 
-let ISHELL_ID = browser.runtime.getManifest().applications?.gecko?.id;
-let SCRAPYARD_ID = ISHELL_ID?.includes("-we")
-    ? "scrapyard-we@firefox"
-    : "scrapyard@firefox";
+let ISHELL_ID = browser.runtime.id;
+let SCRAPYARD_ID = getScrapyardId();
+
+function getScrapyardId() {
+    if (settings.platform.firefox)
+        return ISHELL_ID?.includes("-we")
+            ? "scrapyard-we@firefox"
+            : "scrapyard@firefox";
+    else if (settings.platform.chrome)
+        if (ISHELL_ID === "ofekoiaebgjkhfbcafmllpgffadbpphb")
+            return "fhgomkcfijbifanbkppjhgmcdkmbacep";
+        else
+            return "jlpgjeiblkojkaedoobnfkgobdddimon";
+}
 
 cmdAPI.scrapyard = new Proxy({}, {
     get(target, key, receiver) {

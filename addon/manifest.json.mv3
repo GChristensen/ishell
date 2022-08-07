@@ -1,8 +1,8 @@
 {
-    "version": "0.5",
+    "version": "$VERSION$",
     "applications": {
         "gecko": {
-            "id": "ishell@gchristensen.github.io",
+            "id": "ishell$ID_SUFFIX$@gchristensen.github.io",
             "strict_min_version": "95.0"
         }
     },
