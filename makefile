@@ -30,12 +30,34 @@ firefox-mv3:
 chrome-mv3:
 	cd addon; python ../scripts/mkmanifest.py manifest.json.mv3.chrome manifest.json `cat version.txt`
 
-.PHONY: helper
-helper:
+.PHONY: helper-clean
+helper-clean:
 	cd helper; rm -r -f build
 	cd helper; rm -r -f dist
+	cd helper; rm -f *.spec
+
+.PHONY: helper-win
+helper-win:
+	make helper-clean
 	cd helper; rm -f *.exe
 	cd helper; rm -f *.zip
-	cd helper; rm -f *.spec
 	cd helper; pyinstaller ishell_helper.py
 	cd helper; makensis setup.nsi
+	make helper-clean
+
+
+.PHONY: helper-cli
+helper-cli:
+	cd helper; cp -r ./ishell ./cli-installer/ishell_helper/
+	cd helper; cp -r ./manifests ./cli-installer/ishell_helper/
+	cd helper; cp -r ./ishell_helper.cmd ./cli-installer/ishell_helper/
+	cd helper; cp -r ./ishell_helper.sh ./cli-installer/ishell_helper/
+	cd helper; rm -r -f ./cli-installer/ishell_helper/manifests/debug_manifest*
+	cd helper; cp -r ./setup.py ./cli-installer/ishell_helper/
+	cd helper; rm -f ishell-helper.tgz
+	cd helper; 7za.exe a -ttar -so -an ./cli-installer/* -xr!__pycache__ | 7za.exe a -si ishell-helper.tgz
+	cd helper; rm ./cli-installer/ishell_helper/setup.py
+	cd helper; rm -r -f ./cli-installer/ishell_helper/ishell
+	cd helper; rm -r -f ./cli-installer/ishell_helper/manifests
+	cd helper; rm -r -f ./cli-installer/ishell_helper/ishell_helper.cmd
+	cd helper; rm -r -f ./cli-installer/ishell_helper/ishell_helper.sh

@@ -1,0 +1,7 @@
+{
+"name": "ishell_helper",
+"description": "iShell helper application",
+"path": "D:\\sandbox\\firefox\\ishell\\helper\\ishell_helper.cmd",
+"type": "stdio",
+"allowed_extensions": [ "ishell@gchristensen.github.io", "ishell-we@gchristensen.github.io" ]
+}

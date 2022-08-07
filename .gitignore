@@ -15,4 +15,5 @@ helper/dist/
 helper/*.spec
 helper/*.exe
 helper/*.zip
+helper/*.tgz
 /*.zip

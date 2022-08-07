@@ -9,7 +9,7 @@ Unicode True
 Name "${APPNAMEANDVERSION}"
 InstallDir "$PROGRAMFILES\${APPNAME}"
 InstallDirRegKey HKLM "Software\${APPNAME}" ""
-OutFile "ishell-helper-${VERSION}.exe"
+OutFile "ishell-helper-${VERSION}_x86_64.exe"
 
 ; Use compression
 SetCompressor LZMA
