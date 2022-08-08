@@ -1,11 +1,16 @@
-const _MANIFEST = chrome.runtime.getManifest() // chrome.runtime should be used for compatibility
+if (!globalThis.browser)
+    globalThis.browser = chrome;
 
-window._BACKGROUND_PAGE = !!_MANIFEST.background?.page;
+const _MANIFEST = chrome.runtime.getManifest();
 
-window._MANIFEST_VERSION = _MANIFEST.manifest_version;
+globalThis._BACKGROUND_PAGE = !!_MANIFEST.background?.page;
 
-window._MANIFEST_V3 = window._MANIFEST_VERSION === 3;
+globalThis._MANIFEST_VERSION = _MANIFEST.manifest_version;
 
-window._tm = (name = "timer") => console.time(name);
+globalThis._MANIFEST_V3 = globalThis._MANIFEST_VERSION === 3;
 
-window._te = (name = "timer") => console.timeEnd(name);
+globalThis._log = console.log;
+
+globalThis._tm = (name = "timer") => console.time(name);
+
+globalThis._te = (name = "timer") => console.timeEnd(name);
