@@ -3,5 +3,5 @@
 "description": "iShell helper application",
 "path": "D:\\sandbox\\firefox\\ishell\\helper\\ishell_helper.cmd",
 "type": "stdio",
-"allowed_origins": ["chrome-extension://ofekoiaebgjkhfbcafmllpgffadbpphb/", "chrome-extension://hdjdmgedflhjhbflaijohpnognlhacoc"]
+"allowed_origins": ["chrome-extension://ofekoiaebgjkhfbcafmllpgffadbpphb/", "chrome-extension://hdjdmgedflhjhbflaijohpnognlhacoc/"]
 }
