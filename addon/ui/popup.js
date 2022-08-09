@@ -109,7 +109,6 @@ class PopupWindow {
 
     async addCurrentInputToHistory() {
         cmdManager.commandHistoryPush(this.getInput());
-        await this._commandList.strengthenMemory();
     }
 
     setSuggestionsContent(html) {
@@ -155,13 +154,11 @@ class PopupWindow {
     }
 
     async executeCurrentCommand() {
-        cmdManager.commandHistoryPush(this.getInput());
-        await this._commandList.executeSelection();
+        return this._commandList.executeSelection();
     }
 
     executePreviewItem(object, activate) {
         if (object.length > 0) {
-            _log(activate, object[0].href)
             if (object[0].href)
                 browser.tabs.create({ "url": object[0].href, active: !!activate });
             else

@@ -33,6 +33,7 @@ export class CommandList {
 
     async executeSelection() {
         if (this.selection) {
+            await this.strengthenMemory();
             cmdManager.callExecute(this.selection).finally(() => {
                 ContextUtils.clearSelection();
             });
@@ -48,7 +49,7 @@ export class CommandList {
 
     strengthenMemory() {
         if (this.selection)
-            this.#parser.strengthenMemory(this.selection);
+            return this.#parser.strengthenMemory(this.selection);
     }
 
     addContextMenuItem(input) {
