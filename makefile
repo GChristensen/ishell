@@ -16,7 +16,7 @@ build:
 build-chrome:
 	make chrome-mv3
 	rm -f iShell.zip
-	7za a iShell.zip ./addon/* -xr!web-ext-artifacts -xr!*.mv2* -xr!*.mv3* -xr!version.txt
+	7za a iShell.zip ./addon/* -xr!web-ext-artifacts -xr!.web-extension-id -xr!*.mv2* -xr!*.mv3* -xr!version.txt
 
 .PHONY: firefox-mv2
 firefox-mv2:

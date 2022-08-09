@@ -108,7 +108,7 @@ class PopupWindow {
     }
 
     async addCurrentInputToHistory() {
-        await this.commandHistoryPush(this.getInput());
+        cmdManager.commandHistoryPush(this.getInput());
         await this._commandList.strengthenMemory();
     }
 
@@ -155,21 +155,22 @@ class PopupWindow {
     }
 
     async executeCurrentCommand() {
-        await this.commandHistoryPush(this.getInput());
+        cmdManager.commandHistoryPush(this.getInput());
         await this._commandList.executeSelection();
     }
 
     executePreviewItem(object, activate) {
         if (object.length > 0) {
+            _log(activate, object[0].href)
             if (object[0].href)
-                browser.tabs.create({ "url": object[0].href, active: activate });
+                browser.tabs.create({ "url": object[0].href, active: !!activate });
             else
                 object.click();
         }
     }
 
     async showHistory() {
-        const history = await this.getCommandHistory();
+        const history = cmdManager.getCommandHistory();
 
         this.invalidatePreview();
         cmdAPI.previewList(this.pblock, history, (i, e) => {
@@ -187,8 +188,8 @@ class PopupWindow {
         selectionList.advanceSelection(direction);
     }
 
-    selectPreviewItem(keyCode) {
-        const object = $("[accessKey='" + String.fromCharCode(keyCode).toLowerCase() + "']");
+    selectPreviewItem(char) {
+        const object = $("[accessKey='" + char.toLowerCase() + "']");
         this.executePreviewItem(object);
     }
 
@@ -196,31 +197,28 @@ class PopupWindow {
         this.pblock.scrollBy(0, (direction? -1: 1) * this.pblock.clientHeight - 20);
     }
 
-    async commandHistoryPush(input) {
-        if (input) {
-            input = input.trim();
+    async setPreviousCommand() {
+        const history = cmdManager.getCommandHistory();
 
-            let history = await settings.get("command_history");
+        this._historyPos = this._historyPos === undefined? -1: this._historyPos;
+        this._historyPos += 1;
 
-            if (!history)
-                history = [];
+        if (this._historyPos > history.length - 1)
+            this._historyPos = history.length - 1;
 
-            ADD_ITEM: {
-                if (history.length && history[0].toUpperCase() === input.toUpperCase())
-                    break ADD_ITEM;
-
-                history = [input, ...history];
-
-                if (history.length > settings.max_history_items())
-                    history.splice(history.length - 1, 1);
-
-                await settings.set("command_history", history);
-            }
-        }
+        cmdAPI.setCommandLine(history[this._historyPos])
     }
 
-    async getCommandHistory() {
-        return settings.get("command_history");
+    async setNextCommand() {
+        const history = cmdManager.getCommandHistory();
+
+        this._historyPos = this._historyPos === undefined? 0: this._historyPos;
+        this._historyPos -= 1;
+
+        if (this._historyPos >= 0)
+            cmdAPI.setCommandLine(history[this._historyPos])
+        else
+            this._historyPos = undefined;
     }
 
     displayHelp() {
@@ -234,6 +232,7 @@ class PopupWindow {
                    <span class='keys'>Ctrl+C</span> - copy the preview content to the clipboard.<br>
                    <span class='keys'>Ctrl+Alt+Enter</span> - add the selected command to the context menu.<br>
                    <span class='keys'>Ctrl+Alt+\\</span> - show the command history.<br>
+                   <span class='keys'>Alt+P/Alt+N</span> - switch to the previous/next command.<br>
                    <span class='keys'>Ctrl+Alt+&ltkey&gt;</span> - select the list item prefixed with the &lt;key&gt;.<br>
                    <span class='keys'>&#8593;/&#8595;</span> - cycle through the command suggestions.<br>
                    <span class='keys'>Ctrl+&#8593;/&#8595;</span> - scroll through the preview list items.<br>
@@ -265,24 +264,21 @@ class PopupWindow {
 
     async onKeyDown(evt) {
         if (!evt) return;
-        let keyCode = evt.keyCode;
+        let keyCode = evt.code;
 
-        // Alt+Backspace
-        if (keyCode === 8 && evt.altKey) {
+        if (keyCode === "Backspace" && evt.altKey) {
             evt.preventDefault();
             this.removeCommandArguments();
             return;
         }
 
-        // TAB
-        if (keyCode === 9) {
+        if (keyCode === "Tab") {
             evt.preventDefault();
             this.autocomplete();
             return;
         }
 
-        // ENTER
-        if (keyCode === 13) {
+        if (keyCode === "Enter") {
             if (await Utils.easterListener(this.getInput()))
                 return;
 
@@ -295,22 +291,27 @@ class PopupWindow {
             return;
         }
 
-        // /
-        if (keyCode === 220) {
-            if (evt.ctrlKey && evt.altKey) {
-                await this.showHistory();
-                return;
-            }
+        if (keyCode === "Backslash" && evt.ctrlKey && evt.altKey) {
+            await this.showHistory();
+            return;
         }
 
-        // F5
-        if (keyCode === 116) {
+        if (keyCode === "KeyP" && evt.altKey) {
+            await this.setPreviousCommand();
+            return;
+        }
+
+        if (keyCode === "KeyN" && evt.altKey) {
+            await this.setNextCommand();
+            return;
+        }
+
+        if (keyCode === "F5") {
             chrome.runtime.reload();
             return;
         }
 
-        // Cursor up
-        if (keyCode === 38) {
+        if (keyCode === "ArrowUp") {
             evt.preventDefault();
             if (evt.ctrlKey)
                 this.advancePreviewSelection(false);
@@ -318,8 +319,7 @@ class PopupWindow {
                 this.advanceSuggestionSelection(false);
             return;
         }
-        // Cursor Down
-        else if (keyCode === 40) {
+        else if (keyCode === "ArrowDown") {
             evt.preventDefault();
             if (evt.ctrlKey)
                 this.advancePreviewSelection(true);
@@ -328,21 +328,19 @@ class PopupWindow {
             return;
         }
 
-        // execute events from the preview lists
-        if (evt.ctrlKey && evt.altKey && keyCode >= 40 && keyCode <= 90) {
-            this.selectPreviewItem(keyCode);
-            return;
-        }
-
-        // Ctrl+C
-        if (keyCode === 67 && evt.ctrlKey) {
+        if (keyCode === "KeyC" && evt.ctrlKey) {
             cmdAPI.setClipboard(this.pblock.innerText);
             return;
         }
 
-        // PGUP/PGDOWN
-        if (keyCode === 33 || keyCode === 34) {
-            this.scrollPreview(keyCode === 33);
+        if (keyCode === "PageUp" || keyCode === "PageDown") {
+            this.scrollPreview(keyCode === "PageUp");
+            return;
+        }
+
+        // execute events from the preview lists
+        if (evt.ctrlKey && evt.altKey && /^[a-z\d]$/i.test(evt.key)) {
+            this.selectPreviewItem(evt.key);
             return;
         }
         
@@ -351,17 +349,15 @@ class PopupWindow {
 
     onKeyUp(evt) {
         if (!evt) return;
-        let keyCode = evt.keyCode;
+        let keyCode = evt.code;
         if (this.getInput() === this._lastInput) return;
 
         if (evt.ctrlKey || evt.altKey)
             return;
 
-        // Cursor up
-        if (keyCode === 38)
+        if (keyCode === "ArrowUp")
             return;
-        // Cursor Down
-        else if (keyCode === 40)
+        else if (keyCode === "ArrowDown")
             return;
 
         this.persistInput();

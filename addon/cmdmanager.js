@@ -503,6 +503,33 @@ const cmdAPI = _BACKGROUND_API.cmdManager.createAPIProxy(null, _BACKGROUND_API.c
             if (cmd.init && !cmd.disabled)
                 await this._callCommandHandlerCatching(cmd, cmd.init, "init", doc);
     }
+
+    commandHistoryPush(input) {
+        if (input) {
+            input = input.trim();
+
+            let history = localStorage.getItem("command_history") || "[]";
+            history = JSON.parse(history);
+
+            ADD_ITEM: {
+                if (history.length && history[0].toUpperCase() === input.toUpperCase())
+                    break ADD_ITEM;
+
+                history = [input, ...history];
+
+                if (history.length > settings.max_history_items())
+                    history.splice(history.length - 1, 1);
+
+                history = JSON.stringify(history);
+                localStorage.setItem("command_history", history);
+            }
+        }
+    }
+
+    getCommandHistory() {
+        let history = localStorage.getItem("command_history") || "[]";
+        return JSON.parse(history);
+    }
 }
 
 export const cmdManager = new CommandManager();
