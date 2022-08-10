@@ -200,6 +200,9 @@ class PopupWindow {
         this._historyPos = this._historyPos === undefined? -1: this._historyPos;
         this._historyPos += 1;
 
+        if (this._historyPos === 0 && history[this._historyPos] === this.getInput())
+            this._historyPos += 1;
+
         if (this._historyPos > history.length - 1)
             this._historyPos = history.length - 1;
 

@@ -10,7 +10,7 @@
     "short_name": "iShell",
     "homepage_url": "https://gchristensen.github.io/#ishell",
     "author": "gchristnsn",
-    "description": "A linguistic interface for browsers",
+    "description": "A linguistic interface for browsers.",
     "background": {
         "page": "background.html"
     },
