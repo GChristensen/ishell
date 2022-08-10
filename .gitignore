@@ -2,6 +2,7 @@
 .idea
 *.iml
 .local
+/build
 /addon/web-ext-artifacts
 /addon/.web-extension-id
 node_modules
