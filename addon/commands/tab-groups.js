@@ -88,7 +88,7 @@ export class TabGroup {
                                    "move-selected"], label: "action"}; // goal
         //args[FROM]   = {nountype: noun_arb_text, label: "text"}; // source
         //args[NEAR]   = {nountype: noun_arb_text, label: "text"}; // location
-        args[AT]     = {nountype: noun_type_tab_group, label: "text"}; // time
+        args[AT]     = {nountype: noun_type_tab_group, label: "name"}; // time
         //args[WITH]   = {nountype: noun_type_tab_group, label: "name"}; // instrument
         args[IN]     = {nountype: noun_type_container, label: "container"}; // format
         //args[OF]     = {nountype: noun_arb_text, label: "text"}; // modifier
