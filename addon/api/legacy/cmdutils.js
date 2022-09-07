@@ -58,9 +58,12 @@ CmdUtils.getHtmlSelection = () => ContextUtils.selectedHtml;
 // replaces current selection with string provided
 CmdUtils.setSelection = function setSelection(replacementText) {
     if (ContextUtils.activeTab) {
-        if (typeof replacementText !== 'string') replacementText = replacementText + '';
-        replacementText = replacementText.replace(/(['"])/g, "\\$1");
-        replacementText = replacementText.replace(/\\\\/g, "\\");
+        if (typeof replacementText !== 'string')
+            replacementText = replacementText + '';
+
+        // TODO: why that was made?
+        // replacementText = replacementText.replace(/(['"])/g, "\\$1");
+        // replacementText = replacementText.replace(/\\\\/g, "\\");
 
         return ContextUtils.setSelection(ContextUtils.activeTab.id, replacementText);
     }

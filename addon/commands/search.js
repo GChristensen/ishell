@@ -203,18 +203,22 @@ export class Wikipedia {
     @search
     @command
     @delay 1000
+    @icon https://stackoverflow.com/favicon.ico
+    @parser.url https://api.stackexchange.com/2.3/search/advanced?order=desc&sort=activity&site=stackoverflow&q=%s
+    @url https://stackoverflow.com/search?q=%s
     @parser json
     @container items
-    @title title
     @href link
     @display objectPreviewList
-    @icon https://stackoverflow.com/favicon.ico
-    @url https://api.stackexchange.com/2.3/search?order=desc&sort=activity&site=stackoverflow&intitle=%s
     @description Search for questions on <a href="https://stackoverflow.com">stackoverflow.com</a>.
     @uuid 84628A1F-EE72-4429-B16B-E1A4E9AEE50A
  */
 export class Stackoverflow {
+    parseTitle(item) {
+        return item.title;
+    }
+
     parseBody(item) {
-        return item.tags.join(", ")
+        return item.tags.join(", ");
     }
 }

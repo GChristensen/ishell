@@ -33,8 +33,6 @@ function replaceSelectedText(replacementText) {
 
 function messageListener(message) {
     switch (message.type) {
-        //case "pingSelection":
-        //    return true;
         case "replaceSelectedText":
             replaceSelectedText(message.text);
             chrome.runtime.onMessage.removeListener(messageListener);

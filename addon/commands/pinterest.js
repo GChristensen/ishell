@@ -374,7 +374,7 @@ export class PinterestAPI {
                 "page_size": 100,
                 "privacy_filter": "all",
                 "field_set_key": "detailed",
-                "group_by":"mix_public_private",
+                "group_by": "mix_public_private",
                 "no_fetch_context_on_resource": false
             },
             "context": {}

@@ -65,8 +65,8 @@ class MyCommand {
 
     async #fetchQuestions(display, query) {
         const queryURL = encodeURIComponent(query);
-        const apiURL = "https://api.stackexchange.com/2.3/search";
-        const requestURL = `${apiURL}?page=10&site=stackoverflow&intitle=${queryURL}`;
+        const apiURL = "https://api.stackexchange.com/2.3/search/advanced";
+        const requestURL = `${apiURL}?page=10&site=stackoverflow&q=${queryURL}`;
         return display.fetchJSON(requestURL, {_displayError: "Network error."});
     }
 

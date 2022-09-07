@@ -4,7 +4,7 @@
     @delay 1000
     @icon http://example.com/favicon.ico
     <!-- fetch some JSON from StackOverflow -->
-    @parser.url https://api.stackexchange.com/2.3/search?order=desc&sort=activity&site=stackoverflow&intitle=%s
+    @parser.url https://api.stackexchange.com/2.3/search/advanced?order=desc&sort=activity&site=stackoverflow&q=%s
     <!-- the url annotation is used to execute the command when parser.url is specified -->
     @url https://stackoverflow.com/search?q=%s
     @parser json

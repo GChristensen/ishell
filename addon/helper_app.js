@@ -38,7 +38,7 @@ class HelperApp {
                 port.onDisconnect.addListener(error => {
                     resolve(null);
                     this.port = null;
-                })
+                });
 
                 let initListener = (response) => {
                     response = JSON.parse(response);

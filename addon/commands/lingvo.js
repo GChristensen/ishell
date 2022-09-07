@@ -86,6 +86,8 @@ export class Lingvo {
 
         this.#articleURL = `https://www.lingvolive.com/en-us/translate/${fromID}-${toID}/${wordsURI}`;
 
+        let attemptedAuthorization = false;
+
         var options = {
             url: `${this.#abbyyAPI}/v1/Translation?text=${wordsURI}&srcLang=${fromCode}&dstLang=${toCode}`,
             dataType: "json",
@@ -97,8 +99,14 @@ export class Lingvo {
                 display.set(article)
             },
             statusCode: {
-                401: () => {
-                    display.error("Can not authorize Lingvo.");
+                401: async () => {
+                    if (!attemptedAuthorization) {
+                        attemptedAuthorization = true;
+                        await this.#authorize(display);
+                        cmdAPI.previewAjax(display, options);
+                    }
+                    else
+                        display.error("Lingvo authorization has expired. Try restarting the add-on with F5.");
                 }
             },
             error: data => {
