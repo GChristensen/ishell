@@ -54,11 +54,11 @@ export function noun_type_tab_group(text, html, _, selectionIndices) {
         - *close* - close all tabs in the tab group.
         - *delete* - delete the specified tab group.
         - *window* - open all tabs of the tab group in a new window.
-        - *move* - move all tabs from the current window to the specified tab group.
-        - *move-selected* - move the tabs selected in the browser UI to the specified tab group.
+        - *move* - move all/highlighted tabs from the current window to the specified tab group.
+        - *move-tab* - move the active tab to the specified tab group.
     - *action* - an additional operation to perform.
-        - *switching* - switch to the specified tab group. May be used with the *move* and *move-all* operations.
-    - *container* - the account container to use in the tab group.
+        - *switching* - switch to the specified tab group. May be used with the *move* and *move-tab* operations.
+    - *container* - the identity container to use in the tab group.
 
     # Examples
     - **tab-group** *cats*
@@ -85,7 +85,7 @@ export class TabGroup {
         args[OBJECT] = {nountype: noun_type_tab_group, label: "name"}; // object
         //args[FOR]    = {nountype: noun_arb_text, label: "text"}; // subject
         args[TO]     = {nountype: ["copy", "paste", "switch", "reload", "close", "delete", "window", "move",
-                                   "move-selected"], label: "action"}; // goal
+                                   "move-tab"], label: "action"}; // goal
         //args[FROM]   = {nountype: noun_arb_text, label: "text"}; // source
         //args[NEAR]   = {nountype: noun_arb_text, label: "text"}; // location
         args[AT]     = {nountype: noun_type_tab_group, label: "name"}; // time
@@ -458,7 +458,7 @@ export class TabGroup {
                 html = this.#describeWindow(params.name);
                 break;
             case "move":
-            case "move-selected":
+            case "move-tab":
                 html = this.#describeMove(params.name, params.action === "move");
                 break;
         }
@@ -529,12 +529,12 @@ export class TabGroup {
     }
 
     #describeMove(name, all) {
-        const tabs = all? "all": "selected";
+        const tabs = all? "all/highlighted tabs": "the current tab";
 
         if (name)
-            return `Move ${tabs} tabs to the <b>${name}</b> tab group.`;
+            return `Move ${tabs} to the <b>${name}</b> tab group.`;
         else
-            return `Move ${tabs} tabs to the <b>default</b> tab group.`;
+            return `Move ${tabs} to the <b>default</b> tab group.`;
     }
 
     async #performAction(name, params) {
@@ -561,8 +561,8 @@ export class TabGroup {
                 await this.#tabGroupInNewWindow(params.name);
                 break;
             case "move":
-            case "move-selected":
-                await this.#moveVisibleTabsToGroup(params.name, params.action === "move-selected", params.action2);
+            case "move-tab":
+                await this.#moveVisibleTabsToGroup(params.name, params.action === "move-tab", params.action2);
                 break;
         }
     }
@@ -730,7 +730,7 @@ export class TabGroup {
         }
     }
 
-    async #moveVisibleTabsToGroup(name, onlySelected = true, action) {
+    async #moveVisibleTabsToGroup(name, onlyCurrent, action) {
         const currentWindowTabGroup = await this.#getCurrentWindowTabGroupName();
         const switching = action === "switching";
         name = name || DEFAULT_TAB_GROUP;
@@ -741,18 +741,21 @@ export class TabGroup {
             let tabsToMove = windowVisibleTabs;
             let tabToActivate;
 
-            if (onlySelected) {
-                tabsToMove = await browser.tabs.query({highlighted: true, currentWindow: true});
-                if (windowVisibleTabs.length === tabsToMove.length && !switching)
-                    tabToActivate = await browser.tabs.create({});
-                else if (!switching) {
-                    const notSelectedTabs = windowVisibleTabs.filter(t => !tabsToMove.some(st => st.id === t.id));
-                    notSelectedTabs.sort((a, b) => b.lastAccessed - a.lastAccessed);
-                    tabToActivate = notSelectedTabs[0];
-                }
+            if (onlyCurrent)
+                tabsToMove = await browser.tabs.query({active: true, currentWindow: true});
+            else {
+                const highlightedTabs = await browser.tabs.query({highlighted: true, currentWindow: true});
+
+                if (highlightedTabs.length > 1)
+                    tabsToMove = highlightedTabs;
             }
-            else if (!switching) {
+
+            if (windowVisibleTabs.length === tabsToMove.length && !switching)
                 tabToActivate = await browser.tabs.create({});
+            else if (!switching) {
+                const notSelectedTabs = windowVisibleTabs.filter(t => !tabsToMove.some(st => st.id === t.id));
+                notSelectedTabs.sort((a, b) => b.lastAccessed - a.lastAccessed);
+                tabToActivate = notSelectedTabs[0];
             }
 
             for (const tab of tabsToMove)

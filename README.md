@@ -104,15 +104,6 @@ The addon is successfully ported to manifest v3 as it is
 in Firefox Nightly v102, although a helper application is required to evaluate
 user-provided commands. To run with MV3 rename `manifest.json.mv3` to `manifest.json`.
 
-### Running on Chrome
-
-It is possible to load iShell as an unpacked extension into Chrome in the MV3
-mode. User-provided commands are evaluated without the helper application.
-To run on Chrome, rename `manifest.json.mv3.chrome` to `manifest.json`.
-
-NOTE: to use the Ctrl+Space keyboard shortcut it may be necessary to manually 
-reassign it in the Chrome add-on management console and *restart* the browser.
-
 ### Credits
 
 * iShell borrows the command parser from the original 
