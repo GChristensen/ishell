@@ -61,6 +61,8 @@ export class Lingvo {
 
         if (!this.#lingvoAPIToken)
             display.error("Can not authorize Lingvo.");
+
+        return this.#lingvoAPIToken;
     }
 
     get #authorized() {
@@ -86,13 +88,16 @@ export class Lingvo {
 
         this.#articleURL = `https://www.lingvolive.com/en-us/translate/${fromID}-${toID}/${wordsURI}`;
 
+        const url = `${this.#abbyyAPI}/v1/Translation?text=${wordsURI}&srcLang=${fromCode}&dstLang=${toCode}`;
+        const authorize = async () => this.#authorize(display);
+        let lingvoToken = this.#lingvoAPIToken;
         let attemptedAuthorization = false;
 
         var options = {
-            url: `${this.#abbyyAPI}/v1/Translation?text=${wordsURI}&srcLang=${fromCode}&dstLang=${toCode}`,
+            url,
             dataType: "json",
             headers: {
-                "Authorization": "Bearer " + this.#lingvoAPIToken
+                "Authorization": "Bearer " + lingvoToken
             },
             success: data => {
                 const article = this.#formatArticle(data, words);
@@ -102,15 +107,16 @@ export class Lingvo {
                 401: async () => {
                     if (!attemptedAuthorization) {
                         attemptedAuthorization = true;
-                        await this.#authorize(display);
+                        options.headers = {"Authorization": "Bearer " + await authorize()};
                         cmdAPI.previewAjax(display, options);
                     }
                     else
                         display.error("Lingvo authorization has expired. Try restarting the add-on with F5.");
                 }
             },
-            error: data => {
-                display.text(errorMessage);
+            error: xhr => {
+                if (xhr.status !== 401)
+                    display.text(errorMessage);
             }
         };
 

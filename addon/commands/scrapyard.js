@@ -79,7 +79,7 @@ var noun_scrapyard_shelf = {
     suggest: openListSuggestion
 };
 
-var noun_scrapyard_group = {
+var noun_scrapyard_folder = {
     label: "path",
     _items: [],
     suggest: openListSuggestion
@@ -143,7 +143,7 @@ function updateShelfSuggestions() {
 function updateGroupSuggestions() {
     scrapyardSend("SCRAPYARD_LIST_GROUPS_ISHELL").then(groups => {
         if (groups)
-            noun_scrapyard_group._items = groups;
+            noun_scrapyard_folder._items = groups;
     })
 }
 
@@ -155,7 +155,7 @@ function updateTagSuggestions() {
 }
 
 function updateCompletion() {
-    if (completionUpdateRequired || !noun_scrapyard_group._items.length) {
+    if (completionUpdateRequired || !noun_scrapyard_folder._items.length) {
         //updateShelfSuggestions();
         updateGroupSuggestions();
         updateTagSuggestions();
@@ -208,7 +208,7 @@ function unpackArgs(cmd, args) {
  */
 export class Shelf {
     constructor(args) {
-        args[OBJECT] = {nountype: noun_scrapyard_group, label: "name"};
+        args[OBJECT] = {nountype: noun_scrapyard_folder, label: "name"};
     }
 
     preview({OBJECT: {text: path}}, display) {
@@ -257,7 +257,7 @@ export class Scrapyard {
         //args[TO]     = {nountype: noun_arb_text, label: "text"}; // goal
         args[FROM]   = {nountype: ["folder", "subtree"], label: "depth"}; // source
         //args[NEAR]   = {nountype: noun_arb_text, label: "text"}; // location
-        args[AT]     = {nountype: noun_scrapyard_group, label: "path"}; // time
+        args[AT]     = {nountype: noun_scrapyard_folder, label: "path"}; // time
         //args[WITH]   = {nountype: noun_arb_text, label: "text"}; // instrument
         args[IN]     = {nountype: {"folder": [NODE_TYPE_GROUP],
                                    "bookmark": [NODE_TYPE_BOOKMARK],
@@ -356,7 +356,7 @@ class BookmarkCommandBase {
         args[TO]     = {nountype: noun_type_date, label: "due"}; // goal
         //args[FROM]   = {nountype: noun_arb_text, label: "text"}; // source
         //args[NEAR]   = {nountype: noun_arb_text, label: "text"}; // location
-        args[AT]     = {nountype: noun_scrapyard_group, label: "path"}; // time
+        args[AT]     = {nountype: noun_scrapyard_folder, label: "path"}; // time
         args[WITH]   = {nountype: {"TODO": TODO_STATE_TODO,
                                    "WAITING": TODO_STATE_WAITING,
                                    "POSTPONED": TODO_STATE_POSTPONED,
@@ -481,7 +481,7 @@ export class Bookmark extends BookmarkCommandBase {
 
 class CopyCommandBase {
     constructor(args) {
-        args[OBJECT] = {nountype: noun_scrapyard_group, label: "path"}; // object
+        args[OBJECT] = {nountype: noun_scrapyard_folder, label: "path"}; // object
         args[BY]     = {nountype: ["switching"], label: "action"}; // cause
     }
 
@@ -635,20 +635,6 @@ function getScrapyardId() {
             return "jlpgjeiblkojkaedoobnfkgobdddimon";
 }
 
-cmdAPI.scrapyard = new Proxy({}, {
-    get(target, key, receiver) {
-
-        if (key === "noun_type_directory")
-            return noun_scrapyard_group;
-
-        return (val) => {
-            const payload = val || {};
-            payload.type = "SCRAPYARD_" + camelCaseToSnakeCase(key);
-            return browser.runtime.sendMessage(SCRAPYARD_ID, payload);
-        };
-    }
-});
-
 chrome.management.onInstalled.addListener(async (info) => {
     if (info.id === SCRAPYARD_ID) {
         await settings.scrapyard_presents(true);
@@ -664,7 +650,7 @@ chrome.management.onUninstalled.addListener(async (info) => {
 });
 
 let SCRAPYARD_COMMANDS;
-namespace.onModuleCommandsLoaded = function() {
+namespace.onModuleCommandsLoaded = async function() {
     const commandUUIDs = [
         cmdAPI.getCommandAttributes(Shelf).uuid,
         cmdAPI.getCommandAttributes(Scrapyard).uuid,
@@ -676,6 +662,12 @@ namespace.onModuleCommandsLoaded = function() {
 
     SCRAPYARD_COMMANDS = commandUUIDs.map(cmdManager.getCommandByUUID.bind(cmdManager));
     SCRAPYARD_COMMANDS.forEach(c => cmdManager.removeCommand(c));
+
+    const apiModule = await import("./scrapyard_api.js");
+    apiModule._setScrapyardId(SCRAPYARD_ID);
+
+    cmdAPI.scrapyard = {...apiModule};
+    cmdAPI.scrapyard.noun_type_directory = noun_scrapyard_folder;
 
     checkForScrapyard();
 };

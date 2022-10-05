@@ -635,7 +635,7 @@ CommandPreprocessor.assignCommandAttributes(${object.name}, ${metaPropertiesName
         const objects = [...functionMatches, ...classMatches];
 
         for (const object of objects)
-            if (object.properties.dbgprint)
+            if (!object.skip && object.properties.dbgprint)
                 console.log(object.generatedCode);
 
         return output;

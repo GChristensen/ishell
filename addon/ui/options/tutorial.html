@@ -975,14 +975,14 @@ class Memo {
         some tricks that you would not find in the official documentation. With the <b>pinterest</b> command, users can
         pin images found on the current page to a <a href="https://pinterest.com">Pinterest</a>
         board. One of the command arguments provides autocompletion for all user's boards. It
-        is also possible to create a board if it does not exist.</p>
+        also allows to create a board if it does not exist.</p>
 
-    <p>To achieve this we need to create a custom noun type that obtains the list of user's boards.
-        This noun type should display as suggestions only those boards that match the current input. To create
+    <p>This argument has a custom noun type that obtains the list of user's boards.
+        The noun type should display as suggestions only those boards that match the current input. To create
         a new board, we need to append the current input as an additional suggestion to the generated
         suggestion list.</p>
 
-    <p>If some boards match the current input, we need to score our
+    <p>We also need to score our
         additional suggestion with some low value to make it appear at the bottom. In the
         absence of the matching boards, we need to promote the creation of a new one by scoring the
         additional suggestion with the maximum possible value of 1. Note that generally the score
@@ -1281,10 +1281,10 @@ def close_browser():
     </ul>
 
     <h2><span id="Ace_Code_Editor">Ace Code Editor</span></h2>
-    <p>iShell uses <a href="https://ace.c9.io/" target="_blank">Ace</a> code editor to edit
+    <p>iShell provides the <a href="https://ace.c9.io/" target="_blank">Ace</a> code editor to develop
         user-defined commands. It is worth getting familiar with its <a
                 href="https://github.com/ajaxorg/ace/wiki/Default-Keyboard-Shortcuts"
-                target="_blank">keyboard shortcuts</a>. The most often used ones are:
+                target="_blank">keyboard shortcuts</a>, since some of them are not obvious. For example:
         <code>Ctrl-F</code> - find, <code>Ctrl-H</code> - replace, <code>Ctrl-,</code> (Ctrl and
         comma) - open editor settings panel. An additional nonstandard shortcut: <code>Ctrl-S</code>
         will immediately evaluate and save the edited code.

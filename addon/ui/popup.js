@@ -278,7 +278,7 @@ class PopupWindow {
             return;
         }
 
-        if (keyCode === "Enter") {
+        if (keyCode === "Enter" || keyCode === "NumpadEnter") {
             if (await Utils.easterListener(this.getInput()))
                 return;
 

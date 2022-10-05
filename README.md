@@ -71,7 +71,7 @@ the old way if you prefer).
 Please do not use the command constructor for any
 purposes other than argument definition and simple field initialization, since
 iShell may create the command object multiple times for various reasons. There
-are several other functions that are used to initialize commands (please, see
+are several other functions that are used to initialize commands (see
 iShell API reference for
 [cmdAPI.createCommand](https://gchristensen.github.io/ishell/addon/ui/options/API.html#create-command)
 and explore command templates in the editor).
@@ -102,7 +102,7 @@ at StackOverflow.
 The addon is successfully ported to manifest v3 as it is
 [implemented](https://extensionworkshop.com/documentation/develop/manifest-v3-migration-guide/)
 in Firefox Nightly v102, although a helper application is required to evaluate
-user-provided commands. To run with MV3 rename `manifest.json.mv3` to `manifest.json`.
+user-provided commands. To run with MV3 use `manifest.json.mv3`.
 
 ### Credits
 

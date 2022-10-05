@@ -341,7 +341,7 @@ class CommandManager {
             module = await module;
             if (module?.namespace?.onBuiltinCommandsLoaded)
                 try {
-                    module.namespace.onBuiltinCommandsLoaded();
+                    await module.namespace.onBuiltinCommandsLoaded();
                 } catch (e) {
                     console.error(e);
                 }
@@ -365,7 +365,7 @@ class CommandManager {
 
             if (module.namespace.onModuleCommandsLoaded)
                try {
-                   module.namespace.onModuleCommandsLoaded();
+                   await module.namespace.onModuleCommandsLoaded();
                } catch (e) {
                    console.error(e);
                }
