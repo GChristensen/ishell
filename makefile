@@ -17,8 +17,8 @@ build:
 .PHONY: build-chrome
 build-chrome:
 	make chrome-mv3
-	rm -f build/iShell*.zip
-	7za a build/iShell-chrome-`cat version.txt`.zip ./addon/* -xr!web-ext-artifacts -xr!.web-extension-id -xr!*.mv2* -xr!*.mv3* -xr!version.txt
+	rm -f build/ishell-chrome-*.zip
+	7za a build/ishell-chrome-`cat ./addon/version.txt`.zip ./addon/* -xr!web-ext-artifacts -xr!.web-extension-id -xr!*.mv2* -xr!*.mv3* -xr!version.txt
 
 .PHONY: firefox-mv2
 firefox-mv2:
@@ -43,14 +43,17 @@ helper-win:
 	make helper-clean
 	cd helper; rm -f *.exe
 	cd helper; rm -f *.zip
+	echo "DEBUG = False" > ./helper/ishell/server_debug.py
 	cd helper; pyinstaller ishell_helper.py
 	cd helper; makensis setup.nsi
+	echo "DEBUG = True" > ./helper/ishell/server_debug.py
 	make helper-clean
 
 
 .PHONY: helper-cli
 helper-cli:
 	cd helper; cp -r ./ishell ./cli-installer/ishell_helper/
+	echo "DEBUG = False" > ./helper/cli-installer/ishell_helper/ishell/server_debug.py
 	cd helper; cp -r ./manifests ./cli-installer/ishell_helper/
 	cd helper; cp -r ./ishell_helper.cmd ./cli-installer/ishell_helper/
 	cd helper; cp -r ./ishell_helper.sh ./cli-installer/ishell_helper/

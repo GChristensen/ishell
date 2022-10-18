@@ -12,8 +12,7 @@ import flask
 from flask import request, abort
 from werkzeug.serving import make_server
 
-# !!!!!!vvvv
-DEBUG = False
+from .server_debug import DEBUG
 
 app = flask.Flask(__name__)
 app.config['SEND_FILE_MAX_AGE_DEFAULT'] = 0

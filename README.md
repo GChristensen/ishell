@@ -18,7 +18,7 @@ named `show-text` with the following syntax:
 
 The snippet below shows the class-based command implementation in iShell: 
 
-```js
+```javascript
 /**
     Displays the given message as a notification or prints it to the browser log.
  
