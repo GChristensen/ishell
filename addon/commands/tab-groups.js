@@ -187,11 +187,11 @@ export class TabGroup {
     }
 
     #excludeSelection(text, notify) {
-        if (text === cmdAPI.getSelection()) {
+        if (text && text === cmdAPI.getSelection()) {
             if (notify)
                 cmdAPI.notifyError("tab-group: specify tab group name in the 'at' argument when selection presents.");
 
-            throw new Error("tab-groups: the page has selection");
+            throw new Error("tab-group: the page has selection");
         }
 
         return text;
