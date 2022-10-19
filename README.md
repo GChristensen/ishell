@@ -20,7 +20,7 @@ The snippet below shows the class-based command implementation in iShell:
 
 ```javascript
 /**
-    Displays the given message as a notification or prints it to the browser log.
+    Displays the given message as a notification or prints it to the browser console.
  
     @command
     @icon http://example.com/favicon.ico
@@ -54,7 +54,7 @@ class ShowText {
 iShell will interpret as a command any class with the `@command` annotation in a JavaDoc-style comment.
 Plain JavaScript comments are ignored.
 
-Most of the arguments to the CmdUtils.CreateCommand is also specified as
+Most of the arguments to the CmdUtils.CreateCommand of the legacy Ubiquity is also specified as
 annotations. The command help is generated from the rest of the comment text (it
 may contain HTML or markdown if the `@markdown` annotation is used). Thus, the
 body of the class may provide only fields and methods related to the command
@@ -65,8 +65,7 @@ containing arbitrary text, along with an argument named `in` which can
 take two values: *popup* and *log*. These values will be available for
 autocompletion. With the class-based syntax, you do not need to remember
 obscure argument roles and just directly use the names of arguments when
-defining them or accessing them in methods (although you may access arguments in
-the old way if you prefer). 
+defining them or accessing them in methods. 
 
 Please do not use the command constructor for any
 purposes other than argument definition and simple field initialization, since
@@ -79,7 +78,7 @@ and explore command templates in the editor).
 You may also have noticed that the class preview and execute methods
 have the `args` argument always in the first position, and the `pblock` argument is
 now called `display`. It still contains a reference to the same `div` element of
-iShell preview area (so you can pass it to `CmdUtils.previewAjax`, for example),
+iShell preview area (so you can pass it to `cmdAPI.previewAjax`, for example),
 but has a new set of methods: `set`, `text`, and `error` method which modify
 innerHTML property of the element.
 

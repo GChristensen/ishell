@@ -56,16 +56,16 @@ layout: default
     <p style="text-align: justify;">
         iShell allows to declaratively define and automatically parse commands with
         prepositional arguments. For example, consider the command <b>show-text</b> with the
-        following syntax: "<b>show-text</b> <i>text</i> <b>in</b> <i>popup</i>". It has the
+        following syntax: "<b>show-text</b> <i>hey!</i> <b>in</b> <i>popup</i>". It has the
         prepositional argument named <b>in</b> and the nameless first argument. iShell
-        command parser will automatically provide values (<i>text</i>, <i>popup</i>) of the
-        arguments to the command implementation <a
+        command parser will automatically provide values (<i>hey!</i>, <i>popup</i>) of the
+        arguments to the command <a
             href="https://github.com/GChristensen/ishell#modern-class-based-command-syntax"
-            target="_blank">handler methods</a> after you enter the command in the input box.
+            target="_blank">handler methods</a> after you enter it in the input box.
     </p>
     <p style="text-align: justify;">
-        iShell commands also have full access to jQuery and browser WebExtension APIs, which
-        give you the ability to extend the browser almost effortlessly. Find more information on command
+        iShell commands have full access to browser WebExtension APIs and jQuery. This
+        gives you the ability to extend the browser almost effortlessly. Find more information on command
         authoring in the <a
             href="https://gchristensen.github.io/ishell/addon/ui/options/tutorial.html"
             target="_blank">tutorial</a> at iShell setting pages.
@@ -82,8 +82,7 @@ layout: default
 
     <p style="text-align: justify;">
         The original Ubiquity was an experiment in linguistic ubiquitous user
-        interfaces. Such interfaces are driven by natural-language commands and
-        could be instantly accessed anywhere. The legacy Ubiquity also had a
+        interfaces. The legacy Ubiquity had a
         command subscription model, where you were supposed to subscribe to
         third-party commands that were updated automatically. For security
         reasons, there is no such model in iShell. You need to manually maintain
@@ -94,8 +93,8 @@ layout: default
     <p style="text-align: justify;">
         Despite that, iShell is still immensely useful if you can write
         JavaScript to automate things you have (web)APIs for or to extend the
-        browser functionality without much effort. With the standard CSS and HTML,
-        the addon allows to create interactive presentations of any complexity.
+        browser functionality without much effort. The add-on allows to create interactive
+        presentations of any complexity with the standard CSS and HTML.
     </p>
 
     <h4>Some additional features not found in the original Ubiquity</h4>

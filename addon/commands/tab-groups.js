@@ -65,7 +65,7 @@ export function noun_type_tab_group(text, html, _, selectionIndices) {
     - **tgr** *books* **in** *shopping*
     - **tgr** **to** *delete* *books*
     - **tgr** **all** **to** *close*
-    - **tgr** **to** *move* **by** *switching* **at** *new group*
+    - **tgr** **to** *move* **by** *switching* **at** *books*
 
     @command tab-group, tgr
     @markdown
