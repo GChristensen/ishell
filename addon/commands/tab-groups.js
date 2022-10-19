@@ -451,22 +451,22 @@ export class TabGroup {
 
         switch (params.action) {
             case "copy":
-                html = this.#describeCopy(params.name);
+                html = await this.#describeCopy(params.name);
                 break;
             case "paste":
                 html = await this.#describePaste();
                 break;
             case "reload":
-                html = this.#describeReload(params.name);
+                html = await this.#describeReload(params.name);
                 break;
             case "close":
-                html = this.#describeClose(params.name);
+                html = await this.#describeClose(params.name);
                 break;
             case "delete":
-                html = this.#describeDelete(params.name);
+                html = await this.#describeDelete(params.name);
                 break;
             case "window":
-                html = this.#describeWindow(params.name);
+                html = await this.#describeWindow(params.name);
                 break;
             case "move":
             case "move-tab":
@@ -477,15 +477,14 @@ export class TabGroup {
         display.text(html);
     }
 
-    #describeCopy(name) {
-        if (name) {
-            if (name === ALL_GROUPS_SPECIFIER)
-                return `Copy all tab groups to the clipboard.`;
-            else
-                return `Copy the <b>${name}</b> tab group to the clipboard.`;
-        }
+    async #describeCopy(name) {
+        if (!name)
+            name = await this.#getCurrentWindowTabGroupName();
+
+        if (name === ALL_GROUPS_SPECIFIER)
+            return `Copy all tab groups to the clipboard.`;
         else
-            return `Copy the current tab group to the clipboard.`
+            return `Copy the <b>${name}</b> tab group to the clipboard.`;
     }
 
     async #describePaste() {
@@ -499,44 +498,41 @@ export class TabGroup {
             return `The clipboard does not contain valid content.`
     }
 
-    #describeReload(name) {
-        if (name) {
-            if (name === ALL_GROUPS_SPECIFIER)
-                return `Reload all tabs in all tab groups.`;
-            else
-                return `Reload all tabs in the <b>${name}</b> tab group.`;
-        }
+    async #describeReload(name) {
+        if (!name)
+            name = await this.#getCurrentWindowTabGroupName();
+
+        if (name === ALL_GROUPS_SPECIFIER)
+            return `Reload all tabs in all tab groups.`;
         else
-            return `Reload all tabs in the current tab group.`;
+            return `Reload all tabs in the <b>${name}</b> tab group.`;
     }
 
-    #describeClose(name) {
-        if (name) {
-            if (name === ALL_GROUPS_SPECIFIER)
-                return `Close all tabs in all tab groups.`;
-            else
-                return `Close all tabs in the <b>${name}</b> tab group.`;
-        }
+    async #describeClose(name) {
+        if (!name)
+            name = await this.#getCurrentWindowTabGroupName();
+
+        if (name === ALL_GROUPS_SPECIFIER)
+            return `Close all tabs in all tab groups.`;
         else
-            return `Close all tabs in the current tab group.`;
+            return `Close all tabs in the <b>${name}</b> tab group.`;
     }
 
-    #describeDelete(name) {
-        if (name) {
-            if (name === ALL_GROUPS_SPECIFIER)
-                return `Delete all tab groups except <b>default</b>.`;
-            else
-                return `Delete the <b>${name}</b> tab group and close all its tabs.`;
-        }
+    async #describeDelete(name) {
+        if (!name)
+            name = await this.#getCurrentWindowTabGroupName();
+
+        if (name === ALL_GROUPS_SPECIFIER)
+            return `Delete all tab groups except <b>default</b>.`;
         else
-            return `Delete the current tab group and close all its tabs.`;
+            return `Delete the <b>${name}</b> tab group and close all its tabs.`;
     }
 
-    #describeWindow(name) {
-        if (name)
-            return `Move all tabs from the <b>${name}</b> tab group to a new window.`;
-        else
-            return `Move all tabs from the current tab group to a new window.`;
+    async #describeWindow(name) {
+        if (!name)
+            name = await this.#getCurrentWindowTabGroupName();
+
+        return `Move all tabs from the <b>${name}</b> tab group to a new window.`;
     }
 
     #describeMove(name, all) {
