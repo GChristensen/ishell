@@ -169,7 +169,7 @@ export class TabGroup {
     async preview(args, display, storage) {
         let {OBJECT: {text: name}, TO: {text: action}, BY: {text: action2}, IN, AT} = args;
 
-        name = this.#excludeSelection(AT?.text || name);
+        name = this.#excludeSelection(args);
 
         if (name && !action) {
             if (this.#tabGroups[name])
@@ -186,10 +186,16 @@ export class TabGroup {
         }
     }
 
-    #excludeSelection(text, notify) {
+    #excludeSelection(args, notify) {
+        let text = args.OBJECT?.text;
+
+        if (text && text === cmdAPI.getSelection())
+            if (args.AT?.text && args.AT?.text !== cmdAPI.getSelection())
+                text = args.AT.text;
+
         if (text && text === cmdAPI.getSelection()) {
             if (notify)
-                cmdAPI.notifyError("tab-group: specify tab group name in the 'at' argument when selection presents.");
+                cmdAPI.notifyError("tab-group: specify tab group name explicitly when selection presents.");
 
             throw new Error("tab-group: the page has selection");
         }
@@ -799,7 +805,7 @@ export class TabGroup {
     async execute(args, storage) {
         let {OBJECT: {text: name}, TO: {text: action}, BY: {text: action2}, IN, AT} = args;
 
-        name = this.#excludeSelection(AT?.text || name, true);
+        name = this.#excludeSelection(args, true);
 
         if (name && name !== ALL_GROUPS_SPECIFIER) {
             if (!this.#isTabGroupExists(name))
