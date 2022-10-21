@@ -187,11 +187,10 @@ export class TabGroup {
     }
 
     #excludeSelection(args, notify) {
-        let text = args.OBJECT?.text;
+        let text = args.AT?.text;
 
-        if (text && text === cmdAPI.getSelection())
-            if (args.AT?.text && args.AT?.text !== cmdAPI.getSelection())
-                text = args.AT.text;
+        if (!text || text && text === cmdAPI.getSelection())
+            text = args.OBJECT.text;
 
         if (text && text === cmdAPI.getSelection()) {
             if (notify)
