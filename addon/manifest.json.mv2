@@ -57,6 +57,7 @@
         "contextualIdentities",
         "cookies",
         "webRequest",
-        "webRequestBlocking"
+        "webRequestBlocking",
+        "browsingData"
     ]
 }

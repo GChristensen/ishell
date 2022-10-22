@@ -70,6 +70,7 @@ export function noun_type_tab_group(text, html, _, selectionIndices) {
     @command tab-group, tgr
     @markdown
     @delay 500
+    @author g/christensen
     @icon /ui/icons/tab-groups.svg
     @description Essential tab group manager.
     @uuid CC6A1FD6-5959-423F-8D77-1C6EF630B0A1

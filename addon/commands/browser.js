@@ -1,3 +1,5 @@
+import {settings} from "../settings.js";
+
 export const namespace = new CommandNamespace(CommandNamespace.BROWSER);
 
 namespace.createCommand({
@@ -61,52 +63,62 @@ namespace.createCommand({
 });
 
 namespace.createCommand({
-    name: "new-tab",
-    uuid: "12A03E90-FA3B-49C7-BB4F-3301C616915E",
-    argument: [{role: "object", nountype: noun_arb_text, label: "URL"},
-               {role: "format", nountype: noun_type_container, label: "container"}],
-    description: `Opens the given URL (possibly empty) or links in the selection in a new tab. 
-                  Use the <b>in</b> argument to specify a Firefox identity container.`,
-    icon: "/ui/icons/tab_create.png",
-    async execute({object, format}) {
-        const cookieStoreId = format?.data?.cookieStoreId;
-        let urls = [];
+    name: "clear-browser-cache",
+    uuid: "8C996B34-8557-4A68-BDD2-0F1E91146D42",
+    description: `Clears the browser cache.`,
+    icon: "/ui/icons/broom.svg",
+    async execute() {
+        await browser.browsingData.removeCache({});
+        cmdAPI.notify(`Successfully cleared browser cache.`);
+    }
+});
 
-        const html = object?.html || cmdAPI.getHtmlSelection();
+namespace.createCommand({
+    name: "clear-site-cookies",
+    uuid: "39E722D2-9ACB-4F56-82E7-E1BD58C0DC34",
+    description: `Clears cookies and local storage of the currently opened site.`,
+    icon: "/ui/icons/broom.svg",
+    async execute() {
+        const url = cmdAPI.getLocation();
 
-        if (html) {
-            if (html.startsWith("http"))
-                urls = [html];
-            else {
-                const pageURL = cmdAPI.getLocation();
-                const correctedHTML = cmdAPI.absUrl(html, pageURL);
-                const matches = correctedHTML.matchAll(/<a[^>]+href=["']?([^"' ]*)/ig);
+        if (url) {
+            const removalOptions = {};
+            const tab = cmdAPI.activeTab;
 
-                for (const [_, url] of matches)
-                    urls.push(url);
-            }
+            if (settings.platform.firefox)
+                removalOptions.hostnames = this.getURLHosts(url);
+            else
+                removalOptions.origins = this.getURLHosts(url, true);
+
+            if (tab.cookieStoreId)
+                removalOptions.cookieStoreId = tab.cookieStoreId;
+
+            await browser.browsingData.removeCookies(removalOptions);
+            await browser.browsingData.removeLocalStorage(removalOptions);
+            cmdAPI.notify(`Successfully cleared cookies for ${new URL(url).host}`);
+        }
+        else
+            cmdAPI.notify("Can not access the current site cookies.");
+    },
+    getURLHosts(url, origin) {
+        const result = [];
+        const parsedURL = new URL(url);
+
+        if (origin)
+            result.push(parsedURL.origin);
+        else
+            result.push(parsedURL.hostname);
+
+        if (parsedURL.host.startsWith("www.")) {
+            const bareHost = parsedURL.host.replace(/^www\./i, "");
+            const bareHostName = parsedURL.hostname.replace(/^www\./i, "");
+
+            if (origin)
+                result.push(parsedURL.protocol + bareHost);
+            else
+                result.push(bareHostName);
         }
 
-        if (urls.length)
-            for (const url of urls)
-                try {
-                    const tabOptions = {url};
-
-                    if (cookieStoreId)
-                        tabOptions.cookieStoreId = cookieStoreId;
-
-                    await browser.tabs.create(tabOptions);
-                }
-                catch (e) {
-                    console.error(e);
-                }
-        else {
-            const tabOptions = {};
-
-            if (cookieStoreId)
-                tabOptions.cookieStoreId = cookieStoreId;
-
-            await browser.tabs.create(tabOptions);
-        }
+        return result;
     }
 });

@@ -657,6 +657,7 @@ CommandPreprocessor.assignCommandAttributes(${object.name}, ${metaPropertiesName
         for (const classMeta of classes) {
             if (!classMeta.skip) {
                 const classDef = Object.entries(module).find(e => e[0] === classMeta.name)?.[1];
+
                 if (classDef) {
                     const command = CommandPreprocessor.instantiateCommand(classDef, classMeta.properties);
                     if (classMeta.properties.search)
@@ -674,6 +675,7 @@ CommandPreprocessor.assignCommandAttributes(${object.name}, ${metaPropertiesName
         for (const funMeta of functions) {
             if (!funMeta.skip) {
                 const fun = Object.entries(module).find(e => e[0] === funMeta.name)?.[1];
+
                 if (fun)
                     CommandPreprocessor.instantiateNounType(fun, funMeta.properties);
             }

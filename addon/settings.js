@@ -31,12 +31,12 @@ class IShellSettings {
         if (!this._platform) {
             const platformInfo = await BROWSER.runtime.getPlatformInfo();
             this._platform = {[platformInfo.os]: true};
-            if (navigator.userAgent.indexOf("Firefox") >= 0) {
+
+            if (navigator.userAgent.indexOf("Firefox") >= 0)
                 this._platform.firefox = true;
-            }
-            if (navigator.userAgent.indexOf("Chrome") >= 0) {
+
+            if (navigator.userAgent.indexOf("Chrome") >= 0)
                 this._platform.chrome = true;
-            }
         }
     }
 

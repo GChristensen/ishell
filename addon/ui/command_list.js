@@ -1,4 +1,5 @@
 import {cmdManager, contextMenuManager as contextMenu} from "../ishell.js";
+import {settings} from "../settings.js";
 
 export class CommandList {
     #popup;
@@ -34,9 +35,12 @@ export class CommandList {
     async executeSelection() {
         if (this.selection) {
             await this.strengthenMemory();
-            cmdManager.callExecute(this.selection).finally(() => {
+            const result = cmdManager.callExecute(this.selection).finally(() => {
                 ContextUtils.clearSelection();
             });
+
+            if (!_BACKGROUND_PAGE)
+                await result;
         }
     }
 

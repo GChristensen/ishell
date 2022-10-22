@@ -2,6 +2,7 @@ import {settings} from "./settings.js";
 import {repository} from "./storage.js";
 import {helperApp} from "./helper_app.js";
 
+// !!! Builtin command classes should be exported
 class CommandNamespace {
     name;
     annotated;
@@ -113,6 +114,7 @@ class CommandManager {
         "/commands/more/javlib.js",
         "/commands/more/nyaa.js",
         "/commands/more/more.js",
+        "/commands/new-tab.js",
         "/commands/color-picker.js",
         "/commands/feedsub.js",
         "/commands/google.js",
@@ -339,6 +341,7 @@ class CommandManager {
 
         for (let module of modules) {
             module = await module;
+
             if (module?.namespace?.onBuiltinCommandsLoaded)
                 try {
                     await module.namespace.onBuiltinCommandsLoaded();

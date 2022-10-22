@@ -62,7 +62,8 @@
         "downloads",
         "scripting",
         "sessions",
-        "cookies"
+        "cookies",
+        "browsingData"
     ],
     "host_permissions": [
         "<all_urls>"
