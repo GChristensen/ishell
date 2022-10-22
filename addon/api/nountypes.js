@@ -197,12 +197,26 @@ export const noun_type_contact = {
 export const noun_type_tab = {
     label: "tab title or URL",
 
-    // suggestion methods declared as async should not use callback
     async suggest(text, html, callback, selectedIndices) {
         const tabs = await browser.tabs.query({});
         const suggs = tabs.map(tab => cmdAPI.makeSugg(tab.title || tab.url, null, tab, 1, selectedIndices));
 
         return cmdAPI.grepSuggs(text, suggs);
+    }
+};
+
+export const noun_type_container = {
+    label: "container",
+
+    async suggest(text, html, callback, selectedIndices) {
+        if (browser.contextualIdentities) {
+            const containers = await browser.contextualIdentities.query({})
+            const suggs = containers.map(c => cmdAPI.makeSugg(c.name, null, c, 1, selectedIndices));
+
+            return cmdAPI.grepSuggs(text, suggs);
+        }
+
+        return [];
     }
 };
 

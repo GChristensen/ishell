@@ -59,3 +59,54 @@ namespace.createCommand({
         cmdAPI.executeScript({func: () => window.print()});
     }
 });
+
+namespace.createCommand({
+    name: "new-tab",
+    uuid: "12A03E90-FA3B-49C7-BB4F-3301C616915E",
+    argument: [{role: "object", nountype: noun_arb_text, label: "URL"},
+               {role: "format", nountype: noun_type_container, label: "container"}],
+    description: `Opens the given URL (possibly empty) or links in the selection in a new tab. 
+                  Use the <b>in</b> argument to specify a Firefox identity container.`,
+    icon: "/ui/icons/tab_create.png",
+    async execute({object, format}) {
+        const cookieStoreId = format?.data?.cookieStoreId;
+        let urls = [];
+
+        const html = object?.html || cmdAPI.getHtmlSelection();
+
+        if (html) {
+            if (html.startsWith("http"))
+                urls = [html];
+            else {
+                const pageURL = cmdAPI.getLocation();
+                const correctedHTML = cmdAPI.absUrl(html, pageURL);
+                const matches = correctedHTML.matchAll(/<a[^>]+href=["']?([^"' ]*)/ig);
+
+                for (const [_, url] of matches)
+                    urls.push(url);
+            }
+        }
+
+        if (urls.length)
+            for (const url of urls)
+                try {
+                    const tabOptions = {url};
+
+                    if (cookieStoreId)
+                        tabOptions.cookieStoreId = cookieStoreId;
+
+                    await browser.tabs.create(tabOptions);
+                }
+                catch (e) {
+                    console.error(e);
+                }
+        else {
+            const tabOptions = {};
+
+            if (cookieStoreId)
+                tabOptions.cookieStoreId = cookieStoreId;
+
+            await browser.tabs.create(tabOptions);
+        }
+    }
+});
