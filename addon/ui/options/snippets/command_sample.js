@@ -24,10 +24,40 @@ cmdAPI.createCommand({
     //init(doc /* popup document */, storage) {},
 
     preview(pblock, args, storage) {
+        if (args.object?.text) {
+            const url = args.object.text;
 
+            if (/^https?:\/\/.*/.test(url)) {
+                pblock.innerHTML = `Requesting ${url}...`;
+                this.downloadContent(pblock, url);
+            }
+            else
+                pblock.innerHTML = "Invalid URL.";
+        }
+        else
+            this.previewDefault(pblock);
     },
 
     execute(args, storage) {
+        cmdAPI.notify("Your input is: " + args.object.text);
+    },
 
+    downloadContent(pblock, url) {
+        cmdAPI.previewAjax(pblock, {
+            url,
+            dataType: "html",
+            success: data => this.onContentLoaded(pblock, data),
+            error: () => pblock.innerHTML = "Request error."
+        });
+    },
+
+    onContentLoaded(pblock, data) {
+        if (data) {
+            const html = data.substring(0, 500);
+            // H is a shorthand for cmdAPI.escapeHtml()
+            pblock.innerHTML = "Request response: <br>" + H(html) + "...";
+        }
+        else
+            pblock.innerHTML = "Response is empty.";
     }
 });

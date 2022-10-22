@@ -12,5 +12,5 @@
     @description A short description of your command.
     @uuid: %%UUID%%
  */
-class MySimpleSearchCommand {
+class MyBasicSearchCommand {
 }

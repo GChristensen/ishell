@@ -1,4 +1,4 @@
-cmdAPI.makeSearchCommand({
+cmdAPI.createSearchCommand({
     name: "my-search-command",
     uuid: "%%UUID%%",
     url: "http://www.example.com/find?q=%s",

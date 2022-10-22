@@ -5,7 +5,7 @@
     @description A short description of your command.
     @uuid %%UUID%%
  */
-class MySimpleCommand {
+class MyBasicCommand {
     constructor(args) {
         args[OBJECT] = {nountype: noun_arb_text, label: "text"};
     }

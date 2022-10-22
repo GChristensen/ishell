@@ -1,5 +1,5 @@
 cmdAPI.createCommand({
-    name: "my-simple-command",
+    name: "my-basic-command",
     uuid: "%%UUID%%",
     arguments: [{role: "object", nountype: noun_arb_text, label: "text"}],
     description: "A short description of your command.",

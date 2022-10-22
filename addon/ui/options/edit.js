@@ -62,11 +62,8 @@ async function initEditor() {
     $("#search-template").click(insertSnippet);
     $("#capture-template").click(insertSnippet);
 
-    $("#syntax-types").val(settings.template_syntax() || "class");
-
-    $("#syntax-types").change(() => {
-        settings.template_syntax($("#syntax-types").val());
-    });
+    $("#syntax-types").val(settings.template_syntax() || "class-sample")
+                      .change(() => settings.template_syntax($("#syntax-types").val()));
 
     if (settings.scrapyard_presents())
         $("#capture-link").show();
@@ -242,17 +239,23 @@ async function insertSnippet() {
         return;
 
     let templateId = this.id.replace("-template", "");
-    const simple = settings.template_syntax().includes("simple");
-    const syntax = settings.template_syntax().replace("-simple", "");
+    const basic = settings.template_syntax().includes("basic");
+    const sample = settings.template_syntax().includes("sample");
+    const syntax = settings.template_syntax().replace("-basic", "").replace("-sample", "");
 
-    if (syntax === "class" && templateId !== "capture")
+    if (syntax.startsWith("class") && templateId !== "capture")
         templateId += "_class";
 
-    if (simple && templateId !== "capture")
-        templateId += "_simple";
+    if (basic && templateId !== "capture")
+        templateId += "_basic";
 
-    if (templateId === "search_simple")
+    if (sample && templateId !== "capture")
+        templateId += "_sample";
+
+    if (syntax.startsWith("object") && templateId.startsWith("search"))
         templateId = "search";
+
+    _log(templateId)
 
     let snippet = await (await fetch(browser.runtime.getURL(`/ui/options/snippets/${templateId}.js`))).text();
 

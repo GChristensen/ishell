@@ -40,11 +40,43 @@ class MyCommand {
     //load(storage) {}
     //init(doc /* popup document */, storage) {}
 
-    /*async*/ preview({OBJECT: {text: query}}, display, storage) {
+    async preview({OBJECT: {text: query}}, display, storage) {
+        if (query) {
+            display.text("Querying Stack Overflow...");
 
+            // Get some JSON from Stack Overflow
+            const questions = await this.#fetchQuestions(display, query);
+
+            if (questions)
+                this.#generateList(display, questions.items);
+            else
+                display.error("HTTP request error.");
+        }
+        else
+            this.previewDefault(display);
     }
 
-    /*async*/ execute({OBJECT: {text: query}}, storage) {
+    execute({OBJECT: {text: query}}, storage) {
+        if (query) {
+            const queryURL = encodeURIComponent(query);
+            cmdAPI.addTab(`https://stackoverflow.com/search?q=${queryURL}`);
+        }
+    }
 
+    async #fetchQuestions(display, query) {
+        const queryURL = encodeURIComponent(query);
+        const apiURL = "https://api.stackexchange.com/2.3/search/advanced";
+        const requestURL = `${apiURL}?page=10&site=stackoverflow&q=${queryURL}`;
+        return display.fetchJSON(requestURL, {_displayError: "Network error."});
+    }
+
+    #generateList(display, questions) {
+        const cfg = {
+            text: q => q.title,
+            subtext: q => q.tags.join(", "),
+            action: q => cmdAPI.addTab(q.link)
+        };
+
+        display.objectList(questions, cfg);
     }
 }

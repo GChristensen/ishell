@@ -1,4 +1,3 @@
-// TODO: getting nodes of a range
 // https://stackoverflow.com/questions/667951/how-to-get-nodes-lying-inside-a-range-with-javascript/7931003#7931003
 // http://jsfiddle.net/b3Fk5/2/
 
