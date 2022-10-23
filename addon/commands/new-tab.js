@@ -84,8 +84,7 @@ export class NewTab {
                     if (cookieStoreId)
                         tabOptions.cookieStoreId = cookieStoreId;
 
-                    if (settings.platform.chrome)
-                        tabOptions.active = false;
+                    tabOptions.active = false;
 
                     await browser.tabs.create(tabOptions);
                 }

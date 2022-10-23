@@ -511,6 +511,10 @@ CmdUtils.previewList2 = function(prefix, block, items, cfg, css) {
             html += `<div class="opl-subtext">${subtext}</div>`;
 
         html += "</div>";
+
+        if (cfg.buttonContent) // ! undocumented
+            html += `<div class='opl-item-button'>${cfg.buttonContent}</div>`;
+
         html += "</div>";
 
         lines.push(html);
@@ -534,7 +538,14 @@ CmdUtils.previewList2 = function(prefix, block, items, cfg, css) {
     if (css)
         oplCSS += "\n" + css;
 
-    return CmdUtils.previewList(prefix, block, lines, (i, e) => cfg.action(items[i], e), oplCSS);
+    function onListEvent(i, e) {
+        if ($(e.target).closest(".opl-item-button").length && cfg.buttonAction)
+            cfg.buttonAction(items[i], e);
+        else if (cfg.action)
+            cfg.action(items[i], e);
+    }
+
+    return CmdUtils.previewList(prefix, block, lines, onListEvent, oplCSS);
 };
 
 CmdUtils.previewList2.CSS =
@@ -604,4 +615,12 @@ CmdUtils.previewList2.CSS =
     overflow: hidden;
     white-space: nowrap;
     text-overflow: ellipsis;
- }`;
+ }
+ .opl-item-button {
+    width: max-content;
+    color: var(--shell-font-color);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+ }
+`;
