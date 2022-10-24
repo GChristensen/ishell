@@ -37,6 +37,20 @@ export async function addArchive(options) {
     });
 }
 
+export async function addNotes(options) {
+    return await browser.runtime.sendMessage(SCRAPYARD_ID, {
+        type: "SCRAPYARD_ADD_NOTES",
+        ...options
+    });
+}
+
+export async function addSeparator(options) {
+    return await browser.runtime.sendMessage(SCRAPYARD_ID, {
+        type: "SCRAPYARD_ADD_SEPARATOR",
+        ...options
+    });
+}
+
 export async function packPage(options) {
     return await browser.runtime.sendMessage(SCRAPYARD_ID, {
         type: "SCRAPYARD_PACK_PAGE",
@@ -47,6 +61,13 @@ export async function packPage(options) {
 export async function getItem(options) {
     return await browser.runtime.sendMessage(SCRAPYARD_ID, {
         type: "SCRAPYARD_GET_UUID",
+        ...options
+    });
+}
+
+export async function getItemContent(options) {
+    return await browser.runtime.sendMessage(SCRAPYARD_ID, {
+        type: "SCRAPYARD_GET_UUID_CONTENT",
         ...options
     });
 }
@@ -62,6 +83,12 @@ export async function listItems(options) {
             type: "SCRAPYARD_LIST_PATH",
             ...options
         });
+}
+
+export async function getSelection() {
+    return await browser.runtime.sendMessage(SCRAPYARD_ID, {
+        type: "SCRAPYARD_GET_SELECTION"
+    });
 }
 
 export async function updateItem(options) {

@@ -2,7 +2,7 @@ import {settings} from "./settings.js";
 import {repository} from "./storage.js";
 import {helperApp} from "./helper_app.js";
 
-// !!! Builtin command classes should be exported
+// !!! Builtin command classes and noun types should be exported
 class CommandNamespace {
     name;
     annotated;
