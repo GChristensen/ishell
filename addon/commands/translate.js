@@ -161,18 +161,18 @@ namespace.createCommand({
         goal: noun_type_lang_google,
     },
     execute: function gtranslate_execute({object, goal}) {
-        if (!object.text)
+        if (!object.text || object.text === cmdAPI.getSelection())
             object.text = CmdUtils.getLocation();
 
         Utils.openUrlInBrowser(
-            "http://translate.google.com/translate" +
+            "https://translate.google.com/translate" +
             Utils.paramsToString({
                 u: object.text,
                 tl: goal.data || "en",
             }));
     },
     preview: function gtranslate_preview(pb, {object, goal}) {
-        if (!object.text)
+        if (!object.text || object.text === cmdAPI.getSelection())
             object.text = CmdUtils.getLocation();
 
         let url = (object && object.text)? Utils.escapeHtml(object.text): "";

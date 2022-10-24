@@ -391,7 +391,7 @@ class CommandManager {
         if (namespace)
             userscripts = [userscripts];
 
-        this._unloadUserCommands(namespace);
+        this.unloadUserCommands(namespace);
         this.#userCommandNamespaces = [];
 
         const loadedScripts = [];
@@ -466,7 +466,7 @@ const cmdAPI = _BACKGROUND_API.cmdManager.createAPIProxy(null, _BACKGROUND_API.c
         return new Proxy(api, new APIProxyHandler(commandNamespace, nop));
     }
 
-    _unloadUserCommands(namespace) {
+    unloadUserCommands(namespace) {
         if (namespace)
             this._commands = this._commands.filter(c => c._namespace !== namespace);
         else

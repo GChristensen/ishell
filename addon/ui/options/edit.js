@@ -54,6 +54,7 @@ async function initEditor() {
     $("#download").click(downloadFile);
 
     $("#create-namespace").click(createNamespace);
+    $("#rename-namespace").click(renameNamespace);
     $("#delete-namespace").click(deleteNamespace);
 
     $("#expand-editor").click(expandEditor);
@@ -134,9 +135,9 @@ async function createNamespace() {
                 }
             }
 
-            const builtin = cmdManager.commands.some(c => c._namespace === name && c._builtin);
+            const builtin = cmdManager.commands.some(c => c._namespace?.toLowerCase() === name.toLowerCase());
             if (builtin) {
-                CmdUtils.notify("A builtin category with the same name already exists.");
+                CmdUtils.notify("A category with the same name already exists.");
                 break ADD_NAME;
             }
 
@@ -148,6 +149,44 @@ async function createNamespace() {
                 .text(name))
                 .val(name);
             settings.last_editor_namespace(scriptNamespace);
+        }
+    }
+}
+
+async function renameNamespace() {
+    if (scriptNamespace === SHELL_SETTINGS)
+        return;
+
+    let name = prompt("Rename category: ", scriptNamespace);
+    if (name && name !== scriptNamespace) {
+        RENAME: {
+            let exists;
+            let namespaces = await repository.fetchUserScriptNamespaces();
+
+            for (let n of namespaces) {
+                if (n.toLowerCase() === name.toLowerCase())  {
+                    exists = true;
+                    break;
+                }
+            }
+
+            exists = !!cmdManager.commands.some(c => c._namespace?.toLowerCase() === name.toLowerCase());
+
+            if (exists) {
+                CmdUtils.notify("A category with the same name already exists.");
+                break RENAME;
+            }
+
+            $(`#script-namespaces option[value="${scriptNamespace}"]`)
+                .text(name)
+                .val(name);
+            settings.last_editor_namespace(name);
+
+            await repository.deleteUserScript(scriptNamespace);
+            cmdManager.unloadUserCommands(scriptNamespace);
+
+            scriptNamespace = name;
+            await saveScript();
         }
     }
 }

@@ -457,7 +457,7 @@ ul.syntax li, .syntax ul > li {
 
 
 span.syntax, span.arguments, .syntax h1, .syntax h2, .syntax h3  {
-  font-size: 12pt;
+  font-size: 11pt;
   font-weight: 600;
   font-variant: normal;
   display: inline-block;

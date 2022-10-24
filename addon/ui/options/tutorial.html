@@ -974,16 +974,14 @@ class Memo {
     <p>The code below is the actual source code of the Pinterest command almost as it appears in iShell. It also demonstrates
         some tricks that you would not find in the official documentation. With the <b>pinterest</b> command, users can
         pin images found on the current page to a <a href="https://pinterest.com">Pinterest</a>
-        board. One of the command arguments provides autocompletion for all user's boards. It
-        also allows to create a board if it does not exist.</p>
+        board. One of the command arguments provides autocompletion for all user's boards. This argument
+        also allows to create a board if it does not exist. A custom noun type (<code>noun_type_board</code>)
+        obtains the list of user's boards. The noun type should generate suggestions only for those boards
+        that match the current input.</p>
 
-    <p>This argument has a custom noun type that obtains the list of user's boards.
-        The noun type should display as suggestions only those boards that match the current input. To create
-        a new board, we need to append the current input as an additional suggestion to the generated
-        suggestion list.</p>
-
-    <p>We also need to score our
-        additional suggestion with some low value to make it appear at the bottom. In the
+    <p>To create a new board, we also need to append the current input as an additional suggestion to the generated
+        suggestion list. We also need to score this
+        additional suggestion with some low value to make it appear at the bottom of the board list. In the
         absence of the matching boards, we need to promote the creation of a new one by scoring the
         additional suggestion with the maximum possible value of 1. Note that generally the score
         value of 1 may conflict with the scoring of other arguments and produce unexpected results.
@@ -1175,7 +1173,7 @@ class PinterestAPI {
     evaluate user commands in the Firefox MV3 version of iShell.
 </p>
 
-<p>If you installed the helper application as a Python package, you may develop your own <a
+<p>If you have installed the helper application as a Python package, you may develop your own <a
         href="https://flask.palletsprojects.com/en/2.1.x/" target="_blank">Flask</a> handlers
     callable from user commands. There you could do anything that Python can (see also: <a
             href="https://gchristensen.github.io/enso-portable/" target="_blank">Enso</a>).

@@ -14,14 +14,14 @@ export const namespace = new CommandNamespace(CommandNamespace.BROWSER, true);
     - *type* - a pattern type. Can be:
         - *string* - plain string (default).
         - *regex* - regular expression.
-    - *source* - the part of a link to apply the pattern to. Can be:
-        - *url* - apply the pattern to the URL of a link (default).
+    - *source* - the part of a link to apply the pattern to. The both sources are used if omitted. Can be:
+        - *url* - apply the pattern to the URL of a link.
         - *text* - apply the pattern to the text of a link.
 
     # Examples
     - **new-tab** **in** *work*
     - **new-tab** **for** **all** **in** *work*
-    - **new-tab** **for** _/thread.php\?id=\d+$_ **as** *regex*
+    - **new-tab** **for** _/thread.php\\?id=\d+$_ **as** *regex*
 
     @command
     @markdown
@@ -135,8 +135,13 @@ export class NewTab {
                 result = links;
             else if (args.FROM?.text === "text")
                 result = this.#filterBy("text", links, args);
-            else
+            else if (args.FROM?.text === "url")
                 result = this.#filterBy("url", links, args);
+            else
+                result = [
+                    ...this.#filterBy("text", links, args),
+                    ...this.#filterBy("url", links, args)
+                ];
         }
         else
             result = links;

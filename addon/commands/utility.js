@@ -195,9 +195,16 @@ namespace.createCommand({
         text = text || cmdAPI.getLocation();
 
         if (text) {
-            pblock.text("Checking <b>" + text + "</b>");
-            const requestURL = "https://api-prod.downfor.cloud/httpcheck/" + encodeURIComponent(text);
-            const json = await pblock.fetchJSON(requestURL);
+            let json;
+            // const requestURL = "https://api-prod.downfor.cloud/httpcheck/" + encodeURIComponent(text);
+            //
+            // pblock.text("Checking <b>" + text + "</b>");
+            //
+            // try {
+            //     json = await pblock.fetchJSON(requestURL);
+            // } catch (e) {
+            //     console.error(e);
+            // }
 
             if (json) {
                 if (json.isDown)
