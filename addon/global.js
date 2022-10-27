@@ -5,6 +5,8 @@ const _MANIFEST = chrome.runtime.getManifest();
 
 globalThis._BACKGROUND_PAGE = !!_MANIFEST.background?.page;
 
+globalThis._ADDON_VERSION = _MANIFEST.version;
+
 globalThis._MANIFEST_VERSION = _MANIFEST.manifest_version;
 
 globalThis._MANIFEST_V3 = globalThis._MANIFEST_VERSION === 3;

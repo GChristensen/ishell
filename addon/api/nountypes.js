@@ -210,7 +210,7 @@ export const noun_type_container = {
 
     async suggest(text, html, callback, selectedIndices) {
         if (browser.contextualIdentities) {
-            const containers = await browser.contextualIdentities.query({})
+            const containers = await browser.contextualIdentities.query({});
             const suggs = containers.map(c => cmdAPI.makeSugg(c.name, null, c, 1, selectedIndices));
 
             return cmdAPI.grepSuggs(text, suggs);
@@ -219,6 +219,21 @@ export const noun_type_container = {
         return [];
     }
 };
+
+let searchEngines = [];
+export const noun_type_search = {
+    label: "search",
+
+    suggest(text, html, callback, selectedIndices) {
+        const suggs = searchEngines.map(e => cmdAPI.makeSugg(e.name, null, e, 1, selectedIndices));
+        return cmdAPI.grepSuggs(text, suggs);
+    }
+};
+
+if (browser.search)
+    browser.search.get().then(engines => {
+        searchEngines = engines;
+    });
 
 export const noun_type_lang_google = NounUtils.NounType("language", {
     Afrikaans: "af",

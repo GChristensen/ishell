@@ -172,6 +172,7 @@ export class TabGroup {
         let {OBJECT: {text: name}, TO: {text: action}, BY: {text: action2}, IN, AT, FOR: {text: filter}} = args;
 
         name = this.#excludeSelection(args);
+        filter = filter && filter === cmdAPI.getSelection()? "": filter;
 
         if (name && !action) {
             if (this.#tabGroups[name])
@@ -188,18 +189,14 @@ export class TabGroup {
         }
     }
 
-    #excludeSelection(args, notify) {
+    #excludeSelection(args) {
         let text = args.AT?.text;
 
         if (!text || text && text === cmdAPI.getSelection())
-            text = args.OBJECT.text;
+            text = args.OBJECT?.text;
 
-        if (text && text === cmdAPI.getSelection()) {
-            if (notify)
-                cmdAPI.notifyError("tab-group: specify tab group name explicitly when selection presents.");
-
-            throw new Error("tab-group: the page has selection");
-        }
+        if (text && text === cmdAPI.getSelection())
+            return;
 
         return text;
     }
@@ -498,7 +495,7 @@ export class TabGroup {
                 html = await this.#describeDelete(params.name);
                 break;
             case "window":
-                html = await this.#describeWindow(params.name);
+                html = await this.#describeWindow(params.name, params.filter);
                 break;
             case "move":
             case "move-tab":
@@ -564,11 +561,13 @@ export class TabGroup {
             return `Delete the <b>${name}</b> tab group and close all its tabs.`;
     }
 
-    async #describeWindow(name) {
+    async #describeWindow(name, filter) {
         if (!name)
             name = await this.#getCurrentWindowTabGroupName();
 
-        return `Move all tabs from the <b>${name}</b> tab group to a new window.`;
+        const tabs = filter? `tabs matching <b>${filter}</b>`: "all tabs";
+
+        return `Move ${tabs} from the <b>${name}</b> tab group to a new window.`;
     }
 
     #describeMove(params) {
@@ -603,7 +602,7 @@ export class TabGroup {
                 await this.#deleteTabGroup(params.name);
                 break;
             case "window":
-                await this.#tabGroupInNewWindow(params.name);
+                await this.#tabGroupInNewWindow(params.name, params.filter);
                 break;
             case "move":
             case "move-tab":
@@ -752,7 +751,7 @@ export class TabGroup {
         }
     }
 
-    async #tabGroupInNewWindow(name) {
+    async #tabGroupInNewWindow(name, filter) {
         const currentWindowTabGroup = await this.#getCurrentWindowTabGroupName();
         name = name || currentWindowTabGroup;
 
@@ -767,15 +766,19 @@ export class TabGroup {
             tabs = await this.#getGroupTabs(name, false);
 
         if (tabs.length) {
+            const filteredTabs = this.#filterTabs(tabs, filter);
+
             const newWindow = await browser.windows.create({});
             await this.#setWindowTabGroupName(newWindow, name);
 
-            const windowTabs = await browser.tabs.query({windowId: newWindow.id});
-            if (name === currentWindowTabGroup)
+            const currentWindowTabs = await browser.tabs.query({windowId: currentWindow.id});
+            const newWindowTabs = await browser.tabs.query({windowId: newWindow.id});
+
+            if (name === currentWindowTabGroup && filteredTabs.length === currentWindowTabs.length)
                 browser.tabs.create({windowId: currentWindow.id});
 
-            await browser.tabs.move(tabs.map(t => t.id), {windowId: newWindow.id, index: -1});
-            await browser.tabs.remove(windowTabs.map(t => t.id));
+            await browser.tabs.move(filteredTabs.map(t => t.id), {windowId: newWindow.id, index: -1});
+            await browser.tabs.remove(newWindowTabs.map(t => t.id));
         }
     }
 
@@ -844,7 +847,8 @@ export class TabGroup {
     async execute(args, storage) {
         let {OBJECT: {text: name}, TO: {text: action}, BY: {text: action2}, IN, AT, FOR: {text: filter}} = args;
 
-        name = this.#excludeSelection(args, true);
+        name = this.#excludeSelection(args);
+        filter = filter && filter === cmdAPI.getSelection()? "": filter;
 
         if (name && name !== ALL_GROUPS_SPECIFIER) {
             if (!this.#isTabGroupExists(name))

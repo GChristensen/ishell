@@ -43,15 +43,15 @@ class ContextMenuManager {
                     ContextUtils.updateActiveTab().then(() => {
 
                         if (info.linkUrl) {
-                            CmdUtils.selectedText = info.linkUrl;
-                            CmdUtils.selectedHtml = "<a class='__ishellLinkSelection' src='"
+                            ContextUtils.selectedText = info.linkUrl;
+                            ContextUtils.selectedHtml = "<a class='__ishellLinkSelection' src='"
                                 + info.linkUrl + "'>" + info.linkText + "</a>";
                         }
 
                         contextMenuManager.executeContextMenuItem(info.menuItemId, contextMenuCmd);
                     });
                 }
-                else if (contextMenuCmd) { // open popup, if the command "execute" flag is unchecked
+                else if (contextMenuCmd) { // open popup if the command "execute" flag is unchecked
                     contextMenuManager.selectedContextMenuCommand = info.menuItemId;
 
                     if (_MANIFEST_V3)
@@ -111,24 +111,24 @@ class ContextMenuManager {
         let query = parser.newQuery(command, null, settings.max_suggestions(), true);
         let executed = false;
 
-        query.onResults = () => { // suggestion that use the callback argument may call onResults several times
-            if (executed)
+        query.onResults = () => {
+            if (executed)  // suggestion that use the callback argument may call onResults several times
                 return;
 
             executed = true;
 
-            let sent = query.suggestionList && query.suggestionList.length > 0? query.suggestionList[0]: null;
+            let sentence = query.suggestionList && query.suggestionList.length > 0? query.suggestionList[0]: null;
 
-            if (sent && sent.getCommand().uuid.toLowerCase() === commandDef.uuid.toLowerCase()) {
+            if (sentence && sentence.getCommand().uuid.toLowerCase() === commandDef.uuid.toLowerCase()) {
 
-                cmdManager.callExecute(sent).finally(() => {
+                cmdManager.callExecute(sentence).finally(() => {
                     ContextUtils.clearSelection();
                 });
 
                 if (settings.remember_context_menu_commands())
                     cmdManager.commandHistoryPush(contextMenuCmd.command);
 
-                parser.strengthenMemory(sent);
+                parser.strengthenMemory(sentence);
             }
             else
                 cmdAPI.dbglog("Context menu command/parser result mismatch")

@@ -197,6 +197,36 @@ cmdAPI.executeScript = async function(tabId, options) {
     return executeScript(tabId, options);
 };
 
+// runs command parser on commandText and calls the execute method of the first found suggestion
+cmdAPI.executeCommand = async function(commandText, suggestion = 0) {
+    await ContextUtils.updateActiveTab();
+
+    let parser = await cmdManager.makeParser();
+    let query = parser.newQuery(commandText, null, settings.max_suggestions(), true);
+    let executed = false;
+
+    query.onResults = () => {
+        if (executed)  // suggestion that use the callback argument may call onResults several times
+            return;
+
+        executed = true;
+
+        let sentence = query.suggestionList
+            && query.suggestionList.length > 0
+            && suggestion < query.suggestionList.length
+                    ? query.suggestionList[suggestion]
+                    : null;
+
+        if (sentence) {
+            cmdManager.callExecute(sentence).finally(() => {
+                ContextUtils.clearSelection();
+            });
+        }
+    };
+
+    query.run();
+}
+
 cmdAPI.imagePreviewList = function(prefix, display, imageURLs, callback, css) {
     if (typeof prefix !== "string") {
         [display, imageURLs, callback, css] = [prefix, display, imageURLs, callback];

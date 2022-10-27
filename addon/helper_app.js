@@ -1,5 +1,7 @@
 import {hasCSRPermission} from "./utils_browser.js";
-import {fetchJSON, fetchWithTimeout} from "./utils.js";
+import {fetchJSON, fetchWithTimeout, isBackground, isChrome} from "./utils.js";
+
+const platformChrome = isChrome();
 
 class HelperApp {
     #host;
@@ -7,7 +9,7 @@ class HelperApp {
     #serverOnline;
 
     constructor() {
-        this.auth = globalThis._BACKGROUND_PAGE? crypto.randomUUID(): "default";
+        this.auth = crypto.randomUUID();
         this.version = undefined;
     }
 
@@ -71,15 +73,22 @@ class HelperApp {
         }
     }
 
-    async probe(verbose = false) {
+    async probe(verbose) {
+        if (isBackground())
+            return this._probe(verbose);
+        else if (platformChrome)
+            return chrome.runtime.sendMessage({type: "helperAppProbe", verbose});
+    }
+
+    async _probe(verbose = false) {
         if (!await hasCSRPermission())
             return false;
 
         let presents;
-        if (globalThis._BACKGROUND_PAGE)
+        //if (globalThis._BACKGROUND_PAGE)
             presents = !!await this.getPort();
-        else
-            presents = this.#serverOnline || !!await this._probeServer();
+        // else
+        //     presents = this.#serverOnline || !!await this._probeServer();
 
         if (!presents && verbose)
             displayMessage("Can not connect to the helper application.")
@@ -174,3 +183,18 @@ class HelperApp {
 }
 
 export const helperApp = new HelperApp();
+
+if (platformChrome && isBackground()) {
+    chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
+        if (message.type === "helperAppGetBackgroundAuth") {
+            sendResponse(helperApp.auth);
+        }
+        else if (message.type === "helperAppProbe") {
+            helperApp.probe(message.verbose).then(result => sendResponse(result));
+            return true;
+        }
+    });
+}
+else if (platformChrome) {
+    chrome.runtime.sendMessage({type: "helperAppGetBackgroundAuth"}).then(auth => helperApp.auth = auth);
+}

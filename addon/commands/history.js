@@ -113,7 +113,7 @@ export class History {
     }
 
     async preview({OBJECT, FOR, FROM, TO, OF, BY}, display, storage) {
-        let maxResults = BY?.data || settings.max_history_items() || 20;
+        let maxResults = BY?.data || settings.max_history_items() || 50;
         let forDomain = FOR?.text;
 
         let startDate = OF?.data || this.#monthAgo;

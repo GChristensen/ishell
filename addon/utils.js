@@ -74,3 +74,20 @@ export async function fetchWithTimeout(resource, options = {}) {
 
     return response;
 }
+
+export const CONTEXT_BACKGROUND = 0;
+export const CONTEXT_FOREGROUND = 1;
+
+export function getContextType() {
+    return typeof WorkerGlobalScope !== "undefined" || window.location.pathname === "/background.html"
+        ? CONTEXT_BACKGROUND
+        : CONTEXT_FOREGROUND;
+}
+
+export function isBackground() {
+    return getContextType() === CONTEXT_BACKGROUND;
+}
+
+export function isChrome() {
+    return navigator.userAgent.indexOf("Chrome") >= 0;
+}

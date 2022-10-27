@@ -58,6 +58,7 @@
         "cookies",
         "webRequest",
         "webRequestBlocking",
-        "browsingData"
+        "browsingData",
+        "search"
     ]
 }

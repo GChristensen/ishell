@@ -9,7 +9,7 @@ const ISHELL_SETTINGS_KEY = "shell_settings";
 class IShellSettings {
     constructor() {
         this._default = {
-            max_history_items: 20,
+            max_history_items: 50,
             max_suggestions: 5,
             remember_context_menu_commands: false,
             template_syntax: "class-sample",
@@ -29,8 +29,13 @@ class IShellSettings {
 
     async _loadPlatform() {
         if (!this._platform) {
-            const platformInfo = await BROWSER.runtime.getPlatformInfo();
-            this._platform = {[platformInfo.os]: true};
+            this._platform = {};
+
+            if (BROWSER.runtime.getPlatformInfo) {
+                const platformInfo = await BROWSER.runtime.getPlatformInfo();
+
+                this._platform[platformInfo.os] = true;
+            }
 
             if (navigator.userAgent.indexOf("Firefox") >= 0)
                 this._platform.firefox = true;
@@ -63,16 +68,6 @@ class IShellSettings {
 
     async _set(k, v) { return BROWSER.storage.local.set({[k]: v}) }
 
-    _setAddonUpdated() {
-        localStorage.setItem("ishell-updated", "true");
-    }
-
-    _isAddonUpdated() {
-        const updated = localStorage.getItem("ishell-updated") === "true";
-        localStorage.setItem("ishell-updated", "false");
-        return updated;
-    }
-
     get(target, key, receiver) {
         if (key === "load")
             return v => this._load();
@@ -84,10 +79,6 @@ class IShellSettings {
             return this._get;
         else if (key === "set")
             return this._set;
-        else if (key === "setAddonUpdated")
-            return this._setAddonUpdated;
-        else if (key === "isAddonUpdated")
-            return this._isAddonUpdated;
 
         return val => {
             let bin = this._bin;

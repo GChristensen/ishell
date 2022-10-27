@@ -1,5 +1,5 @@
 {
-    "version": "0.9.24",
+    "version": "1.0.1",
     "applications": {
         "gecko": {
             "id": "ishell@gchristensen.github.io",
@@ -58,6 +58,7 @@
         "cookies",
         "webRequest",
         "webRequestBlocking",
-        "browsingData"
+        "browsingData",
+        "search"
     ]
 }

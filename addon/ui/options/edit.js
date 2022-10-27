@@ -294,8 +294,6 @@ async function insertSnippet() {
     if (syntax.startsWith("object") && templateId.startsWith("search"))
         templateId = "search";
 
-    _log(templateId)
-
     let snippet = await (await fetch(browser.runtime.getURL(`/ui/options/snippets/${templateId}.js`))).text();
 
     //editor.replaceRange(stub, editor.getCursor());

@@ -67,7 +67,8 @@
         "cookies",
         "webRequest",
         "webRequestBlocking",
-        "browsingData"
+        "browsingData",
+        "search"
     ],
     "host_permissions": [
         "<all_urls>"

@@ -9,7 +9,7 @@ export const namespace = new CommandNamespace(CommandNamespace.SCRAPYARD, true);
 const DEFAULT_OUTPUT_LIMIT = 50;
 
 const NODE_TYPE_SHELF = 1;
-const NODE_TYPE_GROUP = 2;
+const NODE_TYPE_FOLDER = 2;
 const NODE_TYPE_BOOKMARK = 3;
 const NODE_TYPE_ARCHIVE = 4;
 const NODE_TYPE_SEPARATOR = 5;
@@ -259,7 +259,7 @@ export class Scrapyard {
         //args[NEAR]   = {nountype: noun_arb_text, label: "text"}; // location
         args[AT]     = {nountype: noun_scrapyard_folder, label: "path"}; // time
         //args[WITH]   = {nountype: noun_arb_text, label: "text"}; // instrument
-        args[IN]     = {nountype: {"folder": [NODE_TYPE_GROUP],
+        args[IN]     = {nountype: {"folder": [NODE_TYPE_FOLDER],
                                    "bookmark": [NODE_TYPE_BOOKMARK],
                                    "archive": [NODE_TYPE_ARCHIVE],
                                    "content": SEARCH_TYPE_CONTENT},
@@ -284,7 +284,7 @@ export class Scrapyard {
         let payload = unpackArgs(this, args);
 
         if (!payload.types)
-            payload.types = ENDPOINT_TYPES.concat([NODE_TYPE_GROUP]);
+            payload.types = ENDPOINT_TYPES.concat([NODE_TYPE_FOLDER]);
         else if (payload.types === SEARCH_TYPE_CONTENT) {
             payload.types = ENDPOINT_TYPES;
             payload.content = true;
@@ -304,7 +304,7 @@ export class Scrapyard {
     #createBookmarkList(nodes, display, path) {
         const cfg = {
             text: n => {
-                if (n.type === NODE_TYPE_GROUP)
+                if (n.type === NODE_TYPE_FOLDER)
                     return H(n.path)
                 else {
                     if (n.uri && !n.name)
@@ -315,7 +315,7 @@ export class Scrapyard {
             },
             subtext: n => n.uri && H(n.uri),
             icon: n => {
-                if (n.type === NODE_TYPE_GROUP)
+                if (n.type === NODE_TYPE_FOLDER)
                     return "/ui/icons/folder.svg";
                 else if (n.icon)
                     return n.icon;
@@ -323,9 +323,9 @@ export class Scrapyard {
                     return "/ui/icons/globe.svg";
             },
             iconSize: 16,
-            className: n => n.type === NODE_TYPE_GROUP? "n-group": "",
+            className: n => n.type === NODE_TYPE_FOLDER? "n-group": "",
             action: n => {
-                if (n.type === NODE_TYPE_GROUP) {
+                if (n.type === NODE_TYPE_FOLDER) {
                     let itemPath = path? path + "/": "";
                     cmdAPI.setCommandLine("scrapyard from folder at " + itemPath + n.path);
                 }
@@ -347,6 +347,29 @@ export class Scrapyard {
 
         $(list).find("img.n-icon").on("error", e => e.target.src = "/ui/icons/globe.svg");
     }
+}
+
+function colorTODO(todo_state) {
+    switch (todo_state) {
+        case TODO_STATE_TODO:
+            return "#fc6dac";
+        case TODO_STATE_WAITING:
+            return"#ff8a00";
+        case TODO_STATE_POSTPONED:
+            return "#00b7ee";
+        case TODO_STATE_CANCELLED:
+            return "#ff4d26";
+        case TODO_STATE_DONE:
+            return "#00b60e";
+    }
+    return "";
+}
+
+function styleTODO(todo_state) {
+    if (todo_state)
+        return "color: " + colorTODO(todo_state) + "; font-weight: bold;";
+
+    return "";
 }
 
 class BookmarkCommandBase {
@@ -385,11 +408,11 @@ class BookmarkCommandBase {
             html += "Tags: <span style='color: #7DE22E;'>" + Utils.escapeHtml(tags) + "</span><br>";
 
         if (todo_state)
-            html += "Priority: <span style='" + this._styleTODO(todo_state) + "'>"
+            html += "Priority: <span style='" + styleTODO(todo_state) + "'>"
                 + Utils.escapeHtml(todo_names[todo_state]) + "</span><br>";
 
         if (todo_date)
-            html += "Deadline: <span style='" + this._styleTODO(todo_state) + "'>&lt;"
+            html += "Deadline: <span style='" + styleTODO(todo_state) + "'>&lt;"
                 + Utils.escapeHtml(todo_date) + "&gt;</span><br>";
 
         if (details) {
@@ -407,29 +430,6 @@ class BookmarkCommandBase {
         payload.uri = cmdAPI.getLocation();
 
         scrapyardSend(`SCRAPYARD_ADD_${this.__entity}_ISHELL`, payload);
-    };
-
-    _todoColor(todo_state) {
-        switch (todo_state) {
-            case TODO_STATE_TODO:
-                return "#fc6dac";
-            case TODO_STATE_WAITING:
-                return"#ff8a00";
-            case TODO_STATE_POSTPONED:
-                return "#00b7ee";
-            case TODO_STATE_CANCELLED:
-                return "#ff4d26";
-            case TODO_STATE_DONE:
-                return "#00b60e";
-        }
-        return "";
-    }
-
-    _styleTODO(todo_state) {
-        if (todo_state)
-            return "color: " + this._todoColor(todo_state) + "; font-weight: bold;";
-
-        return "";
     }
 }
 
@@ -468,6 +468,24 @@ export class Archive extends BookmarkCommandBase {
 
  @command
  @markdown
+ @delay 1000
+ @icon /ui/icons/scrapyard.svg
+ @description Archive a site or selected links from the current page.
+ @uuid 4F5D9B10-6C33-43E3-AD1D-A565A81AEC8E
+ */
+export class ArchiveSite extends BookmarkCommandBase {
+    constructor(args) {
+        super(args);
+        this.__entity = "SITE";
+    }
+}
+
+/**
+ # Syntax
+ Same as **archive**.
+
+ @command
+ @markdown
  @icon /ui/icons/scrapyard.svg
  @description Bookmark a web-page to Scrapyard.
  @uuid 520F182C-34D0-4837-B42A-64A7E859D3D5
@@ -476,6 +494,27 @@ export class Bookmark extends BookmarkCommandBase {
     constructor(args) {
         super(args);
         this.__entity = "BOOKMARK";
+    }
+}
+
+/**
+ # Syntax
+ Same as **archive**.
+
+ @command
+ @markdown
+ @delay 1000
+ @icon /ui/icons/scrapyard.svg
+ @description Instantly create and edit notes at the specified location.
+ @uuid 8B4C13DE-526D-4340-8E75-F4D1192E143F
+ */
+export class Notes extends BookmarkCommandBase {
+    async execute(args) {
+        const payload = unpackArgs(this, args);
+
+        payload.name = args.OBJECT?.text;
+
+        scrapyardSend(`SCRAPYARD_ADD_NOTES_ISHELL`, payload);
     }
 }
 
