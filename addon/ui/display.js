@@ -1,3 +1,5 @@
+import {fetchText} from "../utils.js";
+
 export function createDisplayProxy(block) {
     // a real proxy does not work nicely with some advanced jQuery features
     // probably because jQuery expects a reference to a node that presents in the document
@@ -35,12 +37,14 @@ function fetchBlock(...args) {
 }
 
 async function fetchTextBlock(...args) {
-    args = [this, ...args];
+    if (args.length === 1) {
+        args.push(undefined);
+        args.push(cmdAPI.previewFetch.bind(cmdAPI, this));
+    }
+    else if (args.length === 2)
+        args.push(cmdAPI.previewFetch.bind(cmdAPI, this));
 
-    const response = await cmdAPI.previewFetch(...args);
-
-    if (response.ok)
-        return response.text();
+    return fetchText(...args);
 }
 
 async function fetchJSONBlock(...args) {
