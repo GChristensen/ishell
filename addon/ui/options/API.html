@@ -452,9 +452,9 @@
 
 <h3><a id="helper-fetch" class="anchor" href="#helper-fetch"></a>cmdAPI.helperFetch(pblock, path, init)<span class="since">since v0.5</span></h3>
 <blockquote>
-    <p>Does an asynchronous request to the web server being run by the iShell helper application.
+    <p>Does an asynchronous request to the web server being run by the iShell native helper application.
         If <b>pblock</b> parameter is specified, <b>cmdAPI.previewFetch()</b> function is used to make a request.
-        Built-in JavaScript <b>fetch</b> is used otherwise. If the helper application could not be run,
+        Built-in JavaScript <b>fetch</b> is used otherwise. If the native application could not be run,
         the function throws "IShellNoHelperApp" exception.</p>
     <ul>
         <li><strong>pblock</strong> - the preview block element that could be obtained through the <b>pblock</b> or
@@ -624,7 +624,7 @@
 
 <!--h3><a id="user-content-eval" class="anchor" href="#eval"></a>cmdAPI.evaluate(text)</h3>
 <blockquote>
-    <p>Evaluates the given JavaScript code. In the MV3 version of add-on, this function works only if the helper application is installed.</p>
+    <p>Evaluates the given JavaScript code. In the MV3 version of add-on, this function works only if the native application is installed.</p>
     <ul>
         <li><strong>text</strong> - JavaScrpt code to evaluate.</li>
     </ul>
