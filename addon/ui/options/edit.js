@@ -13,7 +13,7 @@ $(initEditor);
 async function initEditor() {
     if (_MANIFEST_V3 && _BACKGROUND_PAGE) {
         if (!await helperApp.probe())
-            CmdUtils.notify("Please, install the helper applications to execute custom commands");
+            CmdUtils.notify("Please, install the backend application to execute custom commands");
     }
 
     let lastNamespace = settings.last_editor_namespace();

@@ -1,6 +1,6 @@
 {
 "name": "ishell_helper",
-"description": "iShell helper application",
+"description": "iShell backend application",
 "path": "$EXECUTABLE_PATH$",
 "type": "stdio",
 "allowed_origins": ["chrome-extension://ofekoiaebgjkhfbcafmllpgffadbpphb/", "chrome-extension://hdjdmgedflhjhbflaijohpnognlhacoc/"]

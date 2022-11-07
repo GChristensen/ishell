@@ -4,4 +4,4 @@ if [ `id -u` -eq 0 ]
   exit
 fi
 
-python3 ./ishell_helper/installer.py --devel
+python3 ./ishell_backend/installer.py --devel

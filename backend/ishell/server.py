@@ -1,3 +1,5 @@
+import shutil
+import tempfile
 import traceback
 import threading
 import socket
@@ -7,27 +9,28 @@ import os
 
 from contextlib import closing
 from functools import wraps
+from pathlib import Path
 
 import flask
-from flask import request, abort
+from flask import request, abort, send_file
 from werkzeug.serving import make_server
 
 from .server_debug import DEBUG
 
+
 app = flask.Flask(__name__)
 app.config['SEND_FILE_MAX_AGE_DEFAULT'] = 0
-log = logging.getLogger('werkzeug')
-log.disabled = True
-app.logger.disabled = not DEBUG
 
-###
-LOG_FILE = '../.local/helper.log'
-if DEBUG:
-    logging.basicConfig(filename=LOG_FILE, encoding='utf-8', level=logging.DEBUG)
-###
+accessLog = logging.getLogger('werkzeug')
+accessLog.disabled = True
+
+#app.logger.disabled = not DEBUG
+
+backend_log_file = None
 
 auth_token = None
 host = "localhost"
+port = None
 httpd = None
 
 message_mutex = threading.Lock()
@@ -49,12 +52,15 @@ class Httpd(threading.Thread):
 
 
 def start(options):
+    global port
     global httpd
     global auth_token
     port = options["port"]
     auth_token = options["auth"]
 
     try:
+        clean_temp_directory()
+        enable_logging()
         wait_for_port(port)
     except Exception as e:
         logging.debug(e)
@@ -62,6 +68,8 @@ def start(options):
     daemon = not options.get("server", None)
     httpd = Httpd(app, port, daemon)
     httpd.start()
+
+    logging.info("Server initialized.")
 
 
 def stop():
@@ -114,13 +122,40 @@ def add_header(r):
     return r
 
 
+def enable_logging():
+    global backend_log_file
+
+    backend_log_file = os.path.join(get_temp_directory(), "backend.log")
+    logging.basicConfig(filename=backend_log_file, encoding="utf-8", level=logging.DEBUG,
+                        format="%(asctime)s [%(name)s] %(levelname)s: %(message)s")
+
+
+def get_temp_directory():
+    temp_directory_path = os.path.join(tempfile.gettempdir(), f"iShell_{port}")
+
+    if not os.path.exists(temp_directory_path):
+        Path(temp_directory_path).mkdir(parents=True, exist_ok=True)
+
+    return temp_directory_path
+
+
+def clean_temp_directory():
+    temp_directory = get_temp_directory()
+
+    if os.path.exists(temp_directory):
+        try:
+            shutil.rmtree(temp_directory)
+        except Exception as e:
+            logging.exception(e)
+
+
 from . import server_scripts
 from . import server_user
 
 
 @app.route("/")
 def root():
-    return "iShell helper application"
+    return "iShell backend application"
 
 @app.route("/_close_browser", methods=['GET'])
 @requires_auth
@@ -147,8 +182,16 @@ def close_browser():
 
     return "", 204
 
+
 @app.route("/exit")
 @requires_auth
 def exit_app():
     os._exit(0)
 
+
+@app.route("/backend_log")
+def helper_log():
+    if app.logger.disabled:
+        return "", 404
+    else:
+        return send_file(backend_log_file, mimetype="text/plain")

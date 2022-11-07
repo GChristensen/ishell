@@ -153,7 +153,7 @@ cmdAPI.fetchAborted = function(error) {
     return error?.name === "AbortError";
 };
 
-cmdAPI.helperFetch = async function(pblock, path, init) {
+cmdAPI.backendFetch = cmdAPI.helperFetch = async function(pblock, path, init) {
     let _pblock = pblock, _path = path, _init = init;
 
     let preview = !!pblock;
@@ -165,8 +165,8 @@ cmdAPI.helperFetch = async function(pblock, path, init) {
 
     if (!await helperApp.probe()) {
         const error = new Error();
-        error.name = "IShellNoHelperApp";
-        error.message = "Can not run iShell helper app."
+        error.name = "IShellNoBackendApp";
+        error.message = "Can not run iShell backend app."
         throw error;
     }
 

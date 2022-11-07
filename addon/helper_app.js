@@ -84,11 +84,7 @@ class HelperApp {
         if (!await hasCSRPermission())
             return false;
 
-        let presents;
-        //if (globalThis._BACKGROUND_PAGE)
-            presents = !!await this.getPort();
-        // else
-        //     presents = this.#serverOnline || !!await this._probeServer();
+        const presents = !!await this.getPort();
 
         if (!presents && verbose)
             displayMessage("Can not connect to the helper application.")

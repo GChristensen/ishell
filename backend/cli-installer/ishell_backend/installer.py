@@ -56,7 +56,7 @@ def write_reg_hkcu_value(path, value):
 
 dev_install = len(sys.argv) > 1 and sys.argv[1] == "--devel"
 
-helper_base = "ishell_helper"
+backend_base = "ishell_backend"
 
 package_path = os.path.abspath(os.path.dirname(__file__))
 
@@ -66,42 +66,41 @@ else:
     subprocess.check_call([sys.executable, "-m", "pip", "install", package_path, "--user"])
 
 if dev_install:
-    executable_base_path = f"{package_path}/{helper_base}"
-    os.mkdir(f"{package_path}/../.local")
+    executable_base_path = f"{package_path}/{backend_base}"
 else:
-    executable_base_path = site.getuserbase() + f"/bin/{helper_base}"
+    executable_base_path = site.getuserbase() + f"/bin/{backend_base}"
     if platform.system() == "Windows":
-        executable_base_path = os.path.dirname(site.getusersitepackages()) + f"\\Scripts\\{helper_base}"
+        executable_base_path = os.path.dirname(site.getusersitepackages()) + f"\\Scripts\\{backend_base}"
 
 executable_path = get_binary_path(executable_base_path)
 
-firefox_manifest_path = os.path.expanduser(f"~/.mozilla/native-messaging-hosts/{helper_base}.json")
+firefox_manifest_path = os.path.expanduser(f"~/.mozilla/native-messaging-hosts/{backend_base}.json")
 
 if platform.system() == "Windows":
     firefox_manifest_path = executable_base_path + ".json.firefox"
 elif platform.system() == "Darwin":
     firefox_manifest_path = \
-        os.path.expanduser(f"~/Library/Application Support/Mozilla/NativeMessagingHosts/{helper_base}.json")
+        os.path.expanduser(f"~/Library/Application Support/Mozilla/NativeMessagingHosts/{backend_base}.json")
 
-write_manifest(package_path + f"/manifests/{helper_base}.json.firefox", firefox_manifest_path, executable_path)
+write_manifest(package_path + f"/manifests/{backend_base}.json.firefox", firefox_manifest_path, executable_path)
 
-chrome_manifest_path = os.path.expanduser(f"~/.config/google-chrome/NativeMessagingHosts/{helper_base}.json")
+chrome_manifest_path = os.path.expanduser(f"~/.config/google-chrome/NativeMessagingHosts/{backend_base}.json")
 chromium_manifest_path = chrome_manifest_path.replace("google-chrome", "chromium")
 
 if platform.system() == "Windows":
     chrome_manifest_path = executable_base_path + ".json.chrome"
 elif platform.system() == "Darwin":
     chrome_manifest_path = \
-        os.path.expanduser(f"~/Library/Application Support/Google/Chrome/NativeMessagingHosts/{helper_base}.json")
+        os.path.expanduser(f"~/Library/Application Support/Google/Chrome/NativeMessagingHosts/{backend_base}.json")
     chromium_manifest_path = chrome_manifest_path.replace("Chrome", "Chromium")
 
-write_manifest(package_path + f"/manifests/{helper_base}.json.chrome", chrome_manifest_path, executable_path)
+write_manifest(package_path + f"/manifests/{backend_base}.json.chrome", chrome_manifest_path, executable_path)
 
 if platform.system() != "Windows":
-    write_manifest(package_path + f"/manifests/{helper_base}.json.chrome", chromium_manifest_path, executable_path)
+    write_manifest(package_path + f"/manifests/{backend_base}.json.chrome", chromium_manifest_path, executable_path)
 
 if platform.system() == "Windows":
     import winreg
 
-    write_reg_hkcu_value(f"Software\\Mozilla\\NativeMessagingHosts\\{helper_base}", firefox_manifest_path)
-    write_reg_hkcu_value(f"Software\\Google\\Chrome\\NativeMessagingHosts\\{helper_base}", chrome_manifest_path)
+    write_reg_hkcu_value(f"Software\\Mozilla\\NativeMessagingHosts\\ishell_helper", firefox_manifest_path)
+    write_reg_hkcu_value(f"Software\\Google\\Chrome\\NativeMessagingHosts\\ishell_helper", chrome_manifest_path)

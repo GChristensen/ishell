@@ -32,37 +32,37 @@ firefox-mv3:
 chrome-mv3:
 	cd addon; python ../scripts/mkmanifest.py manifest.json.mv3.chrome manifest.json `cat version.txt`
 
-.PHONY: helper-clean
-helper-clean:
-	cd helper; rm -r -f build
-	cd helper; rm -r -f dist
-	cd helper; rm -f *.spec
+.PHONY: backend-clean
+backend-clean:
+	cd backend; rm -r -f build
+	cd backend; rm -r -f dist
+	cd backend; rm -f *.spec
 
-.PHONY: helper-win
-helper-win:
-	make helper-clean
-	cd helper; rm -f *.exe
-	cd helper; rm -f *.zip
-	echo "DEBUG = False" > ./helper/ishell/server_debug.py
-	cd helper; pyinstaller ishell_helper.py
-	cd helper; makensis setup.nsi
-	echo "DEBUG = True" > ./helper/ishell/server_debug.py
-	make helper-clean
+.PHONY: backend-win
+backend-win:
+	make backend-clean
+	cd backend; rm -f *.exe
+	cd backend; rm -f *.zip
+	echo "DEBUG = False" > ./backend/ishell/server_debug.py
+	cd backend; pyinstaller ishell_backend.py
+	cd backend; makensis setup.nsi
+	echo "DEBUG = True" > ./backend/ishell/server_debug.py
+	make backend-clean
 
 
-.PHONY: helper-cli
-helper-cli:
-	cd helper; cp -r ./ishell ./cli-installer/ishell_helper/
-	echo "DEBUG = False" > ./helper/cli-installer/ishell_helper/ishell/server_debug.py
-	cd helper; cp -r ./manifests ./cli-installer/ishell_helper/
-	cd helper; cp -r ./ishell_helper.cmd ./cli-installer/ishell_helper/
-	cd helper; cp -r ./ishell_helper.sh ./cli-installer/ishell_helper/
-	cd helper; rm -r -f ./cli-installer/ishell_helper/manifests/debug_manifest*
-	cd helper; cp -r ./setup.py ./cli-installer/ishell_helper/
-	cd helper; rm -f ishell-helper.tgz
-	cd helper; 7za.exe a -ttar -so -an ./cli-installer/* -xr!__pycache__ | 7za.exe a -si ishell-helper.tgz
-	cd helper; rm ./cli-installer/ishell_helper/setup.py
-	cd helper; rm -r -f ./cli-installer/ishell_helper/ishell
-	cd helper; rm -r -f ./cli-installer/ishell_helper/manifests
-	cd helper; rm -r -f ./cli-installer/ishell_helper/ishell_helper.cmd
-	cd helper; rm -r -f ./cli-installer/ishell_helper/ishell_helper.sh
+.PHONY: backend-cli
+backend-cli:
+	cd backend; cp -r ./ishell ./cli-installer/ishell_backend/
+	echo "DEBUG = False" > ./backend/cli-installer/ishell_backend/ishell/server_debug.py
+	cd backend; cp -r ./manifests ./cli-installer/ishell_backend/
+	cd backend; cp -r ./ishell_backend.cmd ./cli-installer/ishell_backend/
+	cd backend; cp -r ./ishell_backend.sh ./cli-installer/ishell_backend/
+	cd backend; rm -r -f ./cli-installer/ishell_backend/manifests/debug_manifest*
+	cd backend; cp -r ./setup.py ./cli-installer/ishell_backend/
+	cd backend; rm -f ishell-backend.tgz
+	cd backend; 7za.exe a -ttar -so -an ./cli-installer/* -xr!__pycache__ | 7za.exe a -si ishell-backend.tgz
+	cd backend; rm ./cli-installer/ishell_backend/setup.py
+	cd backend; rm -r -f ./cli-installer/ishell_backend/ishell
+	cd backend; rm -r -f ./cli-installer/ishell_backend/manifests
+	cd backend; rm -r -f ./cli-installer/ishell_backend/ishell_backend.cmd
+	cd backend; rm -r -f ./cli-installer/ishell_backend/ishell_backend.sh

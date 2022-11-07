@@ -11,10 +11,10 @@ node_modules
 venv
 backend/flask.bat
 __pycache__
-helper/build/
-helper/dist/
-helper/*.spec
-helper/*.exe
-helper/*.zip
-helper/*.tgz
+backend/build/
+backend/dist/
+backend/*.spec
+backend/*.exe
+backend/*.zip
+backend/*.tgz
 /*.zip

@@ -1,4 +1,5 @@
 import {settings} from "../settings.js";
+import {helperApp} from "../helper_app.js";
 
 export const namespace = new CommandNamespace(CommandNamespace.ISHELL);
 
@@ -33,6 +34,21 @@ namespace.createCommand({
     description: "View iShell API reference.",
     execute: function() {
         CmdUtils.addTab("ui/options/API.html");
+    }
+});
+
+namespace.createCommand({
+    names: ["open-backend-log"],
+    uuid: "60127069-D6C2-41FD-BB9F-C6A459C2DAE8",
+    icon: "/ui/icons/debug.png",
+    _hidden: true,
+    _debug: true,
+    description: "Open the log file of the native backend application.",
+    execute: async function() {
+        const helper = await helperApp.probe(true);
+
+        if (helper)
+            CmdUtils.addTab(helperApp.url("/backend_log"));
     }
 });
 

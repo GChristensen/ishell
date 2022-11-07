@@ -216,7 +216,7 @@ async function loadHelperAppLinks() {
                 $("#helper-windows").attr("href", app);
             else
                 $("#helper-windows").on("click",
-                    () => alert("The helper application is not mandatory to execute user commands in Chrome."));
+                    () => alert("The backend application is not mandatory to execute user commands in Chrome."));
         }
         else
             $("#helper-windows").on("click",

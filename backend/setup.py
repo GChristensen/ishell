@@ -1,7 +1,7 @@
 from setuptools import setup, find_packages
 
 setup(
-    name='ishell_helper',
+    name='ishell_backend',
     version='0.1',
     packages=['ishell'],
     url='',
@@ -11,6 +11,6 @@ setup(
     description='',
     install_requires=['Flask'],
     entry_points = {
-        'console_scripts': ['ishell_helper=ishell.helper:main'],
+        'console_scripts': ['ishell_backend=ishell.backend:main'],
     }
 )

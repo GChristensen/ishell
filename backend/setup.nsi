@@ -1,15 +1,16 @@
 Unicode True
 
-!define APPNAME "iShell Helper"
+!define APPNAME "iShell Backend"
+!define DIRNAME "iShell Extension"
 !define VERSION "0.1"
 
 !define APPNAMEANDVERSION "${APPNAME} ${VERSION}"
 
 ; Main Install settings
 Name "${APPNAMEANDVERSION}"
-InstallDir "$PROGRAMFILES\${APPNAME}"
+InstallDir "$PROGRAMFILES64\${DIRNAME}"
 InstallDirRegKey HKLM "Software\${APPNAME}" ""
-OutFile "ishell-helper-${VERSION}_x86_64.exe"
+OutFile "ishell-backend-${VERSION}_x86_64.exe"
 
 ; Use compression
 SetCompressor LZMA
@@ -135,7 +136,7 @@ Function UninstallExisting
     Exch $1
 FunctionEnd
 
-Section "iShell Helper" Section1
+Section "iShell Backend" Section1
 
     ReadRegStr $0 HKLM "Software\Microsoft\Windows\CurrentVersion\Uninstall\${APPNAME}" "UninstallString"
     ${If} $0 != ""
@@ -153,18 +154,24 @@ Section "iShell Helper" Section1
 	; Set Section Files and Shortcuts
 	SetOutPath "$INSTDIR\"
 	File "assets\ishell.ico"
-	File /r "dist/ishell_helper\"
+	File /r "dist/ishell_backend\"
 
-	Push '$INSTDIR\ishell_helper.exe'
-    Push "\"
+	Push '$INSTDIR\ishell_backend.exe'
     Push "/"
+    Push "\"
+    Call StrReplace
+    Pop $2
+
+    Push $2
+    Push "\"
+    Push "\\"
     Call StrReplace
     Pop $1
 
 	FileOpen $0 manifest.json w
 	FileWrite $0 '{$\n'
     FileWrite $0 '"name": "ishell_helper",$\n'
-    FileWrite $0 '"description": "iShell helper application",$\n'
+    FileWrite $0 '"description": "iShell backend application",$\n'
     FileWrite $0 '"path": "$1",$\n'
     FileWrite $0 '"type": "stdio",$\n'
     FileWrite $0 '"allowed_extensions": [ "ishell@gchristensen.github.io", "ishell-we@gchristensen.github.io" ]$\n'
@@ -219,6 +226,6 @@ Function .onInit
 
 FunctionEnd
 
-BrandingText "iShell Helper"
+BrandingText "iShell Backend"
 
 ; eof
