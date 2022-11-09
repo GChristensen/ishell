@@ -100,7 +100,7 @@ at StackOverflow.
 
 The addon is successfully ported to manifest v3 as it is
 [implemented](https://extensionworkshop.com/documentation/develop/manifest-v3-migration-guide/)
-in Firefox Nightly v102, although a helper application is required to evaluate
+in Firefox Nightly v102, although a backend application is required to evaluate
 user-provided commands. To run with MV3 use `manifest.json.mv3`.
 
 ### Credits
