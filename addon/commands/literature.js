@@ -1,4 +1,4 @@
-export const namespace = new CommandNamespace(CommandNamespace.SEARCH, true);
+export const namespace = new AnnotatedCommandNamespace(CommandNamespace.SEARCH);
 
 const LIBGEN_HOST = "http://libgen.is/";
 

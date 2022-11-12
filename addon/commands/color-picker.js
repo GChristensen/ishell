@@ -1,6 +1,6 @@
 import {loadCSS, loadScript} from "../utils_browser.js";
 
-export const namespace = new CommandNamespace(CommandNamespace.UTILITY, true);
+export const namespace = new AnnotatedCommandNamespace(CommandNamespace.UTILITY);
 
 /**
     # Syntax

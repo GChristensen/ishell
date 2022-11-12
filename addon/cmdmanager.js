@@ -1,6 +1,6 @@
 import {settings} from "./settings.js";
 import {repository} from "./storage.js";
-import {helperApp} from "./helper_app.js";
+import {fetchJSON} from "./utils.js";
 
 // !!! Builtin command classes and noun types should be exported
 class CommandNamespace {
@@ -41,6 +41,12 @@ class CommandNamespace {
             c._namespace = this.name;
             c._builtin = builtin;
         })
+    }
+}
+
+class AnnotatedCommandNamespace extends CommandNamespace {
+    constructor(name) {
+        super(name, true);
     }
 }
 
@@ -104,38 +110,9 @@ class CommandManager {
 
     #userCommandNamespaces = [];
 
-    _builtinModules = [
-        "/commands/browser.js",
-        "/commands/ishell.js",
-        "/commands/translate.js",
-        "/commands/utility.js",
-
-        "/commands/more/kpop.js",
-        "/commands/more/javlib.js",
-        "/commands/more/nyaa.js",
-        "/commands/more/more.js",
-        "/commands/new-tab.js",
-        "/commands/color-picker.js",
-        "/commands/feedsub.js",
-        "/commands/google.js",
-        "/commands/history.js",
-        "/commands/lingvo.js",
-        "/commands/literature.js",
-        "/commands/mail.js",
-        "/commands/pinterest.js",
-        "/commands/resurrect.js",
-        "/commands/scrapyard.js",
-        "/commands/search.js",
-        "/commands/tab-groups.js",
-        "/commands/unicode.js",
-    ];
-    
     constructor() {
         this._commands = [];
         this._disabledCommands = settings.disabled_commands() || {};
-
-        if (settings.platform.chrome)
-            this._builtinModules = this._builtinModules.filter(m => !m.includes("tab-groups.js"));
     }
 
     async makeParser() {
@@ -333,8 +310,13 @@ class CommandManager {
     }
 
     async loadBuiltinCommands() {
+        let commandFiles = await fetchJSON("/commands.json");
+
+        if (settings.platform.chrome)
+            commandFiles = commandFiles.filter(f => !f.includes("/tab-groups.js"));
+
         const modules = [];
-        for (const path of this._builtinModules)
+        for (const path of commandFiles)
             modules.push(this._loadBuiltinCommandModule(path));
 
         await Promise.all(modules);
@@ -379,9 +361,25 @@ class CommandManager {
             console.log("module '%s' has no namespace", path);
     }
 
-    async _loadAnnotatedCommandModule(path) {
-        const preprocessor = new CommandPreprocessor(CommandPreprocessor.CONTEXT_BUILTIN);
-        await preprocessor.load(path);
+    async loadBundledUserCommands() {
+        let commandFiles = await fetchJSON("/commands-user.json");
+        commandFiles = commandFiles.filter(f => !f.includes("/example.js"));
+
+        const modules = [];
+        for (const path of commandFiles)
+            modules.push(this._loadUserCommandModule(path));
+
+        await Promise.all(modules);
+    }
+
+    async _loadUserCommandModule(path) {
+        const module = await this._loadAnnotatedCommandModule(path, CommandPreprocessor.CONTEXT_USER);
+        module.namespace.assignNamespaceToCommands();
+    }
+
+    async _loadAnnotatedCommandModule(path, context = CommandPreprocessor.CONTEXT_BUILTIN) {
+        const preprocessor = new CommandPreprocessor(context);
+        return preprocessor.load(path);
     }
 
     async loadUserCommands(namespace) {
@@ -392,6 +390,8 @@ class CommandManager {
             userscripts = [userscripts];
 
         this.unloadUserCommands(namespace);
+        await this.loadBundledUserCommands();
+
         this.#userCommandNamespaces = [];
 
         const loadedScripts = [];
@@ -477,7 +477,7 @@ const cmdAPI = _BACKGROUND_API.cmdManager.createAPIProxy(null, _BACKGROUND_API.c
         await this.loadBuiltinCommands();
 
         const canLoadUserScripts = !_MANIFEST_V3 || _MANIFEST_V3 && !_BACKGROUND_PAGE
-            || _MANIFEST_V3 && _BACKGROUND_PAGE && await helperApp.probe();
+            /*|| _MANIFEST_V3 && _BACKGROUND_PAGE && await helperApp.probe()*/;
 
         if (canLoadUserScripts)
             await cmdManager.loadUserCommands();
@@ -541,3 +541,4 @@ for (const ns in cmdManager.ns)
     CommandNamespace[ns] = cmdManager.ns[ns];
 
 globalThis.CommandNamespace = CommandNamespace;
+globalThis.AnnotatedCommandNamespace = AnnotatedCommandNamespace;

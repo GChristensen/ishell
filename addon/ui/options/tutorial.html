@@ -1166,20 +1166,15 @@ class PinterestAPI {
 }</code></pre>
 
 
-<h1 class="section-heading"><span id="helper">The Backend Application</span></h1>
+<h1 class="section-heading"><span id="backend">The Backend Application</span></h1>
 <p>iShell native backend application is a local web server that
-    may be used to transcend the limits of WebExtensions. In Firefox, WebExtensions manifest v3
-    forbids dynamic code execution. Because of that, the backend application is the only way to
-    evaluate user commands in the Firefox MV3 version of iShell.
-</p>
-
-<p>If you have installed iShell backend as a Python package, you may develop your own <a
-        href="https://flask.palletsprojects.com/en/2.1.x/" target="_blank">Flask</a> handlers
-    callable from user commands. There you could do anything that Python can (see also: <a
+    may be used to transcend the limits of WebExtensions. There you may develop your own <a
+        href="https://flask.palletsprojects.com" target="_blank">Flask</a> handlers
+    callable from user commands. In them, you could do anything that Python can (see also: <a
             href="https://gchristensen.github.io/enso-portable/" target="_blank">Enso</a>).
     Although technically you may make requests to any local web server, the lifetime of the
     backend application is managed automatically by the browser. Use the <a
-            href="API.html#helper-fetch" target="_blank">cmdAPI.helperFetch()</a> function to
+            href="API.html#backend-fetch" target="_blank">cmdAPI.backendFetch()</a> function to
     call backend application handlers. For example, this is how you implement
     <b>close-browser</b> command for the Windows version of Firefox:</p>
 
@@ -1188,7 +1183,7 @@ class PinterestAPI {
  */
 class CloseBrowser {
     async execute() {
-        await cmdAPI.helperFetch("/close_browser")
+        await cmdAPI.backendFetch("/close_browser")
     }
 }</code></pre>
 

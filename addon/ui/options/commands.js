@@ -1,7 +1,6 @@
 import {cmdManager} from "../../ishell.js";
 import {settings} from "../../settings.js";
 import {setupHelp} from "./utils.js";
-import {repository} from "../../storage.js";
 
 window.escapeHtml = Utils.escapeHtml;
 
@@ -39,8 +38,9 @@ async function buildTable() {
 
     insertNamespace("default", userCommands, makeEditorLink("default"));
 
-    let userNamespaces = await repository.fetchUserScriptNamespaces();
-    userNamespaces = userNamespaces.filter(n => !!n && n !== "default");
+    let userNamespaces = userCommands.map(c => c._namespace);
+    userNamespaces = userNamespaces
+        .filter((ns, i, a) => ns && ns !== "default" && a.indexOf(ns) === i); // distinct
     userNamespaces = userNamespaces.sort(cmdAPI.localeCompare());
 
     for (const n of userNamespaces)

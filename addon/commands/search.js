@@ -1,6 +1,6 @@
 import {settings} from "../settings.js";
 
-export const namespace = new CommandNamespace(CommandNamespace.SEARCH, true);
+export const namespace = new AnnotatedCommandNamespace(CommandNamespace.SEARCH);
 
 /**
     @search

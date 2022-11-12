@@ -11,9 +11,9 @@ let editor;
 $(initEditor);
 
 async function initEditor() {
-    if (_MANIFEST_V3 && _BACKGROUND_PAGE) {
-        if (!await helperApp.probe())
-            CmdUtils.notify("Please, install the backend application to execute custom commands");
+    if (_MANIFEST_V3 && settings.platform.firefox) {
+        CmdUtils.notify("Manifest v3 iShell for Firefox does not support custom commands entered through the editor. "
+            + "Please see the add-on GitHub page for more details.");
     }
 
     let lastNamespace = settings.last_editor_namespace();

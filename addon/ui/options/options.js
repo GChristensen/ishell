@@ -207,22 +207,10 @@ async function importSettings(file) {
 async function loadHelperAppLinks() {
     let latestHelperAppVersion;
 
-    function setDownloadLinks(link1, link2) {
-        const app = link1.endsWith(".exe")? link1: link2;
-        const archive = link1.endsWith(".tgz")? link1: link2;
+    function setDownloadLinks(release) {
+        const tar = release.assets.find(a => a.browser_download_url.endsWith(".tgz"));
 
-        if (_MANIFEST_V3) {
-            if (_BACKGROUND_PAGE)
-                $("#helper-windows").attr("href", app);
-            else
-                $("#helper-windows").on("click",
-                    () => alert("The backend application is not mandatory to execute user commands in Chrome."));
-        }
-        else
-            $("#helper-windows").on("click",
-                () => alert("Windows installer is not provided with the MV2 version of the add-on."));
-
-        $("#helper-python").attr("href", archive);
+        $("#helper-python").attr("href", tar.browser_download_url);
     }
 
     try {
@@ -231,17 +219,17 @@ async function loadHelperAppLinks() {
 
         if (response.ok) {
             let release = JSON.parse(await response.text());
-            setDownloadLinks(release.assets[0].browser_download_url, release.assets[1].browser_download_url);
 
             latestHelperAppVersion = release.name.split(" ");
             latestHelperAppVersion = latestHelperAppVersion.at(-1);
+
+            setDownloadLinks(release);
         }
         else
             throw new Error();
     }
     catch (e) {
         console.error(e);
-        setDownloadLinks("#", "#");
         //latestHelperAppVersion.html(`<b>Latest version:</b> error`);
     }
 
@@ -257,7 +245,7 @@ async function loadHelperAppLinks() {
     if (installedHelperAppVersion)
         $("#helper-version").text(`v${installedHelperAppVersion}`);
     else
-        $("#helper-version").html(`is not installed <a href="tutorial.html#helper" title="About the helper application"
+        $("#helper-version").html(`is not installed <a href="tutorial.html#backend" title="About the backend application"
                                                              target="_blank">&#x1F6C8;</a>`);
 
     if (update)

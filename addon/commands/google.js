@@ -1,6 +1,6 @@
 import {settings} from "../settings.js";
 
-export const namespace = new CommandNamespace(CommandNamespace.SEARCH, true);
+export const namespace = new AnnotatedCommandNamespace(CommandNamespace.SEARCH);
 
 /**
     It is possible to use the <b>as</b> argument with the following values: <i>quoted</i>, <i>site</i>, <i>define</i>.
