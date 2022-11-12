@@ -1,4 +1,4 @@
-export const namespace = new CommandNamespace(CommandNamespace.MAIL, true);
+export const namespace = new AnnotatedCommandNamespace(CommandNamespace.MAIL);
 
 class MailBase {
     constructor(args) {

@@ -1,4 +1,4 @@
-export const namespace = new CommandNamespace(CommandNamespace.SYNDICATION, true);
+export const namespace = new  AnnotatedCommandNamespace(CommandNamespace.SYNDICATION);
 
 /**
  The command uses the URL opened in the current tab.

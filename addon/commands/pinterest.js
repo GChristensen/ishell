@@ -1,6 +1,6 @@
 import {sleep} from "../utils.js";
 
-export const namespace = new CommandNamespace(CommandNamespace.SYNDICATION, true);
+export const namespace = new AnnotatedCommandNamespace(CommandNamespace.SYNDICATION);
 
 /**
  @label board

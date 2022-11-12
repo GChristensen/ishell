@@ -1,1 +1,1 @@
-python ./ishell_backend/installer.py
+python ./ishell_backend/installer.py --devel

@@ -1,4 +1,4 @@
-export const namespace = new CommandNamespace(CommandNamespace.UTILITY, true);
+export const namespace = new AnnotatedCommandNamespace(CommandNamespace.UTILITY);
 
 /**
     Allows to copy the character or its code representations to the clipboard.

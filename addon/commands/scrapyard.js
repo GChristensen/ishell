@@ -702,7 +702,7 @@ namespace.onModuleCommandsLoaded = async function() {
     SCRAPYARD_COMMANDS = commandUUIDs.map(cmdManager.getCommandByUUID.bind(cmdManager));
     SCRAPYARD_COMMANDS.forEach(c => cmdManager.removeCommand(c));
 
-    const apiModule = await import("./scrapyard_api.js");
+    const apiModule = await import("/api/scrapyard.js");
     apiModule._setScrapyardId(SCRAPYARD_ID);
 
     cmdAPI.scrapyard = {...apiModule};

@@ -1,4 +1,4 @@
-export const namespace = new CommandNamespace(CommandNamespace.UTILITY, true);
+export const namespace = new AnnotatedCommandNamespace(CommandNamespace.UTILITY);
 
 const noun_type_archive = {
     "wayback machine latest": ["web.archive.org", "http://web.archive.org/web/"]

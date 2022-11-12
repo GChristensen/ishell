@@ -1,54 +1,56 @@
+PYTHON := $(if $(filter $(OS),Windows_NT),python,python3)
+
 test:
+	make commands
 	cd addon; start web-ext run -p "$(HOME)/../firefox/debug.ishell" --keep-profile-changes
 
 test-nightly:
+	make commands
 	cd addon; start web-ext run -p "$(HOME)/../firefox/debug.ishell.nightly" --firefox=nightly --keep-profile-changes
 
+.PHONY: set-version
+set-version:
+	echo $(filter-out $@,$(MAKECMDGOALS)) > ./addon/version.txt
+
+.PHONY: get-version
+get-version:
+	@cat ./addon/version.txt
+
 sign:
+	make commands
 	make firefox-mv2
 	cd addon; web-ext sign -a ../build -i web-ext-artifacts .web-extension-id *.mv2* *.mv3* background_worker.js mv3_scripts.js version.txt `cat $(HOME)/.amo/creds`
 
 .PHONY: build
 build:
-	cd addon; python ../scripts/mkmanifest.py manifest.json.mv2 manifest.json `cat version.txt` --public
+	make commands
+	cd addon; $(PYTHON) ../scripts/mkmanifest.py manifest.json.mv2 manifest.json `cat version.txt` --public
 	cd addon; web-ext build -a ../build -i web-ext-artifacts .web-extension-id *.mv2* *.mv3* background_worker.js mv3_scripts.js version.txt
 	make firefox-mv2
 
 .PHONY: build-chrome
 build-chrome:
+	make commands
 	make chrome-mv3
 	rm -f build/ishell-chrome-*.zip
 	7za a build/ishell-chrome-`cat ./addon/version.txt`.zip ./addon/* -xr!web-ext-artifacts -xr!.web-extension-id -xr!*.mv2* -xr!*.mv3* -xr!version.txt
 
+.PHONY: commands
+commands:
+	$(PYTHON) ./scripts/mkcommands.py commands
+	$(PYTHON) ./scripts/mkcommands.py commands-user
+
 .PHONY: firefox-mv2
 firefox-mv2:
-	cd addon; python ../scripts/mkmanifest.py manifest.json.mv2 manifest.json `cat version.txt`
+	cd addon; $(PYTHON) ../scripts/mkmanifest.py manifest.json.mv2 manifest.json `cat version.txt`
 
 .PHONY: firefox-mv3
 firefox-mv3:
-	cd addon; python ../scripts/mkmanifest.py manifest.json.mv3 manifest.json `cat version.txt`
+	cd addon; $(PYTHON) ../scripts/mkmanifest.py manifest.json.mv3 manifest.json `cat version.txt`
 
 .PHONY: chrome-mv3
 chrome-mv3:
-	cd addon; python ../scripts/mkmanifest.py manifest.json.mv3.chrome manifest.json `cat version.txt`
-
-.PHONY: backend-clean
-backend-clean:
-	cd backend; rm -r -f build
-	cd backend; rm -r -f dist
-	cd backend; rm -f *.spec
-
-.PHONY: backend-win
-backend-win:
-	make backend-clean
-	cd backend; rm -f *.exe
-	cd backend; rm -f *.zip
-	echo "DEBUG = False" > ./backend/ishell/server_debug.py
-	cd backend; pyinstaller ishell_backend.py
-	cd backend; makensis setup.nsi
-	echo "DEBUG = True" > ./backend/ishell/server_debug.py
-	make backend-clean
-
+	cd addon; $(PYTHON) ../scripts/mkmanifest.py manifest.json.mv3.chrome manifest.json `cat version.txt`
 
 .PHONY: backend-cli
 backend-cli:
@@ -66,3 +68,6 @@ backend-cli:
 	cd backend; rm -r -f ./cli-installer/ishell_backend/manifests
 	cd backend; rm -r -f ./cli-installer/ishell_backend/ishell_backend.cmd
 	cd backend; rm -r -f ./cli-installer/ishell_backend/ishell_backend.sh
+
+%:
+	@:

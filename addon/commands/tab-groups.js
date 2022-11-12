@@ -1,6 +1,6 @@
 import {cmdManager} from "../cmdmanager.js";
 
-export const namespace = new CommandNamespace(CommandNamespace.BROWSER, true);
+export const namespace = new AnnotatedCommandNamespace(CommandNamespace.BROWSER);
 
 const DEFAULT_TAB_GROUP = "default";
 const ALL_GROUPS_SPECIFIER = "all";
