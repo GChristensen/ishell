@@ -110,6 +110,32 @@ class CommandManager {
 
     #userCommandNamespaces = [];
 
+    // ! sic, replaced by mkcommands.py
+    #builtinCommandFiles = [
+        "/commands/browser.js",
+        "/commands/color-picker.js",
+        "/commands/feedsub.js",
+        "/commands/google.js",
+        "/commands/history.js",
+        "/commands/ishell.js",
+        "/commands/lingvo.js",
+        "/commands/literature.js",
+        "/commands/mail.js",
+        "/commands/new-tab.js",
+        "/commands/pinterest.js",
+        "/commands/resurrect.js",
+        "/commands/scrapyard.js",
+        "/commands/search.js",
+        "/commands/tab-groups.js",
+        "/commands/translate.js",
+        "/commands/unicode.js",
+        "/commands/utility.js",
+        "/commands/more/javlib.js",
+        "/commands/more/kpop.js",
+        "/commands/more/more.js",
+        "/commands/more/nyaa.js"
+    ];
+
     constructor() {
         this._commands = [];
         this._disabledCommands = settings.disabled_commands() || {};
@@ -310,13 +336,11 @@ class CommandManager {
     }
 
     async loadBuiltinCommands() {
-        let commandFiles = await fetchJSON("/commands.json");
-
         if (settings.platform.chrome)
-            commandFiles = commandFiles.filter(f => !f.includes("/tab-groups.js"));
+            this.#builtinCommandFiles = this.#builtinCommandFiles.filter(f => !f.includes("/tab-groups.js"));
 
         const modules = [];
-        for (const path of commandFiles)
+        for (const path of this.#builtinCommandFiles)
             modules.push(this._loadBuiltinCommandModule(path));
 
         await Promise.all(modules);
