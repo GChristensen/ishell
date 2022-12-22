@@ -22,7 +22,6 @@ export class Lingvo {
     #abbyyAPI = "https://developers.lingvolive.com/api";
 
     #lingvoAPIToken;
-    #articleURL;
 
     constructor(args) {
         args[OBJECT] = {nountype: noun_arb_text, label: "words"}; // object
@@ -43,11 +42,10 @@ export class Lingvo {
             this.#translate(display, OBJECT, FROM, TO);
     }
 
-    execute(args, storage) {
-        if (this.#articleURL) {
-            cmdAPI.addTab(this.#articleURL);
-            this.#articleURL = null;
-        }
+    execute({OBJECT, FROM, TO}, storage) {
+        const {articleURL} = this.#createURL(OBJECT, FROM, TO);
+
+        cmdAPI.addTab(articleURL);
     }
 
     async #authorize(display) {
@@ -70,31 +68,17 @@ export class Lingvo {
     }
 
     #translate(display, object, from, to) {
-        const words = object.text.trim().toLowerCase();
+        const {words, apiURL} = this.#createURL(object, from, to);
+        const errorMessage = `Can not translate <b>${words}</b>`;
 
         display.text(`Translating <b>${words}</b>...`);
 
-        const errorMessage = `Can not translate <b>${words}</b>`;
-
-        const isLatin = /[a-z]/.test(words);
-        const EN = {data: [1033, "en"]};
-        const RU = {data: [1049, "ru"]};
-
-        const wordsURI = encodeURIComponent(words);
-        const fromCode = this.#getLangCode(from, isLatin ? EN: RU);
-        const toCode = this.#getLangCode(to, isLatin ? RU: EN);
-        const fromID = this.#getLangID(from, isLatin ? EN: RU);
-        const toID = this.#getLangID(to, isLatin ? RU: EN);
-
-        this.#articleURL = `https://www.lingvolive.com/en-us/translate/${fromID}-${toID}/${wordsURI}`;
-
-        const url = `${this.#abbyyAPI}/v1/Translation?text=${wordsURI}&srcLang=${fromCode}&dstLang=${toCode}`;
         const authorize = async () => this.#authorize(display);
         let lingvoToken = this.#lingvoAPIToken;
         let attemptedAuthorization = false;
 
         var options = {
-            url,
+            url: apiURL,
             dataType: "json",
             headers: {
                 "Authorization": "Bearer " + lingvoToken
@@ -121,6 +105,25 @@ export class Lingvo {
         };
 
         cmdAPI.previewAjax(display, options);
+    }
+
+    #createURL(object, from, to) {
+        const words = object.text.trim().toLowerCase();
+
+        const isLatin = /[a-z]/.test(words);
+        const EN = {data: [1033, "en"]};
+        const RU = {data: [1049, "ru"]};
+
+        const wordsURI = encodeURIComponent(words);
+        const fromCode = this.#getLangCode(from, isLatin? EN: RU);
+        const toCode = this.#getLangCode(to, isLatin? RU: EN);
+        const fromID = this.#getLangID(from, isLatin? EN: RU);
+        const toID = this.#getLangID(to, isLatin? RU: EN);
+
+        const articleURL = `https://www.lingvolive.com/en-us/translate/${fromID}-${toID}/${wordsURI}`;
+        const apiURL = `${this.#abbyyAPI}/v1/Translation?text=${wordsURI}&srcLang=${fromCode}&dstLang=${toCode}`;
+
+        return {words, apiURL, articleURL};
     }
 
     #getLangCode(lang, def) {

@@ -1,4 +1,4 @@
-export const namespace = new AnnotatedCommandNamespace(CommandNamespace.BROWSER, true);
+export const namespace = new AnnotatedCommandNamespace(CommandNamespace.TABS, true);
 
 /**
     # Syntax

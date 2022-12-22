@@ -1,31 +1,27 @@
-import {cmdManager} from "../cmdmanager.js";
+import {camelCaseToSnakeCase} from "../utils.js";
+import {settings} from "../settings.js";
 
-export const namespace = new AnnotatedCommandNamespace(CommandNamespace.BROWSER);
+export const namespace = new AnnotatedCommandNamespace(CommandNamespace.TABS);
 
 const DEFAULT_TAB_GROUP = "default";
 const ALL_GROUPS_SPECIFIER = "all";
-const TAB_GROUP_EXPORT_FIELD = "ishell-tab-group";
-
-let CONTAINERS = [];
-const noun_type_container = {};
-
-if (browser.contextualIdentities) {
-    try {
-        CONTAINERS = await browser.contextualIdentities.query({})
-        CONTAINERS.forEach(c => noun_type_container[c.name.toLowerCase()] = c.cookieStoreId);
-    } catch (e) {
-        console.error(e);
-    }
-}
 
 /**
     @label name
     @nountype
  */
-export function noun_type_tab_group(text, html, _, selectionIndices) {
+export async function noun_type_tab_group(text, html, _, selectionIndices) {
     if (text) {
-        let suggs = Object.keys(this._cmd.deref().tabGroups);
-        suggs = suggs.map(name => cmdAPI.makeSugg(name, name, null, 1, selectionIndices));
+        let suggs = [];
+
+        try {
+            suggs = await sendLTG.ltgGetTabGroups();
+        }
+        catch (e) {
+            console.error(e);
+        }
+
+        suggs = suggs.map(tg => cmdAPI.makeSugg(tg.name, tg.name, tg, 1, selectionIndices));
         suggs = cmdAPI.grepSuggs(text, suggs);
 
         cmdAPI.addSugg(suggs, text, html, null, .001, selectionIndices);
@@ -38,10 +34,8 @@ export function noun_type_tab_group(text, html, _, selectionIndices) {
 }
 
 /**
-    Works best if persistent sessions are enabled in the browser settings.
-
     # Syntax
-    **tab-group** [**all** | *name*] [**to** *operation*] [**in** *container*] [**by** *action*] [**at** *name*] [**for** *filter*]
+    **tab-group** [**all** | *name*] [**to** *operation*] [**in** *container*] [**by** *action*] [**at** *name*] [**for** *filter*] [**of** *color key*]
 
     # Arguments
     - *name* - the name of a tab group to create or to operate on. May also be specified in the **at** argument (it has precedence).
@@ -60,12 +54,13 @@ export function noun_type_tab_group(text, html, _, selectionIndices) {
         - *switching* - switch to the specified tab group. May be used with the *move* and *move-tab* operations.
     - *container* - the identity container to use in the tab group.
     - *filter* - when applicable, filter tabs by this string in the tab URL or title.
+    - *color key* - a digit (0-9) corresponding to the color mnemonic of the tab group.
 
     # Examples
     - **tab-group** *cats*
-    - **tgr** *books* **in** *shopping*
+    - **tgr** *books* **in** *shopping* **of** *8*
     - **tgr** **to** *delete* *books*
-    - **tgr** **all** **to** *close*
+    - **tgr** **to** *close* **all**
     - **tgr** **to** *move* **by** *switching* **at** *books* **for** *used*
 
     @command tab-group, tgr
@@ -73,13 +68,12 @@ export function noun_type_tab_group(text, html, _, selectionIndices) {
     @delay 500
     @author g/christensen
     @icon /ui/icons/tab-groups.svg
-    @description Essential tab group manager.
+    @description iShell command for the <a href="https://gchristensen.github.io/lightning-tab-groups/">Lightning Tab Groups</a> extension.
     @uuid CC6A1FD6-5959-423F-8D77-1C6EF630B0A1
  */
 export class TabGroup {
+    #containers = [];
     #tabGroups = {[DEFAULT_TAB_GROUP]: {name: DEFAULT_TAB_GROUP}};
-    #recentTabGroup;
-    #listenersInstalled;
 
     constructor(args) {
         noun_type_tab_group._cmd = new WeakRef(this);
@@ -93,98 +87,38 @@ export class TabGroup {
         args[AT]     = {nountype: noun_type_tab_group, label: "name"}; // time
         //args[WITH]   = {nountype: noun_type_tab_group, label: "name"}; // instrument
         args[IN]     = {nountype: noun_type_container, label: "container"}; // format
-        //args[OF]     = {nountype: noun_arb_text, label: "text"}; // modifier
+        args[OF]     = {nountype: /\d/, label: "color"}; // modifier
         //args[AS]     = {nountype: noun_arb_text, label: "text"}; // alias
         args[BY]     = {nountype: ["switching"], label: "action"}; // cause
         //args[ON]     = {nountype: noun_arb_text, label: "text"}; // dependency
     }
 
-    get tabGroups() {
-        return this.#tabGroups;
-    }
-
     async load(storage) {
-        this.#loadState(storage);
-
-        if (Object.keys(this.#tabGroups).length > 1)
-            this.#installListeners();
-    }
-
-    #installListeners() {
-        if (!this.#listenersInstalled) {
-            browser.windows.onCreated.addListener(this.#onWindowCreated.bind(this));
-            browser.tabs.onCreated.addListener(this.#onTabCreated.bind(this));
-            browser.tabs.onAttached.addListener(this.#onTabAttached.bind(this));
-
-
-            browser.webRequest.onBeforeRequest.addListener(this.#onBeforeTabCreated.bind(this), {
-                    urls: ['<all_urls>'],
-                    types: [browser.webRequest.ResourceType.MAIN_FRAME],
-                },
-                [browser.webRequest.OnBeforeRequestOptions.BLOCKING]
-            );
-        }
-    }
-
-    async #onWindowCreated(browserWindow) {
-        if (this.#recentTabGroup)
-            await this.#setWindowTabGroupName(browserWindow, this.#recentTabGroup);
-    }
-
-    async #onTabCreated(tab) {
-        const name = await this.#getTabGroupName(tab, true);
-        if (!name)
-            await this.#addToActiveTabGroup(tab);
-    }
-
-    #onTabAttached(tabId, attachInfo) {
-        return this.#addToActiveTabGroup({id: tabId});
-    }
-
-    #seenWebRequests = new Set();
-    async #onBeforeTabCreated(request) {
-        if (request.frameId !== 0 || request.tabId === -1 || this.#seenWebRequests.has(request.requestId))
-            return {};
-
-        this.#seenWebRequests.add(request.requestId);
-        setTimeout(() => this.#seenWebRequests.delete(request.requestId), 2000);
-
-        const tab = await browser.tabs.get(request.tabId);
-
-        if (tab) {
-            const windowTabGroup = await this.#getTabWindowTabGroupName(tab);
-            const tabGroup = this.#tabGroups[windowTabGroup];
-
-            if (windowTabGroup !== DEFAULT_TAB_GROUP && tabGroup.container) {
-                const cookieStoreId = tabGroup.container.cookieStoreId;
-                if (request.cookieStoreId !== cookieStoreId) {
-                    await browser.tabs.create({url: request.url, cookieStoreId});
-                    browser.tabs.remove(tab.id);
-                    return {cancel: true};
-                }
-            }
-        }
-
-        return {};
     }
 
     async preview(args, display, storage) {
         let {OBJECT: {text: name}, TO: {text: action}, BY: {text: action2}, IN, AT, FOR: {text: filter}} = args;
+        let tabGroup = args.OBJECT?.data;
+
+        if (name === ALL_GROUPS_SPECIFIER)
+            tabGroup = {name: ALL_GROUPS_SPECIFIER, uuid: ALL_GROUPS_SPECIFIER};
+
+        this.#containers = await this.#getContainers();
 
         name = this.#excludeSelection(args);
         filter = filter && filter === cmdAPI.getSelection()? "": filter;
 
         if (name && !action) {
-            if (this.#tabGroups[name])
-                await this.#listGroupTabs(display, name, filter);
+            if (tabGroup)
+                await this.#listTabGroupTabs(display, tabGroup, filter);
             else
                 display.text(this.#describeCreate(name, IN?.text));
         }
         else if (!name && !action) {
-            await this.#listGroups(display);
+            await this.#listTabGroups(display);
         }
         else if (action) {
-            const params = {action, action2, name, filter};
+            const params = {action, action2, name, filter, tabGroup};
             await this.#describeAction(display, params);
         }
     }
@@ -201,153 +135,36 @@ export class TabGroup {
         return text;
     }
 
-    #isTabGroupExists(name) {
-        name = name.toLowerCase();
-        const tabGroups = Object.values(this.#tabGroups);
-        return !!tabGroups.find(tg => tg.name.toLowerCase() === name)
-    }
+    async #getContainers() {
+        let containers = [];
 
-    #createTabGroup(name) {
-        if (!(name in this.#tabGroups)) {
-            if (name === ALL_GROUPS_SPECIFIER)
-                throw new Error("Can not create group with this name: " + name);
-
-            this.#tabGroups[name] = {name};
+        try {
+            containers = await browser.contextualIdentities.query({})
+        } catch (e) {
+            console.error(e);
         }
+
+        return containers;
     }
 
-    #assignTabGroupContainer(name, container) {
-        if (container) {
-            container = container.toLowerCase()
-            const cookieStoreId = noun_type_container[container];
-            if (cookieStoreId)
-                this.#tabGroups[name].container = {
-                    name: container,
-                    cookieStoreId
-                };
-        }
+    async #isTabGroupExist(name) {
+        return sendLTG.ltgIsTabGroupExist({name});
     }
 
-    #removeTabGroup(name) {
-        delete this.#tabGroups[name];
-    }
-
-    async #getWindowTabGroupName(window) {
-        const windowTabGroup = await browser.sessions.getWindowValue(window.id, 'tabGroup');
-        return windowTabGroup || DEFAULT_TAB_GROUP;
-    }
-
-    async #setWindowTabGroupName(window, name) {
-        return browser.sessions.setWindowValue(window.id, 'tabGroup', name);
-    }
-
-    async #getTabWindowTabGroupName(tab) {
-        const tabWindow = await browser.windows.get(tab.windowId);
-        return this.#getWindowTabGroupName(tabWindow);
+    async #createTabGroup(name, container, colorKey) {
+        return sendLTG.ltgCreateTabGroup({name, container: container?.cookieStoreId, colorKey});
     }
 
     async #getCurrentWindowTabGroupName() {
-        const currentWindow = await browser.windows.getCurrent();
-        return this.#getWindowTabGroupName(currentWindow);
+        return sendLTG.ltgGetCurrentWindowTabGroupName();
     }
 
-    async #setCurrentWindowTabGroupName(name) {
-        const currentWindow = await browser.windows.getCurrent();
-        return this.#setWindowTabGroupName(currentWindow, name);
+    async #switchToTabGroup(uuid, activeTab) {
+        return sendLTG.ltgSwitchToTabGroup({uuid, activeTab});
     }
 
-    async #addToActiveTabGroup(tab) {
-        const windowTabGroup = await this.#getTabWindowTabGroupName(tab);
-        if (windowTabGroup !== DEFAULT_TAB_GROUP)
-            await browser.sessions.setTabValue(tab.id, 'tabGroup', windowTabGroup);
-    }
-
-    async #addToTabGroup(tab, tabGroup) {
-        await browser.sessions.setTabValue(tab.id, 'tabGroup', tabGroup);
-    }
-
-    async #getTabGroupName(tab, raw) {
-        let tabGroup = await browser.sessions.getTabValue(tab.id, 'tabGroup');
-        if (raw)
-            return tabGroup;
-        else
-            return tabGroup || DEFAULT_TAB_GROUP;
-    }
-
-    async #switchToTabGroup(name, activeTab) {
-        let windowTabGroup = await this.#getCurrentWindowTabGroupName();
-        name = name || DEFAULT_TAB_GROUP;
-
-        if (windowTabGroup !== name) {
-            this.#installListeners();
-            await this.#setCurrentWindowTabGroupName(name);
-            this.#recentTabGroup = name;
-
-            const tabs = await browser.tabs.query({ currentWindow: true });
-
-            const [tabsToHide, tabsToShow] = await this.#separateTabs(tabs, name);
-
-            if (tabsToShow.length) {
-                if (activeTab)
-                    await browser.tabs.update(activeTab.id, {active: true});
-                else {
-                    tabsToShow.sort((a, b) => b.lastAccessed - a.lastAccessed);
-                    await browser.tabs.update(tabsToShow[0].id, {active: true});
-                }
-            }
-            else
-                await browser.tabs.create({active: true});
-
-            await browser.tabs.hide(tabsToHide.map(t => t.id));
-            await browser.tabs.show(tabsToShow.map(t => t.id));
-        }
-        else if (activeTab) {
-            await browser.tabs.update(activeTab.id, {active: true});
-        }
-    }
-
-    async #separateTabs(tabs, name) {
-        const tabsToHide = [];
-        const tabsToShow = [];
-
-        await Promise.all(tabs.map(async tab => {
-            try {
-                const tabGroup = await this.#getTabGroupName(tab);
-
-                if (tabGroup !== name)
-                    tabsToHide.push(tab);
-                else
-                    tabsToShow.push(tab);
-            } catch (e) {
-                console.error(e);
-            }
-        }));
-
-        return [tabsToHide, tabsToShow];
-    }
-
-    async #getGroupTabs(name, currentWindow = true) {
-        name = name || DEFAULT_TAB_GROUP;
-        const params = {};
-
-        if (currentWindow)
-            params.currentWindow = true;
-
-        const tabs = await browser.tabs.query(params);
-
-        const result = [];
-        for (const tab of tabs) {
-            const tabGroup = await this.#getTabGroupName(tab);
-            if (tabGroup === name)
-                result.push(tab);
-        }
-
-        return result;
-    }
-
-    async #listGroupTabs(display, name, filter) {
-        let tabs = await this.#getGroupTabs(name);
-        tabs = this.#filterTabs(tabs, filter);
+    async #listTabGroupTabs(display, tabGroup, filter) {
+        const tabs = await sendLTG.ltgGetTabGroupTabs({uuid: tabGroup.uuid, filter});
 
         const cfg = {
             text: t => t.title,
@@ -355,7 +172,7 @@ export class TabGroup {
             icon: t => t.favIconUrl || "/ui/icons/globe.svg",
             iconSize: 16,
             action: t => {
-                this.#switchToTabGroup(name, t);
+                this.#switchToTabGroup(tabGroup.uuid, t);
                 cmdAPI.closeCommandLine();
             },
             buttonContent: "<div class='tab-close-button' title='Close tab'>&#x2A2F;</div>",
@@ -367,73 +184,32 @@ export class TabGroup {
 
         const listStyle = ".tab-close-button {margin-top: -3px;} .tab-close-button:hover {color: var(--opl-subtext-color);}"
         const headingStyle = "width: calc(100% - 5px); border-bottom: 1px solid var(--shell-font-color);";
-        const heading = `<div style="${headingStyle}">Tabs of the <b>${name}</b> tab group</div>`
+        const heading = `<div style="${headingStyle}">Tabs of the <b>${tabGroup.name}</b> tab group</div>`
 
         const list = display.objectList(heading, tabs, cfg, listStyle);
         $(list).find("img.opl-icon").on("error", e => e.target.src = "/ui/icons/globe.svg");
     }
 
-    #filterTabs(tabs, filter) {
-        let result = tabs;
-
-        if (filter) {
-            filter = filter.toLowerCase();
-
-            const filterf = tab => {
-                const urlMatches = tab.url.toLowerCase().includes(filter);
-                const titleMatches = tab.title?.toLowerCase()?.includes(filter);
-                return urlMatches || titleMatches;
-            };
-
-            result = tabs.filter(filterf);
-        }
-
-        return result;
-    }
-
-    async #listGroups(display) {
-        const windowTabGroup = await this.#getCurrentWindowTabGroupName();
-        const groupTabs = {};
-
-        let groups = Object.values(this.#tabGroups);
-        groups = this.#sortTabGroups(groups);
-
-        let hasContainers = false;
-        for (const group of groups) {
-            if (group.container)
-                hasContainers = true;
-
-            groupTabs[group.name] = {
-                windowTabs: await this.#getGroupTabs(group.name),
-                allTabs: await this.#getGroupTabs(group.name, false)
-            };
-        }
+    async #listTabGroups(display) {
+        const tabGroups = await sendLTG.ltgGetTabGroups();
 
         const cfg = {
-            text: tg => this.#formatTabGroup(tg.name, groupTabs[tg.name], tg.name === windowTabGroup),
+            text: tg => this.#formatTabGroup(tg),
             icon: tg => this.#getTabGroupContainerIcon(tg),
             iconSize: 16,
             action: tg => {
-                this.#switchToTabGroup(tg.name);
+                this.#switchToTabGroup(tg.uuid);
                 cmdAPI.closeCommandLine();
             }
         };
 
-        if (!hasContainers)
+        if (!tabGroups.some(tg => tg.container))
             delete cfg.icon;
 
         const headingStyle = "width: calc(100% - 5px); border-bottom: 1px solid var(--shell-font-color);";
         const heading = `<div style="${headingStyle}">Tab groups</div>`
 
-        display.objectList(heading, groups, cfg);
-    }
-
-    #sortTabGroups(groups) {
-        const defaultGroupIdx = groups.findIndex(g => g.name === DEFAULT_TAB_GROUP);
-        const defaultGroup = groups[defaultGroupIdx];
-        groups.splice(defaultGroupIdx, 1);
-        groups.sort(cmdAPI.localeCompare("name"))
-        return [defaultGroup, ...groups];
+        display.objectList(heading, tabGroups, cfg);
     }
 
     #getTabGroupContainerIcon(tabGroup) {
@@ -443,7 +219,8 @@ export class TabGroup {
         let iconStyle = "";
 
         if (tabGroup.container) {
-            container = CONTAINERS.find(c => c.cookieStoreId === tabGroup.container.cookieStoreId);
+
+            container = this.#containers.find(c => c.cookieStoreId === tabGroup.container.cookieStoreId);
             iconUrl = container.iconUrl;
             iconColor = container.colorCode;
             iconStyle = `mask-image: url('${iconUrl}'); mask-size: 16px 16px; `
@@ -453,18 +230,22 @@ export class TabGroup {
         return $(`<div style="${iconStyle}"></div>`);
     }
 
-    #formatTabGroup(name, tabs, active) {
+    #formatTabGroup(tabGroup) {
         let tabCount;
-        const dualCount = tabs.windowTabs.length !== tabs.allTabs.length
+        const dualCount = tabGroup.windowTabsCount !== tabGroup.allTabsCount;
+
         if (dualCount)
-            tabCount = `(${tabs.windowTabs.length}/${tabs.allTabs.length})`;
+            tabCount = `(${tabGroup.allTabsCount}/${tabGroup.windowTabsCount})`;
         else
-            tabCount = `(${tabs.allTabs.length})`;
+            tabCount = `(${tabGroup.allTabsCount})`;
 
         const countTitle = dualCount? "window/total": "total";
 
-        const color = active? "#FF52DF": "#0F0";
-        name = `<span style="color: ${color}">${name}</span>`;
+        const tabGroupColor = tabGroup.color || "#0F0";
+        const color = tabGroup.active? "var(--shell-background-color)": tabGroupColor;
+        const background = tabGroup.active? tabGroupColor: "transparent";
+        const style = `color: ${color}; background-color: ${background}; display: inline-block; padding: 0 2px;`;
+        let name = `<span class="tab-group-name" data-name="${tabGroup.name}" style="${style}">${tabGroup.name}</span>`;
         name = name + ` <span style="color: var(--opl-text-color)" title="${countTitle}">${tabCount}</span>`
         return name;
     }
@@ -517,14 +298,7 @@ export class TabGroup {
     }
 
     async #describePaste() {
-        const inputObject = await this.#parseClipboardContent();
-
-        if (inputObject?.command === TAB_GROUP_EXPORT_FIELD)
-            return `Paste the <b>${inputObject.tabGroup.name}</b> tab group from clipboard.`;
-        else if (Array.isArray(inputObject))
-            return `Paste multiple tab groups from clipboard.`;
-        else
-            return `The clipboard does not contain valid content.`
+        return `Paste tab groups from clipboard.`;
     }
 
     async #describeReload(name, filter) {
@@ -584,25 +358,25 @@ export class TabGroup {
     async #performAction(name, params) {
         switch (params.action) {
             case "copy":
-                await this.#copyTabGroup(params.name)
+                await this.#copyTabGroup(params.tabGroup?.uuid)
                 break;
             case "paste":
-                await this.#pasteTabGroup(params.name)
+                await this.#pasteTabGroup()
                 break;
             case "switch":
-                await this.#switchToTabGroup(params.name)
+                await this.#switchToTabGroup(params.tabGroup?.uuid)
                 break;
             case "reload":
-                await this.#reloadTabGroup(params.name, params.filter);
+                await this.#reloadTabGroup(params.tabGroup?.uuid, params.filter);
                 break;
             case "close":
-                await this.#closeTabGroup(params.name, params.filter);
+                await this.#closeTabGroup(params.tabGroup?.uuid, params.filter);
                 break;
             case "delete":
-                await this.#deleteTabGroup(params.name);
+                await this.#deleteTabGroup(params.tabGroup?.uuid);
                 break;
             case "window":
-                await this.#tabGroupInNewWindow(params.name, params.filter);
+                await this.#tabGroupInNewWindow(params.tabGroup?.uuid, params.filter);
                 break;
             case "move":
             case "move-tab":
@@ -611,266 +385,112 @@ export class TabGroup {
         }
     }
 
-    async #copyTabGroup(name) {
-        const currentWindowTabGroup = await this.#getCurrentWindowTabGroupName();
-        name = name || currentWindowTabGroup;
-
-        let outputObject;
-        if (name === ALL_GROUPS_SPECIFIER) {
-            outputObject = [];
-            for (const name in this.#tabGroups) {
-                const group = await this.#exportTabGroup(name);
-                outputObject.push(group);
-            }
-        }
-        else if (this.#isTabGroupExists(name))
-            outputObject = await this.#exportTabGroup(name);
-
-        const output = JSON.stringify(outputObject, null, 2);
-        await navigator.clipboard.writeText(output);
-    }
-
-    async #exportTabGroup(name) {
-        const tabGroup = this.#tabGroups[name];
-        const tabs = await this.#getGroupTabs(name, false);
-        return {
-            command: TAB_GROUP_EXPORT_FIELD,
-            version: 1,
-            tabGroup: tabGroup,
-            tabs: tabs.map(t => t.url)
-        };
-    }
-
-    async #parseClipboardContent(verbose) {
-        const input = await navigator.clipboard.readText();
-        let inputObject;
-
-        try {
-            inputObject = JSON.parse(input);
-        } catch (e) {
-            if (verbose)
-                cmdAPI.notify(e.message);
-        }
-
-        return inputObject;
+    async #copyTabGroup(uuid) {
+        return sendLTG.ltgCopyTabGroup({uuid});
     }
 
     async #pasteTabGroup() {
-        const inputObject = await this.#parseClipboardContent(true);
-
-        if (Array.isArray(inputObject)) {
-            for (const object of inputObject)
-                if (object?.command === TAB_GROUP_EXPORT_FIELD)
-                    await this.#importTabGroup(object);
-        }
-        else if (inputObject?.command === TAB_GROUP_EXPORT_FIELD)
-            await this.#importTabGroup(inputObject);
+        return sendLTG.ltgPasteTabGroup();
     }
 
-    async #importTabGroup(object) {
-        const name = object.tabGroup.name;
-        this.#tabGroups[name] = object.tabGroup;
-
-        const comparator = cmdAPI.localeCompare("name");
-        const container = CONTAINERS.find(c => !comparator(c, object.tabGroup.container));
-        if (container)
-            this.#tabGroups[name].container.cookieStoreId = container.cookieStoreId;
-        else
-            delete this.#tabGroups[name].container;
-
-        const tabs = await this.#getGroupTabs(name, false);
-        const tabsToCreate = object.tabs.filter(url => !tabs.some(t => t.url === url));
-        const currentWindowTabGroup = await this.#getCurrentWindowTabGroupName();
-
-        for (const url of tabsToCreate) {
-            const tab = await browser.tabs.create({url, active: false});
-            await this.#addToTabGroup(tab, name);
-            if (currentWindowTabGroup !== name)
-                browser.tabs.hide(tab.id);
-        }
+    async #reloadTabGroup(uuid, filter) {
+        return sendLTG.ltgReloadTabGroup({uuid, filter});
     }
 
-    async #reloadTabGroup(name, filter) {
-        const currentWindowTabGroup = await this.#getCurrentWindowTabGroupName();
-        name = name || currentWindowTabGroup;
-
-        let tabs;
-        if (name === ALL_GROUPS_SPECIFIER)
-            tabs = await browser.tabs.query({});
-        else
-            tabs = await this.#getGroupTabs(name, false);
-
-        tabs = this.#filterTabs(tabs, filter);
-
-        for (const tab of tabs)
-            await browser.tabs.update(tab.id, {url: tab.url});
+    async #closeTabGroup(uuid, filter) {
+        return sendLTG.ltgCloseTabGroup({uuid, filter});
     }
 
-    async #closeTabGroup(name, filter) {
-        const currentWindowTabGroup = await this.#getCurrentWindowTabGroupName();
-        name = name || currentWindowTabGroup;
-
-        let tabs;
-        if (name === ALL_GROUPS_SPECIFIER)
-            tabs = await browser.tabs.query({});
-        else
-            tabs = await this.#getGroupTabs(name, false);
-
-        const filteredTabs = this.#filterTabs(tabs, filter);
-
-        if ((currentWindowTabGroup === name || ALL_GROUPS_SPECIFIER === name) && filteredTabs.length === tabs.length)
-            await browser.tabs.create({active: true});
-
-        await browser.tabs.remove(filteredTabs.map(t => t.id));
+    async #deleteTabGroup(uuid) {
+        return sendLTG.ltgDeleteTabGroup({uuid});
     }
 
-    async #deleteTabGroup(name) {
-        const currentWindowTabGroup = await this.#getCurrentWindowTabGroupName();
-        name = name || currentWindowTabGroup;
-
-        if (name !== DEFAULT_TAB_GROUP) {
-            if (name === ALL_GROUPS_SPECIFIER) {
-                let groups = Object.values(this.#tabGroups);
-                groups = groups.filter(g => g.name !== DEFAULT_TAB_GROUP);
-
-                await this.#switchToTabGroup(DEFAULT_TAB_GROUP);
-
-                for (const group of groups) {
-                    this.#removeTabGroup(group.name);
-                    await this.#closeTabGroup(group.name);
-                }
-            }
-            else {
-                this.#removeTabGroup(name);
-
-                if (name === currentWindowTabGroup)
-                    await this.#switchToTabGroup(DEFAULT_TAB_GROUP);
-
-                await this.#closeTabGroup(name);
-            }
-        }
-    }
-
-    async #tabGroupInNewWindow(name, filter) {
-        const currentWindowTabGroup = await this.#getCurrentWindowTabGroupName();
-        name = name || currentWindowTabGroup;
-
-        const currentWindow = await browser.windows.getCurrent();
-
-        let tabs
-        if (name === ALL_GROUPS_SPECIFIER) {
-            tabs = await browser.tabs.query({});
-            name = DEFAULT_TAB_GROUP;
-        }
-        else
-            tabs = await this.#getGroupTabs(name, false);
-
-        if (tabs.length) {
-            const filteredTabs = this.#filterTabs(tabs, filter);
-
-            const newWindow = await browser.windows.create({});
-            await this.#setWindowTabGroupName(newWindow, name);
-
-            const currentWindowTabs = await browser.tabs.query({windowId: currentWindow.id});
-            const newWindowTabs = await browser.tabs.query({windowId: newWindow.id});
-
-            if (name === currentWindowTabGroup && filteredTabs.length === currentWindowTabs.length)
-                browser.tabs.create({windowId: currentWindow.id});
-
-            await browser.tabs.move(filteredTabs.map(t => t.id), {windowId: newWindow.id, index: -1});
-            await browser.tabs.remove(newWindowTabs.map(t => t.id));
-        }
+    async #tabGroupInNewWindow(uuid, filter) {
+        return sendLTG.ltgTabGroupInNewWindow({uuid, filter});
     }
 
     async #moveVisibleTabsToGroup(params) {
-        const moveActiveTab = params.action === "move-tab";
-        const currentWindowTabGroup = await this.#getCurrentWindowTabGroupName();
-        const switching = params.action2 === "switching";
-        params.name = params.name || DEFAULT_TAB_GROUP;
+        if (params.tabGroup)
+            params.uuid = params.tabGroup.uuid;
 
-        if (params.name !== currentWindowTabGroup) {
-            const windowVisibleTabs = (await browser.tabs.query({currentWindow: true})).filter(t => !t.hidden);
-
-            let tabsToMove = windowVisibleTabs;
-            let tabToActivate;
-
-            if (moveActiveTab)
-                tabsToMove = await browser.tabs.query({active: true, currentWindow: true});
-            else {
-                const highlightedTabs = await browser.tabs.query({highlighted: true, currentWindow: true});
-
-                if (highlightedTabs.length > 1)
-                    tabsToMove = highlightedTabs;
-
-                tabsToMove = this.#filterTabs(tabsToMove, params.filter);
-            }
-
-            if (windowVisibleTabs.length === tabsToMove.length && !switching)
-                tabToActivate = await browser.tabs.create({});
-            else if (!switching) {
-                const notSelectedTabs = windowVisibleTabs.filter(t => !tabsToMove.some(st => st.id === t.id));
-                notSelectedTabs.sort((a, b) => b.lastAccessed - a.lastAccessed);
-                tabToActivate = notSelectedTabs[0];
-            }
-
-            for (const tab of tabsToMove)
-                await this.#addToTabGroup(tab, params.name);
-
-            if (switching) {
-                await this.#switchToTabGroup(params.name);
-            }
-            else {
-                await browser.tabs.update(tabToActivate.id, {active: true});
-                await browser.tabs.hide(tabsToMove.map(t => t.id));
-            }
-        }
-    }
-
-    #saveState(storage) {
-        const state = {
-            tabGroups: this.#tabGroups,
-            recentTabGroup: this.#recentTabGroup
-        };
-
-        storage.state(state);
-    }
-
-    #loadState(storage) {
-        const state = storage.state();
-
-        if (state) {
-            this.#tabGroups = state.tabGroups;
-            this.#recentTabGroup = state.recentTabGroup;
-        }
+        return sendLTG.ltgMoveVisibleTabsToGroup({params});
     }
 
     async execute(args, storage) {
-        let {OBJECT: {text: name}, TO: {text: action}, BY: {text: action2}, IN, AT, FOR: {text: filter}} = args;
+        let {OBJECT: {text: name}, TO: {text: action}, BY: {text: action2}, IN, AT, OF, FOR: {text: filter}} = args;
+        let tabGroup = args.OBJECT?.data;
 
         name = this.#excludeSelection(args);
         filter = filter && filter === cmdAPI.getSelection()? "": filter;
 
         if (name && name !== ALL_GROUPS_SPECIFIER) {
-            if (!this.#isTabGroupExists(name))
-                this.#createTabGroup(name);
-
-            if (name !== DEFAULT_TAB_GROUP)
-                this.#assignTabGroupContainer(name, IN?.text);
+            if (!await this.#isTabGroupExist(name))
+                tabGroup = await this.#createTabGroup(name, args.IN?.data, args.OF?.text);
         }
+        else if (name === ALL_GROUPS_SPECIFIER)
+            tabGroup = {name: ALL_GROUPS_SPECIFIER, uuid: ALL_GROUPS_SPECIFIER};
 
         action = action || "switch";
 
-        const params = {action, action2, name, filter};
+        const params = {action, action2, name, filter, tabGroup};
         await this.#performAction(name, params);
-        this.#saveState(storage);
     }
-
 }
 
 namespace.onModuleCommandsLoaded = () => {
-    if (!_BACKGROUND_PAGE) { // Chrome can't hide tabs
-        const cmdDef = cmdAPI.getCommandAttributes(TabGroup);
-        const tabGroupCommand = cmdManager.getCommandByUUID(cmdDef.uuid);
-        cmdManager.removeCommand(tabGroupCommand)
-    }
+    checkForLTG();
 };
+
+const LIGHTNING_TAB_GROUPS_ID = getLTGId();
+
+const sendLTG = new Proxy({}, {
+    get(target, key, receiver) {
+        const type = key;
+
+        return val => {
+            const payload = val || {};
+            payload.type = camelCaseToSnakeCase(type);
+
+            return browser.runtime.sendMessage(LIGHTNING_TAB_GROUPS_ID, payload);
+        };
+    }
+});
+
+function checkSender(sender) {
+    if (LIGHTNING_TAB_GROUPS_ID !== sender.id)
+        throw new Error();
+}
+
+async function isLTGPresents() {
+    try {
+        const response = await sendLTG.ltgGetVersion();
+        return !!response;
+    }
+    catch (e) {
+        return false;
+    }
+}
+
+export async function checkForLTG(retry = 1) {
+    //console.log(`Checking for LTG, retry ${retry}`);
+
+    let ltgPresents = await isLTGPresents();
+
+    if (ltgPresents) {
+        await settings.ltg_presents(true);
+    }
+    else {
+        if (retry < 10)
+            setTimeout(() => checkForLTG(retry + 1), 1000);
+        else
+            await settings.ltg_presents(false);
+    }
+}
+
+function getLTGId() {
+    if (settings.platform.firefox)
+        return browser.runtime.id?.includes("-we")
+            ? "lightning-tab-groups-we@gchristensen.github.io"
+            : "lightning-tab-groups@gchristensen.github.io";
+}
+

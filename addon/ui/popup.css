@@ -4,6 +4,7 @@
     --shell-input-height: 55px;
     --shell-suggestion-width: 260px;
     --shell-font-color: #ddd;
+    --shell-background-color: #2d2d2d;
 }
 
 /** {*/
@@ -42,7 +43,7 @@ body {
     padding: 0;
     margin: 0;
     z-index: 99999;
-    background: #2d2d2d;
+    background: var(--shell-background-color);
     overflow: hidden;
     display: grid;
     grid-template-columns: var(--shell-suggestion-width) auto;

@@ -48,72 +48,111 @@ export class Unicode {
     }
 
     async #fetchUnicode(display, query, partial) {
-        const requestURL = this.#makeURL(query, partial);
-        const html = await display.fetchText(requestURL, {_displayError: "Network error."});
+        const requestURL = "https://unicode.org/Public/UNIDATA/UnicodeData.txt";
+        const text = await display.fetchText(requestURL, {_displayError: "Network error."});
 
-        if (html)
-            return this.#parseResults(html);
+        if (text)
+            return this.#parseResults(text, query, partial);
     }
 
-    #makeURL(query, partial) {
-        const partialURL = partial? "&subs=1": "";
-        const queryURL = encodeURIComponent(query);
-        return `https://unicode-search.net/unicode-namesearch.pl?verbose=1${partialURL}&term=` + queryURL;
+    #parseResults(text, query, partial) {
+        const db = this.#parseUnicodeDB(text);
+        const words = this.#createIndex(query);
+        const results = partial
+            ? this.#partiallyMatchWords(words, db)
+            : this.#prefixMatchWords(words, db);
+
+        return results;
     }
 
-    #parseResults(html) {
-        const doc = $($.parseHTML(html));
-        let table = doc.filter(".resulttable");
-        let characters = [];
+    #parseUnicodeDB(unicodeDB) {
+        const lines = unicodeDB.split("\n").filter(l => !!l);
+        return lines.map(line => {
+            const values = line.split(";");
+            return [values[0], values[1].split(" "), values[1]];
+        });
+    }
 
-        if (table.length) {
-            const rows = doc.find(".resev, .resod");
-            characters = rows.map(function () {
-                const row = $(this);
-                return {
-                    codepoint: row.find(".upoint").text(),
-                    character: row.find(".character").text(),
-                    htmlcode: row.find(".htmlcolcode").html().split("<br>").map(s => s.trim()),
-                    name: row.find(".hname, .name, .namelong").html()
-                             .replace(/<a[^>]+>/g, "").replace(/<\/a>/g, "")
-                };
-            }).get();
-        }
-        else {
-            table = doc.filter(".oneresulttable");
-            if (table.length) {
-                characters = [{
-                    codepoint: table.find(".oneupoint").text(),
-                    character: table.find(".onecharacter").text(),
-                    htmlcode: table.find(".htmlcode").map((_, e) => e.innerHTML).get(),
-                    name: table.find(".rname .name").text()
-                }];
+    #createIndex(text) {
+        let words = text.split(" ")
+            .filter(s => !!s)
+            .map(s => s.toUpperCase())
+
+        return Array.from(new Set(words));
+    }
+
+    #partiallyMatchWords(words, db) {
+        const matchingCharacters = [];
+
+        db.forEach(row => {
+            const foundWords = words.map(_ => false);
+
+            for (let i = 0; i < row[1].length; ++i)
+                for (let w = 0; w < words.length; ++w)
+                    if (row[1][i].indexOf(words[w]) !== -1) {
+                        foundWords[w] = true;
+                        break;
+                    }
+
+            if (foundWords.every(w => w)) {
+                const result = this.#makeResult(row);
+                matchingCharacters.push(result);
             }
-        }
+        });
 
-        return characters;
+        return matchingCharacters;
+    }
+
+    #prefixMatchWords(words, db) {
+        const matchingCharacters = [];
+
+        db.forEach(row => {
+            const foundWords = words.map(_ => false);
+
+            for (let i = 0; i < row[1].length; ++i)
+                for (let w = 0; w < words.length; ++w)
+                    if (row[1][i].startsWith(words[w])) {
+                        foundWords[w] = true;
+                        break;
+                    }
+
+            if (foundWords.every(w => w)) {
+                const result = this.#makeResult(row);
+                matchingCharacters.push(result);
+            }
+        });
+
+        return matchingCharacters;
+    }
+
+    #makeResult(row) {
+        const codepoint = parseInt("0x" + row[0], 16);
+
+        return {
+            codepoint: `U+${row[0]}`,
+            hexhtml: `&#x${row[0]};`,
+            dechtml: `&#${codepoint};`,
+            character: String.fromCodePoint(codepoint),
+            name: row[2]
+        }
     }
 
     execute({OBJECT: {text: query}, WITH: {text: match}}) {
-        if (query) {
-            const url = this.#makeURL(query, match === "partial");
-            cmdAPI.addTab(url);
-        }
     }
 
     #generateList(display, results) {
         const cfg = {
             text: c => {
                 return `<span class="codepoint" title="Copy code point">${c.codepoint}</span>`
-                     + `&nbsp;<span class="htmlhex" title="Copy hexadecimal entity">${c.htmlcode[0]}</span>`
-                     + `&nbsp;<span class="htmldec" title="Copy decimal entity">${c.htmlcode[1]}</span>`
+                     + `&nbsp;<span class="htmlhex" title="Copy hexadecimal entity">${cmdAPI.escapeHtml(c.hexhtml)}</span>`
+                     + `&nbsp;<span class="htmldec" title="Copy decimal entity">${cmdAPI.escapeHtml(c.dechtml)}</span>`
             },
             subtext: c => c.name,
             icon: c => $(`<div style="color: var(--shell-font-color); text-align: center;">${c.character}</div>`),
             iconSize: 24,
             action: (c, e) => {
                 if (["codepoint", "htmlhex", "htmldec"].some(id => id === e.target.className))
-                    cmdAPI.copyToClipboard(e.target.textContent);
+                    cmdAPI.copyToCipboard(e.target.textContent);
                 else
                     cmdAPI.copyToClipboard(c.character);
             }

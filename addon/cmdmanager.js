@@ -2,7 +2,7 @@ import {settings} from "./settings.js";
 import {repository} from "./storage.js";
 import {fetchJSON} from "./utils.js";
 
-// !!! Builtin command classes and noun types should be exported
+// !!! Builtin command classes and noun types should be exported in their corresponding files
 class CommandNamespace {
     name;
     annotated;
@@ -99,6 +99,7 @@ class CommandManager {
     ns = { // command namespaces
         ISHELL: "iShell",
         BROWSER: "Browser",
+        TABS: "Tabs",
         UTILITY: "Utility",
         SEARCH: "Search",
         SYNDICATION: "Syndication",
@@ -127,6 +128,7 @@ class CommandManager {
         "/commands/scrapyard.js",
         "/commands/search.js",
         "/commands/tab-groups.js",
+        "/commands/tabs.js",
         "/commands/translate.js",
         "/commands/unicode.js",
         "/commands/utility.js",

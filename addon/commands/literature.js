@@ -176,7 +176,7 @@ export class Libgen {
  # Syntax
  Same as **libgen**.
 
- @command
+ @-command
  @markdown
  @delay 1000
  @icon https://zlibrary.org/favicon.ico
