@@ -2,11 +2,11 @@ PYTHON := $(if $(filter $(OS),Windows_NT),python,python3)
 
 test:
 	make commands
-	cd addon; start web-ext run -p "$(HOME)/../firefox/debug.ishell" --keep-profile-changes
+	cd addon; start web-ext run -p "$(FIREFOX_PROFILES)/debug.ishell" --keep-profile-changes
 
 test-nightly:
 	make commands
-	cd addon; start web-ext run -p "$(HOME)/../firefox/debug.ishell.nightly" --firefox=nightly --keep-profile-changes
+	cd addon; start web-ext run -p "$(FIREFOX_PROFILES)/debug.ishell.nightly" --firefox=nightly --keep-profile-changes
 
 .PHONY: set-version
 set-version:
