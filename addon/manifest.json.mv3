@@ -1,6 +1,6 @@
 {
     "version": "$VERSION$",
-    "applications": {
+    "browser_specific_settings": {
         "gecko": {
             "id": "ishell$ID_SUFFIX$@gchristensen.github.io",
             "strict_min_version": "95.0"

@@ -118,6 +118,7 @@ Utils.openUrlInBrowser = CmdUtils.addTab = function addTab(url, callback) {
     return result;
 };
 
+
 // === {{{ CmdUtils.absUrl(data, baseUrl) }}} ===
 // Fixes relative URLs in {{{data}}} (e.g. as returned by Ajax calls).
 // Useful for displaying fetched content in command previews.

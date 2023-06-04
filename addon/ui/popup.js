@@ -36,6 +36,7 @@ class PopupWindow {
         cmdAPI.getCommandLine = () => this.getInput();
         cmdAPI.setCommandLine = text => this.setCommand(text);
         cmdAPI.closeCommandLine = () => window.close();
+        cmdAPI.setCommandLineFocus = text => this.setCommandLineFocus();
 
         ContextUtils.arrowSelection = false;
 
@@ -89,6 +90,10 @@ class PopupWindow {
         this.setInput(text);
         this.persistInput();
         this.generateSuggestions(text);
+    }
+
+    setCommandLineFocus(text) {
+        this.cmdline.focus();
     }
 
     removeCommandArguments() {

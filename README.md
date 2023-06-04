@@ -104,8 +104,8 @@ Because Mozilla [removed](https://bugzilla.mozilla.org/show_bug.cgi?id=1789751) 
 workaround that allows to evaluate code dynamically on MV3, it will no longer be possible to
 evaluate commands in the built-in editor in the Firefox MV3 version of the add-on. Forget about instant
 evaluation and effortless debugging. With MV3, it is necessary to build your own version of the add-on
-to add custom commands. Please [thank](https://discourse.mozilla.org) Mozilla
-for this innovation.
+to add custom commands. Please [thank](https://connect.mozilla.org/t5/ideas/add-an-about-config-switch-that-allows-users-to-customize-their/idi-p/32127) 
+Mozilla for this innovation.
 
 #### Environment setup
 
