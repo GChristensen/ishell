@@ -83,7 +83,7 @@ function configureDynamicSettings() {
 
 function populateDynamicSettings() {
     const helpHints = {
-        lingvo_api_key: "API key used by the lingvo command",
+       // lingvo_api_key: "API key used by the lingvo command",
         bing_translator_api_v3_key: "API key used by the translate command",
         youtube_search_api_key: "API key used by the youtube command",
         google_cse_api_key: "API key used by the google and images commands",
@@ -91,7 +91,7 @@ function populateDynamicSettings() {
     };
 
     const helpLinks = {
-        lingvo_api_key: "https://developers.lingvolive.com/en-us/Help",
+        //lingvo_api_key: "https://developers.lingvolive.com/en-us/Help",
         bing_translator_api_v3_key: "https://www.microsoft.com/en-us/translator/business/trial/",
         youtube_search_api_key: "https://developers.google.com/youtube/v3/getting-started",
         google_cse_api_key: "https://developers.google.com/custom-search/v1/introduction",

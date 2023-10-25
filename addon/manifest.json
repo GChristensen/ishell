@@ -1,5 +1,5 @@
 {
-    "version": "1.0.5",
+    "version": "1.0.6",
     "applications": {
         "gecko": {
             "id": "ishell@gchristensen.github.io",
