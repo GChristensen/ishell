@@ -41,6 +41,8 @@ export class CommandList {
 
             if (!_BACKGROUND_PAGE)
                 await result;
+
+            return cmdManager.toCommand(this.selection);
         }
     }
 

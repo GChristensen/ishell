@@ -63,7 +63,8 @@
         "scripting",
         "sessions",
         "cookies",
-        "browsingData"
+        "browsingData",
+        "webRequest"
     ],
     "host_permissions": [
         "<all_urls>"

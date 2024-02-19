@@ -90,13 +90,13 @@ export function loadCSS(doc, id, file) {
     }
 }
 
-export async function loadScript(doc, id, file) {
+export async function loadScript(doc, id, file, type = 'text/javascript') {
     if (!doc.getElementById(id)) {
         let resolver;
 
         const script = doc.createElement('script');
         script.id = id;
-        script.type = 'text/javascript';
+        script.type = type;
         script.src = file;
         script.onload = () => resolver(true);
 

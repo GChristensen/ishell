@@ -172,13 +172,13 @@ function unpackArgs(cmd, args) {
     let result = {
         search: getArgumentText(args.OBJECT),
         depth: getArgumentText(args.FROM),
-        path:  getArgumentText(args.AT) || cmd.__scr_path,
+        path:  getArgumentText(args.TO) || cmd.__scr_path,
         tags:  getArgumentText(args.AS) || cmd.__scr_tags,
         limit: getArgumentText(args.BY),
         types: args.IN && args.IN.text? args.IN.data: null,
         todo_state: (args.WITH && args.WITH.text? args.WITH.data: null)
             || (cmd.__scr_todo? todo_states[cmd.__scr_todo.toUpperCase()]: undefined),
-        todo_date:  getArgumentText(args.TO) || cmd.__scr_due,
+        todo_date:  getArgumentText(args.ON) || cmd.__scr_due,
         details:  getArgumentText(args.FOR) || cmd.__scr_details,
         _selector: cmd.__scr_selector,
         _filter: cmd.__scr_filter,
@@ -376,10 +376,10 @@ class BookmarkCommandBase {
     constructor(args) {
         args[OBJECT] = {nountype: noun_arb_text, label: "title"}; // object
         args[FOR]    = {nountype: noun_arb_text, label: "details"}; // subject
-        args[TO]     = {nountype: noun_type_date, label: "due"}; // goal
+        args[TO]     = {nountype: noun_scrapyard_folder, label: "path"}; // goal
         //args[FROM]   = {nountype: noun_arb_text, label: "text"}; // source
         //args[NEAR]   = {nountype: noun_arb_text, label: "text"}; // location
-        args[AT]     = {nountype: noun_scrapyard_folder, label: "path"}; // time
+        //args[AT]     = {nountype: noun_type_date, label: "due"}; // time
         args[WITH]   = {nountype: {"TODO": TODO_STATE_TODO,
                                    "WAITING": TODO_STATE_WAITING,
                                    "POSTPONED": TODO_STATE_POSTPONED,
@@ -390,7 +390,7 @@ class BookmarkCommandBase {
         //args[OF]     = {nountype: noun_arb_text, label: "text"}; // modifier
         args[AS]     = {nountype: noun_scrapyard_tag, label: "tags"}; // alias
         //args[BY]     = {nountype: noun_arb_text, label: "text"}; // cause
-        //args[ON]     = {nountype: noun_arb_text, label: "text"}; // dependency
+        args[ON]     = {nountype: noun_type_date, label: "due"}; // dependency
     }
 
     preview(args, display) {
@@ -435,7 +435,7 @@ class BookmarkCommandBase {
 
 /**
  # Syntax
- **archive** [**this** | *title*] [**at** *path*] [**as** *tags*] [**for** *details*] [**with** *todo*] [**to** *due*]
+ **archive** [**this** | *title*] [**to** *path*] [**as** *tags*] [**for** *details*] [**with** *todo*] [**on** *due*]
 
  # Arguments
  - **this** - may be required if iShell offers incorrect suggestions.
@@ -447,7 +447,7 @@ class BookmarkCommandBase {
  - *due* - sets bookmark TODO deadline.
 
  # Examples
- - **archive** **this** **at** *~/wiki* **as** *chem* **with** *todo* **to** *10* **for** *research*
+ - **archive** **this** **to** *~/wiki* **as** *chem* **with** *todo* **on** *10* **for** *research*
  
  @command
  @markdown
@@ -556,7 +556,7 @@ class CopyCommandBase {
 
 /**
  # Syntax
-  **copy-at** *path* [**by** *action*]
+  **copy-to** *path* [**by** *action*]
 
  # Arguments
 
@@ -565,7 +565,7 @@ class CopyCommandBase {
     - *switching* - switch to the destination folder.
 
  # Example
- - **copy-at** *~/wiki* **by** *switching*
+ - **copy-to** *~/wiki* **by** *switching*
 
  @command
  @markdown
@@ -574,7 +574,7 @@ class CopyCommandBase {
  @description Copy selected bookmarks at the destination folder.
  @uuid F21CD346-D5B0-41F1-BAC0-1E325DB9DD21
  */
-export class CopyAt extends CopyCommandBase {
+export class CopyTo extends CopyCommandBase {
     constructor(args) {
         super(args);
         this.__action = "COPY";
@@ -583,7 +583,7 @@ export class CopyAt extends CopyCommandBase {
 
 /**
  # Syntax
- Same as **copy-at**.
+ Same as **copy-to**.
 
  @command
  @markdown
@@ -592,7 +592,7 @@ export class CopyAt extends CopyCommandBase {
  @description Copy selected bookmarks at the destination folder.
  @uuid 425CC0C9-8794-486E-AF8C-3D64F92F9AD7
  */
-export class MoveAt extends CopyCommandBase {
+export class MoveTo extends CopyCommandBase {
     constructor(args) {
         super(args);
         this.__action = "MOVE";
@@ -695,8 +695,8 @@ namespace.onModuleCommandsLoaded = async function() {
         cmdAPI.getCommandAttributes(Scrapyard).uuid,
         cmdAPI.getCommandAttributes(Bookmark).uuid,
         cmdAPI.getCommandAttributes(Archive).uuid,
-        cmdAPI.getCommandAttributes(CopyAt).uuid,
-        cmdAPI.getCommandAttributes(MoveAt).uuid
+        cmdAPI.getCommandAttributes(CopyTo).uuid,
+        cmdAPI.getCommandAttributes(MoveTo).uuid
     ];
 
     SCRAPYARD_COMMANDS = commandUUIDs.map(cmdManager.getCommandByUUID.bind(cmdManager));

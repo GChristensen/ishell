@@ -1,0 +1,175 @@
+<style>
+    #aichat-root-container {
+        position: absolute;
+        top: 0;
+        bottom: 0;
+        left: 0;
+        right: 0;
+        display: flex;
+        flex-direction: column;
+        margin: 0;
+        margin-right: 3px;
+    }
+    #aichat-system-prompt-toggle {
+        position: absolute;
+        top: -1px;
+        right: 8px;
+        width: 16px;
+        height: 16px;
+        margin: 0;
+        padding: 0;
+        cursor: pointer;
+        z-index: 10000;
+    }
+    #aichat-input-text-user, #aichat-input-text-system {
+        flex: 0 0 auto;
+        width: 98%;
+        min-width: 98%;
+        max-width: 98%;
+        height: 1.1875em;
+        min-height:1em;
+        max-height:5em;
+        outline: none;
+        font-family: var(--shell-main-font);
+        background-color: var(--shell-panel-color);
+        color: var(--shell-font-color);
+        border: none;
+        border-bottom: 1px solid var(--shell-commandline-color);
+        padding: 4px;
+        margin: 4px 0;
+        resize:none;
+        overflow-x:hidden;
+        overflow-y:auto;
+    }
+    #aichat-input-text-user.aichat-conversation-input {
+        border-bottom: none;
+        border-top: 1px solid var(--shell-commandline-color);
+    }
+    #aichat-input-text-system {
+        display: none;
+    }
+    #aichat-output-container {
+        width: 100%;
+        flex: 1 1 auto;
+        position: relative;
+        overflow-y: auto;
+        margin-right: 4px;
+        border-bottom: 1px solid var(--shell-commandline-color);
+    }
+    #aichat-output-text-container {
+        width: 100%;
+    }
+    .aichat-message {
+        padding-bottom: 4px;
+        margin-bottom: 4px;
+        border-bottom: 1px solid var(--shell-commandline-color);
+    }
+    .aichat-message:last-of-type {
+        border-bottom: none;
+    }
+    .aichat-message > *:first-of-type {
+        margin-top: 4px;
+    }
+    .aichat-message > *:last-of-type {
+        margin-bottom: 4px;
+    }
+    .aichat-role-user, .aichat-role-system {
+        color: #a0a0a0;
+    }
+    #aichat-animation-placeholder {
+        display: none;
+        position: absolute;
+        top: 0;
+        bottom: 0;
+        left: 0;
+        right: 0;
+        background-color: transparent;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        z-index: 20000;
+    }
+    #aichat-loading-image {
+        width: 20%;
+        height: auto;
+    }
+    #aichat-status-line {
+        margin: 4px;
+        margin-top: 0;
+        display: flex;
+        min-height: 20px;
+    }
+    #aichat-status-line > * {
+        flex: 0 0 auto;
+    }
+    #aichat-chat-icon-container {
+        width: 28px;
+        text-align: center;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+    }
+    #aichat-chat-icon {
+        height: 16px;
+        padding-right: 6px;
+    }
+    #aichat-clear-button, #aichat-mode-button {
+        cursor: pointer;
+        font-size: 85%;
+        color: var(--shell-background-color);
+        background-color: var(--shell-commandline-color);
+        border-radius: 3px;
+        padding: 0 4px;
+        margin-top: 2px;
+        z-index: 1000;
+    }
+    #aichat-clear-button {
+        position: fixed;
+        right: 7px;
+        bottom: 24px;
+        margin: 0;
+        border-radius: 3px 3px 0 0;
+        font-size: 85%;
+        opacity: 50%;
+    }
+    #aichat-mode-button {
+        height: 17px;
+    }
+    #aichat-clear-button:hover {
+        opacity: 100%;
+    }
+    #aichat-status-spacer {
+        flex-grow: 1;
+    }
+    #aichat-status-info-container {
+        display: flex;
+        align-items: center;
+    }
+    .flat-emoji {
+        color: transparent;
+        text-shadow: 0 0 0 var(--shell-font-color);
+        font-size: 90%;
+    }
+    .action-link {
+        text-decoration: none;
+    }
+</style>
+<div id="aichat-root-container">
+    <img id="aichat-system-prompt-toggle" src="/ui/icons/down-triangle-s.svg" title="Show system prompt"/>
+    <textarea id="aichat-input-text-system" placeholder="Provide the system prompt (optional)"></textarea>
+    <textarea id="aichat-input-text-user" placeholder="Provide the prompt and press &lt;Enter&gt;"></textarea>
+    <div id="aichat-output-container">
+        <div id="aichat-output-text-container">
+            <div id="aichat-output-text"></div>
+            <div id="aichat-clear-button" title="Clear chat history">Clear</div>
+        </div>
+    </div>
+    <div id="aichat-status-line">
+        <div id="aichat-chat-icon-container">
+            <img id="aichat-chat-icon" src="/ui/icons/conversation-qa.svg"/>
+        </div>
+        <div id="aichat-mode-button" title="Toggle conversation mode"></div>
+        <div id="aichat-status-spacer"></div>
+        <div id="aichat-status-info-container"></div>
+    </div>
+</div>

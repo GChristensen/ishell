@@ -1,7 +1,7 @@
 export const namespace = new AnnotatedCommandNamespace(CommandNamespace.UTILITY);
 
 /**
-    Allows to copy the character or its code representations to the clipboard.
+    Copy the character or its code representations to the clipboard by clicking on it.
 
     # Syntax
     **unicode** *description* [**with** *match*]
@@ -152,7 +152,7 @@ export class Unicode {
             iconSize: 24,
             action: (c, e) => {
                 if (["codepoint", "htmlhex", "htmldec"].some(id => id === e.target.className))
-                    cmdAPI.copyToCipboard(e.target.textContent);
+                    cmdAPI.copyToClipboard(e.target.textContent);
                 else
                     cmdAPI.copyToClipboard(c.character);
             }

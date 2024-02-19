@@ -109,7 +109,7 @@ CmdUtils.getLocation = () => ContextUtils.activeTab?.url || "";
 
 CmdUtils.getActiveTab = () => ContextUtils.activeTab;
 
-Utils.openUrlInBrowser = CmdUtils.addTab = function addTab(url, callback) {
+Utils.openUrlInBrowser = CmdUtils.addTab = CmdUtils.newTab = function addTab(url, callback) {
     let result = browser.tabs.create({ "url": url });
 
     if (callback)

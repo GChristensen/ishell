@@ -19,7 +19,9 @@ class IShellSettings {
                 bing_translator_api_v3_key: "",
                 youtube_search_api_key: "",
                 google_cse_api_key: "",
-                google_cse_api_id: ""
+                google_cse_api_id: "",
+                openai_api_key: "",
+                gpt_default_model: "gpt-4-turbo"
             }
         };
 

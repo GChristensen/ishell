@@ -6,7 +6,7 @@ export const namespace = new AnnotatedCommandNamespace(CommandNamespace.SEARCH);
     @search
     @command
     @delay 1000
-    @container .lister-item
+    @container .ipc-metadata-list-summary-item
     @icon /ui/icons/imdb.png
     @url https://www.imdb.com/search/title/?title=%s
     @description Searches IMDB for movies.
@@ -14,29 +14,22 @@ export const namespace = new AnnotatedCommandNamespace(CommandNamespace.SEARCH);
  */
 export class Imdb {
     parseTitle(container) {
-        const header = container.find(".lister-item-header");
-        header.find(".lister-item-index").remove();
+        const header = container.find(".ipc-title-link-wrapper");
+        const h3 = header.find("h3")
+        const text = h3.text();
+
+        h3.remove();
+        header.text(text.replace(/^\d+\.\s*/, ""));
+
         return header;
     }
 
     parseThumbnail(container) {
-        const thumb = container.find("img.loadlate").first().attr("loadlate");
-        return $(`<img src="${thumb}"/>`);
+        return container.find("img.ipc-image");
     }
 
     parseBody(container) {
-        const synopsis = container.find(".ratings-bar").next();
-        const rating = container.find("[name='ir'] strong");
-        const runtime = container.find(".runtime");
-        const genre = container.find(".genre");
-        synopsis.prepend(" | ");
-        synopsis.prepend(genre);
-        synopsis.prepend(" | ");
-        synopsis.prepend(runtime);
-        synopsis.prepend(" | ");
-        synopsis.prepend(rating);
-        synopsis.prepend("Rating: ");
-        return synopsis;
+        return container.find(".ipc-html-content-inner-div");
     }
 }
 
@@ -139,7 +132,7 @@ export class Wikipedia {
                                  <dd class="summary" wikiarticle="${article.title}">
                                     <i>${previewData.retrievingArticleSummary}</i>
                                  </dd>`)
-                        : `<p className='error'>${previewData.noArticlesFound}</p>`
+                        : `<p class='error'>${previewData.noArticlesFound}</p>`
                     }
                     </dl>`;
 

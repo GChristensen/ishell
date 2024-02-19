@@ -5,6 +5,9 @@
     --shell-suggestion-width: 260px;
     --shell-font-color: #ddd;
     --shell-background-color: #2d2d2d;
+    --shell-panel-color: #3b3b3b;
+    --shell-commandline-color: #d3d3d3;
+    --shell-main-font: Calibri, Helvetica, Arial, sans-serif;
 }
 
 /** {*/
@@ -22,7 +25,7 @@ body {
     min-width: var(--shell-width);
     min-height: var(--shell-height);
     background-color: black;
-    font-family: Calibri, Helvetica, Arial, sans-serif;
+    font-family: var(--shell-main-font);
     font-weight: normal;
     font-size: 12pt;
     margin: 0;
@@ -86,7 +89,8 @@ body {
     margin: 0;
     width: var(--shell-suggestion-width);
     height: 100%;
-    background: linear-gradient(90deg, #3b3b3b 90%, transparent 10%, rgba(0,0,0,0) 0), #2d2d2d;
+    background: linear-gradient(90deg, var(--shell-panel-color) 90%, transparent 10%, rgba(0,0,0,0) 0),
+                var(--shell-background-color);
     background-size: calc(var(--shell-suggestion-width) + 17px) auto;
 }
 
@@ -225,7 +229,7 @@ kbd {
     clear: both;
 }
 
-.announcement-bell {
+.announcement-bell, .flat-emoji {
     color: transparent;
     text-shadow: 0 0 0 white;
     font-size: 90%;

@@ -149,7 +149,7 @@ export class Compose extends MailBase {
  @markdown
  @author g/christensen
  @icon /ui/icons/email.png
- @description Compose an empty email with the given subject using <a href='http://gmail.com'>Gmail</a>.
+ @description Forget any or all remembered emails.
  @uuid C1B5C976-2BBE-4DD6-95E9-A65CC84E1B51
  */
 export class ForgetEmail {

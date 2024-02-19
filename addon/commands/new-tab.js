@@ -1,6 +1,8 @@
 export const namespace = new AnnotatedCommandNamespace(CommandNamespace.TABS, true);
 
 /**
+    The command allows to open multiple links extracted from the active page or selection.
+
     # Syntax
     **new-tab** [*url*] [**in** *container*] [**for** {**all** | *pattern*}] [**as** *type*] [**from** *source*]
 
@@ -24,7 +26,7 @@ export const namespace = new AnnotatedCommandNamespace(CommandNamespace.TABS, tr
     @markdown
     @delay 1000
     @icon /ui/icons/tab_create.png
-    @description Opens multiple links extracted from the active page or selection.
+    @description Create a new tab.
     @author g/christensen
     @uuid 12A03E90-FA3B-49C7-BB4F-3301C616915E
 */

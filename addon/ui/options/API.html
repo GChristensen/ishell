@@ -29,7 +29,7 @@
        href="#shell-api-reference"></a>iShell API Reference</h2>
 
 <p>iShell supports the modern <code>cmdAPI</code> namespace and the legacy
-    <code>CmdUtils</code> namespace from Ubiquity API. The use of native JavaScript and WebExtensions API
+    <code>CmdUtils</code> namespace from Ubiquity API. The use of native JavaScript and WebExtensions APIs
     is suggested whenever appropriate.</p>
 
 <h3><a id="create-command" class="anchor" aria-hidden="true"
@@ -70,6 +70,9 @@
             want your command to accept arguments. See the <a
                     href="tutorial.html#commands-with-arguments" target="_blank">commands with
                 arguments</a> tutorial section.
+        </li>
+        <li><strong>sticky</strong> (<code>@sticky</code>) <span class="since">since v1.1</span> - a boolean value
+            that indicates if <b>iShell</b> popup window should be kept open after the command is executed.
         </li>
         <li><strong>icon</strong> (<code>@icon</code>) - a URL string pointing to a small image
             (favicon-sized) to be displayed alongside the name of your command in the interface.
@@ -377,7 +380,7 @@
     <p>Returns the location URL of the active tab, if available.</p>
 </blockquote>
 
-<h3><a id="user-content-utilsopenurlinbrowserurlstring" class="anchor" href="#utilsopenurlinbrowserurlstring"></a>cmdAPI.addTab(url, callback)</h3>
+<h3><a id="user-content-utilsopenurlinbrowserurlstring" class="anchor" href="#utilsopenurlinbrowserurlstring"></a>cmdAPI.newTab(url, callback)</h3>
 <p class="legacy-name">Legacy names: Utils.openUrlInBrowser</p>
 <blockquote>
     <p>

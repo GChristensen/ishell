@@ -99,6 +99,7 @@ class CommandManager {
     ns = { // command namespaces
         ISHELL: "iShell",
         BROWSER: "Browser",
+        AI: "AI",
         TABS: "Tabs",
         UTILITY: "Utility",
         SEARCH: "Search",
@@ -132,8 +133,9 @@ class CommandManager {
         "/commands/translate.js",
         "/commands/unicode.js",
         "/commands/utility.js",
+        "/commands/aichat/aichat.js",
+        "/commands/aichat/gpt.js",
         "/commands/more/javlib.js",
-        "/commands/more/kpop.js",
         "/commands/more/more.js",
         "/commands/more/nyaa.js"
     ];
@@ -291,7 +293,7 @@ class CommandManager {
         }
     };
 
-    _toCommand(object) {
+    toCommand(object) {
         let command = object;
         if (object instanceof ParsedSentence)
             command = object.getCommand();
@@ -299,13 +301,13 @@ class CommandManager {
     }
 
     _printCommandError(object, method, error) {
-        const command = this._toCommand(object);
+        const command = this.toCommand(object);
         console.error(`iShell command: ${command.name}, ${method}\n${error.toString()}\n${error.stack}`);
     }
 
     // adds a storage bin obtained from the command uuid as the last argument of the called function
     async _callCommandHandler(object, handler, ...args) {
-        const command = this._toCommand(object);
+        const command = this.toCommand(object);
         const bin = await Utils.makeBin(command.uuid);
 
         args.push(bin);
@@ -368,7 +370,7 @@ class CommandManager {
             console.error(`Error loading module: ${path}`, e);
         }
 
-        if (module?.namespace) {
+        if (module?.namespace && module?.namespace?.name) {
             if (module.namespace.annotated)
                 await this._loadAnnotatedCommandModule(path);
 

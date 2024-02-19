@@ -87,7 +87,9 @@ function populateDynamicSettings() {
         bing_translator_api_v3_key: "API key used by the translate command",
         youtube_search_api_key: "API key used by the youtube command",
         google_cse_api_key: "API key used by the google and images commands",
-        google_cse_api_id: "Custom search configuration id used by the google and images commands"
+        google_cse_api_id: "Custom search configuration id used by the google and images commands",
+        openai_api_key: "OpenAI API key used by the gpt command",
+        gpt_default_model: "Default language model used by the gpt command"
     };
 
     const helpLinks = {
@@ -95,10 +97,11 @@ function populateDynamicSettings() {
         bing_translator_api_v3_key: "https://www.microsoft.com/en-us/translator/business/trial/",
         youtube_search_api_key: "https://developers.google.com/youtube/v3/getting-started",
         google_cse_api_key: "https://developers.google.com/custom-search/v1/introduction",
-        google_cse_api_id: "https://support.google.com/programmable-search/answer/2649143"
+        google_cse_api_id: "https://support.google.com/programmable-search/answer/2649143",
+        openai_api_key: "https://platform.openai.com/api-keys"
     };
 
-    const builtinKeys = Object.keys(helpLinks);
+    const builtinKeys = Object.keys(helpHints);
     const dynamicSettings = settings.dynamic_settings();
 
     let html = cmdAPI.reduceTemplate(Object.keys(dynamicSettings),
@@ -111,8 +114,8 @@ function populateDynamicSettings() {
                 <td class="item-key"><input type="text" name="key" title="Key" value="${Utils.escapeHtml(item)}" disabled/></td>
                 <td class="item-value"><input type="text" name="value" title="Value" value="${Utils.escapeHtml(dynamicSettings[item] || "")}"
                                               ${builtinKeys.some(k => k === item) ? 'style="margin-right: -20px"' : ""}/>
-                    ${builtinKeys.some(k => k === item)
-                        ? ('<span className="key-help" title="Get a personal API key">&nbsp;<a href="' + helpLinks[item] 
+                    ${builtinKeys.some(k => k === item) && helpLinks[item]
+                        ? ('<span class="key-help" title="Get a personal API key">&nbsp;<a href="' + helpLinks[item] 
                              + '" target="_blank">?</a></span>')
                         : ""
                      }

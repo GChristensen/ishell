@@ -144,7 +144,7 @@ class PopupWindow {
         this.displayHelp();
     }
 
-    async execute() {
+    async execute(closePopup = true) {
         const selectionList = new PreviewList(this.pblock);
         const previewSelection = selectionList.getSelectedElement();
 
@@ -152,10 +152,15 @@ class PopupWindow {
             ContextUtils.arrowSelection = true;
             this.executePreviewItem(previewSelection, true)
         }
-        else
-            await this.executeCurrentCommand();
+        else {
+            const cmd = await this.executeCurrentCommand();
 
-        window.close();
+            if (cmd.sticky)
+                closePopup = false;
+        }
+
+        if (closePopup)
+            window.close();
     }
 
     async executeCurrentCommand() {
@@ -284,6 +289,9 @@ class PopupWindow {
         }
 
         if (keyCode === "Enter" || keyCode === "NumpadEnter") {
+            if (evt.shiftKey)
+                return;
+
             if (await Utils.easterListener(this.getInput()))
                 return;
 
@@ -292,6 +300,8 @@ class PopupWindow {
                 return;
             }
 
+            // prevent adding a new line in active input (aichat)
+            evt.preventDefault();
             await this.execute();
             return;
         }
@@ -317,6 +327,9 @@ class PopupWindow {
         }
 
         if (keyCode === "ArrowUp") {
+            if (evt.shiftKey || evt.altKey)
+                return;
+
             evt.preventDefault();
             if (evt.ctrlKey)
                 this.advancePreviewSelection(false);
@@ -325,6 +338,9 @@ class PopupWindow {
             return;
         }
         else if (keyCode === "ArrowDown") {
+            if (evt.shiftKey || evt.altKey)
+                return;
+
             evt.preventDefault();
             if (evt.ctrlKey)
                 this.advancePreviewSelection(true);

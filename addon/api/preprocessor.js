@@ -204,6 +204,7 @@ export class CommandPreprocessor {
         let metaclass = comment.match(/@metaclass/i);
         let markdown = comment.match(/@markdown/i);
         let dbgprint = comment.match(/@dbgprint/i);
+        let sticky = comment.match(/@sticky/i);
         let search = comment.match(/@search/i);
         let url = search && comment.match(/@url (.*)(?:\r?\n|$)/i);
         let post = search && comment.match(/@post (.*)(?:\r?\n|$)/i);
@@ -263,6 +264,7 @@ export class CommandPreprocessor {
             metaclass: !!metaclass,
             help: help_content,
             dbgprint: !!dbgprint,
+            sticky: !!sticky,
             search: !!search,
             url: url?.[1]?.trim(),
             post: post?.[1]?.trim(),
