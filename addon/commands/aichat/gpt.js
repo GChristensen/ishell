@@ -14,7 +14,7 @@ const GPT_MODELS = {
 /**
      This command uses <a href="https://openai.com/pricing" target="_blank">OpenAI API</a> to communicate with GPT
      language models. Please provide the authorization API key on the <a href="/ui/options/options.html">iShell
-     options page</a>. All arguments are optional.
+     options page</a>. Press Ctrl+&lt;Enter&gt; to open the popup in a new tab. All command arguments are optional.
 
      # Syntax
      **gpt** [**with** *model*] [**by** *tokens*] [**at** *temperature*]
@@ -44,7 +44,7 @@ export class Gpt extends AIChat {
 
     constructor(args) {
         super(args);
-        args[OBJECT] = {nountype: noun_arb_text, label: "text"}; // object
+        //args[OBJECT] = {nountype: noun_arb_text, label: "text"}; // object
         //args[FOR]    = {nountype: noun_arb_text, label: "text"}; // subject
         //args[TO]     = {nountype: noun_arb_text, label: "text"}; // goal
         //args[FROM]   = {nountype: noun_arb_text, label: "text"}; // source

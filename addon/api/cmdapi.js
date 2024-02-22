@@ -33,6 +33,10 @@ export const cmdAPI = {
         return ContextUtils.arrowSelection
     },
 
+    get ctrlKey() {
+        return ContextUtils.ctrlKey
+    },
+
     get settings() {
         return settings.dynamic_settings();
     },

@@ -5,6 +5,7 @@ export class ContextUtils {
     static selectedText = "";
     static selectedHtml = "";
     static #arrowSelection = false;
+    static #ctrlKey = false;
 
     static async getSelection(tabId) {
         let results;
@@ -65,5 +66,13 @@ export class ContextUtils {
 
     static get arrowSelection() {
         return this.#arrowSelection;
+    }
+
+    static set ctrlKey(value) {
+        this.#ctrlKey = value;
+    }
+
+    static get ctrlKey() {
+        return this.#ctrlKey;
     }
 }

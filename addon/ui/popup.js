@@ -144,9 +144,11 @@ class PopupWindow {
         this.displayHelp();
     }
 
-    async execute(closePopup = true) {
+    async execute(closePopup = true, ctrlKey) {
         const selectionList = new PreviewList(this.pblock);
         const previewSelection = selectionList.getSelectedElement();
+
+        ContextUtils.ctrlKey = ctrlKey;
 
         if (previewSelection) {
             ContextUtils.arrowSelection = true;
@@ -302,7 +304,7 @@ class PopupWindow {
 
             // prevent adding a new line in active input (aichat)
             evt.preventDefault();
-            await this.execute();
+            await this.execute(false, evt.ctrlKey);
             return;
         }
 

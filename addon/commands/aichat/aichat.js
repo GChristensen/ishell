@@ -141,6 +141,12 @@ export class AIChat {
     }
 
     async execute(args, storage) {
+        if (cmdAPI.ctrlKey) {
+            browser.tabs.create({ "url": "/ui/popup.html", active: true });
+            cmdAPI.closeCommandLine();
+            return;
+        }
+
         this.#showProcessingAnimation(true);
 
         try {
