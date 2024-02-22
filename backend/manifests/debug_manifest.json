@@ -1,7 +1,7 @@
 {
 "name": "ishell_helper",
 "description": "iShell backend application",
-"path": "D:\\dev\\firefox\\ishell\\backend\\ishell_backend.cmd",
+"path": "D:\\dev\\browser\\ishell\\backend\\ishell_backend.cmd",
 "type": "stdio",
 "allowed_extensions": [ "ishell@gchristensen.github.io", "ishell-we@gchristensen.github.io" ]
 }
