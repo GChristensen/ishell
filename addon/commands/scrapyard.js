@@ -668,8 +668,8 @@ function getScrapyardId() {
             ? "scrapyard-we@firefox"
             : "scrapyard@firefox";
     else if (settings.platform.chrome)
-        if (ISHELL_ID === "ofekoiaebgjkhfbcafmllpgffadbpphb")
-            return "fhgomkcfijbifanbkppjhgmcdkmbacep";
+        if (ISHELL_ID === "hpadlaipeifcpbpfnkkediojdlcgfiin")
+            return "eljecjmpgeldgcjnefcedhhcobnghplj";
         else
             return "jlpgjeiblkojkaedoobnfkgobdddimon";
 }
@@ -725,7 +725,6 @@ async function checkForScrapyard(retry = 1) {
     //console.log(`Checking for Scrapyard, retry ${retry}`);
 
     let scrapyardPresents = await isScrapyardPresents();
-
     if (scrapyardPresents) {
         settings.scrapyard_presents(true)
 

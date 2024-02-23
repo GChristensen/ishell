@@ -304,7 +304,7 @@ class PopupWindow {
 
             // prevent adding a new line in active input (aichat)
             evt.preventDefault();
-            await this.execute(false, evt.ctrlKey);
+            await this.execute(true, evt.ctrlKey);
             return;
         }
 
