@@ -8,18 +8,20 @@ export const namespace = new CommandNamespace(CommandNamespace.AI);
 
 export class AIChat {
     #modeIconSrc;
+    #isGenerating;
 
     //load(storage) {}
 
     init(doc /* popup document */, storage) {
         this.doc = doc;
         this.$$ = doc.defaultView.$;
+        this.storage = storage;
     }
 
-    async preview(_, display, storage) {
+    async preview(_, display) {
         if (this.$$(`#aichat-root-container[data-uuid="${this.uuid}"]`).length === 0) {
             await this.#initSyntaxHighlighting(this.doc);
-            await this.#initUI(display, storage);
+            await this.#initUI(display, this.storage);
         }
     }
 
@@ -27,6 +29,12 @@ export class AIChat {
         const $$ = this.$$;
         display.innerHTML = await display.fetchText("/commands/aichat/aichat.html");
         $$(`#aichat-root-container`).attr("data-uuid", this.uuid);
+
+        const isConversation = storage.conversationMode();
+        this.#setUpModeButton(isConversation);
+        $$("#aichat-mode-button").on("click", this.#toggleChatMode.bind(this, $$));
+
+        $$("#aichat-clear-button").on("click", this.#clearOutput.bind(this, $$));
 
         $$("#aichat-input-text-user, #aichat-input-text-system").on("input",  function() {
             $$(this).height(1);
@@ -56,32 +64,26 @@ export class AIChat {
         }
 
         if (!selectionText) {
-            const outputText = this.#renderChatHistory(storage);
+            const outputText = await this.#renderChatHistory(storage);
             if (outputText)
                 $$("#aichat-output-text").html(outputText);
         }
 
         $$(this.doc).on("input", "#aichat-input-text-user", e => {
-            storage.promptText(e.target.value);
+            this.storage.promptText(e.target.value);
         });
 
         $$("#aichat-input-text-system").on("input", e => {
-            storage.systemPromptText(e.target.value);
+            this.storage.systemPromptText(e.target.value);
         });
 
         $$("#aichat-system-prompt-toggle").on("click", e => {
-            let showSystemPrompt = storage.showSystemPrompt();
+            let showSystemPrompt = this.storage.showSystemPrompt();
             showSystemPrompt = !showSystemPrompt;
             $$("#aichat-input-text-system").toggle().trigger("input");
             $$("#aichat-system-prompt-toggle").prop("src", `/ui/icons/down-triangle${showSystemPrompt ? "" : "-s"}.svg`);
-            storage.showSystemPrompt(showSystemPrompt);
+            this.storage.showSystemPrompt(showSystemPrompt);
         });
-
-        const isConversation = storage.conversationMode();
-        this.#setUpModeButton(isConversation);
-        $$("#aichat-mode-button").on("click", this.#toggleChatMode.bind(this, $$, display, storage));
-
-        $$("#aichat-clear-button").on("click", this.#clearOutput.bind(this, $$, display, storage));
 
         this.initUI(display, storage);
 
@@ -108,11 +110,10 @@ export class AIChat {
         );
     }
 
-    #clearOutput($$, display, storage) {
+    async #clearOutput($$) {
         const inputTextUser = $$("#aichat-input-text-user");
         const conversationInput = inputTextUser.parent().prop("id") !== "aichat-root-container";
 
-        storage.chatHistory([]);
         inputTextUser.val("").trigger("input");
 
         if (conversationInput) {
@@ -126,21 +127,29 @@ export class AIChat {
             inputTextUser.insertAfter($$("#aichat-input-text-system"));
             inputTextUser.focus();
         }
+
+        await this.storage.chatHistory([]);
     }
 
-    #toggleChatMode($$, display, storage) {
-        let isConversation = storage.conversationMode();
+    async #toggleChatMode($$) {
+        let isConversation = this.storage.conversationMode();
         isConversation = !isConversation;
+        this.storage.conversationMode(isConversation);
         this.#setUpModeButton(isConversation);
-        storage.conversationMode(isConversation);
     }
 
     #setUpModeButton(mode) {
         this.$$("#aichat-mode-button").text(mode? "Chat": "Q&A");
-        this.$$("#aichat-chat-icon").prop("src", mode? "/ui/icons/conversation-chat.svg": "/ui/icons/conversation-qa.svg");
+
+        if (this.#isGenerating)
+            this.$$("#aichat-chat-icon").prop("src", "/ui/icons/loading-gear.svg");
+        else
+            this.$$("#aichat-chat-icon").prop("src", mode? "/ui/icons/conversation-chat.svg": "/ui/icons/conversation-qa.svg");
     }
 
-    async execute(args, storage) {
+    async execute(args) {
+        const storage = this.storage;
+
         if (cmdAPI.ctrlKey) {
             browser.tabs.create({ "url": "/ui/popup.html", active: true });
             cmdAPI.closeCommandLine();
@@ -159,13 +168,33 @@ export class AIChat {
                 systemPrompt: this.$$("#aichat-input-text-system").val(),
             };
 
-            const data = await this.generateText(storage, args, params);
+            let data;
+            const isStream = !!this.generateTextStream;
 
-            if (data?.output) {
-                storage.promptText(data.prompt);
-                await this.saveChatMessage(storage, "user", data.prompt);
+            if (isStream)
+                data = await this.generateTextStream(storage, args, params);
+            else
+                data = await this.generateText(storage, args, params);
+
+            if (data?.output !== undefined) {
+                const outputDiv = await this.#appendChatMessage(storage, data, params.prompt);
+
+                if (isStream)
+                    data = await this.processStreamResponse(data, outputDiv);
+
+                storage.promptText(params.prompt);
+                await this.saveChatMessage(storage, "user", params.prompt);
                 await this.saveChatMessage(storage, "assistant", data.output);
-                await this.#appendChatMessage(storage, data);
+
+                try {
+                    outputDiv.text();
+                } catch (e) {
+                    if (e.message === "can't access dead object") {
+                        await this.#appendChatMessage(storage, data, params.prompt);
+                        this.#showProcessingAnimation(false);
+                    }
+                }
+
                 await this.#displayStatus(storage, data);
             }
             else if (data?.error) {
@@ -194,6 +223,8 @@ export class AIChat {
     }
 
     #showProcessingAnimation(processing) {
+        this.#isGenerating = processing;
+
         if (processing) {
             this.#modeIconSrc = this.$$("#aichat-chat-icon").prop("src");
             this.$$("#aichat-chat-icon").prop("src", "/ui/icons/loading-gear.svg");
@@ -216,7 +247,7 @@ export class AIChat {
         return storage.chatHistory(chatHistory);
     }
 
-    #renderChatHistory(storage) {
+    async #renderChatHistory(storage) {
         const $$ = this.$$;
         const isConversation = storage.conversationMode();
         const chatHistory = this.getChatHistory(storage);
@@ -249,12 +280,14 @@ export class AIChat {
         return result;
     }
 
-    #appendChatMessage(storage, data) {
+    #appendChatMessage(storage, data, prompt) {
         const $$ = this.$$;
         const textDiv = $$("#aichat-output-text");
         const inputTextUser = $$("#aichat-input-text-user");
         const inputTextUserAtRoot = inputTextUser.parent().prop("id") === "aichat-root-container";
         const isConversation = storage.conversationMode();
+        const isStream = !!this.generateTextStream;
+        let result;
 
         if (!isConversation) { // Q&A mode
             if (!inputTextUserAtRoot) { // Just changed from the chat mode to Q&A, raise the input
@@ -264,16 +297,18 @@ export class AIChat {
                 inputTextUser.focus();
             }
 
-            if (data.output) {
+            if (data.output !== undefined) {
                 const output = this.marked.parse(data.output);
-                textDiv.html(`<div class="aichat-message aichat-role-assistant">${output}</div>`);
+                result = $$(`<div class="aichat-message aichat-role-assistant">${output}</div>`);
             }
             else if (data.error) {
                 const errorText = this.processError(data);
                 let output = this.marked.parse(errorText);
-                textDiv.html(`<div class="aichat-message aichat-role-error error">${output}</div>`);
+                result = $$(`<div class="aichat-message aichat-role-error error">${output}</div>`);
             }
-            return;
+
+            textDiv.html(result);
+            return result;
         }
 
         inputTextUser.val(""); // Chat mode
@@ -281,7 +316,7 @@ export class AIChat {
             inputTextUser.detach();
             textDiv.append(inputTextUser);
 
-            const chatHistory = this.getChatHistory(storage); // And prepend the first user prompt
+            const chatHistory = this.getChatHistory(storage); // Prepend the first user prompt
             if (chatHistory.length) {
                 const message = chatHistory[0];
                 message.content = cmdAPI.escapeHtml(message.content);
@@ -290,26 +325,33 @@ export class AIChat {
             }
         }
 
-        let prompt = cmdAPI.escapeHtml(data.prompt);
         prompt = this.marked.parse(prompt);
         $$(`<div class="aichat-message aichat-role-user">${prompt}</div>`).insertBefore(inputTextUser);
 
-        if (data.output) {
+        if (data.output !== undefined) {
             const output = this.marked.parse(data.output);
-            $$(`<div class="aichat-message aichat-role-assistant">${output}</div>`).insertBefore(inputTextUser);
+            result = $$(`<div class="aichat-message aichat-role-assistant">${output}</div>`).insertBefore(inputTextUser);
         }
         else if (data.error) {
             const errorText = this.processError(data);
             let output = this.marked.parse(errorText);
-            $$(`<div class="aichat-message aichat-role-error error">${output}</div>`).insertBefore(inputTextUser);
+            result = $$(`<div class="aichat-message aichat-role-error error">${output}</div>`).insertBefore(inputTextUser);
         }
 
-        const userMessage = $$(".aichat-role-user", textDiv).last();
-        const outputContainer = $$("#aichat-output-container");
+        if (!isStream) {
+            const userMessage = $$(".aichat-role-user", textDiv).last();
+            const outputContainer = $$("#aichat-output-container");
 
-        outputContainer.animate({
-            scrollTop: userMessage.offset().top - outputContainer.offset().top + outputContainer.scrollTop()
-        });
+            outputContainer.animate({
+                scrollTop: userMessage.offset().top - outputContainer.offset().top + outputContainer.scrollTop()
+            });
+        }
+
+        return result;
+    }
+
+    getOutputContainer() {
+        return this.$$("div.aichat-message.aichat-role-assistant:last-of-type");
     }
 
     processError(data) {

@@ -365,8 +365,8 @@ var BinHandler = {
                 delete bin[key]
             }
             else bin[key] = val;
-            repository.setCommandStorage(target.__uuid__, bin);
-            return key in bin ? bin[key] : old
+            const result = key in bin ? bin[key] : old;
+            return repository.setCommandStorage(target.__uuid__, bin).then(_ => result);
         }
     },
     has(target, key) {

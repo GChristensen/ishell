@@ -74,7 +74,7 @@ export class Gpt extends AIChat {
         return result;
     }
 
-    async generateText(storage, args, params) {
+    async generateTextStream(storage, args, params) {
         const defaultModel = GPT_MODELS[cmdAPI.settings.gpt_default_model] || "gpt-3.5-turbo";
         const model = args.WITH?.data || defaultModel;
         const maxTokens = args.BY?.text? parseInt(args.BY?.text): null;
@@ -107,42 +107,78 @@ export class Gpt extends AIChat {
         if (temperature)
             requestBody.temperature = temperature;
 
-        let data;
+        let response;
         try {
             const apiUrl = "https://api.openai.com/v1/chat/completions";
-            data = await this.#openaiAPIRequest(apiUrl, requestBody);
+            response = await this.#openaiAPIRequest(apiUrl, requestBody);
         } catch (e) {
             return {
-                model: model,
-                prompt: params.prompt,
+                _model: model,
                 error: e.error?.message || e.message
             };
         }
 
-        if (data) {
-            const content = data.choices?.[0]?.message?.content;
-            const result = {};
+        return {
+            output: "",
+            _model: model,
+            _response: response
+        };
+    }
 
-            if (content) {
-                result.model = model;
-                result.output = content;
-                result.prompt = params.prompt;
-                result._data = data;
+    async processStreamResponse(data, outputDiv) {
+        const reader = data._response.body?.pipeThrough(new TextDecoderStream()).getReader();
+        let output = "";
+        let tokens = 0;
+
+        while (true) {
+            const chunk = await reader?.read();
+            if (chunk?.done) break;
+
+            //_log(chunk?.value)
+
+            const data = chunk?.value
+                ?.replace(/^data: /, "")
+                ?.split(/\n\ndata: /);
+
+            for (const token of data) {
+                //_log(token)
+                try {
+                    const tokenObject = JSON.parse(token);
+                    if (tokenObject.choices[0].finish_reason)
+                        break;
+                    output += tokenObject.choices[0]?.delta?.content || "";
+                    tokens += 1;
+                } catch (e) {
+                    output += String.fromCharCode(0x2753);
+                }
+
+                try {
+                    const html = this.marked.parse(output);
+                    outputDiv.html(html);
+
+                    const scroll= outputDiv.closest("#aichat-output-container");
+                    scroll.stop(true, false).animate({scrollTop: scroll.prop("scrollHeight")});
+                } catch (e) {
+                    console.error(e);
+                }
             }
-
-            return result;
         }
+
+        data.output = output;
+        data._usage = {total_tokens: tokens};
+
+        return data;
     }
 
     async getStatusHtml(storage, data) {
         const balance = await this.#openaiGetBalance(storage);
         const balanceHtml = balance || `<a href="https://platform.openai.com/usage" id="gpt-login-link" 
                 target="_blank" class="action-link" title="Login OpenAI"><span class="flat-emoji">&#x1F511;</span></a>`
-        const tokens = data._data.usage?.total_tokens;
+        const tokens = data._usage?.total_tokens;
 
         return `
         <div id="aichat-status-model-label"><span class="flat-emoji" title="Language model">&#x1F9E0;</span>&nbsp;<!--
-        --><span title="Language model">${data.model}</span></div>&nbsp;|&nbsp;<!--
+        --><span title="Language model">${data._model}</span></div>&nbsp;|&nbsp;<!--
         --><div id="aichat-status-tokens-label" class="flat-emoji" title="Consumed tokens">&#x1F3F7;&#xFE0F;&nbsp;<span
                     id="aichat-status-tokens" title="Consumed tokens">${tokens}</span>&nbsp;|&nbsp;</div><!--
         --><div id="aichat-status-balance-label"><span class="flat-emoji" title="Balance" class="flat-emoji" 
@@ -153,11 +189,14 @@ export class Gpt extends AIChat {
     async #openaiGetBalance(storage) {
         const apiUrl = "https://api.openai.com/dashboard/billing/credit_grants";
         const sessionToken = storage.openAISessionToken();
-        const data = sessionToken && sessionToken !== "null"
+        const response = sessionToken && sessionToken !== "null"
             ? await this.#openaiAPIRequest(apiUrl, "", "get", sessionToken)
             : null;
-        if (data && data["total_available"]) {
-            return "$" + data["total_available"];
+
+        if (response && response.ok) {
+            const data = await response.json();
+            if (data.total_available)
+                return "$" + data.total_available;
         }
     }
 
@@ -184,8 +223,7 @@ export class Gpt extends AIChat {
     async #headersListener(details) {
         const bearer = details.requestHeaders.find(h => h.name === "Authorization")?.value?.split(" ")?.[1];
         if (bearer && bearer !== "null") {
-            const storage = await cmdAPI.createBin(this.uuid);
-            storage.openAISessionToken(bearer);
+            this.storage.openAISessionToken(bearer);
             browser.webRequest.onSendHeaders.removeListener(this._headerListener);
         }
     }
@@ -201,8 +239,10 @@ export class Gpt extends AIChat {
             }
         };
 
-        if (options)
+        if (options) {
+            options.stream = true;
             requestOptions.body = JSON.stringify(options);
+        }
         else if (method.toLowerCase() !== "get") {
             requestOptions.body = "{}";
         }
@@ -212,6 +252,6 @@ export class Gpt extends AIChat {
         if (!response.ok)
             throw await response.json();
 
-        return await response.json();
+        return response;
     }
 }
