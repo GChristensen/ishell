@@ -189,9 +189,15 @@ export class Gpt extends AIChat {
     async #openaiGetBalance(storage) {
         const apiUrl = "https://api.openai.com/dashboard/billing/credit_grants";
         const sessionToken = storage.openAISessionToken();
-        const response = sessionToken && sessionToken !== "null"
-            ? await this.#openaiAPIRequest(apiUrl, "", "get", sessionToken)
-            : null;
+        let response;
+
+        try {
+           response = sessionToken && sessionToken !== "null"
+                ? await this.#openaiAPIRequest(apiUrl, "", "get", sessionToken)
+                : null;
+        } catch (e) {
+            console.log("Failed to get OpenAI balance.");
+        }
 
         if (response && response.ok) {
             const data = await response.json();
