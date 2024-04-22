@@ -137,7 +137,7 @@ export class Gpt extends AIChat {
             //_log(chunk?.value)
 
             const data = chunk?.value
-                ?.replace(/^data: /, "")
+                ?.replace(/^\s*data: /, "")
                 ?.split(/\n\ndata: /);
 
             for (const token of data) {
@@ -149,6 +149,7 @@ export class Gpt extends AIChat {
                     output += tokenObject.choices[0]?.delta?.content || "";
                     tokens += 1;
                 } catch (e) {
+                    //_log("error", e);
                     output += String.fromCharCode(0x2753);
                 }
 
