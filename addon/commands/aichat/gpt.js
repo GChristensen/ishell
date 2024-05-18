@@ -9,6 +9,7 @@ const GPT_MODELS = {
     "gpt-3.5": "gpt-3.5-turbo",
     "gpt-4": "gpt-4",
     "gpt-4-turbo": "gpt-4-turbo-preview",
+    "gpt-4o": "gpt-4o",
 };
 
 /**
@@ -24,6 +25,7 @@ const GPT_MODELS = {
         - **gpt-3.5** - gpt-3.5-turbo
         - **gpt-4** - gpt-4
         - **gpt-4-turbo** - gpt-4-turbo-preview
+        - **gpt-4o** - gpt-4o (omni)
      - *tokens* - maximum number of tokens in the prompt and output. The current limit is 4096.
      - *temperature* - sampling temperature. A floating point value between 0 and 2.
 
@@ -129,6 +131,7 @@ export class Gpt extends AIChat {
         const reader = data._response.body?.pipeThrough(new TextDecoderStream()).getReader();
         let output = "";
         let tokens = 0;
+        let remaining = "";
 
         while (true) {
             const chunk = await reader?.read();
@@ -140,7 +143,17 @@ export class Gpt extends AIChat {
                 ?.replace(/^\s*data: /, "")
                 ?.split(/\n\ndata: /);
 
-            for (const token of data) {
+            for (let token of data) {
+                if (!/}\s*$/.test(token)) {
+                    remaining += token;
+                    continue;
+                }
+
+                if (remaining) {
+                    token = remaining + token;
+                    remaining = "";
+                }
+
                 //_log(token)
                 try {
                     const tokenObject = JSON.parse(token);
@@ -149,7 +162,8 @@ export class Gpt extends AIChat {
                     output += tokenObject.choices[0]?.delta?.content || "";
                     tokens += 1;
                 } catch (e) {
-                    //_log("error", e);
+                    _log(token)
+                    _log("error", e);
                     output += String.fromCharCode(0x2753);
                 }
 

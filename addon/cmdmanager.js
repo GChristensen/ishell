@@ -136,6 +136,7 @@ class CommandManager {
         "/commands/aichat/aichat.js",
         "/commands/aichat/gpt.js",
         "/commands/more/javlib.js",
+        "/commands/more/kpop.js",
         "/commands/more/more.js",
         "/commands/more/nyaa.js"
     ];
