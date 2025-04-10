@@ -16,7 +16,7 @@ named `show-text` with the following syntax:
 
 **show-text** *message text* **in** *destination*
 
-The snippet below shows the class-based command implementation in iShell: 
+The snippet below demonstrates the class-based command implementation in iShell: 
 
 ```javascript
 /**

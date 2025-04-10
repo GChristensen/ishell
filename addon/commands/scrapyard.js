@@ -695,8 +695,10 @@ namespace.onModuleCommandsLoaded = async function() {
         cmdAPI.getCommandAttributes(Scrapyard).uuid,
         cmdAPI.getCommandAttributes(Bookmark).uuid,
         cmdAPI.getCommandAttributes(Archive).uuid,
+        cmdAPI.getCommandAttributes(ArchiveSite).uuid,
         cmdAPI.getCommandAttributes(CopyTo).uuid,
-        cmdAPI.getCommandAttributes(MoveTo).uuid
+        cmdAPI.getCommandAttributes(MoveTo).uuid,
+        cmdAPI.getCommandAttributes(Notes).uuid,
     ];
 
     SCRAPYARD_COMMANDS = commandUUIDs.map(cmdManager.getCommandByUUID.bind(cmdManager));
@@ -725,6 +727,7 @@ async function checkForScrapyard(retry = 1) {
     //console.log(`Checking for Scrapyard, retry ${retry}`);
 
     let scrapyardPresents = await isScrapyardPresents();
+
     if (scrapyardPresents) {
         settings.scrapyard_presents(true)
 

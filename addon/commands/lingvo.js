@@ -99,11 +99,23 @@ export class Lingvo {
 
     #formatEntry(defs) {
         const $defs = $(defs);
+        const unlockAdNode = this.#locateNode($defs[0], '//*[contains(text(), "Unlock all")]');
+
+        if (unlockAdNode)
+        {
+            const nodeToRemove = unlockAdNode.closest("div").parentNode;
+            $(nodeToRemove).remove();
+        }
+
         $defs.find("svg").parent().remove();
         $defs.find("h3").first().remove();
         $defs.find("h3")
             .css("background-color", "gray")
             .css("padding-left", "5px");
         $defs.find("h4").remove();
+    }
+
+    #locateNode(rootNode, xpathExpression) {
+        return rootNode.ownerDocument.evaluate(xpathExpression, rootNode, null, XPathResult.FIRST_ORDERED_NODE_TYPE, null).singleNodeValue;
     }
 }
