@@ -211,14 +211,15 @@ function recursiveParse(unusedWords, filledArgs, objYet, prepDict) {
 // stripped. An unclosed quote extends to the end of the input, so the
 // parse stays stable while the user is still typing the phrase.
 // Quotes are recognized only at a token boundary; a mid-word quote
-// (e.g. 5") stays literal. There is no escape syntax for a literal
-// quote inside a quoted span.
+// (e.g. 5") stays literal. A doubled quote inside a quoted span
+// produces a literal quote character: "she said ""hi""".
 function tokenize(inputString) {
-    var tokens = [], m, re = /"([^"]*)"?|\S+/g;
+    var tokens = [], m, re = /"((?:[^"]|"")*)"?|\S+/g;
     while ((m = re.exec(inputString))) {
         if (m[1] !== undefined) {
-            if (!m[1]) continue; // empty quotes: no token
-            let token = new String(m[1]);
+            let text = m[1].replace(/""/g, '"');
+            if (!text) continue; // empty quotes: no token
+            let token = new String(text);
             token.quoted = true;
             tokens.push(token);
         }
@@ -465,12 +466,14 @@ Parser.prototype = {
 
             // noun-first matches on input
             if (!ppss.length) {
+                // strip the quoting syntax from the input
+                let text = tokenize(input).join(" ");
                 let selObj = {
-                    text: input,
-                    html: Utils.escapeHtml(input),
+                    text: text,
+                    html: Utils.escapeHtml(text),
                     fake: true,
                 };
-                selected = !!input;
+                selected = !!text;
                 ppss = this._nounFirstSuggestions(selObj, maxSuggestions, query);
             }
         }
@@ -552,7 +555,7 @@ ParsedSentence.prototype = {
             if (!this.fromNounFirstSuggestion && this._selObj.text === text)
                 text = this._query.PRONOUNS[0];
             else if (this._argNeedsQuotes(x, text))
-                text = '"' + text.replace(/"/g, "") + '"';
+                text = '"' + text.replace(/"/g, '""') + '"';
             if (x !== "object") preposition += args[x].preposition + " ";
             sentence += preposition + text;
         }
@@ -564,6 +567,8 @@ ParsedSentence.prototype = {
     // object on re-parse).
     _argNeedsQuotes: function PS__argNeedsQuotes(argName, text) {
         if (argName !== "object" && /\s/.test(text)) return true;
+        // a word starting with a quote would re-parse as a quote opener
+        if (/(^|\s)"/.test(text)) return true;
         var {args} = this._verb;
         for (let word of text.split(/\s+/)) if (word)
             for (let x in args) {

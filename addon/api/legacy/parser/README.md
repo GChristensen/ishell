@@ -298,14 +298,18 @@ stripped. An atomic token:
   literal word, not the selection.
 
 An **unclosed quote extends to the end of the input**, so suggestions stay
-stable while the user is still typing the phrase. There is no escape syntax
-for a literal `"` inside a quoted span; a mid-word quote (`5"`) stays
-literal.
+stable while the user is still typing the phrase. A **doubled quote** inside
+a quoted span produces a literal quote character (`"she said ""hi"""` →
+`she said "hi"`); a mid-word quote (`5"`) stays literal.
 
 For round-tripping, `ParsedSentence.completionText` re-quotes an emitted
-argument when it is a multiword prepositional argument or when any of its
-words would re-parse as a role marker (embedded quotes are stripped in that
-case), so tab-completing a suggestion reproduces the same reading.
+argument when it is a multiword prepositional argument, when any of its
+words would re-parse as a role marker, or when any of its words starts with
+a quote character; embedded quotes are escaped by doubling. Tab-completing
+a suggestion therefore reproduces the same reading losslessly.
+
+The noun-first fallback path also runs the input through the tokenizer, so a
+bare quoted phrase reaches noun types without the quoting syntax.
 
 ### 2.5 `PartiallyParsedSentence` — semantic resolution
 

@@ -8,6 +8,9 @@ test: commands
 test-nightly: commands
     cd addon; cmd //c start web-ext run -p "$FIREFOX_PROFILES/debug.ishell.nightly" --firefox=nightly --keep-profile-changes
 
+test-parser:
+    node ./scripts/test_parser.mjs
+
 set-version version:
     echo {{version}} > ./addon/version.txt
 

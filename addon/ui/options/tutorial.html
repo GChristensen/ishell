@@ -455,6 +455,34 @@ arguments: [{role: "object", nountype: noun_arb_text, label: "message"}, // obje
         <li> dependency (in "listen song <b>ON</b> Spotify", Spotify is the dependency.)</li>
     </ul>
 
+    <h3><span id="Quoting">Multiword Arguments and Quoting</span></h3>
+    <p>Any argument may consist of several words. However, when several interpretations of the
+        input are possible, the parser prefers the one that fills more arguments, so trailing
+        words tend to be assigned to the object argument: in <b>email to</b> <i>jane smith</i>,
+        the word <i>smith</i> becomes the message rather than a part of the contact name. To
+        group several words into a single argument explicitly, enclose them in double quotes:
+    </p>
+
+    <pre>email "hello world" to "jane smith"</pre>
+
+    <p>The quoted text is treated as an indivisible whole, so words that the parser would
+        normally recognize as argument markers (such as <b>at</b> or <b>to</b>) stay literal
+        inside quotes:
+    </p>
+
+    <pre>email "meeting at noon" to jane</pre>
+
+    <p>Some additional details on the quoting behavior:</p>
+    <ul>
+        <li>An unclosed quote extends to the end of the input, so suggestions remain stable
+            while you are still typing the quoted phrase.</li>
+        <li>To include a literal quote character in a quoted phrase, double it:
+            <code>"she said ""hi"""</code>.</li>
+        <li>A quoted <a href="#Anaphora">anaphoric pronoun</a> (for example,
+            <code>"this"</code>) is treated as literal text and is not substituted with the
+            selection.</li>
+    </ul>
+
     <h3><span id="The_Arguments_Object">The Arguments Dictionary</span>
     </h3>
     <p>When your execute method is called, it is passed a dictionary that encapsulates the values
@@ -987,10 +1015,11 @@ class Memo {
         value of 1 may conflict with the scoring of other arguments and produce unexpected results.
     </p>
 
-    <p>Due to the conceptual limitations of the iShell parser, the text of the additional suggestion
-        as it is entered by the user can not contain spaces. It is because we already have one argument of <b>noun_arb_text</b>
-        type (OBJECT). All text after the first space will automatically be assigned to the OBJECT
-        argument. Board suggestions received from Pinterest can contain spaces, though.</p>
+    <p>Because the command already has one argument of <b>noun_arb_text</b> type (OBJECT), the
+        text of the additional suggestion, as it is entered by the user, should either contain
+        no spaces or be enclosed in <a href="#Quoting">double quotes</a>: without quotes, all
+        text after the first space will automatically be assigned to the OBJECT argument. Board
+        suggestions received from Pinterest can contain spaces, though.</p>
 
 <pre><code data-language="javascript">/**
     This noun type provides autocompletion for the user's Pinterest boards.
@@ -1259,8 +1288,9 @@ def close_browser():
         the command line (the <b>with</b> argument in the example above). Without anaphoric
         pronouns, all text after the first space in the value of the second <i>arbitrary text
             argument</i> will be assigned to the first such one, which is always the
-        <code>object</code>. If there is no active selection, anaphoric pronouns are treated as
-        literal text values.
+        <code>object</code>. Alternatively, multiword values may be kept together by enclosing
+        them in <a href="#Quoting">double quotes</a>. If there is no active selection, anaphoric
+        pronouns are treated as literal text values.
     </p>
     <p>iShell parser recognizes the following anaphoric pronouns:</p>
     <ul>
