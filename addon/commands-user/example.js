@@ -3,7 +3,7 @@
 // with two additional requirements:
 // 1. Export the namespace variable from a module as it is shown below.
 // 2. Export classes and functions of the annotated commands and noun-types.
-// Use the makefile to build the add-on with bundled user commands.
+// Use the justfile to build the add-on with bundled user commands.
 
 export const namespace = new AnnotatedCommandNamespace("My commands");
 

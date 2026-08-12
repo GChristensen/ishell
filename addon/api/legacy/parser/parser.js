@@ -181,6 +181,7 @@ function recursiveParse(unusedWords, filledArgs, objYet, prepDict) {
     for (var prepYet in prepDict) break;
     if (prepYet) for (let i = 0, z = objYet ? len : 1; i < z; ++i) {
         let word = unusedWords[i];
+        if (word.quoted) continue; // atomic token: never a role marker
         for (let name in prepDict) if (prepDict[name].indexOf(word) === 0) {
             // found a preposition
             let objNext = objYet && !i;  // next only if we're at leftmost
@@ -205,16 +206,43 @@ function recursiveParse(unusedWords, filledArgs, objYet, prepDict) {
     return completions;
 }
 
+// Splits the input into tokens. A double-quoted span becomes a single
+// atomic token: a boxed String with a "quoted" flag and the quotes
+// stripped. An unclosed quote extends to the end of the input, so the
+// parse stays stable while the user is still typing the phrase.
+// Quotes are recognized only at a token boundary; a mid-word quote
+// (e.g. 5") stays literal. There is no escape syntax for a literal
+// quote inside a quoted span.
+function tokenize(inputString) {
+    var tokens = [], m, re = /"([^"]*)"?|\S+/g;
+    while ((m = re.exec(inputString))) {
+        if (m[1] !== undefined) {
+            if (!m[1]) continue; // empty quotes: no token
+            let token = new String(m[1]);
+            token.quoted = true;
+            tokens.push(token);
+        }
+        else tokens.push(m[0]);
+    }
+    return tokens;
+}
+
 function parseSentence(inputString, verbList, makePPS) {
     // Returns a list of PartiallyParsedSentences.
     var parsings = [];
-    var words = inputString.match(/\S+/g);
-    if (!words) return parsings;
+    var words = tokenize(inputString);
+    if (!words.length) return parsings;
 
+    // A quoted token is never tried as the verb.
     var verbOnly = words.length === 1;
-    var inputs = (verbOnly
-        ? [[words[0], null, 1]]
-        : [[words[0], words.slice(1), 1], [words.pop(), words, .1]]);
+    var inputs = [];
+    if (!words[0].quoted)
+        inputs.push(verbOnly
+            ? [words[0], null, 1]
+            : [words[0], words.slice(1), 1]);
+    if (!verbOnly && !words[words.length - 1].quoted)
+        inputs.push([words.pop(), words, .1]);
+    if (!inputs.length) return parsings;
     for (let verb of verbList) if ((verbOnly || verb.argCount) &&
         !verb.disabled)
         VERB: for (let input of inputs) {
@@ -419,10 +447,18 @@ Parser.prototype = {
                 input,
                 this._verbList,
                 function makePPS(verb, argStrings, matchScore) {
-                    for (var x in verb.args)
+                    for (var x in verb.args) {
                         // ensure all args in argStrings
                         // will be used for reconstructing the sentence
-                        argStrings[x] = x in argStrings && argStrings[x].join(" ");
+                        let tokens = argStrings[x];
+                        let text = x in argStrings && tokens.join(" ");
+                        if (text && tokens.some(t => t.quoted)) {
+                            // keep the flag: quoted args skip pronoun substitution
+                            text = new String(text);
+                            text.quoted = true;
+                        }
+                        argStrings[x] = text;
+                    }
                     return new PartiallyParsedSentence(
                         verb, argStrings, selObj, matchScore, query);
                 });
@@ -511,16 +547,30 @@ ParsedSentence.prototype = {
             let {text} = this._argSuggs[x] || 0;
             if (!text || this._argFlags[x] & FLAG_DEFAULT) continue;
             let preposition = " ";
-            if (x === "object") {
-                // Check for a valid text selection. We'll replace
-                // the text with a pronoun for readability
-                if (!this.fromNounFirstSuggestion && this._selObj.text === text)
-                    text = this._query.PRONOUNS[0];
-            }
-            else preposition += args[x].preposition + " ";
+            // Check for a valid text selection. We'll replace
+            // the text with a pronoun for readability
+            if (!this.fromNounFirstSuggestion && this._selObj.text === text)
+                text = this._query.PRONOUNS[0];
+            else if (this._argNeedsQuotes(x, text))
+                text = '"' + text.replace(/"/g, "") + '"';
+            if (x !== "object") preposition += args[x].preposition + " ";
             sentence += preposition + text;
         }
         return sentence + " ";
+    },
+    // An emitted argument must be re-quoted if any of its words would
+    // re-parse as a role marker, or if a prepositional argument spans
+    // several words (an unquoted multiword phrase loses its tail to the
+    // object on re-parse).
+    _argNeedsQuotes: function PS__argNeedsQuotes(argName, text) {
+        if (argName !== "object" && /\s/.test(text)) return true;
+        var {args} = this._verb;
+        for (let word of text.split(/\s+/)) if (word)
+            for (let x in args) {
+                let prep = args[x].preposition;
+                if (prep && prep.indexOf(word) === 0) return true;
+            }
+        return false;
     },
     // text formatted sentence for display in popup menu
     get displayText() {
@@ -736,7 +786,7 @@ function PartiallyParsedSentence(verb, argStrings, selObj, matchScore, query) {
         // If argument is present, try the noun suggestions
         // based both on substituting pronoun...
         // (but not for noun-first)
-        let gotSuggs = (text && matchScore &&
+        let gotSuggs = (text && matchScore && !text.quoted &&
             this._suggestWithPronounSub(argName, text));
         // and on not substituting pronoun...
         let gotSuggsDirect = ((text || (text = verb.args[argName].input)) &&

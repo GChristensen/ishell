@@ -263,10 +263,20 @@ export class PinterestAPI {
     }
 
     async authorize() {
-        const json = await this.#fetchPinterestJSON("/resource/UserSettingsResource/get/");
-        const userDetails = this.#handleResponse(json);
-        if (userDetails)
-            this.#userName = userDetails.username;
+        const url = `${this.PINTEREST_URL}/resource/ActiveUserResource/create/`;
+
+        const resp = await fetch(url, {
+                method: "post",
+                body: encodeURI('data={"options":{"data":{"auxData":{"stage":"prod"},"browser":4,"clientUUID":"experimental","event_type":7137,"time":0,"view_type":1}},"context":{}}'),
+                headers: {
+                    "X-CSRFToken": await this.#getCSRFToken(url),
+                    "Content-Type": "application/x-www-form-urlencoded"
+                }
+            })
+
+        const json = await resp.json();
+
+        this.#userName = json.client_context?.user?.username;
     }
 
     async checkAuthorization() {
@@ -383,7 +393,8 @@ export class PinterestAPI {
         if (bookmark)
             pinterestOptions.options.bookmarks = [bookmark];
 
-        const params = {data: JSON.stringify(pinterestOptions)};
+        const params = {data: JSON.stringify(pinterestOptions),
+                                   "_": Date.now()};
         const json = await this.#fetchPinterestJSON("/resource/BoardsResource/get/", params);
 
         if (json?.resource_response?.status === "success")
