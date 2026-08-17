@@ -33,6 +33,7 @@ const GPT_MODELS = {
      **gpt** **with** *3.5* **by** *1000* **at** *0.7*
 
      @command
+     @hidden
      @sticky
      @markdown
      @license GPL

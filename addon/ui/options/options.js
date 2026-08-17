@@ -88,8 +88,8 @@ function populateDynamicSettings() {
         youtube_search_api_key: "API key used by the youtube command",
         google_cse_api_key: "API key used by the google and images commands",
         google_cse_api_id: "Custom search configuration id used by the google and images commands",
-        openai_api_key: "OpenAI API key used by the gpt command",
-        gpt_default_model: "Default language model used by the gpt command"
+        //openai_api_key: "OpenAI API key used by the gpt command",
+        //gpt_default_model: "Default language model used by the gpt command"
     };
 
     const helpLinks = {
@@ -98,7 +98,7 @@ function populateDynamicSettings() {
         youtube_search_api_key: "https://developers.google.com/youtube/v3/getting-started",
         google_cse_api_key: "https://developers.google.com/custom-search/v1/introduction",
         google_cse_api_id: "https://support.google.com/programmable-search/answer/2649143",
-        openai_api_key: "https://platform.openai.com/api-keys"
+        //openai_api_key: "https://platform.openai.com/api-keys"
     };
 
     const builtinKeys = Object.keys(helpHints);

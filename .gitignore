@@ -6,6 +6,7 @@
 /addon/web-ext-artifacts
 /addon/.web-extension-id
 node_modules
+/addon/.amo-upload-uuid
 /package.json
 /package-lock.json
 venv
