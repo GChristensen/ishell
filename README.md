@@ -6,6 +6,36 @@ A linguistic interface for web browsers.
 It aims to bring back the full functionality of Ubiquity to Firefox Quantum and to provide a clean, 
 unified modern object-oriented command authoring API.
 
+### Why iShell
+
+Most software asks you to find things on the screen. iShell lets you name them instead.
+
+You open the command line, type a few words, and the browser does the work.
+It sounds simple. The usability gain is large.
+
+**Words beat pointing.** In *The Humane Interface*, Jef Raskin noted that using a mouse takes two steps.
+First you hunt for a target. Then you guide the pointer onto it. By Fitts's law, the smaller and
+farther the target, the longer this takes. Reaching for the mouse also breaks the rhythm of a touch typist.
+Typing the name of a command skips the hunting and the pointing. You recall a word almost instantly,
+and your hands already know the motions.
+
+**You stop typing when the command is clear.** iShell matches verbs fuzzily and shows suggestions as you type.
+A few letters are often enough. Commands you use often rise to the top of the list.
+
+**You see the result before you commit.** Commands can show a preview while you type.
+You check what is about to happen, then press Enter. Raskin warned that hidden state makes users err.
+A visible preview leaves little room for a surprise.
+
+**Commands read like language.** You write `translate hello to german` rather than click through a dialog.
+Prepositions mark the arguments, so there are no flags to memorize. Commands can also act on
+the text you have selected on the page.
+
+**It is yours to extend.** A command is a small JavaScript class with a comment on top.
+Write one in minutes, and the command line grows around the way you work.
+
+The speed of this approach does not come naturally to anyone used to mainstream computer interaction.
+You have to train yourself into the habit. Once you have, the mouse becomes the slower option.
+
 ### Object-oriented command syntax
 
 Although iShell still supports the command authoring API of the original Ubiquity, 
