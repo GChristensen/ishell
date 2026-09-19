@@ -1,0 +1,280 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>iShell — a command line for your browser</title>
+<meta name="description" content="iShell is a natural-language command line for Firefox and Chrome. Press Ctrl+Space, type what you want, and the result appears in the same window.">
+<link rel="icon" type="image/svg+xml" href="img/logo.svg">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:wght@400;500;600;700&amp;family=JetBrains+Mono:wght@400;500;700&amp;display=swap">
+<link rel="stylesheet" href="styles.css">
+</head>
+<body>
+
+<!-- NAV -->
+<header class="site-header">
+  <a class="brand" href="#top" aria-label="iShell home">
+    <img src="img/logo.svg" width="36" height="32" alt="">
+    <span class="brand__name">iShell</span>
+  </a>
+  <nav class="site-nav">
+    <a href="#syntax">syntax</a>
+    <a href="#commands">commands</a>
+    <a href="#authoring">authoring</a>
+    <a href="#lineage">ubiquity</a>
+    <!--a class="btn" href="#install">Add to browser</a-->
+  </nav>
+</header>
+
+<main>
+
+<!-- HERO -->
+<section class="hero" id="top">
+  <p class="hero__prompt"><span>~ $</span>ishell --help</p>
+  <h1 class="hero__title">Tell the browser<br><em>what to do.</em><i class="caret"></i></h1>
+
+  <div class="hero__row">
+    <p class="hero__lede">iShell is a natural-language command line for Firefox and Chrome. Press
+      <kbd class="kbd">Ctrl+Space</kbd>, type what you want, and the result appears in the same
+      window before you even press Enter.</p>
+    <div class="hero__actions">
+      <a class="btn btn--lg" href="https://addons.mozilla.org/en-US/firefox/addon/ishell/"><img class="btn__icon" src="/images/firefox.png" width="22" height="22" alt="">Add to Firefox</a>
+      <a class="btn btn--lg btn--ghost" href="https://chrome.google.com/webstore/detail/scrapyard/hdjdmgedflhjhbflaijohpnognlhacoc"><img class="btn__icon" src="/images/firefox.png" width="22" height="22" alt="">Add to Chrome</a>
+    </div>
+  </div>
+
+  <figure class="hero__figure">
+    <object class="demo" id="ishell-demo" type="image/svg+xml" data="img/ishell-demo.svg" role="img"
+            aria-label="Animation of the iShell command line. The prompt opens over a page; 'translate espoir from fr to ja' is typed and the preview shows the Japanese translation; then 'duck humanism' brings up DuckDuckGo results; then 'images magnolia' shows a grid of pictures."></object>
+    <figcaption class="demo-captions">
+      <div class="demo-caption">
+        <code><span>&gt;</span> translate espoir from fr to ja</code>
+        <p>Arguments are read as you type; language names are filled in for you.</p>
+      </div>
+      <div class="demo-caption">
+        <code><span>&gt;</span> duck humanism</code>
+        <p>DuckDuckGo results in the preview. No new tab, no page load.</p>
+      </div>
+      <div class="demo-caption">
+        <code><span>&gt;</span> images magnolia</code>
+        <p>A pageable grid of pictures, each one a keypress away.</p>
+      </div>
+    </figcaption>
+  </figure>
+</section>
+
+<!-- WHAT IT IS -->
+<section class="section section--alt split">
+  <p class="eyebrow split__aside"><span class="eyebrow__num">01</span>what-it-is</p>
+  <div class="split__main">
+    <p class="statement">Commands are shortcuts for things you do on the Web every day.
+      <span>They cut out repetitive clicking and let you get more done, faster, with interactive
+      results shown right where you typed.</span></p>
+    <p class="statement-note">Dozens of commands ship with the add-on, and you can write your own in
+      JavaScript. This is the main power of this add-on. See the <a class="text-link" href="https://gchristensen.github.io/ishell/docs/commands.html">full
+      list of built-in commands</a>.</p>
+  </div>
+</section>
+
+<!-- SYNTAX -->
+<section class="section" id="syntax">
+  <div class="section-head">
+    <p class="eyebrow"><span class="eyebrow__num">02</span>syntax</p>
+    <h2 class="section-title">Commands read like sentences.</h2>
+    <p class="lede">A verb, an object and a few prepositions. The parser works out which word fills
+      which role, suggests the likeliest reading as you type, and learns the ones you pick most.</p>
+  </div>
+
+  <div class="panel" style="margin-top: 56px;">
+    <div class="anatomy">
+      <span class="anatomy__prompt">&gt;</span>
+      <span class="token token--verb"><span class="token__word">translate</span><span class="token__label">verb</span></span>
+      <span class="token token--arg"><span class="token__word">espoir</span><span class="token__label">object</span></span>
+      <span class="token token--prep"><span class="token__word">from</span><span class="token__label">prep.</span></span>
+      <span class="token token--arg"><span class="token__word">fr</span><span class="token__label">source</span></span>
+      <span class="token token--prep"><span class="token__word">to</span><span class="token__label">prep.</span></span>
+      <span class="token token--arg"><span class="token__word">ja</span><span class="token__label">goal</span></span>
+    </div>
+  </div>
+</section>
+
+<!-- BUILT-IN COMMANDS -->
+<section class="section section--alt" id="commands">
+  <div class="commands-head">
+    <div class="section-head">
+      <p class="eyebrow"><span class="eyebrow__num">03</span>commands</p>
+      <h2 class="section-title">Built in, ready to type.</h2>
+      <p class="lede">Four examples out of the dozens of commands that ship with the add-on — the
+        ones you just saw at work, plus one more.</p>
+    </div>
+    <a class="link-arrow" href="https://gchristensen.github.io/ishell/docs/commands.html">man ishell →</a>
+  </div>
+
+  <div class="cmd-table">
+    <span class="mono-label cmd-table__label">For example</span>
+
+    <div class="cmd-row">
+      <span class="cmd-row__name">translate</span>
+      <code class="cmd-row__syntax">translate <i>text</i> <b>from</b> <i>language</i> <b>to</b> <i>language</i></code>
+      <span class="cmd-row__desc">Translates from one language to another using Bing Translator.</span>
+    </div>
+
+    <div class="cmd-row">
+      <span class="cmd-row__name">duck</span>
+      <code class="cmd-row__syntax">duck <i>query</i> <b>as</b> <i>quoted | site</i></code>
+      <span class="cmd-row__desc">Searches DuckDuckGo for your words.</span>
+    </div>
+
+    <div class="cmd-row">
+      <span class="cmd-row__name">images</span>
+      <code class="cmd-row__syntax">images <i>query</i></code>
+      <span class="cmd-row__desc">Browse pictures from Bing Images. Click a thumbnail to open it in a background tab.</span>
+    </div>
+
+    <div class="cmd-row">
+      <span class="cmd-row__name">history</span>
+      <code class="cmd-row__syntax">history <i>filter</i> <b>for</b> <i>domain</i> <b>of</b> <i>day</i> <b>by</b> <i>amount</i></code>
+      <span class="cmd-row__desc">Search browsing history.</span>
+    </div>
+  </div>
+
+  <p class="commands-note">Some built-in commands need an API key for their service, set in the
+    add-on options. If the links in the iShell interface are not enough, the
+    <a class="text-link" href="https://github.com/GChristensen/ishell#readme">GitHub page</a>
+    explains how to get one.</p>
+</section>
+
+<!-- AUTHORING -->
+<section class="section authoring" id="authoring">
+  <div class="authoring__text">
+    <p class="eyebrow"><span class="eyebrow__num">04</span>authoring</p>
+    <h2 class="section-title">Write your own commands.</h2>
+    <p>Declare the arguments once and the parser does the rest. For <b>show-text</b> <i>hey!</i>
+      <b>in</b> <i>popup</i>, iShell hands <i>hey!</i> and <i>popup</i> strings straight to the command handler
+      methods (<b>execute</b> in the example).</p>
+    <p>Commands have full access to the browser WebExtension APIs and jQuery, and previews are plain
+      HTML and CSS, so they can be as rich as you like.</p>
+    <div class="authoring__links">
+      <a class="link-arrow" href="https://gchristensen.github.io/ishell/addon/ui/options/tutorial.html">tutorial →</a>
+      <a class="link-arrow" href="https://github.com/GChristensen/ishell#object-oriented-command-syntax">class-based syntax →</a>
+    </div>
+  </div>
+
+  <div class="authoring__editor">
+    <div class="editor">
+      <div class="editor__bar">
+        <span class="editor__dot"></span><span class="editor__dot"></span><span class="editor__dot"></span>
+        <span class="editor__name">command editor · show-text.js</span>
+      </div>
+<pre class="editor__code"><span class="c-comment">/**
+    Displays the given message as a notification
+    or prints it to the browser console.
+
+    <span class="c-tag">@command</span>
+    <span class="c-tag">@uuid</span> 5BDEFC27-CA9F-4F41-85E4-8B358154E2FC
+    <span class="c-tag">@description</span> An object-oriented command with arguments.
+ */</span>
+<span class="c-kw">class</span> <b>ShowText</b> {
+    constructor(args) {
+        args[<span class="c-role">OBJECT</span>] = {nountype: noun_arb_text, label: <span class="c-str">"message"</span>};
+        args[<span class="c-role">IN</span>] = {nountype: [<span class="c-str">"popup"</span>, <span class="c-str">"log"</span>], label: <span class="c-str">"destination"</span>};
+    }
+
+    execute(args) {
+        <span class="c-kw">const</span> destination = args[<span class="c-role">IN</span>]?.text;
+        <span class="c-kw">const</span> message = args[<span class="c-role">OBJECT</span>]?.text;
+
+        <span class="c-kw">if</span> (destination === <span class="c-str">"log"</span>)
+            console.log(message);
+        <span class="c-kw">else</span>
+            cmdAPI.notify(message);
+    }
+}</pre>
+    </div>
+  </div>
+
+  <div class="authoring__roles">
+    <div class="panel panel--roles">
+      <p class="roles__head">Every argument role a command can declare</p>
+      <div class="roles">
+        <span class="role">to <i>· goal</i></span>
+        <span class="role">from <i>· source</i></span>
+        <span class="role">near <i>· location</i></span>
+        <span class="role">at <i>· time</i></span>
+        <span class="role">with <i>· instrument</i></span>
+        <span class="role">in <i>· format</i></span>
+        <span class="role">of <i>· modifier</i></span>
+        <span class="role">as <i>· alias</i></span>
+        <span class="role role--new">by <i>· cause</i></span>
+        <span class="role role--new">for <i>· subject</i></span>
+        <span class="role role--new">on <i>· dependency</i></span>
+      </div>
+      <p class="roles__note">Eleven prepositions, plus the nameless <b>object</b> that follows the
+        verb. The highlighted three are new in iShell and were not part of the original Ubiquity.</p>
+    </div>
+  </div>
+</section>
+
+<!-- LINEAGE -->
+<section class="section section--alt lineage" id="lineage">
+  <div class="section-head lineage__head">
+    <p class="eyebrow"><span class="eyebrow__num">05</span>lineage</p>
+    <h2 class="section-title">Ubiquity, brought back.</h2>
+    <p class="lede">iShell is a WebExtensions revival of
+      <a class="text-link" href="https://wiki.mozilla.org/Labs/Ubiquity">Mozilla Ubiquity</a>, an
+      ingenious experiment in linguistic user interfaces. It brings back its full functionality with
+      a clean, modern, object-oriented authoring API.</p>
+  </div>
+
+  <div class="lineage__col">
+    <span class="mono-label">What changed</span>
+    <p>Ubiquity let you subscribe to third-party commands that updated themselves. For security
+      reasons iShell has no such model: you keep third-party code in the command editor yourself,
+      using the <b>install</b> command.</p>
+    <p>If you can write a little JavaScript, that is all it takes to automate the Web APIs you use or
+      to extend the browser without much effort.</p>
+  </div>
+
+  <div class="lineage__col">
+    <span class="mono-label">Not in the original</span>
+    <div class="additions">
+      <p class="addition">Object-oriented command syntax.</p>
+      <p class="addition">More argument roles: <b>by</b> (cause), <b>for</b> (subject) and <b>on</b> (dependency).</p>
+      <p class="addition">Scroll through preview list items with Ctrl+↑/↓.</p>
+      <p class="addition">User commands split into categories in the editor.</p>
+      <p class="addition">Add commands to the context menu with Ctrl+Alt+Enter (Firefox).</p>
+    </div>
+  </div>
+</section>
+
+<!-- FINAL CTA -->
+<section class="cta" id="install">
+  <h2 class="cta__title">Ctrl+Space.<br><em>Then just say it.</em></h2>
+  <div class="cta__actions">
+    <a class="btn btn--xl" href="https://addons.mozilla.org/en-US/firefox/addon/ishell/"><img class="btn__icon" src="/images/firefox.png" width="22" height="22" alt="">Add to Firefox</a>
+    <a class="btn btn--xl btn--ghost" href="https://chrome.google.com/webstore/detail/scrapyard/hdjdmgedflhjhbflaijohpnognlhacoc"><img class="btn__icon" src="/images/firefox.png" width="22" height="22" alt="">Add to Chrome</a>
+  </div>
+</section>
+
+</main>
+
+<!-- FOOTER -->
+<footer class="site-footer">
+  <a class="brand" href="#top" aria-label="iShell home">
+    <img src="img/logo.svg" width="36" height="32" alt="">
+    <span class="brand__name">iShell</span>
+  </a>
+  <nav>
+    <a href="https://gchristensen.github.io/ishell/docs/commands.html">Commands</a>
+    <a href="https://gchristensen.github.io/ishell/addon/ui/options/tutorial.html">Tutorial</a>
+    <a href="https://github.com/GChristensen/ishell">GitHub</a>
+    <a href="https://github.com/GChristensen/ishell/issues">Report a bug</a>
+    <span>See also:
+      <a class="text-link" href="https://gchristensen.github.io/enso-portable/">Enso Launcher</a>,
+      <a class="text-link" href="https://gchristensen.github.io/scrapyard/">Scrapyard</a></span>
+  </nav>
+  <span>© g/christensen</span>
+</footer>
+
+</body>
+</html>

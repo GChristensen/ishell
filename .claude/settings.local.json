@@ -1,0 +1,27 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(cd 'D:\\\\dev\\\\browser\\\\ishell\\\\landing.sy'; cat package.json build.mjs; ls img; wc -c index.html main.js styles.css; ls ../media)",
+      "Bash(mkdir -p 'C:\\\\Users\\\\user\\\\AppData\\\\Local\\\\Temp\\\\claude\\\\D--dev-browser-ishell\\\\ef8c7dd9-8e7a-4603-8131-72dc88fbec02\\\\scratchpad/frames')",
+      "Bash(ffprobe -v error -show_entries format=duration:stream=width,height 'D:\\\\dev\\\\browser\\\\ishell\\\\media\\\\ishell.webm')",
+      "Bash(ffmpeg -v error -i 'D:\\\\dev\\\\browser\\\\ishell\\\\media\\\\ishell.webm' -vf fps=1/1.5,scale=800:-1,tile=3x3 'C:\\\\Users\\\\user\\\\AppData\\\\Local\\\\Temp\\\\claude\\\\D--dev-browser-ishell\\\\ef8c7dd9-8e7a-4603-8131-72dc88fbec02\\\\scratchpad/frames/t%02d.png')",
+      "Bash(sed 's/name: *//')",
+      "Bash(cp 'C:\\\\Users\\\\user\\\\AppData\\\\Local\\\\Temp\\\\claude\\\\D--dev-browser-ishell\\\\ef8c7dd9-8e7a-4603-8131-72dc88fbec02\\\\scratchpad\\\\artifact-files\\\\2f662473-cf16-4bd2-a065-854bf319b5e0\\\\project\\\\Main.dc.html' 'C:\\\\Users\\\\user\\\\AppData\\\\Local\\\\Temp\\\\claude\\\\D--dev-browser-ishell\\\\ef8c7dd9-8e7a-4603-8131-72dc88fbec02\\\\scratchpad\\\\canvas\\\\project\\\\Main.dc.html')",
+      "Bash(cp 'C:\\\\Users\\\\user\\\\AppData\\\\Local\\\\Temp\\\\claude\\\\D--dev-browser-ishell\\\\ef8c7dd9-8e7a-4603-8131-72dc88fbec02\\\\scratchpad\\\\artifact-files\\\\2f662473-cf16-4bd2-a065-854bf319b5e0\\\\project\\\\Demo.dc.html' 'C:\\\\Users\\\\user\\\\AppData\\\\Local\\\\Temp\\\\claude\\\\D--dev-browser-ishell\\\\ef8c7dd9-8e7a-4603-8131-72dc88fbec02\\\\scratchpad\\\\canvas\\\\project\\\\Demo.dc.html')",
+      "Bash(mkdir -p landing/img landing/tools)",
+      "Bash(cp addon/ui/icons/logo.svg landing/img/logo.svg)",
+      "Bash(node tools/gen-demo.mjs)",
+      "Bash(node 'C:\\\\Users\\\\user\\\\AppData\\\\Local\\\\Temp\\\\claude\\\\D--dev-browser-ishell\\\\ef8c7dd9-8e7a-4603-8131-72dc88fbec02\\\\scratchpad\\\\serve.mjs' 'D:\\\\dev\\\\browser\\\\ishell\\\\landing')",
+      "Bash(cp landing.sy/build.mjs landing/build.mjs)",
+      "Bash(cp landing.sy/package.json landing/package.json)",
+      "Bash(node build.mjs --plain --out __TRACKED_VAR__/preview-plain)",
+      "Bash(ln -s ../landing.sy/node_modules node_modules)",
+      "Bash(cp -r ../landing.sy/node_modules ./node_modules)",
+      "Bash(node build.mjs --out __TRACKED_VAR__/preview-min)",
+      "Bash(gzip -c img/ishell-demo.svg)",
+      "Bash(git -C 'D:\\\\dev\\\\browser\\\\ishell' status --short)",
+      "Bash(node 'C:\\\\Users\\\\user\\\\AppData\\\\Local\\\\Temp\\\\claude\\\\D--dev-browser-ishell\\\\ef8c7dd9-8e7a-4603-8131-72dc88fbec02\\\\scratchpad\\\\serve.mjs' 'C:\\\\Users\\\\user\\\\AppData\\\\Local\\\\Temp\\\\claude\\\\D--dev-browser-ishell\\\\ef8c7dd9-8e7a-4603-8131-72dc88fbec02\\\\scratchpad\\\\preview-min')",
+      "Bash(S='C:\\\\Users\\\\user\\\\AppData\\\\Local\\\\Temp\\\\claude\\\\D--dev-browser-ishell\\\\ef8c7dd9-8e7a-4603-8131-72dc88fbec02\\\\scratchpad'; cat \"$S/../tasks/bu7mj4557.output\" 2>/dev/null | head -5)"
+    ]
+  }
+}
