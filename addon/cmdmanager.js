@@ -116,6 +116,7 @@ class CommandManager {
     #builtinCommandFiles = [
         "/commands/browser.js",
         "/commands/color-picker.js",
+        "/commands/duck.js",
         "/commands/feedsub.js",
         "/commands/google.js",
         "/commands/history.js",

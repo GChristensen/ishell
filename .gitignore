@@ -19,3 +19,4 @@ backend/*.exe
 backend/*.zip
 backend/*.tgz
 /*.zip
+/CLAUDE.md

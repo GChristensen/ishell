@@ -1,6 +1,6 @@
 export const namespace = new AnnotatedCommandNamespace(CommandNamespace.SEARCH);
 
-const LIBGEN_HOST = "http://libgen.is/";
+const LIBGEN_HOST = "https://libgen.li/";
 
 /**
  # Syntax
@@ -23,8 +23,6 @@ const LIBGEN_HOST = "http://libgen.is/";
  @uuid 25DB48B1-0FB6-49FC-8F38-728A1BAF7265
  */
 export class Libgen {
-    #libgenHost;
-
     constructor(args) {
         args[OBJECT] = {nountype: noun_arb_text, label: "title or author"}; // object
         //args[FOR]    = {nountype: noun_arb_text, label: "text"}; // subject
@@ -48,15 +46,15 @@ export class Libgen {
 
         if (response.ok) {
             const doc = cmdAPI.parseHtml(await response.text());
-            const table = $("table.c", doc);
+            const table = $("table#tablelibgen", doc);
             const books = this._parseTable(table);
 
             if (!books.length)
                 display.text("Not found.");
             else {
                 display.objectList(books, {
-                    text: (b) => b.title,
-                    subtext: (b) => b.details,
+                    text: (b) => this._titleHTML(b),
+                    subtext: (b) => Utils.escapeHtml(b.details),
                     action: (b) => browser.tabs.create({"url": b.link, active: cmdAPI.arrowSelection})
                 });
             }
@@ -70,23 +68,16 @@ export class Libgen {
     }
 
     _makeQueryURL({OBJECT, WITH, OF, BY}) {
-        const sort_mode = WITH?.text?.toUpperCase();
+        const sort_mode = WITH?.text?.toLowerCase();
         const order = OF?.text;
         const amount = BY?.text;
 
-        this.#libgenHost = LIBGEN_HOST;
-
-        let query = `${this.#libgenHost}search.php?open=0&view=simple&column=def&req=${OBJECT?.text}`;
+        // curtab=f restricts the results to files, the tab that lists the downloadable items
+        let query = `${LIBGEN_HOST}index.php?curtab=f&req=${encodeURIComponent(OBJECT?.text || "")}`;
 
         if (order) {
-            query += "&sort=" + order;
-
-            if (sort_mode)
-                query += "&sortmode=" + sort_mode;
-            else {
-                if (order === "year")
-                    query += "&sortmode=DESC";
-            }
+            query += "&order=" + order;
+            query += "&ordermode=" + (sort_mode || (order === "year" ? "desc" : "asc"));
         }
 
         if (amount)
@@ -95,79 +86,82 @@ export class Libgen {
         return query;
     }
 
+    _titleHTML(book) {
+        let html = Utils.escapeHtml(book.title);
+
+        if (book.isbn)
+            html += ` <span style="font-size: 90%">${Utils.escapeHtml(book.isbn)}</span>`;
+
+        if (book.series)
+            html += ` <span style="font-size: 90%; opacity: 0.7">[${Utils.escapeHtml(book.series)}]</span>`;
+
+        return html;
+    }
+
+    // text of a cell without the parts that are only meaningful on the site: the [...] toggle of long author
+    // lists (its hidden remainder is kept), the line breaks are replaced with spaces
+    _cellText(cell) {
+        const clone = cell.clone();
+
+        clone.find("input, label").remove();
+        clone.find("br").replaceWith(" ");
+
+        return clone.text().replace(/\s+/g, " ").trim();
+    }
+
+    // cuts the text after the last complete comma-separated item that fits the given length
+    _shorten(text, length) {
+        if (text.length <= length)
+            return text;
+
+        const cut = text.lastIndexOf(", ", length);
+
+        return text.substring(0, cut > 0 ? cut : length).trim() + ", ...";
+    }
+
+    // Columns of the result table: 0 - series, title, ISBN and badges, 1 - authors, 2 - publisher, 3 - year,
+    // 4 - language, 5 - pages, 6 - size, 7 - extension, 8 - mirrors.
     _parseTable(table) {
-        let data = [];
-        let rows = table.children("tbody").children("tr").not(":first");
+        const books = [];
 
-        rows.each((_, tr) => {
-            let cols = $(tr).children("td");
+        table.children("tbody").children("tr").each((_, tr) => {
+            const cols = $(tr).children("td");
 
-            let entry = {};
-            entry.mirrors = [];
+            if (cols.length < 9)
+                return;
 
-            cols.each((i, td) => {
-                switch(i) {
-                    case 1:
-                        entry.authors = td.innerText;
-                        break;
-                    case 2:
-                        let greens = $(td).find("font[color='green']");
-                        greens.each((_, elem) => {
-                            let green = $(elem);
-                            if (green.text().indexOf("[") < 0)
-                                green.remove();
-                            else
-                                green.attr("style", "font-size: 90%");
-                        });
+            const entry = {};
+            const titleCell = $(cols[0]);
 
-                        let fonts = $(td).find("font");
-                        fonts.each((_, elem) => {
-                            let font = $(elem);
-                            font.attr("color", "#45BCFF");
-                        });
+            // there may be several links to the edition (series issue, title, ISBN): the title is the one having text
+            const titleLink = titleCell.find("a[href^='edition.php']")
+                .filter((_, a) => !$(a).closest("b").length)
+                .filter((_, a) => this._cellText($(a).clone().children("i").remove().end()))
+                .first();
+            const link = titleLink.attr("href") || $(cols[6]).find("a").attr("href");
 
-                        $(td).find("a:not([id])").remove();
-                        let links = $(td).find("a[id]");
-                        links.each((_, elem) => {
-                            let link = $(elem);
-                            let href = link.attr("href");
-                            link.attr("style", "color: #45BCFF");
-                            link.attr("href", this.#libgenHost + link.attr("href"));
-                        });
+            if (!link)
+                return;
 
-                        entry.title = td.innerHTML
-                            .replace("<br>", " ")
-                            .replace(/<a/ig, "<span class='libgen'")
-                            .replace(/<\/a>/ig, "</span>");
-                        entry.link = links.get(0).href;
-                        break;
-                    case 4:
-                        entry.year = td.innerText;
-                        break;
-                    case 8:
-                        entry.extension = td.innerText;
-                        break;
-                    case 9:
-                        entry.mirrors = $(td).find("a");
-                        break;
-                }
-            });
+            entry.link = new URL(link, LIBGEN_HOST).href;
+            entry.title = this._cellText(titleLink.clone().children("i").remove().end())
+                || this._shorten(this._cellText(titleCell), 100);
+            entry.series = this._cellText(titleCell.children("b").first());
+            entry.isbn = this._cellText(titleCell.find("font[color='green']").first());
 
-            entry.details = "";
+            const authors = this._shorten(this._cellText($(cols[1])).replace(/[;,\s]+$/, ""), 80);
+            const publisher = this._cellText($(cols[2]));
+            const year = this._cellText($(cols[3]));
+            const language = this._cellText($(cols[4]));
+            const size = this._cellText($(cols[6]));
+            const extension = this._cellText($(cols[7]));
 
-            if (entry.authors)
-                entry.details += entry.authors + ", ";
+            entry.details = [authors, publisher, year, language, size, extension].filter(s => s).join(", ");
 
-            if (entry.year)
-                entry.details += entry.year + ", ";
-
-            if (entry.extension)
-                entry.details += entry.extension;
-
-            data.push(entry);
+            books.push(entry);
         });
 
-        return data;
+        return books;
     }
 }
 
@@ -304,6 +298,7 @@ export class Zlibrary {
 }
 
 /**
+ @hidden
  @command
  @markdown
  @delay 1000

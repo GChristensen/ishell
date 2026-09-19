@@ -3,27 +3,25 @@ import {settings} from "../settings.js";
 export const namespace = new AnnotatedCommandNamespace(CommandNamespace.SEARCH);
 
 /**
-    It is possible to use the <b>as</b> argument with the following values: <i>quoted</i>, <i>site</i>, <i>define</i>.
-
     @search
+    @markdown
     @command
     @delay 1000
-    @parser json
-    @container items
-    @title title
-    @href link
-    @body htmlSnippet
+    @url https://www.google.com/search?q=%s
     @icon /ui/icons/google.png
-    @description Searches Google for your words.
+    @description The search API used by this command was closed by Google. Please use the duck command instead.
     @uuid 61A61D85-07B4-4375-AB42-D635190241EA
  */
 export class Google {
-    url = `https://customsearch.googleapis.com/customsearch/v1?key=${cmdAPI.settings.google_cse_api_key}`
-        + `&cx=${cmdAPI.settings.google_cse_api_id}&q=%s`;
-
     constructor(args) {
         args[OBJECT] = {nountype: noun_arb_text, label: "query"};
         args[AS] = {nountype:  ["quoted", "define", "site"], label: "type"};
+    }
+
+    preview(args, display) {
+        display.set(`The Google search API is no longer available, so results cannot be shown here.
+                     <p>Use the <b>duck</b> command to search DuckDuckGo instead:</p>
+                     <pre>\tduck [query]</pre>`);
     }
 
     beforeSearch(args) {
@@ -90,18 +88,20 @@ export class Maps {
 }
 
 /**
+    Browse pictures from Bing Images. Click a thumbnail to open the full-size image in a background tab.
+
     @search
     @command
     @delay 1000
-    @icon /ui/icons/google.png
-    @url https://www.google.com/search?tbm=isch&q=%s
+    @icon /ui/icons/bing.png
+    @url https://www.bing.com/images/search?q=%s
     @author Federico Parodi, satyr, g/christensen
-    @description Browse pictures from Google Images.
+    @description Browse pictures from Bing Images.
     @uuid 3A1A73F1-C651-4AD5-B4B4-2FBAAB85CDD0
  */
 export class Images {
-    apiURL = `https://customsearch.googleapis.com/customsearch/v1?key=${cmdAPI.settings.google_cse_api_key}`
-           + `&cx=${cmdAPI.settings.google_cse_api_id}&searchType=image`;
+    PAGE_SIZE = 20;
+    apiURL = `https://www.bing.com/images/async?mmasync=1&count=${this.PAGE_SIZE}`;
 
     async preview({OBJECT: {text: query}}, display) {
         if (query) {
@@ -115,18 +115,38 @@ export class Images {
     async #previewImages(display, params) {
         display.text("Loading results...");
 
-        const requestURL = this.apiURL + `&start=${params.start}&q=${encodeURIComponent(params.query)}`;
-        const results = await display.fetchJSON(requestURL, {_displayError: "Network error."});
+        const requestURL = this.apiURL + `&first=${params.start}&q=${encodeURIComponent(params.query)}`;
+        const html = await display.fetchText(requestURL, {_displayError: "Network error."});
 
-        if (results)
-            this.#generateView(display, results, params);
+        if (html)
+            this.#generateView(display, this.#parseImages(html), params);
         else
             display.error("HTTP request error.");
     }
 
-    #generateView(display, results, params) {
-        const range = results.items.length
-            ? `${params.start + 1} ~ ${params.start + results.items.length}`
+    // every image tile carries a JSON description in the "m" attribute: murl - the image, turl - its thumbnail
+    #parseImages(html) {
+        const doc = new DOMParser().parseFromString(html, "text/html");
+        const images = [];
+
+        for (const tile of doc.querySelectorAll("a.iusc[m]")) {
+            try {
+                const {murl, turl} = JSON.parse(tile.getAttribute("m"));
+
+                if (murl && turl)
+                    images.push({image: murl, thumbnail: turl});
+            }
+            catch (e) {
+                console.error(e);
+            }
+        }
+
+        return images;
+    }
+
+    #generateView(display, images, params) {
+        const range = images.length
+            ? `${params.start + 1} ~ ${params.start + images.length}`
             : 'x';
 
         const style =
@@ -146,7 +166,8 @@ export class Images {
              </div>
             `;
 
-        display.imageList(navi, results.items.map(i => i.link), null, style);
+        display.imageList(navi, images.map(i => i.thumbnail),
+            i => browser.tabs.create({url: images[i].image, active: false}), style);
 
         if (!params.start)
             display.querySelector(".prev").disabled = true
@@ -160,7 +181,7 @@ export class Images {
                 params.start = params.starts.pop() || 0
             else {
                 params.starts.push(params.start)
-                params.start += results.items.length
+                params.start += this.PAGE_SIZE
             }
             this.#previewImages(display, params);
         })

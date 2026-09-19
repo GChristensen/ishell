@@ -3,33 +3,59 @@ import {settings} from "../settings.js";
 export const namespace = new AnnotatedCommandNamespace(CommandNamespace.SEARCH);
 
 /**
+    Results are taken from the IMDB suggestion service, since the search pages of the site are rendered
+    from an embedded JSON and are protected from automated requests.
+
     @search
     @command
     @delay 1000
-    @container .ipc-metadata-list-summary-item
     @icon /ui/icons/imdb.png
-    @url https://www.imdb.com/search/title/?title=%s
+    @url https://www.imdb.com/find/?s=tt&q=%s
     @description Searches IMDB for movies.
     @uuid F34E6A8C-FBBD-4DB2-9999-1B653034D985
  */
 export class Imdb {
-    parseTitle(container) {
-        const header = container.find(".ipc-title-link-wrapper");
-        const h3 = header.find("h3")
-        const text = h3.text();
+    async preview({OBJECT: {text: query}}, display) {
+        query = query?.trim();
 
-        h3.remove();
-        header.text(text.replace(/^\d+\.\s*/, ""));
+        if (!query)
+            return this.previewDefault(display);
 
-        return header;
+        display.text("Loading results...");
+
+        // the first path segment is the first letter of the query
+        const lowerCased = query.toLowerCase();
+        const prefix = /^[a-z0-9]/.test(lowerCased) ? lowerCased[0] : "x";
+        const requestURL = `https://v3.sg.media-imdb.com/suggestion/${prefix}/${encodeURIComponent(lowerCased)}.json`;
+        const json = await display.fetchJSON(requestURL, {_displayError: "Network error."});
+
+        if (!json)
+            return display.error("HTTP request error.");
+
+        const titles = (json.d || []).filter(r => r.id?.startsWith("tt") && r.l);
+
+        if (!titles.length)
+            return display.text(`No results for <b>${Utils.escapeHtml(query)}</b>.`);
+
+        display.objectList(titles, {
+            text: t => this.#titleHTML(t),
+            subtext: t => Utils.escapeHtml([t.q, t.s].filter(s => s).join(", ")),
+            icon: t => this.#thumbnail(t),
+            action: t => browser.tabs.create({url: `https://www.imdb.com/title/${t.id}/`, active: cmdAPI.arrowSelection})
+        }, ".opl-icon {width: 32px; height: 48px; object-fit: cover;}");
     }
 
-    parseThumbnail(container) {
-        return container.find("img.ipc-image");
+    #titleHTML(title) {
+        const year = title.y || title.yr;
+
+        return Utils.escapeHtml(title.l) + (year ? ` <span style="font-size: 90%">(${year})</span>` : "");
     }
 
-    parseBody(container) {
-        return container.find(".ipc-html-content-inner-div");
+    // the image service scales pictures according to the modifiers embedded in the file name
+    #thumbnail(title) {
+        const url = title.i?.imageUrl;
+
+        return url ? Utils.escapeHtml(url.replace(/\._V1_.*$/, "._V1_UY96_.jpg")) : undefined;
     }
 }
 

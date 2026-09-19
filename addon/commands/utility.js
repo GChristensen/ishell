@@ -138,14 +138,13 @@ namespace.createCommand({
 });
 
 
-var bitly_api_user = "ubiquityopera";
-var bitly_api_key = "R_59da9e09c96797371d258f102a690eab";
 namespace.createCommand({
-    names: ["shorten-url", "bitly"],
+    names: ["shorten-url", "tinyurl"],
     uuid: "6475BAAA-4547-4FF0-BCA7-EE4236F20386",
-    icon: "/ui/icons/bitly.png",
+    icon: "/ui/icons/tinyurl.png",
     description: "Shorten your URLs with the least possible keystrokes",
-    homepage: "http://bit.ly",
+    help: "Shortens the given URL or the URL of the current tab using <a href='https://tinyurl.com'>TinyURL</a>.",
+    homepage: "https://tinyurl.com",
     previewDelay: 1000,
     author: {
         name: "Cosimo Streppone",
@@ -153,34 +152,46 @@ namespace.createCommand({
     },
     license: "GPL",
     arguments: [{role: "object", nountype: noun_arb_text, label: "text"}],
+    _normalizeURL: function (text) {
+        text = (text || "").trim();
+
+        if (text && !/^[a-z][a-z\d+.\-]*:\/\//i.test(text))
+            text = "https://" + text;
+
+        try {
+            const url = new URL(text);
+            if (/^https?:$/.test(url.protocol) && url.hostname.includes("."))
+                return url.href;
+        }
+        catch (e) {}
+    },
     preview: async function (pblock, {object: {text}}) {
         this._short_url = undefined;
-        let url = "http://api.bit.ly/shorten?version=2.0.1&longUrl={QUERY}&login=" + bitly_api_user
-            + "&apiKey=" + bitly_api_key;
 
-        var query = text;
         // Get the url from current open tab if none specified
-        if (!query) query = CmdUtils.getLocation();
+        const query = text || CmdUtils.getLocation();
         if (!query) return;
-        var urlString = url.replace("{QUERY}", query);
 
-        // Get the url from current open tab if none specified
-        var ajax = await CmdUtils.previewGet(pblock, urlString, ajax => {
-            var err_code = ajax.errorCode;
-            var err_msg = ajax.errorMessage;
-            // Received an error from bit.ly API?
-            if (err_code > 0 || err_msg) {
-                pblock.error('Bit.ly API error ' + err_code + ': ' + err_msg);
-                return;
-            }
+        const longURL = this._normalizeURL(query);
+        if (!longURL) {
+            pblock.error(`<b>${Utils.escapeHtml(query)}</b> is not a valid URL.`);
+            return;
+        }
 
-            this._short_url = ajax.results[query].shortUrl;
-            pblock.text(`Shortened <b>${query}</b> to: <span style="color: #45BCFF">${this._short_url}</span>.
+        const requestURL = "https://tinyurl.com/api-create.php?url=" + encodeURIComponent(longURL);
+        const shortURL = (await pblock.fetchText(requestURL, {_displayError: "Network error."}))?.trim();
+
+        if (shortURL && /^https?:\/\//.test(shortURL)) {
+            this._short_url = shortURL;
+            pblock.text(`Shortened <b>${Utils.escapeHtml(query)}</b> to: <span style="color: #45BCFF">${shortURL}</span>.
                                 <br><br>Press 'Enter' to copy the result to clipboard.<br>`);
-        }, "json");
+        }
+        else
+            pblock.error("The URL could not be shortened.");
     },
     execute: async function ({object: {text}}) {
-        CmdUtils.setClipboard(this._short_url);
+        if (this._short_url)
+            CmdUtils.setClipboard(this._short_url);
     }
 });
 
@@ -233,58 +244,73 @@ namespace.createCommand({
     description: "Displays your current IP address.",
     uuid: "03F608A8-FB85-46BE-B2B2-B7B817104BCC",
 
+    // free keyless services returning the caller's address; they are tried in order
+    _sources: [
+        {
+            url: "https://ipwho.is/?fields=success,ip,country,country_code,region,city,flag",
+            parse: j => j.success && {
+                ip: j.ip, city: j.city, region: j.region, country: j.country,
+                countryCode: j.country_code, flag: j.flag?.img
+            }
+        },
+        {
+            url: "https://api.seeip.org/geoip",
+            parse: j => ({
+                ip: j.ip, city: j.city, region: j.region, country: j.country,
+                countryCode: j.country_code
+            })
+        }
+    ],
+
     async preview(pblock, args) {
-        pblock.text("Fetching IP information...")
-        return this._requestJSON(pblock, "https://ipapi.co/json/");
+        pblock.text("Fetching IP information...");
+
+        const info = await this._lookup(pblock);
+
+        if (info)
+            this._constructView(pblock, info);
+        else if (info === null)
+            pblock.error("Could not determine the IP address.");
     },
 
     execute(args) {
-        cmdAPI.addTab("https://ipapi.co/");
+        cmdAPI.addTab("https://ipinfo.io/");
     },
 
-    async _requestJSON(pblock, url) {
-        const response = await pblock.fetch(url, {_displayError: "Network error."})
-        if (response.ok) {
-            this._cloudflare = false;
-            this._constructView(pblock, await response.json());
-        }
-        else if (response.status === 503) {
-            if (!this._cloudflare)
-                return this._solveCloudFlare(pblock, url);
-            else
-                this._cloudflare = false;
-        }
-        else
-            pblock.error("HTTP request error.")
-    },
+    // returns undefined if the preview was changed while the request was in flight
+    async _lookup(pblock) {
+        for (const source of this._sources) {
+            try {
+                const response = await pblock.fetch(source.url);
 
-    _constructView(pblock, json) {
-        const flag = `https://ipapi.co/static/images/flags/${json.country_code.toLowerCase()}.png`;
-        const flagHTML = `<img src="${flag}" style="width: 16px; height: 16px; vertical-align: middle;"/>`;
-        const location = `${json.city}, ${json.region}, ${json.country_name} ${flagHTML}`
-        pblock.text(`Current IP address: <b>${json.ip}</b> (${location})`);
-    },
+                if (response.ok) {
+                    const info = source.parse(await response.json());
 
-    async _solveCloudFlare(pblock, url) {
-        this._cloudflare = true;
-
-        pblock.text("Waiting for Cloudflare...");
-        const newTab = await browser.tabs.create({active: false, url});
-
-        let listener = (id, changed, tab) => {
-            if (id === newTab.id && changed.title && changed.title.includes("ipapi")) {
-                browser.tabs.onUpdated.removeListener(listener);
-
-                this._cloudflare = false;
-                browser.tabs.remove(newTab.id);
-
-                this._requestJSON(pblock, url);
+                    if (info?.ip)
+                        return info;
+                }
             }
-        };
+            catch (e) {
+                if (cmdAPI.fetchAborted(e))
+                    return undefined;
 
-        const params =  {urls: ["*://ipapi.co/*"]};
-        if (!_BACKGROUND_PAGE)
-            delete params.urls;
-        browser.tabs.onUpdated.addListener(listener, params);
+                console.error(e);
+            }
+        }
+
+        return null;
+    },
+
+    _constructView(pblock, info) {
+        const flag = info.flag
+            || (/^[a-z]{2}$/i.test(info.countryCode || "")
+                ? `https://flagcdn.com/w20/${info.countryCode.toLowerCase()}.png` : "");
+        const flagHTML = flag
+            ? ` <img src="${Utils.escapeHtml(flag)}" style="height: 16px; vertical-align: middle;"/>`
+            : "";
+        const place = [info.city, info.region, info.country].filter(p => p).map(Utils.escapeHtml).join(", ");
+        const location = place ? ` (${place}${flagHTML})` : "";
+
+        pblock.text(`Current IP address: <b>${Utils.escapeHtml(info.ip)}</b>${location}`);
     }
 });

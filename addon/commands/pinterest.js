@@ -36,6 +36,7 @@ export function noun_type_board(text, html, _, selectionIndices) {
     # Examples
     **pinterest** **to** *cats* **of** *1000* *Nice kitty*
 
+    @hidden
     @command
     @markdown
     @delay 1000

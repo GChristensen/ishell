@@ -18,8 +18,6 @@ class IShellSettings {
                 //lingvo_api_key: "NGNmNTVlNzUtNzg2MS00ZWE1LWIzNWItNjNlMTAyZTM5YmRlOmM3NTg3MDY2Y2MyMDQxY2E4NTQ0MDZhOTQyYTcxMTk2",
                 bing_translator_api_v3_key: "",
                 youtube_search_api_key: "",
-                google_cse_api_key: "",
-                google_cse_api_id: "",
                 openai_api_key: "",
                 gpt_default_model: "gpt-4-turbo"
             }

@@ -1,4 +1,15 @@
 <div>
+    <h3>v1.3 <span class="change-date">September 19, 2026</span></h3>
+    <ul class="change-info">
+        <li>Added new command: <b>duck</b>. It searches DuckDuckGo and requires no API keys, unlike the <b>google</b> command.</li>
+        <li>The <b>images</b> command now browses Bing Images and does not require API keys anymore.
+            The <b>google</b> command does not show search results in its preview since Google closed its search API.</li>
+        <li>The <b>shorten-url</b> command now uses TinyURL because the bit.ly endpoint it relied on was shut down. The <b>bitly</b> alias was renamed to <b>tinyurl</b>.</li>
+        <li>The <b>current-ip</b> command now uses the ipwho.is service (with seeip.org as a fallback) instead of ipapi.co, which requires solving a Cloudflare challenge.</li>
+        <li>The <b>libgen</b> command was updated to the current markup and query format of libgen.li.</li>
+        <li>The <b>imdb</b> command was repaired: it lists movie and TV titles with posters, years and cast using the IMDB suggestion service.</li>
+    </ul>
+
     <h3>v1.2 <span class="change-date">August 17, 2026</span></h3>
     <ul class="change-info">
         <li>Wrapping a preposition's argument in double quotes - for example, for "further review" - makes the spaces within it available to autocompletion.

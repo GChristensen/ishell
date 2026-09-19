@@ -86,8 +86,6 @@ function populateDynamicSettings() {
        // lingvo_api_key: "API key used by the lingvo command",
         bing_translator_api_v3_key: "API key used by the translate command",
         youtube_search_api_key: "API key used by the youtube command",
-        google_cse_api_key: "API key used by the google and images commands",
-        google_cse_api_id: "Custom search configuration id used by the google and images commands",
         //openai_api_key: "OpenAI API key used by the gpt command",
         //gpt_default_model: "Default language model used by the gpt command"
     };
@@ -96,8 +94,6 @@ function populateDynamicSettings() {
         //lingvo_api_key: "https://developers.lingvolive.com/en-us/Help",
         bing_translator_api_v3_key: "https://www.microsoft.com/en-us/translator/business/trial/",
         youtube_search_api_key: "https://developers.google.com/youtube/v3/getting-started",
-        google_cse_api_key: "https://developers.google.com/custom-search/v1/introduction",
-        google_cse_api_id: "https://support.google.com/programmable-search/answer/2649143",
         //openai_api_key: "https://platform.openai.com/api-keys"
     };
 

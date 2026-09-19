@@ -2,9 +2,7 @@
 
 A linguistic interface for web browsers.
 
-This is a development page. Please visit the main site at: https://gchristensen.github.io/ishell/
-
-iShell is a WebExtensions revival of [Mozilla Ubiquity](https://wiki.mozilla.org/Labs/Ubiquity).
+[iShell](https://gchristensen.github.io/ishell/) is a WebExtensions revival of [Mozilla Ubiquity](https://wiki.mozilla.org/Labs/Ubiquity).
 It aims to bring back the full functionality of Ubiquity to Firefox Quantum and to provide a clean, 
 unified modern object-oriented command authoring API.
 
@@ -76,25 +74,11 @@ In more detail, the command authoring API is described in the extension
 
 ### IMPORTANT: API keys are necessary for some built-in commands
 
-Some built-in commands (for example, youtube, google, and images) require API keys of
-the corresponding web services. Moreover, to use Google commands you need to
-create a custom search engine with the options "Search the entire web" and
-"Image search" enabled. If the help links in iShell interface provide not enough
-guidance on how to set it up, some inspiration could be found in [this
-post](https://stackoverflow.com/questions/45899493/configuring-google-custom-search-to-work-like-google-search)
-at StackOverflow.
-
-### No more command editor in MV3
-
-You may need to build your own version of the add-on if you need extra manifest permissions,
-or want to use custom commands in Firefox MV3 version of the add-on.
-Because Mozilla [removed](https://bugzilla.mozilla.org/show_bug.cgi?id=1789751) a sole
-workaround that allows to evaluate code dynamically with MV3, it will no longer be possible to
-evaluate commands in the built-in editor in the Firefox MV3 version of the add-on. Forget about instant
-evaluation and effortless debugging. With MV3, it is necessary to build your own version of the add-on
-to add custom commands. Please [thank](https://connect.mozilla.org/t5/ideas/add-an-about-config-switch-that-allows-users-to-customize-their/idi-p/32127) 
-Mozilla for this innovation. The [Chrome version](https://chromewebstore.google.com/detail/ishell-extension/hdjdmgedflhjhbflaijohpnognlhacoc?pli=1) 
-of the extension can still use the command code editor when built for MV3.
+Some built-in commands (for example, youtube) require API keys of the corresponding
+web services. The help links in iShell settings page explain how to obtain them.
+The google command does not provide results preview anymore because Google closed
+its search API. Use the duck and images commands (powered by DuckDuckGo and Bing)
+which do not require keys.
 
 ### Credits
 
