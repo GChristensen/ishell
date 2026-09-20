@@ -56,3 +56,6 @@ backend-cli:
     cd backend; rm -r -f ./cli-installer/ishell_backend/manifests
     cd backend; rm -r -f ./cli-installer/ishell_backend/ishell_backend.cmd
     cd backend; rm -r -f ./cli-installer/ishell_backend/ishell_backend.sh
+
+landing:
+    cd landing; npm run build

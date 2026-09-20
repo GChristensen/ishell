@@ -38,8 +38,8 @@
       <kbd class="kbd">Ctrl+Space</kbd>, type what you want, and the result appears in the same
       window before you even press Enter.</p>
     <div class="hero__actions">
-      <a class="btn btn--lg" href="https://addons.mozilla.org/en-US/firefox/addon/ishell/"><img class="btn__icon" src="/images/firefox.png" width="16" height="16" alt="">Add to Firefox</a>
-      <a class="btn btn--lg btn--ghost" href="https://chrome.google.com/webstore/detail/scrapyard/hdjdmgedflhjhbflaijohpnognlhacoc"><img class="btn__icon" src="/images/chrome.png" width="16" height="16" alt="">Add to Chrome</a>
+      <a class="btn btn--lg" href="https://addons.mozilla.org/en-US/firefox/addon/ishell/"><img class="btn__icon" src="/images/firefox.svg" width="24" height="24" alt="">Add to Firefox</a>
+      <a class="btn btn--lg btn--ghost" href="https://chrome.google.com/webstore/detail/scrapyard/hdjdmgedflhjhbflaijohpnognlhacoc"><img class="btn__icon" src="/images/chrome.svg" width="24" height="24" alt="">Add to Chrome</a>
     </div>
   </div>
 
@@ -104,20 +104,13 @@
     <div class="section-head">
       <p class="eyebrow"><span class="eyebrow__num">03</span>commands</p>
       <h2 class="section-title">Built in, ready to type.</h2>
-      <p class="lede">Four examples out of the dozens of commands that ship with the add-on — the
-        ones you just saw at work, plus one more.</p>
+      <p class="lede">Several examples out of the dozens of commands that ship with the add-on.</p>
     </div>
     <a class="link-arrow" href="https://gchristensen.github.io/ishell/docs/commands.html">man ishell →</a>
   </div>
 
   <div class="cmd-table">
     <span class="mono-label cmd-table__label">For example</span>
-
-    <div class="cmd-row">
-      <span class="cmd-row__name">translate</span>
-      <code class="cmd-row__syntax">translate <i>text</i> <b>from</b> <i>language</i> <b>to</b> <i>language</i></code>
-      <span class="cmd-row__desc">Translates from one language to another using Bing Translator.</span>
-    </div>
 
     <div class="cmd-row">
       <span class="cmd-row__name">duck</span>
@@ -129,6 +122,12 @@
       <span class="cmd-row__name">images</span>
       <code class="cmd-row__syntax">images <i>query</i></code>
       <span class="cmd-row__desc">Browse pictures from Bing Images. Click a thumbnail to open it in a background tab.</span>
+    </div>
+
+    <div class="cmd-row">
+        <span class="cmd-row__name">translate</span>
+        <code class="cmd-row__syntax">translate <i>text</i> <b>from</b> <i>language</i> <b>to</b> <i>language</i></code>
+        <span class="cmd-row__desc">Translates from one language to another using Bing Translator.</span>
     </div>
 
     <div class="cmd-row">
@@ -149,9 +148,10 @@
   <div class="authoring__text">
     <p class="eyebrow"><span class="eyebrow__num">04</span>authoring</p>
     <h2 class="section-title">Write your own commands.</h2>
-    <p>Declare the arguments once and the parser does the rest. For <b>show-text</b> <i>hey!</i>
+    <p>Just declare the arguments, and the parser does the rest. In the example at the right, for the command <b>show-text</b> <i>hey!</i>
       <b>in</b> <i>popup</i>, iShell hands <i>hey!</i> and <i>popup</i> strings straight to the command handler
-      methods (<b>execute</b> in the example).</p>
+      methods (<b>preview</b> and <b>execute</b>, only <b>execute</b> is implemented in the example). The command name is derived
+        from the class name automatically!</p>
     <p>Commands have full access to the browser WebExtension APIs and jQuery, and previews are plain
       HTML and CSS, so they can be as rich as you like.</p>
     <div class="authoring__links">
@@ -175,12 +175,12 @@
     <span class="c-tag">@description</span> An object-oriented command with arguments.
  */</span>
 <span class="c-kw">class</span> <b>ShowText</b> {
-    constructor(args) {
+    constructor(args) { <span class="c-comment">// Define arguments in the constructor.</span>
         args[<span class="c-role">OBJECT</span>] = {nountype: noun_arb_text, label: <span class="c-str">"message"</span>};
         args[<span class="c-role">IN</span>] = {nountype: [<span class="c-str">"popup"</span>, <span class="c-str">"log"</span>], label: <span class="c-str">"destination"</span>};
     }
 
-    execute(args) {
+    execute(args) { <span class="c-comment">// Get argument values in the handler methods.</span>
         <span class="c-kw">const</span> destination = args[<span class="c-role">IN</span>]?.text;
         <span class="c-kw">const</span> message = args[<span class="c-role">OBJECT</span>]?.text;
 
@@ -251,8 +251,8 @@
 <section class="cta" id="install">
   <h2 class="cta__title">Ctrl+Space.<br><em>Then just say it.</em></h2>
   <div class="cta__actions">
-    <a class="btn btn--xl" href="https://addons.mozilla.org/en-US/firefox/addon/ishell/"><img class="btn__icon" src="/images/firefox.png" width="16" height="16" alt="">Add to Firefox</a>
-    <a class="btn btn--xl btn--ghost" href="https://chrome.google.com/webstore/detail/scrapyard/hdjdmgedflhjhbflaijohpnognlhacoc"><img class="btn__icon" src="/images/chrome.png" width="16" height="16" alt="">Add to Chrome</a>
+    <a class="btn btn--xl" href="https://addons.mozilla.org/en-US/firefox/addon/ishell/"><img class="btn__icon" src="/images/firefox.svg" width="24" height="24" alt="">Add to Firefox</a>
+    <a class="btn btn--xl btn--ghost" href="https://chrome.google.com/webstore/detail/scrapyard/hdjdmgedflhjhbflaijohpnognlhacoc"><img class="btn__icon" src="/images/chrome.svg" width="24" height="24" alt="">Add to Chrome</a>
   </div>
 </section>
 
