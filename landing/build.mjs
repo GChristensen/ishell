@@ -31,9 +31,9 @@ const isLocal = (url) => !/^([a-z][a-z0-9+.-]*:|\/|#)/i.test(url);
 const bytes = (s) => Buffer.byteLength(s, "utf8");
 const read = (rel) => readFile(path.join(here, rel), "utf8");
 
-// Rewrites every local src/href/data attribute. fn(url, attr) returns the new value.
+// Rewrites every local src/href/data/poster attribute. fn(url, attr) returns the new value.
 const mapUrls = (html, fn) =>
-  html.replace(/(\s(src|href|data)=")([^"]+)(")/g,
+  html.replace(/(\s(src|href|data|poster)=")([^"]+)(")/g,
     (m, pre, attr, url, post) => isLocal(url) ? pre + fn(url, attr) + post : m);
 
 let html = await read("index.html");
@@ -107,14 +107,25 @@ if (plain) {
       : [{ name: "preset-default", params: { overrides: { removeViewBox: false } } }],
   });
   const svgs = new Map();                   // url -> minified text
-  for (const [, , url] of html.matchAll(/(\s(?:src|href|data)=")([^"]+\.svg)"/g)) {
+  for (const [, , url] of html.matchAll(/(\s(?:src|href|data|poster)=")([^"]+\.svg)"/g)) {
     if (!isLocal(url) || svgs.has(url)) continue;
     const src = await read(url);
     before += bytes(src);
     svgs.set(url, optimize(src, { path: url, ...svgOpts(src) }).data);
   }
+
+  // other local, non-svg assets (video, poster stills, ...): too big/binary to inline or minify,
+  // so they're just copied through under media/, same place the repo already keeps them.
+  const ASSET_DIR = "media";
+  const assets = new Map();                  // url -> basename
+  for (const [, , url] of html.matchAll(/(\s(?:src|href|data|poster)=")([^"]+)"/g)) {
+    if (!isLocal(url) || svgs.has(url) || /\.svg$/i.test(url)) continue;
+    assets.set(url, path.basename(url));
+  }
+
   const written = new Set();
   html = mapUrls(html, (url, attr) => {
+    if (assets.has(url)) return `${ASSET_DIR}/${assets.get(url)}`;
     const svg = svgs.get(url);
     if (svg === undefined) throw new Error(`unhandled local asset: ${url}`);
     if (attr !== "data" && bytes(svg) <= INLINE_LIMIT)
@@ -156,6 +167,15 @@ if (plain) {
     log.push(`  + ${SVG_DIR}/${path.basename(url)}  ${bytes(await read(url))} -> ${bytes(data)} bytes`);
   }
   log.push(`  ${svgs.size - written.size} small svgs inlined as data: URIs`);
+  const assetOut = path.join(outDir, ASSET_DIR);
+  await mkdir(assetOut, { recursive: true });
+  for (const [url, base] of assets) {
+    const src = path.resolve(here, url);
+    const dest = path.join(assetOut, base);
+    if (path.resolve(dest) === src) continue;   // already in place (default outDir)
+    await cp(src, dest);
+    log.push(`  + ${ASSET_DIR}/${base} copied`);
+  }
 }
 
 console.log(`landing (${plain ? "plain" : "minified"}): ${path.join(here, "index.html")}`);

@@ -474,6 +474,21 @@ h1, h2, h3, p, figure, pre { margin: 0; }
   color: var(--accent);
 }
 
+/* ---------- demo video ---------- */
+
+.video__player {
+  display: block;
+  width: 100%;
+  max-width: 500px;
+  margin-top: 56px;
+  aspect-ratio: 500 / 280;
+  border: 1px solid var(--line-strong);
+  border-radius: 10px;
+  overflow: hidden;
+  background: var(--graphite);
+  box-shadow: 0 44px 80px -48px rgba(23, 25, 28, .55);
+}
+
 /* ---------- final call to action ---------- */
 
 .cta {
