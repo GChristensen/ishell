@@ -479,9 +479,9 @@ h1, h2, h3, p, figure, pre { margin: 0; }
 .video__player {
   display: block;
   width: 100%;
-  max-width: 500px;
-  margin-top: 56px;
-  aspect-ratio: 500 / 280;
+  max-width: 620px;
+  margin: 56px auto 0;
+  aspect-ratio: 620 / 486;
   border: 1px solid var(--line-strong);
   border-radius: 10px;
   overflow: hidden;
