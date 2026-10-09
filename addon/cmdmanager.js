@@ -126,6 +126,7 @@ class CommandManager {
         "/commands/mail.js",
         "/commands/new-tab.js",
         "/commands/pinterest.js",
+        "/commands/reopen-tab.js",
         "/commands/resurrect.js",
         "/commands/scrapyard.js",
         "/commands/search.js",

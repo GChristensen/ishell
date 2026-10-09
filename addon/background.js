@@ -1,3 +1,4 @@
+import "./closed_tabs.js";
 import {contextMenuManager} from "./ishell.js";
 import {receive, receiveExternal} from "./proxy.js";
 

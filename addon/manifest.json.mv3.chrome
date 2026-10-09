@@ -58,6 +58,7 @@
         "unlimitedStorage",
         "contextMenus",
         "history",
+        "sessions",
         "management",
         "downloads",
         "scripting",
