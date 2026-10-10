@@ -69,7 +69,9 @@ export class ReopenTab {
         // prefer session entries, which are restored with their navigation history
         closedTabs.sort((a, b) => b.closedAt - a.closedAt || !!b.sessionId - !!a.sessionId);
 
-        const urls = new Set();
+        // skip duplicates and tabs whose URL is currently open
+        const openTabs = await browser.tabs.query({});
+        const urls = new Set(openTabs.map(t => t.url));
         closedTabs = closedTabs.filter(t => !urls.has(t.url) && urls.add(t.url));
 
         if (filter) {
