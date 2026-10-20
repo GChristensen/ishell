@@ -565,3 +565,8 @@ h1, h2, h3, p, figure, pre { margin: 0; }
 @media (prefers-reduced-motion: reduce) {
   .caret { animation: none; }
 }
+
+.gc-credit { width: 100%; }
+.gc-credit a { display: inline-flex; align-items: center; gap: 8px; }
+.site-footer { flex-wrap: wrap; }
+.site-footer nav { flex: 1 1 0; justify-content: flex-end; }
